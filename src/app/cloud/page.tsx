@@ -1,9 +1,8 @@
-import React from 'react'
+import CloudPage from "@/features/cloud/components/CloudPage";
+import React from "react";
 
 const Cloud = () => {
-  return (
-    <div>Cloud</div>
-  )
-}
+  return <CloudPage />;
+};
 
-export default Cloud
+export default Cloud;

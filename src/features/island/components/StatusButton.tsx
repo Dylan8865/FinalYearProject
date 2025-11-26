@@ -5,6 +5,8 @@ interface StatusButtonProps {
   data: string | number;
   bgColor: string;
   orientation?: "left" | "right";
+  btnIcon?: React.ReactNode;
+  onClick?: () => void;
 }
 
 const StatusButton = ({
@@ -12,12 +14,14 @@ const StatusButton = ({
   data,
   bgColor,
   orientation,
+  btnIcon,
+  onClick,
 }: StatusButtonProps) => {
   return (
     <div
       className={`${
         orientation == "right" && "scale-x-[-1]"
-      } flex justify-center items-center text-white`}
+      } relative flex justify-center items-center text-white`}
     >
       <div
         className={`${
@@ -31,10 +35,20 @@ const StatusButton = ({
           orientation == "right"
             ? "scale-x-[-1] justify-end border-l-4"
             : "border-r-4"
-        } border-y-4 border-black bg-[#333333] w-36 h-8 px-3 flex items-center`}
+        } border-y-4 border-black bg-[#333333] w-48 h-8 px-3 flex items-center`}
       >
         {data}
       </div>
+      {btnIcon && (
+        <button
+          className={`${
+            orientation == "right" && "scale-x-[-1]"
+          } absolute right-0 border-black border-4 w-10 h-8 flex items-center justify-center bg-[#1a1a1a]`}
+          onClick={onClick}
+        >
+          {btnIcon}
+        </button>
+      )}
     </div>
   );
 };
