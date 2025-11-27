@@ -1,49 +1,21 @@
-/* eslint-disable react-hooks/purity */
 "use client";
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import React, { useMemo } from "react";
+import React from "react";
 import Island from "./Island";
 
-const IslandCanvas = () => {
-  const islandPositions = useMemo(() => {
-    const positions: Array<{
-      position: [number, number, number];
-      gridSize: number;
-    }> = [];
-    const minDistance = 8;
+export interface IslandData {
+  id: string;
+  position: [number, number, number];
+  gridSize: number;
+}
 
-    for (let i = 0; i < 3; i++) {
-      let position: [number, number, number];
-      let attempts = 0;
+interface IslandCanvasProps {
+  islands: IslandData[];
+}
 
-      do {
-        position = [
-          (Math.random() - 0.5) * 20,
-          Math.random() * 3 + 1,
-          (Math.random() - 0.5) * 20,
-        ];
-        attempts++;
-      } while (
-        positions.some((p) => {
-          const dx = p.position[0] - position[0];
-          const dy = p.position[1] - position[1];
-          const dz = p.position[2] - position[2];
-          return Math.sqrt(dx * dx + dy * dy + dz * dz) < minDistance;
-        }) &&
-        attempts < 50
-      );
-
-      positions.push({
-        position,
-        gridSize: Math.floor(Math.random() * 3) + 4,
-      });
-    }
-
-    return positions;
-  }, []);
-
+const IslandCanvas = ({ islands }: IslandCanvasProps) => {
   return (
     <div className="w-full h-full">
       <Canvas shadows camera={{ position: [10, 15, 5], fov: 50 }}>
@@ -58,9 +30,9 @@ const IslandCanvas = () => {
         />
         <hemisphereLight args={["#87CEEB", "#A8A060", 0.6]} />
 
-        {islandPositions.map((island, index) => (
+        {islands.map((island) => (
           <Island
-            key={index}
+            key={island.id}
             gridSize={island.gridSize}
             position={island.position}
           />
@@ -73,7 +45,7 @@ const IslandCanvas = () => {
           enableDamping={true}
           dampingFactor={0.05}
           minDistance={5}
-          maxDistance={30}
+          maxDistance={Infinity}
           mouseButtons={{
             LEFT: 2,
             MIDDLE: 1,
