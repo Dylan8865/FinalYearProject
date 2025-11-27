@@ -7,7 +7,11 @@ import OxygenIcon from "../icons/OxygenIcon";
 import IslandIcon from "../icons/IslandIcon";
 import PlusIcon from "../icons/PlusIcon";
 
-const StatusBar = () => {
+interface StatusBarProps {
+  setIsDialogOpen: (value: string) => void;
+}
+
+const StatusBar = ({ setIsDialogOpen }: StatusBarProps) => {
   return (
     <div className="flex justify-between p-4 pointer-events-none">
       <div className="space-y-2">
@@ -17,7 +21,7 @@ const StatusBar = () => {
           bgColor="bg-[#6d3f33]"
           orientation="left"
           btnIcon={<MenuIcon />}
-          onClick={() => {}}
+          onClick={() => setIsDialogOpen("profile")}
         />
         <StatusButton
           icon={<TrophyIcon />}
@@ -25,7 +29,7 @@ const StatusBar = () => {
           bgColor="bg-[#68a5ad]"
           orientation="left"
           btnIcon={<MenuIcon />}
-          onClick={() => {}}
+          onClick={() => setIsDialogOpen("level")}
         />
       </div>
       <div className="space-y-2">
