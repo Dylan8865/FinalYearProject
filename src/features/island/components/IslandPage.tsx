@@ -8,6 +8,8 @@ import Dialog from "./Dialog";
 import EditButton from "./EditButton";
 import SettingButton from "./SettingButton";
 import "@hackernoon/pixel-icon-library/fonts/iconfont.css";
+import UserIcon from "../icons/UserIcon";
+import TrophyIcon from "../icons/TrophyIcon";
 
 const IslandPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
@@ -27,6 +29,7 @@ const IslandPage = () => {
       {isDialogOpen == "profile" && (
         <Dialog
           bgColor="bg-[#6d3f33]"
+          icon={<UserIcon />}
           title="Profile"
           className="flex justify-center items-center"
           setIsDialogOpen={setIsDialogOpen}
@@ -60,7 +63,8 @@ const IslandPage = () => {
       {isDialogOpen == "level" && (
         <Dialog
           bgColor="bg-[#68a5ad]"
-          title="Level Up"
+          icon={<TrophyIcon />}
+          title="Level"
           className="flex justify-center items-center"
           setIsDialogOpen={setIsDialogOpen}
         >

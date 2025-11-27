@@ -1,9 +1,9 @@
 import React from "react";
 import CloseIcon from "../icons/CloseIcon";
-import UserIcon from "../icons/UserIcon";
 
 interface DialogProps {
   bgColor: string;
+  icon: React.ReactNode;
   title: string;
   children: React.ReactNode;
   className?: string;
@@ -13,6 +13,7 @@ interface DialogProps {
 
 const Dialog = ({
   bgColor,
+  icon,
   title,
   children,
   className,
@@ -33,7 +34,7 @@ const Dialog = ({
             <div
               className={`${bgColor} h-14 w-14 border-black border-4 mt-[-10px] ml-[-10px] text-white flex justify-center items-center`}
             >
-              <UserIcon />
+              {icon}
             </div>
             <div className="ps-4 flex items-center text-lg text-white">
               {title}
