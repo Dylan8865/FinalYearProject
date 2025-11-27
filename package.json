@@ -12,6 +12,7 @@
     "@hackernoon/pixel-icon-library": "^1.0.6",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.81.1",
     "@types/three": "^0.181.0",
     "autoprefixer": "^10.4.22",
