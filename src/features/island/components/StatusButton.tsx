@@ -21,7 +21,7 @@ const StatusButton = ({
     <div
       className={`${
         orientation == "right" && "scale-x-[-1]"
-      } relative flex justify-center items-center text-white`}
+      } relative flex justify-center items-center text-white pointer-events-auto`}
     >
       <div
         className={`${

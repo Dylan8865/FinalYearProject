@@ -9,7 +9,7 @@ import PlusIcon from "../icons/PlusIcon";
 
 const StatusBar = () => {
   return (
-    <div className="flex justify-between p-4">
+    <div className="flex justify-between p-4 pointer-events-none">
       <div className="space-y-2">
         <StatusButton
           icon={<UserIcon />}
