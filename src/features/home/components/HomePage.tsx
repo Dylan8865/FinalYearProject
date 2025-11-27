@@ -1,7 +1,6 @@
 "use client";
 
 import Island from "@/components/island";
-import Model from "@/components/model";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import React, { useState, useEffect } from "react";

@@ -1,102 +1,35 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import StatusBar from "./StatusBar";
 import InventoryBar from "./InventoryBar";
-import IslandCanvas, { IslandData } from "./IslandCanvas";
+import IslandCanvas from "./IslandCanvas";
 import Dialog from "./Dialog";
 import EditButton from "./EditButton";
-import { mapIslandsToCanvas, DBIsland } from "../utils/mapIslandsToCanvas";
 import UserIcon from "../icons/UserIcon";
 import SettingButton from "./SettingButton";
 import TrophyIcon from "../icons/TrophyIcon";
+import { useIslands } from "../hooks/useIsland";
 
 const IslandPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
-  const [islands, setIslands] = useState<IslandData[]>([]);
+  const { islands, loading, error } = useIslands();
 
-  useEffect(() => {
-    // Fetch islands from database
-    async function fetchIslands() {
-      try {
-        // Replace with your actual API endpoint
-        const response = await fetch("/api/islands");
-        const dbIslands: DBIsland[] = await response.json();
+  if (loading) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+        <div className="text-2xl text-white">Loading islands...</div>
+      </div>
+    );
+  }
 
-        // Map DB islands to canvas positions
-        const mappedIslands = mapIslandsToCanvas(dbIslands, 8);
-
-        setIslands(mappedIslands);
-      } catch (error) {
-        console.error("Failed to fetch islands:", error);
-
-        // Fallback: Mock data for development
-        const mockDBIslands: DBIsland[] = [
-          {
-            id: "island-1",
-            created_at: new Date().toISOString(),
-            name: "Starter Island",
-            level: 1,
-            theme: "grass",
-            user_id: "user-1",
-          },
-          {
-            id: "island-2",
-            created_at: new Date().toISOString(),
-            name: "Mountain Peak",
-            level: 3,
-            theme: "rock",
-            user_id: "user-1",
-          },
-          {
-            id: "island-3",
-            created_at: new Date().toISOString(),
-            name: "Ocean View",
-            level: 2,
-            theme: "water",
-            user_id: "user-1",
-          },
-          {
-            id: "island-4",
-            created_at: new Date().toISOString(),
-            name: "Ocean View",
-            level: 2,
-            theme: "water",
-            user_id: "user-1",
-          },
-          {
-            id: "island-5",
-            created_at: new Date().toISOString(),
-            name: "Ocean View",
-            level: 2,
-            theme: "water",
-            user_id: "user-1",
-          },
-          {
-            id: "island-6",
-            created_at: new Date().toISOString(),
-            name: "Ocean View",
-            level: 2,
-            theme: "water",
-            user_id: "user-1",
-          },
-          {
-            id: "island-7",
-            created_at: new Date().toISOString(),
-            name: "Ocean View",
-            level: 2,
-            theme: "water",
-            user_id: "user-1",
-          },
-        ];
-
-        const mappedIslands = mapIslandsToCanvas(mockDBIslands, 8);
-        setIslands(mappedIslands);
-      }
-    }
-
-    fetchIslands();
-  }, []);
+  if (error) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+        <div className="text-2xl text-white">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-screen h-screen relative bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
@@ -110,7 +43,7 @@ const IslandPage = () => {
         <InventoryBar />
       </div>
 
-      {isDialogOpen == "profile" && (
+      {isDialogOpen === "profile" && (
         <Dialog
           bgColor="bg-[#6d3f33]"
           icon={<UserIcon />}
@@ -137,14 +70,14 @@ const IslandPage = () => {
             />
             <SettingButton
               icon={<i className="hn hn-octagon-times"></i>}
-              title="Log Out"
+              title="Delete Account"
               color="red"
             />
           </div>
         </Dialog>
       )}
 
-      {isDialogOpen == "level" && (
+      {isDialogOpen === "level" && (
         <Dialog
           bgColor="bg-[#68a5ad]"
           icon={<TrophyIcon />}
@@ -152,7 +85,7 @@ const IslandPage = () => {
           className="flex justify-center items-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <div></div>
+          <div>Level information here</div>
         </Dialog>
       )}
     </div>
