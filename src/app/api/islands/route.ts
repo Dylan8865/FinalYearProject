@@ -7,7 +7,7 @@ export async function GET() {
 
     const { data: islands, error } = await supabase
       .from("island")
-      .select("*")
+      .select("*, user(*)")
       .order("created_at", { ascending: false });
 
     if (error) {

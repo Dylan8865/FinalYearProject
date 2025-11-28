@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { IslandData } from "../components/IslandCanvas";
-import { mapIslandsToCanvas, DBIsland } from "../utils/mapIslandsToCanvas";
+import { mapIslandsToCanvas } from "../utils/mapIslandsToCanvas";
+import { IslandTypeWithPosition } from "../types";
+import { IslandType } from "@/types/types";
 
 export function useIslands() {
-  const [islands, setIslands] = useState<IslandData[]>([]);
+  const [islands, setIslands] = useState<IslandTypeWithPosition[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +19,7 @@ export function useIslands() {
         throw new Error("Failed to fetch islands");
       }
 
-      const dbIslands: DBIsland[] = await response.json();
+      const dbIslands: IslandType[] = await response.json();
       const mappedIslands = mapIslandsToCanvas(dbIslands, 8);
 
       setIslands(mappedIslands);
