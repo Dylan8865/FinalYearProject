@@ -1,11 +1,11 @@
 import React from "react";
 import StatusButton from "./StatusButton";
-import UserIcon from "../icons/UserIcon";
-import TrophyIcon from "../icons/TrophyIcon";
-import MenuIcon from "../icons/MenuIcon";
-import OxygenIcon from "../icons/OxygenIcon";
-import IslandIcon from "../icons/IslandIcon";
-import PlusIcon from "../icons/PlusIcon";
+import UserIcon from "../../icons/UserIcon";
+import TrophyIcon from "../../icons/TrophyIcon";
+import MenuIcon from "../../icons/MenuIcon";
+import OxygenIcon from "../../icons/OxygenIcon";
+import IslandIcon from "../../icons/IslandIcon";
+import PlusIcon from "../../icons/PlusIcon";
 
 interface StatusBarProps {
   setIsDialogOpen: (value: string) => void;

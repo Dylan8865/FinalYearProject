@@ -1,24 +1,28 @@
 "use client";
 
 import React, { useState } from "react";
-import StatusBar from "./StatusBar";
-import InventoryBar from "./InventoryBar";
-import IslandCanvas from "./IslandCanvas";
-import Dialog from "./Dialog";
-import EditButton from "./EditButton";
+import StatusBar from "./StatusBar/StatusBar";
+import InventoryBar from "./InventoryBar/InventoryBar";
+import IslandCanvas from "./IslandCanvas/IslandCanvas";
+import Dialog from "./Dialog/Dialog";
+import EditButton from "./Dialog/EditButton";
 import UserIcon from "../icons/UserIcon";
-import SettingButton from "./SettingButton";
+import SettingButton from "./Dialog/SettingButton";
 import TrophyIcon from "../icons/TrophyIcon";
-import { useIslands } from "../hooks/useIsland";
+import { useIslands } from "../hooks/useIslands";
 import LockIcon from "../icons/LockIcon";
 import LoginIcon from "../icons/LoginIcon";
 import WarningIcon from "../icons/WarningIcon";
 import MenuIcon from "../icons/MenuIcon";
 import StoreIcon from "../icons/StoreIcon";
+import StoreContent from "./Dialog/StoreContent";
+import InventoryContent from "./Dialog/InventoryContent";
 
 const IslandPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error } = useIslands();
+
+  const userId = "02955e7f-d369-4be1-904d-21e8b0b9d1dc"; // TODO: change to real data
 
   if (loading) {
     return (
@@ -29,6 +33,7 @@ const IslandPage = () => {
   }
 
   if (error) {
+    s;
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
         <div className="text-2xl text-white">Error: {error}</div>
@@ -99,20 +104,20 @@ const IslandPage = () => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <div>Inventory details here</div>
+          <InventoryContent userId={userId} />
         </Dialog>
       )}
 
       {isDialogOpen === "store" && (
         <Dialog
-          iconStyle="bg-[#dcd1c1] text-black"
+          iconStyle="bg-[#dcd1c1] text-black text-2xl"
           icon={<StoreIcon />}
           title="Store"
           className="flex justify-center items-center"
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <div>Store details here</div>
+          <StoreContent userId={userId} />
         </Dialog>
       )}
     </div>
