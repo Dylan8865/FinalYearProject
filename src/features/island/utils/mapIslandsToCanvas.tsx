@@ -26,13 +26,13 @@ export function mapIslandsToCanvas(
         ? seededRandom(islandSeed + index * 3000)
         : Math.random();
 
-      position = [(randomX - 0.5) * 20, randomY * 3 + 1, (randomZ - 0.5) * 20];
+      position = [(randomX - 0.5) * 20, randomY * 10 + 1, (randomZ - 0.5) * 20];
       attempts++;
 
       if (attempts >= maxAttempts) {
         position = [
           (randomX - 0.5) * 30 + index * 2,
-          randomY * 3 + 1,
+          randomY * 20 + index * 2,
           (randomZ - 0.5) * 30 + index * 2,
         ];
         break;
@@ -46,7 +46,6 @@ export function mapIslandsToCanvas(
       })
     );
 
-    // Fixed: Map level to grid size
     // Level 1 = gridSize 5
     // Level 2 = gridSize 7
     // Level 3 = gridSize 9

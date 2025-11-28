@@ -17,12 +17,22 @@ import MenuIcon from "../icons/MenuIcon";
 import StoreIcon from "../icons/StoreIcon";
 import StoreContent from "./Dialog/StoreContent";
 import InventoryContent from "./Dialog/InventoryContent";
+import { UserType } from "@/types/types";
 
 const IslandPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error } = useIslands();
 
-  const userId = "02955e7f-d369-4be1-904d-21e8b0b9d1dc"; // TODO: change to real data
+  const user = {
+    id: "02955e7f-d369-4be1-904d-21e8b0b9d1dc",
+    name: "rikashi_shifu",
+    email: "harryliow229@gmail.com",
+    password: "h@shedPassw0rd",
+    last_login_time: "2025-11-27 19:30:13",
+    oxygen: 1299301,
+    level: 2,
+    no_of_islands: 4,
+  } as UserType & { no_of_islands: number };
 
   if (loading) {
     return (
@@ -33,7 +43,6 @@ const IslandPage = () => {
   }
 
   if (error) {
-    s;
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
         <div className="text-2xl text-white">Error: {error}</div>
@@ -47,7 +56,7 @@ const IslandPage = () => {
         <IslandCanvas islands={islands} />
       </div>
       <div className="absolute top-0 left-0 right-0 z-10">
-        <StatusBar setIsDialogOpen={setIsDialogOpen} />
+        <StatusBar setIsDialogOpen={setIsDialogOpen} user={user} />
       </div>
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <InventoryBar setIsDialogOpen={setIsDialogOpen} />
@@ -104,7 +113,7 @@ const IslandPage = () => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <InventoryContent userId={userId} />
+          <InventoryContent userId={user.id} />
         </Dialog>
       )}
 
@@ -117,7 +126,7 @@ const IslandPage = () => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <StoreContent userId={userId} />
+          <StoreContent userId={user.id} />
         </Dialog>
       )}
     </div>

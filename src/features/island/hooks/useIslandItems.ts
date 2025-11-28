@@ -15,7 +15,7 @@ export function useIslandItems(userId?: string, islandId?: string) {
       if (userId) params.append("user_id", userId);
       if (islandId) params.append("island_id", islandId);
 
-      const response = await fetch(`/api/island-items?${params.toString()}`);
+      const response = await fetch(`/api/island_items?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch island items");
@@ -34,7 +34,7 @@ export function useIslandItems(userId?: string, islandId?: string) {
 
   const purchaseItem = async (itemId: string, userId: string) => {
     try {
-      const response = await fetch("/api/island-items", {
+      const response = await fetch("/api/island_items", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,7 +65,7 @@ export function useIslandItems(userId?: string, islandId?: string) {
     gridZ: number
   ) => {
     try {
-      const response = await fetch("/api/island-items", {
+      const response = await fetch("/api/island_items", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
