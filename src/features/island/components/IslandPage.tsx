@@ -10,6 +10,11 @@ import UserIcon from "../icons/UserIcon";
 import SettingButton from "./SettingButton";
 import TrophyIcon from "../icons/TrophyIcon";
 import { useIslands } from "../hooks/useIsland";
+import LockIcon from "../icons/LockIcon";
+import LoginIcon from "../icons/LoginIcon";
+import WarningIcon from "../icons/WarningIcon";
+import MenuIcon from "../icons/MenuIcon";
+import StoreIcon from "../icons/StoreIcon";
 
 const IslandPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
@@ -40,12 +45,12 @@ const IslandPage = () => {
         <StatusBar setIsDialogOpen={setIsDialogOpen} />
       </div>
       <div className="absolute bottom-0 left-0 right-0 z-10">
-        <InventoryBar />
+        <InventoryBar setIsDialogOpen={setIsDialogOpen} />
       </div>
 
       {isDialogOpen === "profile" && (
         <Dialog
-          bgColor="bg-[#6d3f33]"
+          iconStyle="bg-[#6d3f33] text-white"
           icon={<UserIcon />}
           title="Profile"
           className="flex justify-center items-center"
@@ -59,17 +64,13 @@ const IslandPage = () => {
             />
             <SettingButton
               fieldName="Settings"
-              icon={<i className="hn hn-lock-alt"></i>}
+              icon={<LockIcon />}
               title="Change Password"
               color="gray"
             />
+            <SettingButton icon={<LoginIcon />} title="Log Out" color="gray" />
             <SettingButton
-              icon={<i className="hn hn-login"></i>}
-              title="Log Out"
-              color="gray"
-            />
-            <SettingButton
-              icon={<i className="hn hn-octagon-times"></i>}
+              icon={<WarningIcon />}
               title="Delete Account"
               color="red"
             />
@@ -79,13 +80,39 @@ const IslandPage = () => {
 
       {isDialogOpen === "level" && (
         <Dialog
-          bgColor="bg-[#68a5ad]"
+          iconStyle="bg-[#68a5ad] text-white"
           icon={<TrophyIcon />}
           title="Level"
           className="flex justify-center items-center"
           setIsDialogOpen={setIsDialogOpen}
         >
           <div>Level information here</div>
+        </Dialog>
+      )}
+
+      {isDialogOpen === "inventory" && (
+        <Dialog
+          iconStyle="bg-[#dcd1c1] text-black"
+          icon={<MenuIcon />}
+          title="Inventory"
+          className="flex justify-center items-center"
+          size="large"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <div>Inventory details here</div>
+        </Dialog>
+      )}
+
+      {isDialogOpen === "store" && (
+        <Dialog
+          iconStyle="bg-[#dcd1c1] text-black"
+          icon={<StoreIcon />}
+          title="Store"
+          className="flex justify-center items-center"
+          size="large"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <div>Store details here</div>
         </Dialog>
       )}
     </div>

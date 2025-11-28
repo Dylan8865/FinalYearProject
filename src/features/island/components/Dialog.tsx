@@ -2,7 +2,7 @@ import React from "react";
 import CloseIcon from "../icons/CloseIcon";
 
 interface DialogProps {
-  bgColor: string;
+  iconStyle: string;
   icon: React.ReactNode;
   title: string;
   children: React.ReactNode;
@@ -12,7 +12,7 @@ interface DialogProps {
 }
 
 const Dialog = ({
-  bgColor,
+  iconStyle,
   icon,
   title,
   children,
@@ -32,7 +32,7 @@ const Dialog = ({
           {/* left */}
           <div className="flex">
             <div
-              className={`${bgColor} h-14 w-14 border-black border-4 mt-[-10px] ml-[-10px] text-white flex justify-center items-center`}
+              className={`${iconStyle} h-14 w-14 border-black border-4 mt-[-10px] ml-[-10px] flex justify-center items-center`}
             >
               {icon}
             </div>
