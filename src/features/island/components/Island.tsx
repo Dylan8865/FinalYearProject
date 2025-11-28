@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect, JSX } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Line } from "@react-three/drei";
@@ -186,73 +186,135 @@ const GridPlatform = ({
   const totalSize = gridSize * cellSize;
   const offset = totalSize / 2 - cellSize / 2;
   const islandRadius = (gridSize * 1.2) / 2;
+  const center = Math.floor(gridSize / 2);
 
   const isInnerArea = (row: number, col: number) => {
-    const center = Math.floor(gridSize / 2);
     const distance = Math.max(Math.abs(row - center), Math.abs(col - center));
     return distance <= Math.floor(gridSize / 3);
   };
 
-  const isWithinIsland = (x: number, z: number) => {
-    const distFromCenter = Math.sqrt(x * x + z * z);
-    return distFromCenter <= islandRadius * 0.85;
+  // Check if a cell should be rendered (circular pattern)
+  const shouldRenderCell = (row: number, col: number) => {
+    const dx = col - center;
+    const dz = row - center;
+    const distFromCenter = Math.sqrt(dx * dx + dz * dz);
+
+    // Create circular boundary with slight randomness for natural look
+    const maxRadius = gridSize / 2;
+    const randomOffset = Math.sin(row * 2.5) * Math.cos(col * 2.5) * 0.3;
+
+    return distFromCenter <= maxRadius + randomOffset;
+  };
+
+  // Get actual world position from grid coordinates
+  const getCellPosition = (row: number, col: number): [number, number] => {
+    const x = col * cellSize - offset;
+    const z = row * cellSize - offset;
+    return [x, z];
+  };
+
+  // Check if a cell exists at given grid coordinates
+  const cellExists = (row: number, col: number) => {
+    return (
+      row >= 0 &&
+      row < gridSize &&
+      col >= 0 &&
+      col < gridSize &&
+      shouldRenderCell(row, col)
+    );
+  };
+
+  // Generate grid lines only between existing cells
+  const generateGridLines = () => {
+    const horizontalLines: JSX.Element[] = [];
+    const verticalLines: JSX.Element[] = [];
+
+    // Horizontal lines
+    for (let row = 0; row <= gridSize; row++) {
+      const lineSegments: THREE.Vector3[][] = [];
+      let currentSegment: THREE.Vector3[] = [];
+
+      for (let col = 0; col <= gridSize; col++) {
+        const [x, z] = getCellPosition(row - 0.5, col - 0.5);
+        const hasTopCell = cellExists(row - 1, col - 1);
+        const hasBottomCell = cellExists(row, col - 1);
+
+        if (hasTopCell || hasBottomCell) {
+          currentSegment.push(new THREE.Vector3(x, 0, z));
+        } else {
+          if (currentSegment.length >= 2) {
+            lineSegments.push([...currentSegment]);
+          }
+          currentSegment = [];
+        }
+      }
+
+      if (currentSegment.length >= 2) {
+        lineSegments.push(currentSegment);
+      }
+
+      lineSegments.forEach((segment, idx) => {
+        horizontalLines.push(
+          <Line
+            key={`h-${row}-${idx}`}
+            points={segment}
+            color={THEME.gridLine}
+            lineWidth={2}
+          />
+        );
+      });
+    }
+
+    // Vertical lines
+    for (let col = 0; col <= gridSize; col++) {
+      const lineSegments: THREE.Vector3[][] = [];
+      let currentSegment: THREE.Vector3[] = [];
+
+      for (let row = 0; row <= gridSize; row++) {
+        const [x, z] = getCellPosition(row - 0.5, col - 0.5);
+        const hasLeftCell = cellExists(row - 1, col - 1);
+        const hasRightCell = cellExists(row - 1, col);
+
+        if (hasLeftCell || hasRightCell) {
+          currentSegment.push(new THREE.Vector3(x, 0, z));
+        } else {
+          if (currentSegment.length >= 2) {
+            lineSegments.push([...currentSegment]);
+          }
+          currentSegment = [];
+        }
+      }
+
+      if (currentSegment.length >= 2) {
+        lineSegments.push(currentSegment);
+      }
+
+      lineSegments.forEach((segment, idx) => {
+        verticalLines.push(
+          <Line
+            key={`v-${col}-${idx}`}
+            points={segment}
+            color={THEME.gridLine}
+            lineWidth={2}
+          />
+        );
+      });
+    }
+
+    return [...horizontalLines, ...verticalLines];
   };
 
   return (
     <group position={[0, 0.02, 0]}>
-      {[...Array(gridSize + 1)].map((_, i) => {
-        const z = i * cellSize - offset - cellSize / 2;
-        const linePoints = [];
+      {/* Grid lines */}
+      {generateGridLines()}
 
-        for (let j = 0; j <= gridSize; j++) {
-          const x = j * cellSize - offset - cellSize / 2;
-          if (isWithinIsland(x, z)) {
-            linePoints.push(new THREE.Vector3(x, 0, z));
-          }
-        }
-
-        if (linePoints.length < 2) return null;
-
-        return (
-          <Line
-            key={`h-${i}`}
-            points={linePoints}
-            color={THEME.gridLine}
-            lineWidth={2}
-          />
-        );
-      })}
-
-      {[...Array(gridSize + 1)].map((_, i) => {
-        const x = i * cellSize - offset - cellSize / 2;
-        const linePoints = [];
-
-        for (let j = 0; j <= gridSize; j++) {
-          const z = j * cellSize - offset - cellSize / 2;
-          if (isWithinIsland(x, z)) {
-            linePoints.push(new THREE.Vector3(x, 0, z));
-          }
-        }
-
-        if (linePoints.length < 2) return null;
-
-        return (
-          <Line
-            key={`v-${i}`}
-            points={linePoints}
-            color={THEME.gridLine}
-            lineWidth={2}
-          />
-        );
-      })}
-
+      {/* Grid cells */}
       {[...Array(gridSize)].map((_, row) =>
         [...Array(gridSize)].map((_, col) => {
-          const x = col * cellSize - offset;
-          const z = row * cellSize - offset;
+          if (!shouldRenderCell(row, col)) return null;
 
-          if (!isWithinIsland(x, z)) return null;
-
+          const [x, z] = getCellPosition(row, col);
           const cellId = `${row}-${col}`;
           const isHovered = hoveredCell === cellId;
           const isInner = isInnerArea(row, col);

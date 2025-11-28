@@ -1,44 +1,21 @@
-import { IslandData } from "../components/IslandCanvas";
+import { IslandTypeWithPosition } from "../types";
+import { IslandType } from "@/types/types";
 
-export interface DBIsland {
-  id: string;
-  created_at: string;
-  name: string | null;
-  level: number | null;
-  theme: string | null;
-  user_id: string | null;
-}
-
-interface IslandWithPosition extends IslandData {
-  name: string | null;
-  level: number | null;
-  theme: string | null;
-}
-
-/**
- * Maps database islands to canvas positions with collision detection
- * @param dbIslands - Islands from database
- * @param minDistance - Minimum distance between islands
- * @param seed - Optional seed for consistent positioning (use island ID)
- * @returns Array of islands with canvas positions
- */
 export function mapIslandsToCanvas(
-  dbIslands: DBIsland[],
+  dbIslands: IslandType[],
   minDistance = 8,
   seed?: string
-): IslandWithPosition[] {
-  const mappedIslands: IslandWithPosition[] = [];
+): IslandTypeWithPosition[] {
+  const mappedIslands: IslandTypeWithPosition[] = [];
 
   dbIslands.forEach((dbIsland, index) => {
     let position: [number, number, number];
     let attempts = 0;
     const maxAttempts = 100;
 
-    // Use island ID for seeded randomness (consistent positions per island)
     const islandSeed = seed ? hashCode(dbIsland.id + seed) : Math.random();
 
     do {
-      // Generate position with optional seeding
       const randomX = seed
         ? seededRandom(islandSeed + index * 1000)
         : Math.random();
@@ -49,19 +26,14 @@ export function mapIslandsToCanvas(
         ? seededRandom(islandSeed + index * 3000)
         : Math.random();
 
-      position = [
-        (randomX - 0.5) * 20, // X between -10 and 10
-        randomY * 3 + 1, // Y between 1 and 4
-        (randomZ - 0.5) * 20, // Z between -10 and 10
-      ];
+      position = [(randomX - 0.5) * 20, randomY * 3 + 1, (randomZ - 0.5) * 20];
       attempts++;
 
-      // If max attempts reached, place it anyway (far from others if possible)
       if (attempts >= maxAttempts) {
         position = [
-          (randomX - 0.5) * 30 + index * 5,
+          (randomX - 0.5) * 30 + index * 2,
           randomY * 3 + 1,
-          (randomZ - 0.5) * 30 + index * 5,
+          (randomZ - 0.5) * 30 + index * 2,
         ];
         break;
       }
@@ -74,16 +46,24 @@ export function mapIslandsToCanvas(
       })
     );
 
-    // Map level to grid size (level 1-3 = size 4-6)
-    const gridSize = Math.min(Math.max((dbIsland.level || 1) + 3, 4), 6);
+    // Fixed: Map level to grid size
+    // Level 1 = gridSize 5
+    // Level 2 = gridSize 7
+    // Level 3 = gridSize 9
+    const gridSize = Math.min(Math.max(dbIsland.level * 2 + 3, 5), 9);
+
+    console.log(
+      `Island ${dbIsland.name} - Level: ${dbIsland.level}, GridSize: ${gridSize}`
+    );
 
     mappedIslands.push({
       id: dbIsland.id,
-      position,
-      gridSize,
       name: dbIsland.name,
       level: dbIsland.level,
       theme: dbIsland.theme,
+      position,
+      gridSize,
+      user: dbIsland.user,
     });
   });
 
@@ -115,25 +95,26 @@ function seededRandom(seed: number): number {
  * Arranges islands in a circular pattern
  */
 export function arrangeIslandsCircular(
-  dbIslands: DBIsland[],
+  dbIslands: IslandType[],
   radius = 15,
   heightVariation = 2
-): IslandWithPosition[] {
+): IslandTypeWithPosition[] {
   return dbIslands.map((dbIsland, index) => {
     const angle = (index / dbIslands.length) * Math.PI * 2;
     const x = Math.cos(angle) * radius;
     const z = Math.sin(angle) * radius;
     const y = 2 + (Math.random() - 0.5) * heightVariation;
 
-    const gridSize = Math.min(Math.max((dbIsland.level || 1) + 3, 4), 6);
+    const gridSize = Math.min(Math.max(dbIsland.level * 2 + 3, 5), 9);
 
     return {
       id: dbIsland.id,
-      position: [x, y, z],
-      gridSize,
       name: dbIsland.name,
       level: dbIsland.level,
       theme: dbIsland.theme,
+      position: [x, y, z],
+      gridSize,
+      user: dbIsland.user,
     };
   });
 }
@@ -142,10 +123,10 @@ export function arrangeIslandsCircular(
  * Arranges islands in a grid pattern
  */
 export function arrangeIslandsGrid(
-  dbIslands: DBIsland[],
+  dbIslands: IslandType[],
   columns = 3,
   spacing = 10
-): IslandWithPosition[] {
+): IslandTypeWithPosition[] {
   return dbIslands.map((dbIsland, index) => {
     const row = Math.floor(index / columns);
     const col = index % columns;
@@ -154,15 +135,16 @@ export function arrangeIslandsGrid(
     const z = (row - Math.floor(dbIslands.length / columns) / 2) * spacing;
     const y = 2 + (Math.random() - 0.5) * 1;
 
-    const gridSize = Math.min(Math.max((dbIsland.level || 1) + 3, 4), 6);
+    const gridSize = Math.min(Math.max(dbIsland.level * 2 + 3, 5), 9);
 
     return {
       id: dbIsland.id,
-      position: [x, y, z],
-      gridSize,
       name: dbIsland.name,
       level: dbIsland.level,
       theme: dbIsland.theme,
+      position: [x, y, z],
+      gridSize,
+      user: dbIsland.user,
     };
   });
 }
