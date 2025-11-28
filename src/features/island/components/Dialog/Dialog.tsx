@@ -7,8 +7,9 @@ interface DialogProps {
   title: string;
   children: React.ReactNode;
   className?: string;
-  size?: "small" | "large";
-  setIsDialogOpen: (value: string) => void;
+  size?: "small" | "medium" | "large";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const Dialog = ({
@@ -17,14 +18,18 @@ const Dialog = ({
   title,
   children,
   className,
-  size = "small",
+  size = "medium",
   setIsDialogOpen,
 }: DialogProps) => {
   return (
     <div className="relative h-screen w-screen flex justify-center items-center z-90 bg-black bg-opacity-25">
       <div
         className={`${
-          size == "small" ? "h-[500px] w-[500px]" : "h-[500px] w-[1000px]"
+          size == "medium"
+            ? "h-[500px] w-[500px]" // medium
+            : size == "large"
+            ? "h-[500px] w-[1000px]" // large
+            : "h-[300px] w-[300px]" // small
         } relative border-black border-4`}
       >
         {/* header */}
