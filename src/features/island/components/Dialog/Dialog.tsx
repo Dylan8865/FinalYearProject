@@ -1,38 +1,45 @@
 import React from "react";
-import CloseIcon from "../icons/CloseIcon";
+import CloseIcon from "../../icons/CloseIcon";
 
 interface DialogProps {
-  bgColor: string;
+  iconStyle: string;
   icon: React.ReactNode;
   title: string;
   children: React.ReactNode;
   className?: string;
-  size?: "small" | "large";
-  setIsDialogOpen: (value: string) => void;
+  size?: "small" | "medium" | "large";
+  borderColor?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const Dialog = ({
-  bgColor,
+  iconStyle,
   icon,
   title,
   children,
   className,
-  size = "small",
+  size = "medium",
+  borderColor = "border-black",
   setIsDialogOpen,
 }: DialogProps) => {
   return (
     <div className="relative h-screen w-screen flex justify-center items-center z-90 bg-black bg-opacity-25">
       <div
         className={`${
-          size == "small" ? "h-[500px] w-[500px]" : "h-[500px] w-[1000px]"
-        } relative border-black border-4`}
+          size == "medium"
+            ? "h-[500px] w-[500px]" // medium
+            : size == "large"
+            ? "h-[500px] w-[1000px]" // large
+            : "h-[300px] w-[300px]" // small
+        } relative ${borderColor} border-4`}
       >
         {/* header */}
         <div className="relative z-20 flex justify-between h-10 bg-[#333333]">
           {/* left */}
           <div className="flex">
             <div
-              className={`${bgColor} h-14 w-14 border-black border-4 mt-[-10px] ml-[-10px] text-white flex justify-center items-center`}
+              className={`${iconStyle} h-14 w-14  ${borderColor} border-4 mt-[-10px] ml-[-10px] flex justify-center items-center`}
             >
               {icon}
             </div>
