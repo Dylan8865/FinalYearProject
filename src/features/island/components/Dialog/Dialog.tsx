@@ -8,6 +8,7 @@ interface DialogProps {
   children: React.ReactNode;
   className?: string;
   size?: "small" | "medium" | "large";
+  borderColor?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setIsDialogOpen: React.Dispatch<React.SetStateAction<any>>;
 }
@@ -19,6 +20,7 @@ const Dialog = ({
   children,
   className,
   size = "medium",
+  borderColor = "border-black",
   setIsDialogOpen,
 }: DialogProps) => {
   return (
@@ -30,14 +32,14 @@ const Dialog = ({
             : size == "large"
             ? "h-[500px] w-[1000px]" // large
             : "h-[300px] w-[300px]" // small
-        } relative border-black border-4`}
+        } relative ${borderColor} border-4`}
       >
         {/* header */}
         <div className="relative z-20 flex justify-between h-10 bg-[#333333]">
           {/* left */}
           <div className="flex">
             <div
-              className={`${iconStyle} h-14 w-14 border-black border-4 mt-[-10px] ml-[-10px] flex justify-center items-center`}
+              className={`${iconStyle} h-14 w-14  ${borderColor} border-4 mt-[-10px] ml-[-10px] flex justify-center items-center`}
             >
               {icon}
             </div>

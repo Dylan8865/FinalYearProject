@@ -9,7 +9,7 @@ interface ButtonProps {
 const Button = ({ children, className, onClick }: ButtonProps) => {
   return (
     <div
-      className={`${className} border-4 w-20 h-10 flex justify-center items-center`}
+      className={`${className} w-20 h-10 flex justify-center items-center`}
       onClick={onClick}
     >
       {children}

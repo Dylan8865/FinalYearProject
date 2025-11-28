@@ -114,6 +114,7 @@ const StoreContent = ({ userId }: StoreContentProps) => {
             title="Purchase item?"
             size="small"
             setIsDialogOpen={setSelectedItem}
+            borderColor="border-[#d9d9d9]"
             className="flex justify-center items-center"
           >
             <div className="space-y-6">
@@ -127,8 +128,18 @@ const StoreContent = ({ userId }: StoreContentProps) => {
                 <span className="text-neutral-300">?</span>
               </p>
               <div className="flex gap-4 justify-center">
-                <Button>Yes</Button>
-                <Button className="">No</Button>
+                <Button
+                  className="bg-[#333333] border border-transparent hover:border-[#515151] transition"
+                  onClick={() => handlePurchase(selectedItem.id)}
+                >
+                  Yes
+                </Button>
+                <Button
+                  className="bg-[#1a1a1a] border border-transparent hover:border-[#515151] transition"
+                  onClick={() => setSelectedItem(null)}
+                >
+                  No
+                </Button>
               </div>
             </div>
           </Dialog>
