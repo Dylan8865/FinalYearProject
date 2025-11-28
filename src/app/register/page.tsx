@@ -1,7 +1,8 @@
 import React from "react";
+import RegisterPage from '@/features/register/RegisterPage';
 
 const Register = () => {
-  return <div>FolderPage</div>;
+  return <RegisterPage />;
 };
 
 export default Register;
