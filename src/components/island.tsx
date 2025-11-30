@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useMemo, useState, useCallback } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, ThreeEvent } from "@react-three/fiber";
 import {
   OrbitControls,
   Sky,
@@ -13,6 +13,7 @@ import {
   Text,
 } from "@react-three/drei";
 import * as THREE from "three";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 // Khaki Color Theme Palette
 const THEME = {
@@ -159,7 +160,7 @@ const PATHWAY_DIRECTIONS = {
 };
 
 // Game State Management Component
-function GameStateManager({ children }) {
+function GameStateManager({ children }: { children: (gameState: any, setGameState: any) => React.ReactNode }) {
   const [gameState, setGameState] = useState({
     currency: 1000,
     oxygen: 100,
@@ -178,9 +179,9 @@ function GameStateManager({ children }) {
 }
 
 // Camera Controller Component
-function CameraController({ targetPosition, targetLookAt, shouldAnimate }) {
+function CameraController({ targetPosition, targetLookAt, shouldAnimate }: { targetPosition: number[]; targetLookAt: number[]; shouldAnimate: boolean }) {
   const { camera } = useThree();
-  const controlsRef = useRef();
+  const controlsRef = useRef<OrbitControlsImpl>(null!);
   const isAnimating = useRef(false);
   const animationProgress = useRef(0);
 
@@ -239,10 +240,16 @@ function PathwayObject({
   neighbors,
   onRemove,
   isInRemoveMode,
+}: {
+  position: number[];
+  direction: string;
+  neighbors: { left: boolean; right: boolean; up: boolean; down: boolean };
+  onRemove: () => void;
+  isInRemoveMode: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
 
-  const handleClick = (e) => {
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     if (isInRemoveMode) {
       onRemove();
@@ -265,7 +272,7 @@ function PathwayObject({
   const isVertical = direction === PATHWAY_DIRECTIONS.VERTICAL;
 
   return (
-    <group position={position} {...commonProps}>
+    <group position={position as [number, number, number]} {...commonProps}>
       {/* Main pathway tile */}
       <mesh
         position={[0, -0.02, 0]}
@@ -369,14 +376,21 @@ function PlacedObject({
   isInRemoveMode,
   direction,
   neighbors,
+}: {
+  itemKey: string;
+  position: number[];
+  onRemove: () => void;
+  isInRemoveMode: boolean;
+  direction?: string;
+  neighbors?: { left: boolean; right: boolean; up: boolean; down: boolean };
 }) {
-  const item = ITEMS[itemKey];
-  const meshRef = useRef();
+  const item = ITEMS[itemKey as keyof typeof ITEMS];
+  const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
   if (!item) return null;
 
-  const handleClick = (e) => {
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     if (isInRemoveMode) {
       onRemove();
@@ -389,7 +403,7 @@ function PlacedObject({
     onPointerLeave: () => setHovered(false),
   };
 
-  const getMaterial = (baseColor) => (
+  const getMaterial = (baseColor: string) => (
     <meshStandardMaterial
       color={hovered && isInRemoveMode ? "#ff0000" : baseColor}
       roughness={0.9}
@@ -404,8 +418,8 @@ function PlacedObject({
     return (
       <PathwayObject
         position={position}
-        direction={direction}
-        neighbors={neighbors}
+        direction={direction!}
+        neighbors={neighbors!}
         onRemove={onRemove}
         isInRemoveMode={isInRemoveMode}
       />
@@ -415,7 +429,7 @@ function PlacedObject({
   switch (itemKey) {
     case "oakTree":
       return (
-        <group position={position} {...commonProps}>
+        <group position={position as [number, number, number]} {...commonProps}>
           <mesh position={[0, 0.3, 0]} castShadow>
             <cylinderGeometry args={[0.08, 0.1, 0.6, 6]} />
             {getMaterial(THEME.tree)}
@@ -433,7 +447,7 @@ function PlacedObject({
 
     case "christmas":
       return (
-        <group position={position} {...commonProps}>
+        <group position={position as [number, number, number]} {...commonProps}>
           <mesh position={[0, 0.3, 0]} castShadow>
             <cylinderGeometry args={[0.08, 0.1, 0.6, 6]} />
             {getMaterial("#5d4037")}
@@ -472,7 +486,7 @@ function PlacedObject({
 
     case "stone":
       return (
-        <mesh ref={meshRef} position={position} castShadow {...commonProps}>
+        <mesh ref={meshRef} position={position as [number, number, number]} castShadow {...commonProps}>
           <dodecahedronGeometry args={[0.2, 0]} />
           {getMaterial(item.color)}
         </mesh>
@@ -480,7 +494,7 @@ function PlacedObject({
 
     case "fountain":
       return (
-        <group position={position} {...commonProps}>
+        <group position={position as [number, number, number]} {...commonProps}>
           <mesh position={[0, 0, 0]} castShadow>
             <cylinderGeometry args={[0.4, 0.45, 0.12, 8]} />
             {getMaterial(THEME.secondary)}
@@ -508,7 +522,7 @@ function PlacedObject({
 
     case "pumpkin":
       return (
-        <group position={position} {...commonProps}>
+        <group position={position as [number, number, number]} {...commonProps}>
           <mesh position={[0, 0.15, 0]} castShadow>
             <sphereGeometry args={[0.2, 8, 6]} />
             {getMaterial("#ff6f00")}
@@ -530,7 +544,7 @@ function PlacedObject({
 
     case "flower":
       return (
-        <group position={position} {...commonProps}>
+        <group position={position as [number, number, number]} {...commonProps}>
           {[...Array(5)].map((_, i) => {
             const angle = (i / 5) * Math.PI * 2;
             const radius = 0.15;
@@ -566,7 +580,7 @@ function PlacedObject({
 
     case "lotus":
       return (
-        <group position={position} {...commonProps}>
+        <group position={position as [number, number, number]} {...commonProps}>
           <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <circleGeometry args={[0.15, 8]} />
             <meshStandardMaterial color="#2e7d32" side={THREE.DoubleSide} />
@@ -594,7 +608,7 @@ function PlacedObject({
 
     case "vines":
       return (
-        <group position={position} {...commonProps}>
+        <group position={position as [number, number, number]} {...commonProps}>
           {[...Array(4)].map((_, i) => (
             <mesh key={i} position={[0, -i * 0.15, 0]} castShadow>
               <cylinderGeometry args={[0.03, 0.02, 0.15, 4]} />
@@ -623,7 +637,7 @@ function PlacedObject({
       return (
         <mesh
           ref={meshRef}
-          position={position}
+          position={position as [number, number, number]}
           castShadow
           receiveShadow
           {...commonProps}
@@ -655,7 +669,7 @@ function PlacedObject({
 
     default:
       return (
-        <mesh ref={meshRef} position={position} castShadow {...commonProps}>
+        <mesh ref={meshRef} position={position as [number, number, number]} castShadow {...commonProps}>
           <boxGeometry args={[0.3, 0.3, 0.3]} />
           {getMaterial(item.color || "#ffffff")}
         </mesh>
@@ -664,8 +678,8 @@ function PlacedObject({
 }
 
 // Water Flow Effect
-function WaterFlow({ position, onSplash, id }) {
-  const waterRef = useRef();
+function WaterFlow({ position, onSplash, id }: { position: number[]; onSplash?: () => void; id: number }) {
+  const waterRef = useRef<THREE.Mesh>(null);
   const [splashed, setSplashed] = useState(false);
 
   useFrame(() => {
@@ -706,7 +720,7 @@ function WaterFlow({ position, onSplash, id }) {
   }
 
   return (
-    <mesh ref={waterRef} position={position}>
+    <mesh ref={waterRef} position={position as [number, number, number]}>
       <cylinderGeometry args={[0.08, 0.06, 0.3, 8]} />
       <meshStandardMaterial
         color={THEME.water}
@@ -720,7 +734,7 @@ function WaterFlow({ position, onSplash, id }) {
 }
 
 // Direction Selector Component - NEW
-function DirectionSelector({ onSelectDirection, currentDirection }) {
+function DirectionSelector({ onSelectDirection, currentDirection }: { onSelectDirection: (direction: string) => void; currentDirection: string }) {
   return (
     <div
       style={{
@@ -814,6 +828,16 @@ function InventoryBar({
   onToggleRemoveMode,
   showDirectionSelector,
   onToggleDirectionSelector,
+}: {
+  inventory: (string | null)[];
+  selectedSlot: number;
+  onSelectSlot: (slot: number) => void;
+  currency: number;
+  oxygen: number;
+  removeMode: boolean;
+  onToggleRemoveMode: () => void;
+  showDirectionSelector: boolean;
+  onToggleDirectionSelector: (show: boolean) => void;
 }) {
   return (
     <div
@@ -881,7 +905,7 @@ function InventoryBar({
       </div>
 
       {/* Inventory Slots */}
-      {inventory.map((item, index) => (
+      {inventory.map((item: string | null, index: number) => (
         <div
           key={index}
           onClick={() => {
@@ -919,7 +943,7 @@ function InventoryBar({
             opacity: removeMode ? 0.5 : 1,
           }}
         >
-          {item && ITEMS[item]?.emoji}
+          {item && ITEMS[item as keyof typeof ITEMS]?.emoji}
           {selectedSlot === index && !removeMode && item && (
             <div
               style={{
@@ -982,11 +1006,11 @@ function InventoryBar({
 }
 
 // Shop Component
-function Shop({ isOpen, onClose, onPurchase, currency }) {
+function Shop({ isOpen, onClose, onPurchase, currency }: { isOpen: boolean; onClose: () => void; onPurchase: (itemKey: string, price: number) => void; currency: number }) {
   const [notification, setNotification] = useState("");
 
-  const handlePurchase = (itemKey) => {
-    const item = ITEMS[itemKey];
+  const handlePurchase = (itemKey: string) => {
+    const item = ITEMS[itemKey as keyof typeof ITEMS];
     if (currency >= item.price) {
       onPurchase(itemKey, item.price);
       setNotification(`✅ Successfully purchased ${item.name}!`);
@@ -1134,7 +1158,7 @@ function Shop({ isOpen, onClose, onPurchase, currency }) {
 }
 
 // Shop Button
-function ShopButton({ onClick }) {
+function ShopButton({ onClick }: { onClick: () => void }) {
   return (
     <div
       onClick={onClick}
@@ -1170,7 +1194,7 @@ function ShopButton({ onClick }) {
 }
 
 // Camera Control Buttons
-function CameraButtons({ onCameraChange, currentCamera }) {
+function CameraButtons({ onCameraChange, currentCamera }: { onCameraChange: (cameraId: string) => void; currentCamera: string }) {
   const buttons = [
     { id: "default", emoji: "🏝️", label: "All Islands" },
     { id: "island1", emoji: "1️⃣", label: "Island 1" },
@@ -1229,7 +1253,7 @@ function CameraButtons({ onCameraChange, currentCamera }) {
 }
 
 // Success Message
-function SuccessMessage({ message }) {
+function SuccessMessage({ message }: { message: string }) {
   if (!message) return null;
 
   return (
@@ -1263,13 +1287,19 @@ function GridPlatform({
   onCellClick,
   placedObjects,
   waterCells,
+}: {
+  gridSize?: number;
+  islandLevel: number;
+  onCellClick: (x: number, z: number, isInner: boolean, cellId: string) => void;
+  placedObjects: Record<string, any>;
+  waterCells: string[];
 }) {
-  const [hoveredCell, setHoveredCell] = useState(null);
+  const [hoveredCell, setHoveredCell] = useState<string | null>(null);
   const cellSize = 1.2;
   const totalSize = gridSize * cellSize;
   const offset = totalSize / 2 - cellSize / 2;
 
-  const isInnerArea = (row, col) => {
+  const isInnerArea = (row: number, col: number) => {
     const center = Math.floor(gridSize / 2);
     const distance = Math.max(Math.abs(row - center), Math.abs(col - center));
     return distance <= Math.floor(gridSize / 3);
@@ -1373,7 +1403,7 @@ function GridPlatform({
 }
 
 // Island Base
-function IslandBase({ gridSize = 5 }) {
+function IslandBase({ gridSize = 5 }: { gridSize?: number }) {
   const radius = (gridSize * 1.2) / 2 + 0.5;
 
   const geometry = useMemo(() => {
@@ -1429,7 +1459,7 @@ function IslandBase({ gridSize = 5 }) {
 }
 
 // Grass Base
-function GrassBase({ gridSize = 5 }) {
+function GrassBase({ gridSize = 5 }: { gridSize?: number }) {
   const radius = (gridSize * 1.2) / 2 + 0.5;
 
   return (
@@ -1451,10 +1481,16 @@ function ClickableIsland({
   onIslandClick,
   isLocked,
   level,
+}: {
+  position: number[];
+  islandId: string;
+  onIslandClick: (islandId: string) => void;
+  isLocked: boolean;
+  level: number;
 }) {
   return (
     <group
-      position={position}
+      position={position as [number, number, number]}
       onClick={(e) => {
         e.stopPropagation();
         onIslandClick(islandId);
@@ -1520,7 +1556,7 @@ function ClickableIsland({
 }
 
 // Helper function to get pathway neighbors
-function getPathwayNeighbors(x, z, placedObjects) {
+function getPathwayNeighbors(x: number, z: number, placedObjects: Record<string, any>) {
   const cellSize = 1.2;
   const neighbors = {
     left: false,
@@ -1567,9 +1603,19 @@ function IslandScene({
   onIslandClick,
   onRemoveObject,
   removeMode,
+}: {
+  islandLevel: number;
+  unlockedIslands: boolean[];
+  onCellClick: (x: number, z: number, isInner: boolean, cellId: string) => void;
+  placedObjects: Record<string, any>;
+  waterCells: string[];
+  waterFlows: any[];
+  onIslandClick: (islandId: string) => void;
+  onRemoveObject: (posKey: string) => void;
+  removeMode: boolean;
 }) {
-  const groupRef = useRef();
-  const gridSize = ISLAND_LEVELS[islandLevel].size;
+  const groupRef = useRef<THREE.Group>(null);
+  const gridSize = ISLAND_LEVELS[islandLevel as keyof typeof ISLAND_LEVELS].size;
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -1597,7 +1643,7 @@ function IslandScene({
           const neighbors =
             data.item === "pathway"
               ? getPathwayNeighbors(x, z, placedObjects)
-              : {};
+              : { left: false, right: false, up: false, down: false };
 
           return (
             <PlacedObject
@@ -1647,7 +1693,7 @@ function IslandScene({
 export default function FloatingIsland() {
   const [shopOpen, setShopOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [waterFlows, setWaterFlows] = useState([]);
+  const [waterFlows, setWaterFlows] = useState<Array<{ id: number; position: number[]; onSplash: () => void }>>([]);
   const [cameraTarget, setCameraTarget] = useState(CAMERA_POSITIONS.default);
   const [shouldAnimateCamera, setShouldAnimateCamera] = useState(false);
   const [showDirectionSelector, setShowDirectionSelector] = useState(false);
@@ -1655,9 +1701,9 @@ export default function FloatingIsland() {
   return (
     <GameStateManager>
       {(gameState, setGameState) => {
-        const handlePurchase = (itemKey, price) => {
+        const handlePurchase = (itemKey: string, price: number) => {
           const emptySlot = gameState.inventory.findIndex(
-            (slot) => slot === null
+            (slot: string | null) => slot === null
           );
           if (emptySlot !== -1 && gameState.currency >= price) {
             const newInventory = [...gameState.inventory];
@@ -1671,11 +1717,11 @@ export default function FloatingIsland() {
         };
 
         // FIXED: Remove object handler - now handles water removal properly
-        const handleRemoveObject = (posKey) => {
+        const handleRemoveObject = (posKey: string) => {
           const removedObject = gameState.placedObjects[posKey];
           if (!removedObject) return;
 
-          const item = ITEMS[removedObject.item];
+          const item = ITEMS[removedObject.item as keyof typeof ITEMS];
           const [x, y, z] = posKey.split(",").map(Number);
           const refundAmount = item.price;
           const isBlock = item.type === "block";
@@ -1703,14 +1749,14 @@ export default function FloatingIsland() {
           objectsToRemove.forEach((key) => {
             const obj = newPlacedObjects[key];
             if (obj) {
-              totalRefund += ITEMS[obj.item].price;
+              totalRefund += ITEMS[obj.item as keyof typeof ITEMS].price;
               delete newPlacedObjects[key];
             }
           });
 
           // FIXED: Properly remove water cells
           const cellSize = 1.2;
-          const gridSize = ISLAND_LEVELS[gameState.islandLevel].size;
+          const gridSize = ISLAND_LEVELS[gameState.islandLevel as keyof typeof ISLAND_LEVELS].size;
           const offset = (gridSize * cellSize) / 2 - cellSize / 2;
 
           const col = Math.round((x + offset) / cellSize);
@@ -1718,7 +1764,7 @@ export default function FloatingIsland() {
           const cellId = `${row}-${col}`;
 
           const newWaterCells = gameState.waterCells.filter(
-            (id) => id !== cellId
+            (id: string) => id !== cellId
           );
 
           setGameState({
@@ -1737,7 +1783,7 @@ export default function FloatingIsland() {
           setTimeout(() => setSuccessMessage(""), 2000);
         };
 
-        const handleCellClick = (x, z, isInner, cellId) => {
+        const handleCellClick = (x: number, z: number, isInner: boolean, cellId: string) => {
           if (gameState.removeMode) return;
 
           const selectedItem = gameState.inventory[gameState.selectedSlot];
@@ -1747,7 +1793,7 @@ export default function FloatingIsland() {
             return;
           }
 
-          const item = ITEMS[selectedItem];
+          const item = ITEMS[selectedItem as keyof typeof ITEMS];
           let height = 0;
 
           if (item.type === "block") {
@@ -1838,8 +1884,8 @@ export default function FloatingIsland() {
           setTimeout(() => setSuccessMessage(""), 2000);
         };
 
-        const handleCameraChange = (cameraId) => {
-          setCameraTarget(CAMERA_POSITIONS[cameraId]);
+        const handleCameraChange = (cameraId: string) => {
+          setCameraTarget(CAMERA_POSITIONS[cameraId as keyof typeof CAMERA_POSITIONS]);
           setShouldAnimateCamera(true);
           setGameState({ ...gameState, currentCamera: cameraId });
 
@@ -1848,7 +1894,7 @@ export default function FloatingIsland() {
           }, 2000);
         };
 
-        const handleIslandClick = (islandId) => {
+        const handleIslandClick = (islandId: string) => {
           const islandIndex = islandId === "island2" ? 1 : 2;
           const isLocked = !gameState.unlockedIslands[islandIndex];
 
@@ -1905,7 +1951,7 @@ export default function FloatingIsland() {
           setTimeout(() => setSuccessMessage(""), 2000);
         };
 
-        const handleDirectionChange = (direction) => {
+        const handleDirectionChange = (direction: string) => {
           setGameState({
             ...gameState,
             pathwayDirection: direction,
@@ -1932,7 +1978,7 @@ export default function FloatingIsland() {
           >
             <Canvas
               shadows
-              camera={{ position: CAMERA_POSITIONS.default.position, fov: 50 }}
+              camera={{ position: CAMERA_POSITIONS.default.position as [number, number, number], fov: 50 }}
               style={{ pointerEvents: "auto" }}
             >
               <ambientLight intensity={0.7} color="#ffffff" />
@@ -2029,15 +2075,15 @@ export default function FloatingIsland() {
               <h3 style={{ margin: "0 0 10px 0" }}>🏝️ Island Builder</h3>
               <p style={{ margin: "5px 0" }}>Level: {gameState.islandLevel}</p>
               <p style={{ margin: "5px 0" }}>
-                Grid: {ISLAND_LEVELS[gameState.islandLevel].size}x
-                {ISLAND_LEVELS[gameState.islandLevel].size}
+                Grid: {ISLAND_LEVELS[gameState.islandLevel as keyof typeof ISLAND_LEVELS].size}x
+                {ISLAND_LEVELS[gameState.islandLevel as keyof typeof ISLAND_LEVELS].size}
               </p>
               <p style={{ margin: "5px 0", fontSize: "12px", opacity: 0.8 }}>
                 {gameState.removeMode
                   ? "🪓 Remove Mode - Click items to remove"
                   : gameState.inventory[gameState.selectedSlot]
                   ? `Selected: ${
-                      ITEMS[gameState.inventory[gameState.selectedSlot]].name
+                      ITEMS[gameState.inventory[gameState.selectedSlot] as keyof typeof ITEMS].name
                     }`
                   : "No item selected"}
               </p>
