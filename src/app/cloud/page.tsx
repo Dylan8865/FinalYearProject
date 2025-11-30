@@ -58,6 +58,20 @@ export default function Cloud() {
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [clickedWord, setClickedWord] = useState<string | null>(null);
+  const [activeSearch, setActiveSearch] = useState("");
+
+  // Filter words based on search query
+  const filteredWords = activeSearch
+    ? CLOUD_WORDS.filter((word) =>
+        word.text.toLowerCase().includes(activeSearch.toLowerCase())
+      )
+    : CLOUD_WORDS;
+
+  // Check if a word matches the search
+  const isMatchingWord = (text: string) => {
+    if (!activeSearch) return false;
+    return text.toLowerCase().includes(activeSearch.toLowerCase());
+  };
 
   const handleWordClick = (word: string) => {
     setClickedWord(word);
@@ -68,9 +82,13 @@ export default function Cloud() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/explore?q=${encodeURIComponent(searchQuery)}`);
-    }
+    // Apply the search filter on the cloud page
+    setActiveSearch(searchQuery.trim());
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setActiveSearch("");
   };
 
   return (
@@ -119,6 +137,8 @@ export default function Cloud() {
           const isHovered = hoveredWord === word.text;
           const isClicked = clickedWord === word.text;
           const isOtherHovered = hoveredWord && hoveredWord !== word.text;
+          const isMatching = isMatchingWord(word.text);
+          const isFiltered = activeSearch && !isMatching;
 
           return (
             <button
@@ -126,7 +146,9 @@ export default function Cloud() {
               onClick={() => handleWordClick(word.text)}
               onMouseEnter={() => setHoveredWord(word.text)}
               onMouseLeave={() => setHoveredWord(null)}
-              className="absolute transition-all duration-300 ease-out hover:z-10 cursor-pointer select-none"
+              className={`absolute transition-all duration-500 ease-out hover:z-10 cursor-pointer select-none ${
+                isFiltered ? "pointer-events-none" : ""
+              }`}
               style={{
                 left: `${word.x}%`,
                 top: `${word.y}%`,
@@ -136,13 +158,23 @@ export default function Cloud() {
                   ? "scale(0.95)"
                   : isHovered
                   ? "scale(1.15)"
+                  : isMatching
+                  ? "scale(1.2)"
                   : "scale(1)",
-                color: isClicked ? "#3b82f6" : isHovered ? "#60a5fa" : "white",
-                opacity: isOtherHovered ? 0.3 : 1,
-                textShadow: isHovered
+                color: isClicked
+                  ? "#3b82f6"
+                  : isMatching
+                  ? "#22c55e"
+                  : isHovered
+                  ? "#60a5fa"
+                  : "white",
+                opacity: isFiltered ? 0.1 : isOtherHovered ? 0.3 : 1,
+                textShadow: isMatching
+                  ? "0 0 30px rgba(34, 197, 94, 0.8), 0 0 60px rgba(34, 197, 94, 0.5)"
+                  : isHovered
                   ? "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3)"
                   : "none",
-                filter: isHovered ? "brightness(1.2)" : "none",
+                filter: isHovered || isMatching ? "brightness(1.2)" : "none",
               }}
             >
               {word.text}
@@ -150,6 +182,21 @@ export default function Cloud() {
           );
         })}
       </div>
+
+      {/* Search Results Count */}
+      {activeSearch && (
+        <div className="absolute top-24 left-1/2 transform -translate-x-1/2 text-center">
+          <p className="text-gray-300 text-lg">
+            Found <span className="text-green-400 font-bold">{filteredWords.length}</span> matching topics for &quot;{activeSearch}&quot;
+          </p>
+          <button
+            onClick={handleClearSearch}
+            className="mt-2 text-gray-400 hover:text-white text-sm underline transition-colors"
+          >
+            Clear search
+          </button>
+        </div>
+      )}
 
       {/* Search Bar */}
       <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4">
@@ -172,9 +219,30 @@ export default function Cloud() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="What do you want to learn today?"
+              placeholder="Filter topics in the cloud..."
               className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-lg"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="ml-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
         </form>
       </div>
