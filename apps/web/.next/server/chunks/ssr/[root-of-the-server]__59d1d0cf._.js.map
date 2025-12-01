@@ -1,0 +1,1 @@
+{"version":3,"sources":["turbopack:///[project]/apps/web/src/app/[username]/island/[item_id]/page.tsx"],"sourcesContent":["import React from \"react\";\n\nconst Item = () => {\n  return <div>Item</div>;\n};\n\nexport default Item;\n"],"names":[],"mappings":"sWAEa,IACJ,CAAA,EAAA,EAAA,GAAA,EAAC,MAAA,UAAI"}
