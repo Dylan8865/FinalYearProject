@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { register } from "@/src/actions/register";
-import WILogo from "@/src/features/auth/register/icons/WILogo";
-import GoogleLogo from "@/src/features/auth/register/icons/GoogleLogo";
-import AppleLogo from "@/src/features/auth/register/icons/AppleLogo";
-import FBLogo from "@/src/features/auth/register/icons/FBLogo";
+import { register } from "@/actions/register";
+import WILogo from "@/features/auth/register/icons/WILogo";
+import GoogleLogo from "@/features/auth/register/icons/GoogleLogo";
+import AppleLogo from "@/features/auth/register/icons/AppleLogo";
+import FBLogo from "@/features/auth/register/icons/FBLogo";
 
 const RegisterPage = () => {
   const [error, setError] = useState<string | null>(null);

@@ -1,5 +1,5 @@
 import React from "react";
-import { useIslandItems } from "@/src/hooks/useIslandItems";
+import { useIslandItems } from "@/hooks/useIslandItems";
 
 interface InventoryContentProps {
   userId: string;

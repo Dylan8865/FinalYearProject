@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { mapIslandsToCanvas } from "@/src/utils/mapIslandsToCanvas";
+import { mapIslandsToCanvas } from "@/utils/mapIslandsToCanvas";
 import { IslandTypeWithPosition, IslandType } from "@/types/types";
 
 export function useIslands() {

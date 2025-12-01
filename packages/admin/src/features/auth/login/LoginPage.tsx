@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { login } from "@/src/actions/login";
-import WILogo from "@/src/features/auth/login/icons/WILogo";
-import GoogleLogo from "@/src/features/auth/login/icons/GoogleLogo";
-import AppleLogo from "@/src/features/auth/login/icons/AppleLogo";
-import FBLogo from "@/src/features/auth/login/icons/FBLogo";
+import { login } from "@/actions/login";
+import WILogo from "@/features/auth/login/icons/WILogo";
+import GoogleLogo from "@/features/auth/login/icons/GoogleLogo";
+import AppleLogo from "@/features/auth/login/icons/AppleLogo";
+import FBLogo from "@/features/auth/login/icons/FBLogo";
 import Link from "next/link";
 
 const LoginPage = () => {

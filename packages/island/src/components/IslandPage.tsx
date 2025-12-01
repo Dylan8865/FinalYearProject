@@ -1,22 +1,22 @@
 "use client";
 
 import React, { useState } from "react";
-import StatusBar from "@/src/components/StatusBar/StatusBar";
-import InventoryBar from "@/src/components/InventoryBar/InventoryBar";
-import IslandCanvas from "@/src/components/IslandCanvas/IslandCanvas";
-import Dialog from "@/src/components/Dialog/Dialog";
-import EditButton from "@/src/components/Dialog/EditButton";
-import UserIcon from "@/src/icons/UserIcon";
-import SettingButton from "@/src/components/Dialog/SettingButton";
-import TrophyIcon from "@/src/icons/TrophyIcon";
-import { useIslands } from "@/src/hooks/useIslands";
-import LockIcon from "@/src/icons/LockIcon";
-import LoginIcon from "@/src/icons/LoginIcon";
-import WarningIcon from "@/src/icons/WarningIcon";
-import MenuIcon from "@/src/icons/MenuIcon";
-import StoreIcon from "@/src/icons/StoreIcon";
-import StoreContent from "@/src/components/Dialog/StoreContent";
-import InventoryContent from "@/src/components/Dialog/InventoryContent";
+import StatusBar from "@/components/StatusBar/StatusBar";
+import InventoryBar from "@/components/InventoryBar/InventoryBar";
+import IslandCanvas from "@/components/IslandCanvas/IslandCanvas";
+import Dialog from "@/components/Dialog/Dialog";
+import EditButton from "@/components/Dialog/EditButton";
+import UserIcon from "@/icons/UserIcon";
+import SettingButton from "@/components/Dialog/SettingButton";
+import TrophyIcon from "@/icons/TrophyIcon";
+import { useIslands } from "@/hooks/useIslands";
+import LockIcon from "@/icons/LockIcon";
+import LoginIcon from "@/icons/LoginIcon";
+import WarningIcon from "@/icons/WarningIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import StoreIcon from "@/icons/StoreIcon";
+import StoreContent from "@/components/Dialog/StoreContent";
+import InventoryContent from "@/components/Dialog/InventoryContent";
 import { UserType } from "@/types/types";
 
 const IslandPage = () => {
