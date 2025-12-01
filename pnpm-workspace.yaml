@@ -1,3 +1,6 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - "admin"
+  - "cloud"
+  - "home"
+  - "island"
+  - "search"

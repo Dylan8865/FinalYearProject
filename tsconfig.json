@@ -12,14 +12,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "baseUrl": ".",
-    "paths": {
-      "@wisdom-island/home": ["packages/home/src"],
-      "@wisdom-island/search": ["packages/search/src"],
-      "@wisdom-island/cloud": ["packages/cloud/src"],
-      "@wisdom-island/island": ["packages/island/src"],
-      "@wisdom-island/admin": ["packages/admin/src"]
-    }
+    "baseUrl": "."
   },
-  "exclude": ["node_modules", "apps", ".next", "dist"]
+  "exclude": ["node_modules", ".next", "dist"]
 }
