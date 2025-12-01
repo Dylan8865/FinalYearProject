@@ -1,4 +1,4 @@
-import IslandPage from "@/src/components/IslandPage";
+import IslandPage from "@/components/IslandPage";
 import React from "react";
 
 const Island = () => {

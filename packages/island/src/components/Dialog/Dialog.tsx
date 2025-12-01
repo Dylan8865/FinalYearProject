@@ -1,5 +1,5 @@
 import React from "react";
-import CloseIcon from "@/src/icons/CloseIcon";
+import CloseIcon from "@/icons/CloseIcon";
 
 interface DialogProps {
   iconStyle: string;
