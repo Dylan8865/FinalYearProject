@@ -113,7 +113,7 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  packages/home:
+  packages/explore:
     dependencies:
       next:
         specifier: 16.0.1
