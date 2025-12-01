@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Wisdom Island - Search",
-  description: "Search and explore knowledge in Wisdom Island.",
+  title: "Wisdom Island - Home",
+  description: "A gamified knowledge sharing platform.",
 };
 
 export default function RootLayout({
