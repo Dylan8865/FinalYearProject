@@ -15,7 +15,7 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  admin:
+  packages/admin:
     dependencies:
       '@supabase/ssr':
         specifier: ^0.8.0
@@ -70,7 +70,7 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  cloud:
+  packages/cloud:
     dependencies:
       next:
         specifier: 16.0.1
@@ -113,7 +113,7 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  home:
+  packages/home:
     dependencies:
       next:
         specifier: 16.0.1
@@ -156,7 +156,7 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  island:
+  packages/island:
     dependencies:
       '@radix-ui/react-scroll-area':
         specifier: ^1.2.10
@@ -226,7 +226,7 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  search:
+  packages/search:
     dependencies:
       next:
         specifier: 16.0.1
