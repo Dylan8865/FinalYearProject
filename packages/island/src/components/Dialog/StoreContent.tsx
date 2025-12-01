@@ -1,17 +1,17 @@
 "use client";
 /* eslint-disable react-hooks/purity */
 import React, { useState } from "react";
-import { useItems } from "@/src/hooks/useItems";
-import { useIslandItems } from "@/src/hooks/useIslandItems";
-import FileIcon from "@/src/icons/FileIcon";
+import { useItems } from "@/hooks/useItems";
+import { useIslandItems } from "@/hooks/useIslandItems";
+import FileIcon from "@/icons/FileIcon";
 import { ItemType } from "@/types/types";
-import SeedlingIcon from "@/src/icons/SeedlingIcon";
-import BlockIcon from "@/src/icons/BlockIcon";
-import OxygenIcon from "@/src/icons/OxygenIcon";
-import { ScrollArea } from "@/src/components/ui/ScrollArea";
-import QuestionIcon from "@/src/icons/QuestionIcon";
+import SeedlingIcon from "@/icons/SeedlingIcon";
+import BlockIcon from "@/icons/BlockIcon";
+import OxygenIcon from "@/icons/OxygenIcon";
+import { ScrollArea } from "@/components/ui/ScrollArea";
+import QuestionIcon from "@/icons/QuestionIcon";
 import Dialog from "./Dialog";
-import ExclaimationIcon from "@/src/icons/ExclaimationIcon";
+import ExclaimationIcon from "@/icons/ExclaimationIcon";
 import Button from "./Button";
 
 interface StoreRowProps {

@@ -2,8 +2,8 @@
 
 import React from "react";
 import InventoryButton from "./InventoryButton";
-import MenuIcon from "@/src/icons/MenuIcon";
-import StoreIcon from "@/src/icons/StoreIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import StoreIcon from "@/icons/StoreIcon";
 
 interface InventoryBarProps {
   setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
