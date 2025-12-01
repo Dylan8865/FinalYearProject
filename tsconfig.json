@@ -5,7 +5,6 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -13,23 +12,14 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@wisdom-island/home": ["packages/home/src"],
+      "@wisdom-island/search": ["packages/search/src"],
+      "@wisdom-island/cloud": ["packages/cloud/src"],
+      "@wisdom-island/island": ["packages/island/src"],
+      "@wisdom-island/admin": ["packages/admin/src"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts",
-    "src/app/world/[world_id]"
-  ],
   "exclude": ["node_modules"]
 }
