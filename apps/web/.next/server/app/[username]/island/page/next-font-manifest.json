@@ -1,8 +1,0 @@
-{
-  "pages": {},
-  "app": {
-    "[project]/apps/web/src/app/[username]/island/page": []
-  },
-  "appUsingSizeAdjust": false,
-  "pagesUsingSizeAdjust": false
-}
