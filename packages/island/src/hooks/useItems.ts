@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ItemType } from "../types";
+import { ItemType } from "@/types/types";
 
 export function useItems() {
   const [items, setItems] = useState<ItemType[]>([]);

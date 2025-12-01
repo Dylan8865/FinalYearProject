@@ -1,4 +1,4 @@
-import { IslandTypeWithPosition, IslandType } from "../types";
+import { IslandTypeWithPosition, IslandType } from "@/types/types";
 
 export function mapIslandsToCanvas(
   dbIslands: IslandType[],

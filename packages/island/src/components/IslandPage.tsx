@@ -1,23 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import StatusBar from "./StatusBar/StatusBar";
-import InventoryBar from "./InventoryBar/InventoryBar";
-import IslandCanvas from "./IslandCanvas/IslandCanvas";
-import Dialog from "./Dialog/Dialog";
-import EditButton from "./Dialog/EditButton";
-import UserIcon from "../icons/UserIcon";
-import SettingButton from "./Dialog/SettingButton";
-import TrophyIcon from "../icons/TrophyIcon";
-import { useIslands } from "../hooks/useIslands";
-import LockIcon from "../icons/LockIcon";
-import LoginIcon from "../icons/LoginIcon";
-import WarningIcon from "../icons/WarningIcon";
-import MenuIcon from "../icons/MenuIcon";
-import StoreIcon from "../icons/StoreIcon";
-import StoreContent from "./Dialog/StoreContent";
-import InventoryContent from "./Dialog/InventoryContent";
-import { UserType } from "../types";
+import StatusBar from "@/components/StatusBar/StatusBar";
+import InventoryBar from "@/components/InventoryBar/InventoryBar";
+import IslandCanvas from "@/components/IslandCanvas/IslandCanvas";
+import Dialog from "@/components/Dialog/Dialog";
+import EditButton from "@/components/Dialog/EditButton";
+import UserIcon from "@/icons/UserIcon";
+import SettingButton from "@/components/Dialog/SettingButton";
+import TrophyIcon from "@/icons/TrophyIcon";
+import { useIslands } from "@/hooks/useIslands";
+import LockIcon from "@/icons/LockIcon";
+import LoginIcon from "@/icons/LoginIcon";
+import WarningIcon from "@/icons/WarningIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import StoreIcon from "@/icons/StoreIcon";
+import StoreContent from "@/components/Dialog/StoreContent";
+import InventoryContent from "@/components/Dialog/InventoryContent";
+import { UserType } from "@/types/types";
 
 const IslandPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState("");

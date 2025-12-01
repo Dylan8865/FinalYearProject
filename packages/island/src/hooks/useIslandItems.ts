@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { IslandItemType } from "../types";
+import { IslandItemType } from "@/types/types";
 
 export function useIslandItems(userId?: string, islandId?: string) {
   const [islandItems, setIslandItems] = useState<IslandItemType[]>([]);
