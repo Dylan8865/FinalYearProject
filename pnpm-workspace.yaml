@@ -1,6 +1,2 @@
 packages:
-  - "admin"
-  - "cloud"
-  - "home"
-  - "island"
-  - "search"
+  - "packages/*"
