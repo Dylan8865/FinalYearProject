@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@wisdom-island/home": ["../../packages/home/src"],
+      "@wisdom-island/search": ["../../packages/search/src"],
+      "@wisdom-island/cloud": ["../../packages/cloud/src"],
+      "@wisdom-island/island": ["../../packages/island/src"],
+      "@wisdom-island/admin": ["../../packages/admin/src"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
