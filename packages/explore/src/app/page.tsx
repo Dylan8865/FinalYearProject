@@ -1,29 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
-// Island Icon Component
-const IslandIcon = () => (
-  <svg
-    width="32"
-    height="32"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M12 2C8 2 5 5 5 9C5 13 8 15 12 15C16 15 19 13 19 9C19 5 16 2 12 2Z"
-      fill="currentColor"
-      opacity="0.6"
-    />
-    <path
-      d="M3 18C3 18 6 16 12 16C18 16 21 18 21 18C21 20 18 22 12 22C6 22 3 20 3 18Z"
-      fill="currentColor"
-    />
-    <path d="M12 8V13M10 10L12 8L14 10" stroke="white" strokeWidth="1.5" />
-  </svg>
-);
+import IslandIcon from "@/features/island/icons/IslandIcon";
 
 // Mock content data - will be replaced with database
 const MOCK_CONTENT = [
@@ -51,7 +30,7 @@ const SORT_OPTIONS = [
   { value: "duration-desc", label: "Duration (Descending)" },
 ];
 
-function SearchPage() {
+export default function Explore() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryParam = searchParams.get("q") || "";
@@ -111,10 +90,10 @@ function SearchPage() {
     e.preventDefault();
     if (searchQuery.trim()) {
       setIsSearching(true);
-      router.push(`/?q=${encodeURIComponent(searchQuery)}`);
+      router.push(`/explore?q=${encodeURIComponent(searchQuery)}`);
     } else {
       setIsSearching(false);
-      router.push("/");
+      router.push("/explore");
     }
   };
 
@@ -131,38 +110,38 @@ function SearchPage() {
       <header className="flex items-center justify-between px-8 py-6">
         <div className="flex items-center gap-8">
           {/* Island Icon - Links to Island Game Page */}
-          <a
-            href="http://localhost:3004"
+          <button
+            onClick={() => router.push("/mike/island")}
             className="text-white hover:text-gray-300 transition-colors"
           >
             <IslandIcon />
-          </a>
+          </button>
 
           <nav className="flex gap-6">
-            <a
-              href="http://localhost:3003"
+            <button
+              onClick={() => router.push("/home")}
               className="text-gray-400 hover:text-white transition-colors"
             >
-              Home
-            </a>
-            <a
-              href="http://localhost:3002"
+              Search
+            </button>
+            <button
+              onClick={() => router.push("/cloud")}
               className="text-gray-400 hover:text-white transition-colors"
             >
               Cloud
-            </a>
+            </button>
             <button className="text-white font-medium border-b-2 border-white">
-              Search
+              Explore
             </button>
           </nav>
         </div>
 
-        <a
-          href="http://localhost:3001/login"
+        <button
+          onClick={() => router.push("/login")}
           className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
         >
           Sign in
-        </a>
+        </button>
       </header>
 
       {/* Search and Filters */}
@@ -322,7 +301,7 @@ function SearchPage() {
             <div
               key={item.id}
               className="group cursor-pointer"
-              onClick={() => router.push(`/${item.id}`)}
+              onClick={() => router.push(`/explore/${item.id}`)}
             >
               {/* Card Image Placeholder */}
               <div className="aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gradient-to-b from-sky-300 to-sky-400">
@@ -378,14 +357,5 @@ function SearchPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-// Wrap with Suspense for useSearchParams
-export default function SearchPageWrapper() {
-  return (
-    <Suspense fallback={<div className="h-screen bg-gray-900 flex items-center justify-center text-white">Loading...</div>}>
-      <SearchPage />
-    </Suspense>
   );
 }

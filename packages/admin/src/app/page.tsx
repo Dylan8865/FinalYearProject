@@ -1,21 +1,22 @@
 "use client";
 
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import IslandIcon from "@/features/island/icons/IslandIcon";
 
-const AdminHome = () => {
+const Home = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to login page
-    router.push("/login");
+    // Redirect to the first user's island page
+    router.push("/mike/island");
   }, [router]);
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
-      <div>Redirecting to login...</div>
+      <div>Redirecting to island...</div>
     </div>
   );
 };
 
-export default AdminHome;
+export default Home;
