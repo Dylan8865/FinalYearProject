@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import IslandIcon from "@/features/island/icons/IslandIcon";
 
 // Word cloud data with different sizes and positions
 const CLOUD_WORDS = [
@@ -48,28 +49,6 @@ const CLOUD_WORDS = [
   { text: "Security", size: 46, x: 35, y: 25, weight: 500 },
 ];
 
-// Island Icon Component
-const IslandIcon = () => (
-  <svg
-    width="32"
-    height="32"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M12 2C8 2 5 5 5 9C5 13 8 15 12 15C16 15 19 13 19 9C19 5 16 2 12 2Z"
-      fill="currentColor"
-      opacity="0.6"
-    />
-    <path
-      d="M3 18C3 18 6 16 12 16C18 16 21 18 21 18C21 20 18 22 12 22C6 22 3 20 3 18Z"
-      fill="currentColor"
-    />
-    <path d="M12 8V13M10 10L12 8L14 10" stroke="white" strokeWidth="1.5" />
-  </svg>
-);
-
 /**
  * Cloud Page - Interactive word cloud exploration
  * Allows users to discover content by clicking on trending topics
@@ -97,8 +76,7 @@ export default function Cloud() {
   const handleWordClick = (word: string) => {
     setClickedWord(word);
     setTimeout(() => {
-      // Navigate to search app
-      window.location.href = `http://localhost:3005?q=${encodeURIComponent(word)}`;
+      router.push(`/explore?q=${encodeURIComponent(word)}`);
     }, 200);
   };
 
@@ -119,38 +97,38 @@ export default function Cloud() {
       <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
         <div className="flex items-center gap-8">
           {/* Island Icon - Links to Island Game Page */}
-          <a
-            href="http://localhost:3004"
+          <button
+            onClick={() => router.push("/mike/island")}
             className="text-white hover:text-gray-300 transition-colors"
           >
             <IslandIcon />
-          </a>
+          </button>
 
           <nav className="flex gap-6">
-            <a
-              href="http://localhost:3003"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              Home
-            </a>
-            <button className="text-white font-medium border-b-2 border-white">
-              Cloud
-            </button>
-            <a
-              href="http://localhost:3005"
+            <button
+              onClick={() => router.push("/home")}
               className="text-gray-400 hover:text-white transition-colors"
             >
               Search
-            </a>
+            </button>
+            <button className="text-white font-medium border-b-2 border-white">
+              Cloud
+            </button>
+            <button
+              onClick={() => router.push("/explore")}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              Explore
+            </button>
           </nav>
         </div>
 
-        <a
-          href="http://localhost:3001/login"
+        <button
+          onClick={() => router.push("/login")}
           className="text-white hover:text-gray-300 transition-colors"
         >
           Sign in
-        </a>
+        </button>
       </header>
 
       {/* Word Cloud */}
