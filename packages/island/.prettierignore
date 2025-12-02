@@ -1,0 +1,7 @@
+.next
+node_modules
+out
+dist
+pnpm-lock.yaml
+*.config.js
+*.config.mjs

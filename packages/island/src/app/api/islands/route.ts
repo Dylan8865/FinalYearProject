@@ -5,22 +5,29 @@ export async function GET() {
   try {
     const supabase = await createClient();
 
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { data: islands, error } = await supabase
       .from("island")
-      .select("*, user(*)")
-      .order("created_at", { ascending: false });
+      .select("*")
+      .eq("profile_id", user.id)
+      .order("created_at", { ascending: true });
 
     if (error) {
       console.error("Supabase error:", error);
-      return NextResponse.json(
-        { error: "Failed to fetch islands" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(islands);
   } catch (error) {
-    console.error("Server error:", error);
+    console.error("Unexpected error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -31,29 +38,118 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
 
     const { data: island, error } = await supabase
       .from("island")
       .insert({
-        name: body.name,
-        level: body.level || 1,
-        theme: body.theme || "grass",
+        ...body,
+        profile_id: user.id,
       })
       .select()
       .single();
 
     if (error) {
       console.error("Supabase error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(island);
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id, ...updates } = body;
+
+    const { data: island, error } = await supabase
+      .from("island")
+      .update(updates)
+      .eq("id", id)
+      .eq("profile_id", user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(island);
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
       return NextResponse.json(
-        { error: "Failed to create island" },
-        { status: 500 }
+        { error: "Island ID is required" },
+        { status: 400 }
       );
     }
 
-    return NextResponse.json(island, { status: 201 });
+    const { error } = await supabase
+      .from("island")
+      .delete()
+      .eq("id", id)
+      .eq("profile_id", user.id);
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Server error:", error);
+    console.error("Unexpected error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

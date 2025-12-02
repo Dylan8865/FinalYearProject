@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@hackernoon/pixel-icon-library/fonts/iconfont.css";
 
 export const metadata: Metadata = {
   title: "Wisdom Island - Island",
@@ -13,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased m-0 p-0">{children}</body>
+      <body className="m-0 p-0 antialiased">{children}</body>
     </html>
   );
 }
