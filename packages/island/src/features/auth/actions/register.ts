@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import bcrypt from "bcryptjs";
 
 export async function register(formData: FormData) {
   const username = formData.get("username") as string;
@@ -15,35 +14,19 @@ export async function register(formData: FormData) {
 
   const supabase = await createClient();
 
-  // Check if user already exists
-  const { data: existingUser } = await supabase
-    .from("users")
-    .select("*")
-    .or(`email.eq.${email},username.eq.${username}`)
-    .single();
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        username,
+      },
+    },
+  });
 
-  if (existingUser) {
-    return { error: "User with this email or username already exists" };
+  if (error) {
+    return { error: error.message };
   }
 
-  // Hash password
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  // Create user
-  const { data: newUser, error: insertError } = await supabase
-    .from("users")
-    .insert({
-      username,
-      email,
-      password_hash: passwordHash,
-      oxygen: 100,
-    })
-    .select()
-    .single();
-
-  if (insertError) {
-    return { error: "Failed to create user" };
-  }
-
-  redirect(`/island/${newUser.username}`);
+  redirect("/login");
 }

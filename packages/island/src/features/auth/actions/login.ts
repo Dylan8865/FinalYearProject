@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import bcrypt from "bcryptjs";
 
 export async function login(formData: FormData) {
   const email = formData.get("email") as string;
@@ -14,26 +13,14 @@ export async function login(formData: FormData) {
 
   const supabase = await createClient();
 
-  // Fetch user by email
-  const { data: user, error: fetchError } = await supabase
-    .from("users")
-    .select("*")
-    .eq("type", "island")
-    .eq("email", email)
-    .single();
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (fetchError || !user) {
-    return { error: "Invalid email or password" };
+  if (error) {
+    return { error: error.message };
   }
 
-  // Verify password
-  const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-
-  if (!isPasswordValid) {
-    return { error: "Invalid email or password" };
-  }
-
-  // Create session (you'd implement this based on your auth strategy)
-  // For now, redirect to the island page
-  redirect(`/island/${user.username}`);
+  redirect("/island/rikashi_shifu");
 }

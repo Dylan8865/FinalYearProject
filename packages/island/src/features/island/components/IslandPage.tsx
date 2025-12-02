@@ -18,6 +18,7 @@ import StoreIcon from "@/icons/StoreIcon";
 import StoreContent from "@/features/island/components/Dialog/StoreContent";
 import InventoryContent from "@/features/island/components/Dialog/InventoryContent";
 import { UserType } from "@/types/types";
+import { logOut } from "@/features/auth/actions/logout";
 
 const IslandPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
@@ -82,7 +83,12 @@ const IslandPage = () => {
               title="Change Password"
               color="gray"
             />
-            <SettingButton icon={<LoginIcon />} title="Log Out" color="gray" />
+            <SettingButton
+              onClick={async () => await signOut()}
+              icon={<LoginIcon />}
+              title="Log Out"
+              color="gray"
+            />
             <SettingButton
               icon={<WarningIcon />}
               title="Delete Account"
