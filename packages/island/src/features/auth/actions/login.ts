@@ -13,13 +13,20 @@ export async function login(formData: FormData) {
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
     return { error: error.message };
+  }
+
+  if (data.user) {
+    await supabase
+      .from("profile")
+      .update({ last_login_time: new Date().toISOString() })
+      .eq("id", data.user.id);
   }
 
   redirect("/island");

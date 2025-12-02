@@ -11,7 +11,15 @@ const Login = async () => {
   } = await supabase.auth.getSession();
 
   if (session) {
-    redirect("/island");
+    const { data: profile } = await supabase
+      .from("profile")
+      .select("id")
+      .eq("id", session.user.id)
+      .single();
+
+    if (profile) {
+      redirect("/island");
+    }
   }
 
   return <LoginPage />;

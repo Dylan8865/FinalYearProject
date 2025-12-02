@@ -39,15 +39,15 @@ const StoreRow = ({
           .map((item) => (
             <div key={item.id} className="space-y-[6px]">
               <button
-                className="flex justify-center items-center h-16 w-16 overflow-hidden bg-[#d9d9d9] hover:bg-[#959595] transition cursor-pointer"
+                className="flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden bg-[#d9d9d9] transition hover:bg-[#959595]"
                 onClick={() => setSelectedItem(item)}
               >
-                <div className="text-black flex justify-center items-center text-2xl">
+                <div className="flex items-center justify-center text-2xl text-black">
                   <QuestionIcon />
                 </div>
               </button>
 
-              <div className="flex justify-between items-center w-16">
+              <div className="flex w-16 items-center justify-between">
                 <OxygenIcon width={16} height={16} />
                 <div className="text-xs">{item.oxygen_required}</div>
               </div>
@@ -81,10 +81,10 @@ const StoreContent = ({ userId }: StoreContentProps) => {
   }
 
   return (
-    <div className="relative flex justify-center items-center flex-col h-full w-full">
+    <div className="relative flex h-full w-full flex-col items-center justify-center">
       <ScrollArea className="h-[430px] w-full">
-        <div className="flex justify-center items-center">
-          <div className="p-10 space-y-10 w-fit">
+        <div className="flex items-center justify-center">
+          <div className="w-fit space-y-10 p-10">
             <StoreRow
               items={items}
               category="Functional"
@@ -108,7 +108,7 @@ const StoreContent = ({ userId }: StoreContentProps) => {
       </ScrollArea>
 
       {selectedItem && (
-        <div className="fixed h-screen w-screen top-0 left-0 flex justify-center items-center bg-black bg-opacity-25">
+        <div className="fixed left-0 top-0 flex h-screen w-screen items-center justify-center bg-black bg-opacity-25">
           <Dialog
             iconStyle="bg-[#6d3f33] text-white"
             icon={<ExclaimationIcon />}
@@ -116,7 +116,7 @@ const StoreContent = ({ userId }: StoreContentProps) => {
             size="small"
             setIsDialogOpen={setSelectedItem}
             borderColor="border-[#d9d9d9]"
-            className="flex justify-center items-center"
+            className="flex items-center justify-center"
           >
             <div className="space-y-6">
               <p className="text-center">
@@ -124,19 +124,19 @@ const StoreContent = ({ userId }: StoreContentProps) => {
                   Are you sure you want to purchase
                 </span>
                 <br />
-                <span className="font-bold text-lg">{selectedItem.name}</span>
+                <span className="text-lg font-bold">{selectedItem.name}</span>
                 <br />
                 <span className="text-neutral-300">?</span>
               </p>
-              <div className="flex gap-4 justify-center">
+              <div className="flex justify-center gap-4">
                 <Button
-                  className="bg-[#333333] border border-transparent hover:border-[#515151] transition"
+                  className="border border-transparent bg-[#333333] transition hover:border-[#515151]"
                   onClick={() => handlePurchase(selectedItem.id)}
                 >
                   Yes
                 </Button>
                 <Button
-                  className="bg-[#1a1a1a] border border-transparent hover:border-[#515151] transition"
+                  className="border border-transparent bg-[#1a1a1a] transition hover:border-[#515151]"
                   onClick={() => setSelectedItem(null)}
                 >
                   No
