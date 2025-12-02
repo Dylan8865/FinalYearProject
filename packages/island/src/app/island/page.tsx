@@ -1,20 +1,20 @@
-import React from "react";
-import RegisterPage from "@/features/auth/components/RegisterPage";
+import IslandPage from "@/features/island/components/IslandPage";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import React from "react";
 
-const Register = async () => {
+const Island = async () => {
   const supabase = await createClient();
 
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (session) {
-    redirect("/island");
+  if (!session) {
+    redirect("/login");
   }
 
-  return <RegisterPage />;
+  return <IslandPage />;
 };
 
-export default Register;
+export default Island;

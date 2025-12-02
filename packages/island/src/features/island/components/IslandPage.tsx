@@ -18,7 +18,7 @@ import StoreIcon from "@/icons/StoreIcon";
 import StoreContent from "@/features/island/components/Dialog/StoreContent";
 import InventoryContent from "@/features/island/components/Dialog/InventoryContent";
 import { UserType } from "@/types/types";
-import { logOut } from "@/features/auth/actions/logout";
+import ProfileContent from "./Dialog/ProfileContent";
 
 const IslandPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
@@ -37,7 +37,7 @@ const IslandPage = () => {
 
   if (loading) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+      <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
         <div className="text-2xl text-white">Loading islands...</div>
       </div>
     );
@@ -45,18 +45,18 @@ const IslandPage = () => {
 
   if (error) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+      <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
         <div className="text-2xl text-white">Error: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="w-screen h-screen relative bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+    <div className="relative h-screen w-screen bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
       <div className="absolute inset-0 z-0">
         <IslandCanvas islands={islands} />
       </div>
-      <div className="absolute top-0 left-0 right-0 z-10">
+      <div className="absolute left-0 right-0 top-0 z-10">
         <StatusBar setIsDialogOpen={setIsDialogOpen} user={user} />
       </div>
       <div className="absolute bottom-0 left-0 right-0 z-10">
@@ -68,33 +68,10 @@ const IslandPage = () => {
           iconStyle="bg-[#6d3f33] text-white"
           icon={<UserIcon />}
           title="Profile"
-          className="flex justify-center items-center"
+          className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <div className="space-y-4">
-            <EditButton fieldName="Username:" fieldValue="rikashi_shifu" />
-            <EditButton
-              fieldName="Email:"
-              fieldValue="harryliow229@gmail.com"
-            />
-            <SettingButton
-              fieldName="Settings"
-              icon={<LockIcon />}
-              title="Change Password"
-              color="gray"
-            />
-            <SettingButton
-              onClick={async () => await signOut()}
-              icon={<LoginIcon />}
-              title="Log Out"
-              color="gray"
-            />
-            <SettingButton
-              icon={<WarningIcon />}
-              title="Delete Account"
-              color="red"
-            />
-          </div>
+          <ProfileContent />
         </Dialog>
       )}
 
@@ -103,7 +80,7 @@ const IslandPage = () => {
           iconStyle="bg-[#68a5ad] text-white"
           icon={<TrophyIcon />}
           title="Level"
-          className="flex justify-center items-center"
+          className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
           <div>Level information here</div>
@@ -115,7 +92,7 @@ const IslandPage = () => {
           iconStyle="bg-[#dcd1c1] text-black"
           icon={<MenuIcon />}
           title="Inventory"
-          className="flex justify-center items-center"
+          className="flex items-center justify-center"
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
@@ -128,7 +105,7 @@ const IslandPage = () => {
           iconStyle="bg-[#dcd1c1] text-black text-2xl"
           icon={<StoreIcon />}
           title="Store"
-          className="flex justify-center items-center"
+          className="flex items-center justify-center"
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
