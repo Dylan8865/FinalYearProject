@@ -1,14 +1,14 @@
 "use client";
 /* eslint-disable react-hooks/purity */
 import React, { useState } from "react";
-import { useItems } from "@/hooks/useItems";
-import { useIslandItems } from "@/hooks/useIslandItems";
+import { useItems } from "@/features/island/hooks/useItems";
+import { useIslandItems } from "@/features/island/hooks/useIslandItems";
 import FileIcon from "@/icons/FileIcon";
 import { ItemType } from "@/types/types";
 import SeedlingIcon from "@/icons/SeedlingIcon";
 import BlockIcon from "@/icons/BlockIcon";
 import OxygenIcon from "@/icons/OxygenIcon";
-import { ScrollArea } from "@/components/ui/ScrollArea";
+import { ScrollArea } from "@/features/island/components/Dialog/ScrollArea";
 import QuestionIcon from "@/icons/QuestionIcon";
 import Dialog from "./Dialog";
 import ExclaimationIcon from "@/icons/ExclaimationIcon";
