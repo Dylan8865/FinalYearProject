@@ -5,13 +5,13 @@ export async function GET(request: Request) {
   try {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("user_id");
+    const profileId = searchParams.get("profile_id");
     const islandId = searchParams.get("island_id");
 
     let query = supabase.from("island-item").select("*, item(*), island(*)");
 
-    if (userId) {
-      query = query.eq("user_id", userId);
+    if (profileId) {
+      query = query.eq("profile_id", profileId);
     }
 
     if (islandId) {
@@ -42,23 +42,68 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    function getNextAvailablePosition(
+      data: {
+        pos_x: number;
+        pos_y: number;
+      }[],
+      gridWidth = 10,
+      gridHeight = 5
+    ) {
+      const used = new Set(data.map((p) => `${p.pos_x},${p.pos_y}`));
+
+      for (let y = 0; y < gridHeight; y++) {
+        for (let x = 0; x < gridWidth; x++) {
+          if (!used.has(`${x},${y}`)) {
+            return { pos_x: x, pos_y: y };
+          }
+        }
+      }
+
+      return null;
+    }
+
     const supabase = await createClient();
     const body = await request.json();
+
+    if (body.profile_id == null || body.item_id == null) {
+      return NextResponse.json(
+        { error: "profile_id and item_id are required" },
+        { status: 400 }
+      );
+    }
+
+    const { data: inventoryPosition, error: inventoryPositionError } =
+      await supabase
+        .from("island-item")
+        .select("pos_x, pos_y")
+        .eq("profile_id", body.profile_id);
+
+    if (inventoryPositionError) {
+      console.error("Supabase error:", inventoryPositionError);
+      return NextResponse.json(
+        { error: "Failed to fetch inventory positions" },
+        { status: 500 }
+      );
+    }
+
+    const nextPosition = getNextAvailablePosition(inventoryPosition);
 
     const { data: islandItem, error } = await supabase
       .from("island-item")
       .insert({
         title: body.title,
-        cover_image: body.cover_image,
+        image_cover_path: body.image_cover_path,
         level: body.level,
         grid_x: body.grid_x || null,
         grid_y: body.grid_y || null,
         grid_z: body.grid_z || null,
         island_id: body.island_id || null,
         item_id: body.item_id,
-        pos_x: body.pos_x || null,
-        pos_y: body.pos_y || null,
-        user_id: body.user_id,
+        pos_x: nextPosition ? nextPosition.pos_x : body.pos_x || null,
+        pos_y: nextPosition ? nextPosition.pos_y : body.pos_y || null,
+        profile_id: body.profile_id,
+        status: body.status || null,
       })
       .select("*, item(*), island(*)")
       .single();
@@ -154,6 +199,44 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Server error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const supabase = await createClient();
+    const body = await request.json();
+    const { id, pos_x, pos_y } = body;
+
+    if (!id || pos_x === undefined || pos_y === undefined) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from("island-item")
+      .update({
+        pos_x,
+        pos_y,
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating item position:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Error in PATCH /api/island-items:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

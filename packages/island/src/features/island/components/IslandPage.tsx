@@ -12,14 +12,15 @@ import MenuIcon from "@/icons/MenuIcon";
 import StoreIcon from "@/icons/StoreIcon";
 import StoreContent from "@/features/island/components/Dialog/StoreContent";
 import InventoryContent from "@/features/island/components/Dialog/InventoryContent";
-import { UserType } from "@/types/types";
+import { ProfileType } from "@/types/types";
 import ProfileContent from "./Dialog/ProfileContent";
+import { IslandItemsProvider } from "@/features/island/contexts/IslandItemsContext";
 
 interface IslandPageProps {
-  user: UserType & { no_of_islands: number };
+  profile: ProfileType & { no_of_islands: number };
 }
 
-const IslandPage = ({ user }: IslandPageProps) => {
+const IslandPage = ({ profile }: IslandPageProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error } = useIslands();
 
@@ -40,67 +41,69 @@ const IslandPage = ({ user }: IslandPageProps) => {
   }
 
   return (
-    <div className="relative h-screen w-screen bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
-      <div className="absolute inset-0 z-0">
-        <IslandCanvas islands={islands} />
+    <IslandItemsProvider profileId={profile.id}>
+      <div className="relative h-screen w-screen bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+        <div className="absolute inset-0 z-0">
+          <IslandCanvas islands={islands} />
+        </div>
+        <div className="absolute left-0 right-0 top-0 z-10">
+          <StatusBar setIsDialogOpen={setIsDialogOpen} profile={profile} />
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <InventoryBar setIsDialogOpen={setIsDialogOpen} />
+        </div>
+
+        {isDialogOpen === "profile" && (
+          <Dialog
+            iconStyle="bg-[#6d3f33] text-white"
+            icon={<UserIcon />}
+            title="Profile"
+            className="flex items-center justify-center"
+            setIsDialogOpen={setIsDialogOpen}
+          >
+            <ProfileContent userName={profile.name} userEmail={profile.email} />
+          </Dialog>
+        )}
+
+        {isDialogOpen === "level" && (
+          <Dialog
+            iconStyle="bg-[#68a5ad] text-white"
+            icon={<TrophyIcon />}
+            title="Level"
+            className="flex items-center justify-center"
+            setIsDialogOpen={setIsDialogOpen}
+          >
+            <div>Level information here</div>
+          </Dialog>
+        )}
+
+        {isDialogOpen === "inventory" && (
+          <Dialog
+            iconStyle="bg-[#dcd1c1] text-black"
+            icon={<MenuIcon />}
+            title="Inventory"
+            className="flex items-center justify-center"
+            size="large"
+            setIsDialogOpen={setIsDialogOpen}
+          >
+            <InventoryContent />
+          </Dialog>
+        )}
+
+        {isDialogOpen === "store" && (
+          <Dialog
+            iconStyle="bg-[#dcd1c1] text-black text-2xl"
+            icon={<StoreIcon />}
+            title="Store"
+            className="flex items-center justify-center"
+            size="large"
+            setIsDialogOpen={setIsDialogOpen}
+          >
+            <StoreContent userId={profile.id} />
+          </Dialog>
+        )}
       </div>
-      <div className="absolute left-0 right-0 top-0 z-10">
-        <StatusBar setIsDialogOpen={setIsDialogOpen} user={user} />
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 z-10">
-        <InventoryBar setIsDialogOpen={setIsDialogOpen} />
-      </div>
-
-      {isDialogOpen === "profile" && (
-        <Dialog
-          iconStyle="bg-[#6d3f33] text-white"
-          icon={<UserIcon />}
-          title="Profile"
-          className="flex items-center justify-center"
-          setIsDialogOpen={setIsDialogOpen}
-        >
-          <ProfileContent userName={user.name} userEmail={user.email} />
-        </Dialog>
-      )}
-
-      {isDialogOpen === "level" && (
-        <Dialog
-          iconStyle="bg-[#68a5ad] text-white"
-          icon={<TrophyIcon />}
-          title="Level"
-          className="flex items-center justify-center"
-          setIsDialogOpen={setIsDialogOpen}
-        >
-          <div>Level information here</div>
-        </Dialog>
-      )}
-
-      {isDialogOpen === "inventory" && (
-        <Dialog
-          iconStyle="bg-[#dcd1c1] text-black"
-          icon={<MenuIcon />}
-          title="Inventory"
-          className="flex items-center justify-center"
-          size="large"
-          setIsDialogOpen={setIsDialogOpen}
-        >
-          <InventoryContent userId={user.id} />
-        </Dialog>
-      )}
-
-      {isDialogOpen === "store" && (
-        <Dialog
-          iconStyle="bg-[#dcd1c1] text-black text-2xl"
-          icon={<StoreIcon />}
-          title="Store"
-          className="flex items-center justify-center"
-          size="large"
-          setIsDialogOpen={setIsDialogOpen}
-        >
-          <StoreContent userId={user.id} />
-        </Dialog>
-      )}
-    </div>
+    </IslandItemsProvider>
   );
 };
 

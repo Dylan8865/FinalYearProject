@@ -66,14 +66,18 @@ const StoreContent = ({ userId }: StoreContentProps) => {
   const { items, loading: itemsLoading } = useItems();
   const { purchaseItem } = useIslandItems(userId);
   const [selectedItem, setSelectedItem] = useState<ItemType | null>(null);
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
   const handlePurchase = async (itemId: string) => {
+    setIsPurchasing(true);
     const success = await purchaseItem(itemId, userId);
     if (success) {
       alert("Item purchased successfully!");
     } else {
       alert("Failed to purchase item");
     }
+    setIsPurchasing(false);
+    setSelectedItem(null);
   };
 
   if (itemsLoading) {
@@ -130,14 +134,16 @@ const StoreContent = ({ userId }: StoreContentProps) => {
               </p>
               <div className="flex justify-center gap-4">
                 <Button
-                  className="border border-transparent bg-[#333333] transition hover:border-[#515151]"
+                  className="border border-transparent bg-[#333333] transition hover:border-[#515151] disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => handlePurchase(selectedItem.id)}
+                  disabled={isPurchasing}
                 >
                   Yes
                 </Button>
                 <Button
-                  className="border border-transparent bg-[#1a1a1a] transition hover:border-[#515151]"
+                  className="border border-transparent bg-[#1a1a1a] transition hover:border-[#515151] disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setSelectedItem(null)}
+                  disabled={isPurchasing}
                 >
                   No
                 </Button>

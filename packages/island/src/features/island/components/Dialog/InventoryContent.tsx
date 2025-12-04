@@ -1,84 +1,123 @@
-import React from "react";
-import { useIslandItems } from "@/features/island/hooks/useIslandItems";
+import React, { useState } from "react";
+import { IslandItemType } from "@/types/types";
+import QuestionIcon from "@/icons/QuestionIcon";
+import TrashIcon from "@/icons/TrashIcon";
+import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
 
-interface InventoryContentProps {
-  userId: string;
-}
+const InventoryContent = () => {
+  const { islandItems, loading, updateItemPosition, deleteItem } =
+    useIslandItemsContext();
+  const [draggedItem, setDraggedItem] = useState<{
+    item: IslandItemType;
+    fromX: number;
+    fromY: number;
+  } | null>(null);
+  const [isTrashHovered, setIsTrashHovered] = useState(false);
 
-const InventoryContent = ({ userId }: InventoryContentProps) => {
-  const { islandItems, loading } = useIslandItems(userId);
+  const handleDragStart = (
+    e: React.DragEvent,
+    item: IslandItemType,
+    x: number,
+    y: number
+  ) => {
+    setDraggedItem({ item, fromX: x, fromY: y });
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = async (e: React.DragEvent, toX: number, toY: number) => {
+    e.preventDefault();
+
+    if (!draggedItem) return;
+
+    const { item, fromX, fromY } = draggedItem;
+
+    // Check if target slot is empty or swap items
+    const targetItem = islandItems.find(
+      (i) => i.pos_x === toX && i.pos_y === toY
+    );
+
+    if (targetItem) {
+      // Swap items - no await, happens in background
+      updateItemPosition(item.id, toX, toY);
+      updateItemPosition(targetItem.id, fromX, fromY);
+    } else {
+      // Move to empty slot - no await, happens in background
+      updateItemPosition(item.id, toX, toY);
+    }
+
+    setDraggedItem(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setIsTrashHovered(false);
+  };
+
+  const handleTrashDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setIsTrashHovered(true);
+  };
+
+  const handleTrashDragLeave = () => {
+    setIsTrashHovered(false);
+  };
+
+  const handleTrashDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+
+    if (!draggedItem) return;
+
+    // Delete item - optimistic update and background deletion
+    deleteItem(draggedItem.item.id);
+
+    setDraggedItem(null);
+    setIsTrashHovered(false);
+  };
 
   if (loading) {
     return <div className="text-center">Loading inventory...</div>;
   }
 
-  // Separate placed and unplaced items
-  const placedItems = islandItems.filter((item) => item.island_id !== null);
-  const unplacedItems = islandItems.filter((item) => item.island_id === null);
-
   return (
-    <div className="space-y-6 overflow-auto max-h-[400px]">
-      {/* Unplaced Items */}
-      <div>
-        <h3 className="text-lg font-bold mb-3 border-b-2 border-white pb-2">
-          Available Items ({unplacedItems.length})
-        </h3>
-        <div className="grid grid-cols-4 gap-3">
-          {unplacedItems.map((islandItem) => (
-            <div
-              key={islandItem.id}
-              className="border-2 border-white p-3 bg-[#333333] hover:bg-[#444444] transition"
-            >
-              <div className="font-bold text-sm mb-1">
-                {islandItem.item?.name}
-              </div>
-              <div className="text-xs text-gray-400">
-                {islandItem.item?.type}
-              </div>
-            </div>
-          ))}
-        </div>
-        {unplacedItems.length === 0 && (
-          <div className="text-gray-400 text-center py-4">
-            No items in inventory
-          </div>
-        )}
-      </div>
+    <>
+      <div className="grid grid-cols-10 gap-4">
+        {Array.from({ length: 5 }).map((_, row) =>
+          Array.from({ length: 10 }).map((_, col) => {
+            const item = islandItems.find(
+              (i) => i.pos_x === col && i.pos_y === row
+            );
 
-      {/* Placed Items */}
-      <div>
-        <h3 className="text-lg font-bold mb-3 border-b-2 border-white pb-2">
-          Placed Items ({placedItems.length})
-        </h3>
-        <div className="space-y-2">
-          {placedItems.map((islandItem) => (
-            <div
-              key={islandItem.id}
-              className="border-2 border-green-500 p-3 bg-[#2a2a2a] flex justify-between items-center"
-            >
-              <div>
-                <div className="font-bold">{islandItem.item?.name}</div>
-                <div className="text-xs text-gray-400">
-                  Island: {islandItem.island?.name || "Unknown"}
-                </div>
-                <div className="text-xs text-gray-400">
-                  Position: ({islandItem.grid_x}, {islandItem.grid_y},{" "}
-                  {islandItem.grid_z})
-                </div>
+            return (
+              <div
+                key={`${row}-${col}`}
+                className={`${row == 0 ? "bg-[#d9d9d9] text-black" : "bg-[#8b8b8b]"} flex h-16 w-16 items-center justify-center overflow-hidden transition-opacity ${item ? "cursor-grab active:cursor-grabbing" : ""} ${draggedItem?.fromX === col && draggedItem?.fromY === row ? "opacity-50" : ""}`}
+                draggable={!!item}
+                onDragStart={(e) => item && handleDragStart(e, item, col, row)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, col, row)}
+                onDragEnd={handleDragEnd}
+              >
+                {item && <QuestionIcon />}
               </div>
-              <button className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 text-sm border-2 border-white">
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-        {placedItems.length === 0 && (
-          <div className="text-gray-400 text-center py-4">
-            No items placed on islands
-          </div>
+            );
+          })
         )}
       </div>
-    </div>
+      <div
+        className={`absolute bottom-8 right-9 text-3xl transition-colors ${isTrashHovered ? "text-red-500" : ""}`}
+        onDragOver={handleTrashDragOver}
+        onDragLeave={handleTrashDragLeave}
+        onDrop={handleTrashDrop}
+      >
+        <TrashIcon />
+      </div>
+    </>
   );
 };
 

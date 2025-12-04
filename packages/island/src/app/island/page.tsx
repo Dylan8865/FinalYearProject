@@ -36,17 +36,19 @@ const Island = async () => {
     .update({ last_login_time: new Date().toISOString() })
     .eq("id", user.id);
 
-  const userData = {
+  const profileData = {
     id: profile.id,
+    created_at: profile.created_at,
     name: profile.name,
     email: profile.email,
     last_login_time: profile.last_login_time,
     oxygen: profile.oxygen,
     level: profile.level,
+    type: profile.type,
     no_of_islands: islandCount || 0,
   };
 
-  return <IslandPage user={userData} />;
+  return <IslandPage profile={profileData} />;
 };
 
 export default Island;

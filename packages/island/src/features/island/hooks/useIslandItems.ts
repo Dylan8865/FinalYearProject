@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { IslandItemType } from "@/types/types";
 
-export function useIslandItems(userId?: string, islandId?: string) {
+export function useIslandItems(profileId?: string, islandId?: string) {
   const [islandItems, setIslandItems] = useState<IslandItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,10 +14,10 @@ export function useIslandItems(userId?: string, islandId?: string) {
       setError(null);
 
       const params = new URLSearchParams();
-      if (userId) params.append("user_id", userId);
+      if (profileId) params.append("profile_id", profileId);
       if (islandId) params.append("island_id", islandId);
 
-      const response = await fetch(`/api/island_items?${params.toString()}`);
+      const response = await fetch(`/api/island-items?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch island items");
@@ -34,16 +34,17 @@ export function useIslandItems(userId?: string, islandId?: string) {
     }
   };
 
-  const purchaseItem = async (itemId: string, userId: string) => {
+  const purchaseItem = async (itemId: string, profileId: string) => {
     try {
-      const response = await fetch("/api/island_items", {
+      const response = await fetch("/api/island-items", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          level: 1,
           item_id: itemId,
-          user_id: userId,
+          profile_id: profileId,
         }),
       });
 
@@ -67,7 +68,7 @@ export function useIslandItems(userId?: string, islandId?: string) {
     gridZ: number
   ) => {
     try {
-      const response = await fetch("/api/island_items", {
+      const response = await fetch("/api/island-items", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -93,9 +94,73 @@ export function useIslandItems(userId?: string, islandId?: string) {
     }
   };
 
+  const updateItemPosition = async (
+    islandItemId: string,
+    posX: number,
+    posY: number
+  ) => {
+    // Optimistic update - update UI immediately
+    setIslandItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === islandItemId ? { ...item, pos_x: posX, pos_y: posY } : item
+      )
+    );
+
+    // Update database in background
+    try {
+      const response = await fetch("/api/island-items", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: islandItemId,
+          pos_x: posX,
+          pos_y: posY,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update item position");
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Failed to update item position:", err);
+      // Revert optimistic update on error
+      await fetchIslandItems();
+      return false;
+    }
+  };
+
+  const deleteItem = async (islandItemId: string) => {
+    // Optimistic update - remove from UI immediately
+    setIslandItems((prevItems) =>
+      prevItems.filter((item) => item.id !== islandItemId)
+    );
+
+    // Delete from database in background
+    try {
+      const response = await fetch(`/api/island-items?id=${islandItemId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete item");
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Failed to delete item:", err);
+      // Revert optimistic update on error
+      await fetchIslandItems();
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchIslandItems();
-  }, [userId, islandId]);
+  }, [profileId, islandId]);
 
   return {
     islandItems,
@@ -104,5 +169,7 @@ export function useIslandItems(userId?: string, islandId?: string) {
     refetch: fetchIslandItems,
     purchaseItem,
     placeItemOnIsland,
+    updateItemPosition,
+    deleteItem,
   };
 }

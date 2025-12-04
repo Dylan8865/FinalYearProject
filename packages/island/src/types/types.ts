@@ -1,12 +1,12 @@
-export interface UserType {
+export interface ProfileType {
   id: string;
   created_at: string;
   name: string;
   email: string;
-  password: string;
   last_login_time: string;
   oxygen: number;
   level: number;
+  type: string;
 }
 
 export interface IslandType {
@@ -15,8 +15,8 @@ export interface IslandType {
   name: string;
   level: number;
   theme: string;
-  user_id: string;
-  user: UserType;
+  profile_id: string;
+  user: ProfileType;
 }
 
 export interface ItemType {
@@ -41,7 +41,7 @@ export interface IslandItemType {
   item_id: string;
   pos_x: number | null;
   pos_y: number | null;
-  user_id: string;
+  profile_id: string;
   item?: ItemType;
   island?: IslandType;
 }

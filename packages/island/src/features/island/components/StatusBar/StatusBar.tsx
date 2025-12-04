@@ -6,20 +6,20 @@ import MenuIcon from "@/icons/MenuIcon";
 import OxygenIcon from "@/icons/OxygenIcon";
 import IslandIcon from "@/icons/IslandIcon";
 import PlusIcon from "@/icons/PlusIcon";
-import { UserType } from "@/types/types";
+import { ProfileType } from "@/types/types";
 
 interface StatusBarProps {
   setIsDialogOpen: (value: string) => void;
-  user: UserType & { no_of_islands: number };
+  profile: ProfileType & { no_of_islands: number };
 }
 
-const StatusBar = ({ setIsDialogOpen, user }: StatusBarProps) => {
+const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
   return (
-    <div className="flex justify-between p-4 pointer-events-none">
+    <div className="pointer-events-none flex justify-between p-4">
       <div className="space-y-2">
         <StatusButton
           icon={<UserIcon />}
-          data={user.name}
+          data={profile.name}
           bgColor="bg-[#6d3f33]"
           orientation="left"
           btnIcon={<MenuIcon />}
@@ -27,7 +27,7 @@ const StatusBar = ({ setIsDialogOpen, user }: StatusBarProps) => {
         />
         <StatusButton
           icon={<TrophyIcon />}
-          data={`Level ${user.level}`}
+          data={`Level ${profile.level}`}
           bgColor="bg-[#68a5ad]"
           orientation="left"
           btnIcon={<MenuIcon />}
@@ -37,13 +37,13 @@ const StatusBar = ({ setIsDialogOpen, user }: StatusBarProps) => {
       <div className="space-y-2">
         <StatusButton
           icon={<OxygenIcon />}
-          data={new Intl.NumberFormat("en").format(user.oxygen)}
+          data={new Intl.NumberFormat("en").format(profile.oxygen)}
           bgColor="bg-[#cfa272]"
           orientation="right"
         />
         <StatusButton
           icon={<IslandIcon />}
-          data={user.no_of_islands}
+          data={profile.no_of_islands}
           bgColor="bg-[#5a706b]"
           orientation="right"
           btnIcon={<PlusIcon />}
