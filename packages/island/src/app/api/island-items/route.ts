@@ -40,29 +40,29 @@ export async function GET(request: Request) {
   }
 }
 
-function getNextAvailablePosition(
-  data: {
-    pos_x: any;
-    pos_y: any;
-  }[],
-  gridWidth = 10,
-  gridHeight = 5
-) {
-  const used = new Set(data.map((p) => `${p.pos_x},${p.pos_y}`));
-
-  for (let x = 0; x < gridWidth; x++) {
-    for (let y = 0; y < gridHeight; y++) {
-      if (!used.has(`${x},${y}`)) {
-        return { pos_x: x, pos_y: y };
-      }
-    }
-  }
-
-  return null;
-}
-
 export async function POST(request: Request) {
   try {
+    function getNextAvailablePosition(
+      data: {
+        pos_x: number;
+        pos_y: number;
+      }[],
+      gridWidth = 10,
+      gridHeight = 5
+    ) {
+      const used = new Set(data.map((p) => `${p.pos_x},${p.pos_y}`));
+
+      for (let y = 0; y < gridHeight; y++) {
+        for (let x = 0; x < gridWidth; x++) {
+          if (!used.has(`${x},${y}`)) {
+            return { pos_x: x, pos_y: y };
+          }
+        }
+      }
+
+      return null;
+    }
+
     const supabase = await createClient();
     const body = await request.json();
 
@@ -199,6 +199,44 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Server error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const supabase = await createClient();
+    const body = await request.json();
+    const { id, pos_x, pos_y } = body;
+
+    if (!id || pos_x === undefined || pos_y === undefined) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from("island-item")
+      .update({
+        pos_x,
+        pos_y,
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating item position:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Error in PATCH /api/island-items:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

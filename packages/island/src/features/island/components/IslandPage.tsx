@@ -12,14 +12,14 @@ import MenuIcon from "@/icons/MenuIcon";
 import StoreIcon from "@/icons/StoreIcon";
 import StoreContent from "@/features/island/components/Dialog/StoreContent";
 import InventoryContent from "@/features/island/components/Dialog/InventoryContent";
-import { UserType } from "@/types/types";
+import { ProfileType } from "@/types/types";
 import ProfileContent from "./Dialog/ProfileContent";
 
 interface IslandPageProps {
-  user: UserType & { no_of_islands: number };
+  profile: ProfileType & { no_of_islands: number };
 }
 
-const IslandPage = ({ user }: IslandPageProps) => {
+const IslandPage = ({ profile }: IslandPageProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error } = useIslands();
 
@@ -45,7 +45,7 @@ const IslandPage = ({ user }: IslandPageProps) => {
         <IslandCanvas islands={islands} />
       </div>
       <div className="absolute left-0 right-0 top-0 z-10">
-        <StatusBar setIsDialogOpen={setIsDialogOpen} user={user} />
+        <StatusBar setIsDialogOpen={setIsDialogOpen} profile={profile} />
       </div>
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <InventoryBar setIsDialogOpen={setIsDialogOpen} />
@@ -59,7 +59,7 @@ const IslandPage = ({ user }: IslandPageProps) => {
           className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <ProfileContent userName={user.name} userEmail={user.email} />
+          <ProfileContent userName={profile.name} userEmail={profile.email} />
         </Dialog>
       )}
 
@@ -84,7 +84,7 @@ const IslandPage = ({ user }: IslandPageProps) => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <InventoryContent userId={user.id} />
+          <InventoryContent userId={profile.id} />
         </Dialog>
       )}
 
@@ -97,7 +97,7 @@ const IslandPage = ({ user }: IslandPageProps) => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <StoreContent userId={user.id} />
+          <StoreContent userId={profile.id} />
         </Dialog>
       )}
     </div>
