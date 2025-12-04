@@ -14,6 +14,7 @@ interface SidebarProps {
 
 export default function Sidebar({
   isOpen,
+  onToggle,
   conversations,
   activeConversation,
   onNewChat,
@@ -54,17 +55,31 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`flex h-full flex-col border-r bg-muted/30 transition-all duration-300 ${
-        isOpen ? "w-64" : "w-0 overflow-hidden"
+      className={`flex h-full flex-col bg-[#171717] transition-all duration-300 ${
+        isOpen ? "w-64" : "w-16"
       }`}
     >
-      {/* Header */}
-      <div className="flex h-14 items-center justify-between border-b px-3">
-        <span className="text-sm font-semibold">History</span>
+      {/* Header with Logo and Toggle */}
+      <div className="flex h-14 items-center justify-between px-3">
+        {/* Logo */}
+        <button className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-gray-700">
+          <svg
+            viewBox="0 0 40 40"
+            className="h-6 w-6 text-teal-400"
+            fill="currentColor"
+          >
+            {/* Wisdom Island logo */}
+            <path d="M20 4c-2 0-3.5 1.5-3.5 3.5 0 1.2.6 2.3 1.5 3v2h-2c-1.5 0-2.5 1-2.5 2.5 0 1 .5 1.8 1.2 2.3-.7.5-1.2 1.3-1.2 2.2 0 1.5 1 2.5 2.5 2.5h1v4h-6c-1 0-2 .8-2 2 0 1 .8 2 2 2h18c1 0 2-.8 2-2 0-1-.8-2-2-2h-6v-4h1c1.5 0 2.5-1 2.5-2.5 0-.9-.5-1.7-1.2-2.2.7-.5 1.2-1.3 1.2-2.3 0-1.5-1-2.5-2.5-2.5h-2v-2c.9-.7 1.5-1.8 1.5-3C23.5 5.5 22 4 20 4z" />
+          </svg>
+        </button>
+
+        {/* Toggle/Expand button */}
         <button
-          onClick={onNewChat}
-          className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted"
-          title="New chat"
+          onClick={onToggle}
+          className={`flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white ${
+            !isOpen ? "hidden" : ""
+          }`}
+          title="Close sidebar"
         >
           <svg
             className="h-5 w-5"
@@ -76,85 +91,22 @@ export default function Sidebar({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M12 4v16m8-8H4"
+              d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
             />
           </svg>
         </button>
       </div>
 
-      {/* Conversations List */}
-      <div className="flex-1 overflow-y-auto p-2">
-        {conversations.length === 0 ? (
-          <p className="px-2 py-4 text-center text-sm text-muted-foreground">
-            No conversations yet
-          </p>
-        ) : (
-          Object.entries(groupedConversations).map(
-            ([group, convs]) =>
-              convs.length > 0 && (
-                <div key={group} className="mb-4">
-                  <h3 className="mb-2 px-2 text-xs font-medium text-muted-foreground">
-                    {group}
-                  </h3>
-                  {convs.map((conversation) => (
-                    <div
-                      key={conversation.id}
-                      className={`group relative mb-1 flex cursor-pointer items-center rounded-lg px-3 py-2 text-sm transition-colors ${
-                        activeConversation?.id === conversation.id
-                          ? "bg-muted"
-                          : "hover:bg-muted/50"
-                      }`}
-                      onClick={() => onSelectConversation(conversation)}
-                    >
-                      <svg
-                        className="mr-2 h-4 w-4 shrink-0 text-muted-foreground"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                        />
-                      </svg>
-                      <span className="flex-1 truncate">{conversation.title}</span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteConversation(conversation.id);
-                        }}
-                        className="absolute right-2 hidden rounded p-1 text-muted-foreground hover:bg-background hover:text-destructive group-hover:block"
-                        title="Delete"
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )
-          )
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="border-t p-3">
-        <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+      {/* Menu Items */}
+      <div className="flex flex-col gap-1 px-2">
+        {/* New Chat */}
+        <button
+          onClick={onNewChat}
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-white hover:bg-gray-700"
+          title="New chat"
+        >
           <svg
-            className="h-4 w-4"
+            className="h-5 w-5 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -163,18 +115,111 @@ export default function Sidebar({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
             />
+          </svg>
+          {isOpen && <span>New chat</span>}
+        </button>
+
+        {/* Search Chats */}
+        <button
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white"
+          title="Search chats"
+        >
+          <svg
+            className="h-5 w-5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
-          Settings
+          {isOpen && <span>Search chats</span>}
+        </button>
+
+        {/* Library */}
+        <button
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white"
+          title="Library"
+        >
+          <svg
+            className="h-5 w-5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+            />
+          </svg>
+          {isOpen && <span>Library</span>}
         </button>
       </div>
+
+      {/* Conversations List - Only show when expanded */}
+      {isOpen && (
+        <div className="mt-4 flex-1 overflow-y-auto px-2">
+          {conversations.length === 0 ? (
+            <p className="px-3 py-4 text-center text-sm text-gray-500">
+              No conversations yet
+            </p>
+          ) : (
+            Object.entries(groupedConversations).map(
+              ([group, convs]) =>
+                convs.length > 0 && (
+                  <div key={group} className="mb-4">
+                    <h3 className="mb-2 px-3 text-xs font-medium text-gray-500">
+                      {group}
+                    </h3>
+                    {convs.map((conversation) => (
+                      <div
+                        key={conversation.id}
+                        className={`group relative mb-1 flex cursor-pointer items-center rounded-lg px-3 py-2 text-sm transition-colors ${
+                          activeConversation?.id === conversation.id
+                            ? "bg-gray-700 text-white"
+                            : "text-gray-300 hover:bg-gray-800"
+                        }`}
+                        onClick={() => onSelectConversation(conversation)}
+                      >
+                        <span className="flex-1 truncate">{conversation.title}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteConversation(conversation.id);
+                          }}
+                          className="absolute right-2 hidden rounded p-1 text-gray-500 hover:bg-gray-600 hover:text-red-400 group-hover:block"
+                          title="Delete"
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )
+            )
+          )}
+        </div>
+      )}
     </aside>
   );
 }

@@ -13,7 +13,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     return (
       <div className="mb-6 flex animate-fade-in gap-4">
         {/* Assistant Avatar */}
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500">
           <svg
             className="h-5 w-5 text-white"
             fill="none"
@@ -31,9 +31,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
         {/* Loading dots */}
         <div className="flex items-center gap-1 pt-2">
-          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-muted-foreground"></span>
-          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-muted-foreground"></span>
-          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-muted-foreground"></span>
+          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-gray-400"></span>
+          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-gray-400"></span>
+          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-gray-400"></span>
         </div>
       </div>
     );
@@ -43,7 +43,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     <div className={`mb-6 flex animate-fade-in gap-4 ${isUser ? "flex-row-reverse" : ""}`}>
       {/* Avatar */}
       {isUser ? (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-600 text-white">
           <svg
             className="h-5 w-5"
             fill="none"
@@ -59,7 +59,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           </svg>
         </div>
       ) : (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500">
           <svg
             className="h-5 w-5 text-white"
             fill="none"
@@ -80,16 +80,16 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       <div
         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
           isUser
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted"
+            ? "bg-teal-600 text-white"
+            : "bg-gray-800 text-gray-100"
         }`}
       >
-        <div className="prose prose-sm dark:prose-invert max-w-none">
+        <div className="text-sm leading-relaxed">
           {message.content.split("\n").map((line, i) => (
             <p key={i} className="mb-2 last:mb-0">
               {line.split(/(\*\*.*?\*\*)/).map((part, j) => {
                 if (part.startsWith("**") && part.endsWith("**")) {
-                  return <strong key={j}>{part.slice(2, -2)}</strong>;
+                  return <strong key={j} className="font-semibold">{part.slice(2, -2)}</strong>;
                 }
                 return part;
               })}
@@ -100,7 +100,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         {/* Timestamp */}
         <div
           className={`mt-2 text-xs ${
-            isUser ? "text-primary-foreground/70" : "text-muted-foreground"
+            isUser ? "text-teal-200" : "text-gray-500"
           }`}
         >
           {message.timestamp.toLocaleTimeString([], {
@@ -109,25 +109,6 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           })}
         </div>
       </div>
-
-      {/* Actions for assistant messages */}
-      {!isUser && (
-        <div className="flex flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <button
-            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            title="Copy"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-          </button>
-        </div>
-      )}
     </div>
   );
 }
