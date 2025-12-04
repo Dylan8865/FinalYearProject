@@ -4,20 +4,30 @@ import React from "react";
 import InventoryButton from "./InventoryButton";
 import MenuIcon from "@/icons/MenuIcon";
 import StoreIcon from "@/icons/StoreIcon";
+import QuestionIcon from "@/icons/QuestionIcon";
+import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
 
 interface InventoryBarProps {
   setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const InventoryBar = ({ setIsDialogOpen }: InventoryBarProps) => {
+  const { islandItems } = useIslandItemsContext();
+
+  const hotbarItems = Array.from({ length: 10 }).map((_, index) => {
+    return islandItems.find((item) => item.pos_x === index && item.pos_y === 0);
+  });
+
   return (
-    <div className="z-0 flex justify-center items-center w-screen pointer-events-none">
-      <div className="z-20 w-fit bg-black h-10 px-4 pointer-events-auto">
-        <div className="mt-[-24px] flex gap-2 justify-center items-center">
-          {Array.from({ length: 10 }).map((_, index) => (
-            <InventoryButton key={index} className="bg-[#d9d9d9]" />
+    <div className="pointer-events-none z-0 flex w-screen items-center justify-center">
+      <div className="pointer-events-auto z-20 h-10 w-fit bg-black px-4">
+        <div className="mt-[-24px] flex items-center justify-center gap-2">
+          {hotbarItems.map((item, index) => (
+            <InventoryButton key={index} className="bg-[#d9d9d9] text-black">
+              {item && <QuestionIcon />}
+            </InventoryButton>
           ))}
-          <div className="flex gap-2 ml-4">
+          <div className="ml-4 flex gap-2">
             <InventoryButton
               className="bg-[#dcd1c1]"
               onClick={() => setIsDialogOpen("inventory")}

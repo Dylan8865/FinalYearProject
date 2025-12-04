@@ -1,16 +1,12 @@
 import React, { useState } from "react";
-import { useIslandItems } from "@/features/island/hooks/useIslandItems";
 import { IslandItemType } from "@/types/types";
 import QuestionIcon from "@/icons/QuestionIcon";
 import TrashIcon from "@/icons/TrashIcon";
+import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
 
-interface InventoryContentProps {
-  userId: string;
-}
-
-const InventoryContent = ({ userId }: InventoryContentProps) => {
+const InventoryContent = () => {
   const { islandItems, loading, updateItemPosition, deleteItem } =
-    useIslandItems(userId);
+    useIslandItemsContext();
   const [draggedItem, setDraggedItem] = useState<{
     item: IslandItemType;
     fromX: number;
