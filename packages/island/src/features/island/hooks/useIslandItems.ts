@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { IslandItemType } from "@/types/types";
 
-export function useIslandItems(userId?: string, islandId?: string) {
+export function useIslandItems(profileId?: string, islandId?: string) {
   const [islandItems, setIslandItems] = useState<IslandItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export function useIslandItems(userId?: string, islandId?: string) {
       setError(null);
 
       const params = new URLSearchParams();
-      if (userId) params.append("user_id", userId);
+      if (profileId) params.append("profile_id", profileId);
       if (islandId) params.append("island_id", islandId);
 
       const response = await fetch(`/api/island_items?${params.toString()}`);
@@ -34,7 +34,7 @@ export function useIslandItems(userId?: string, islandId?: string) {
     }
   };
 
-  const purchaseItem = async (itemId: string, userId: string) => {
+  const purchaseItem = async (itemId: string, profileId: string) => {
     try {
       const response = await fetch("/api/island_items", {
         method: "POST",
@@ -42,8 +42,9 @@ export function useIslandItems(userId?: string, islandId?: string) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          level: 1,
           item_id: itemId,
-          user_id: userId,
+          profile_id: profileId,
         }),
       });
 
@@ -95,7 +96,7 @@ export function useIslandItems(userId?: string, islandId?: string) {
 
   useEffect(() => {
     fetchIslandItems();
-  }, [userId, islandId]);
+  }, [profileId, islandId]);
 
   return {
     islandItems,

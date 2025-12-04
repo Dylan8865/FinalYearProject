@@ -18,7 +18,7 @@ export async function deleteAccount() {
   }
 
   try {
-    // Delete user's islands (will cascade delete item_islands due to FK)
+    // Delete user's islands (will cascade delete island_items due to FK)
     const { error: islandsError } = await supabase
       .from("island")
       .delete()

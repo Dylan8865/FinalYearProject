@@ -15,7 +15,7 @@ export interface IslandType {
   name: string;
   level: number;
   theme: string;
-  user_id: string;
+  profile_id: string;
   user: UserType;
 }
 
@@ -41,7 +41,7 @@ export interface IslandItemType {
   item_id: string;
   pos_x: number | null;
   pos_y: number | null;
-  user_id: string;
+  profile_id: string;
   item?: ItemType;
   island?: IslandType;
 }
