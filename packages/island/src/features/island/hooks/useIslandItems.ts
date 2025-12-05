@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { IslandItemType } from "@/types/types";
+import { createClient } from "@/lib/supabase/client";
 
 export function useIslandItems(profileId?: string, islandId?: string) {
   const [islandItems, setIslandItems] = useState<IslandItemType[]>([]);
@@ -24,7 +25,37 @@ export function useIslandItems(profileId?: string, islandId?: string) {
       }
 
       const data: IslandItemType[] = await response.json();
-      setIslandItems(data);
+
+      // Fetch model URLs from Supabase storage
+      const supabase = createClient();
+      const itemsWithModels = await Promise.all(
+        data.map(async (item) => {
+          if (item.item?.id) {
+            // Get public URL for the model
+            const { data: urlData } = supabase.storage
+              .from("items")
+              .getPublicUrl(`${item.item.id}.glb`);
+
+            console.log("Fetched model URL for item:", {
+              itemId: item.item.id,
+              itemName: item.item.name,
+              modelUrl: urlData.publicUrl,
+            });
+
+            return {
+              ...item,
+              item: {
+                ...item.item,
+                model_url: urlData.publicUrl,
+              },
+            };
+          }
+          return item;
+        })
+      );
+
+      console.log("All items with models:", itemsWithModels);
+      setIslandItems(itemsWithModels);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(errorMessage);
@@ -52,10 +83,31 @@ export function useIslandItems(profileId?: string, islandId?: string) {
         throw new Error("Failed to purchase item");
       }
 
-      await fetchIslandItems();
+      const newItem = await response.json();
+
+      // Fetch model URL for the new item
+      if (newItem.item?.id) {
+        const supabase = createClient();
+        const { data: urlData } = supabase.storage
+          .from("items")
+          .getPublicUrl(`${newItem.item.id}.glb`);
+
+        newItem.item.model_url = urlData.publicUrl;
+
+        console.log("Purchased item with model:", {
+          itemId: newItem.item.id,
+          modelUrl: newItem.item.model_url,
+        });
+      }
+
+      // Optimistic update - add new item to state immediately
+      setIslandItems((prevItems) => [...prevItems, newItem]);
+
       return true;
     } catch (err) {
       console.error("Failed to purchase item:", err);
+      // Revert on error
+      await fetchIslandItems();
       return false;
     }
   };
@@ -67,6 +119,21 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     gridY: number,
     gridZ: number
   ) => {
+    // Optimistic update
+    setIslandItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === islandItemId
+          ? {
+              ...item,
+              island_id: islandId,
+              grid_x: gridX,
+              grid_y: gridY,
+              grid_z: gridZ,
+            }
+          : item
+      )
+    );
+
     try {
       const response = await fetch("/api/island-items", {
         method: "PUT",
@@ -86,10 +153,10 @@ export function useIslandItems(profileId?: string, islandId?: string) {
         throw new Error("Failed to place item");
       }
 
-      await fetchIslandItems();
       return true;
     } catch (err) {
       console.error("Failed to place item:", err);
+      await fetchIslandItems();
       return false;
     }
   };

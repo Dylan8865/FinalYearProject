@@ -14,7 +14,7 @@
   "dependencies": {
     "@hackernoon/pixel-icon-library": "^1.0.6",
     "@radix-ui/react-scroll-area": "^1.2.10",
-    "@react-three/drei": "^10.7.6",
+    "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.0",
     "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/ssr": "^0.8.0",

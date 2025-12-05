@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState, useEffect, JSX } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { Line } from "@react-three/drei";
 
@@ -166,12 +166,21 @@ const GrassBase = ({ gridSize = 5 }: GrassBaseProps) => {
   );
 };
 
+interface PlacedObject {
+  x: number;
+  y: number;
+  z: number;
+  node: React.ReactNode;
+}
+
 interface GridPlatformProps {
   gridSize?: number;
   islandLevel: number;
   onCellClick: (x: number, z: number, isInner: boolean, cellId: string) => void;
-  placedObjects: Record<string, React.ReactNode>;
+  placedObjects: Record<string, PlacedObject>;
   waterCells: string[];
+  isDraggingItem?: boolean;
+  onCellDrop?: (cellId: string, x: number, z: number) => void;
 }
 
 const GridPlatform = ({
@@ -180,12 +189,13 @@ const GridPlatform = ({
   onCellClick,
   placedObjects,
   waterCells,
+  isDraggingItem = false,
+  onCellDrop,
 }: GridPlatformProps) => {
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
   const cellSize = 1.2;
   const totalSize = gridSize * cellSize;
   const offset = totalSize / 2 - cellSize / 2;
-  const islandRadius = (gridSize * 1.2) / 2;
   const center = Math.floor(gridSize / 2);
 
   const isInnerArea = (row: number, col: number) => {
@@ -193,27 +203,21 @@ const GridPlatform = ({
     return distance <= Math.floor(gridSize / 3);
   };
 
-  // Check if a cell should be rendered (circular pattern)
   const shouldRenderCell = (row: number, col: number) => {
     const dx = col - center;
     const dz = row - center;
     const distFromCenter = Math.sqrt(dx * dx + dz * dz);
-
-    // Create circular boundary with slight randomness for natural look
     const maxRadius = gridSize / 2;
     const randomOffset = Math.sin(row * 2.5) * Math.cos(col * 2.5) * 0.3;
-
     return distFromCenter <= maxRadius + randomOffset;
   };
 
-  // Get actual world position from grid coordinates
   const getCellPosition = (row: number, col: number): [number, number] => {
     const x = col * cellSize - offset;
     const z = row * cellSize - offset;
     return [x, z];
   };
 
-  // Check if a cell exists at given grid coordinates
   const cellExists = (row: number, col: number) => {
     return (
       row >= 0 &&
@@ -224,12 +228,10 @@ const GridPlatform = ({
     );
   };
 
-  // Generate grid lines only between existing cells
   const generateGridLines = () => {
     const horizontalLines: JSX.Element[] = [];
     const verticalLines: JSX.Element[] = [];
 
-    // Horizontal lines
     for (let row = 0; row <= gridSize; row++) {
       const lineSegments: THREE.Vector3[][] = [];
       let currentSegment: THREE.Vector3[] = [];
@@ -265,7 +267,6 @@ const GridPlatform = ({
       });
     }
 
-    // Vertical lines
     for (let col = 0; col <= gridSize; col++) {
       const lineSegments: THREE.Vector3[][] = [];
       let currentSegment: THREE.Vector3[] = [];
@@ -306,10 +307,8 @@ const GridPlatform = ({
 
   return (
     <group position={[0, 0.02, 0]}>
-      {/* Grid lines */}
       {generateGridLines()}
 
-      {/* Grid cells */}
       {[...Array(gridSize)].map((_, row) =>
         [...Array(gridSize)].map((_, col) => {
           if (!shouldRenderCell(row, col)) return null;
@@ -325,11 +324,26 @@ const GridPlatform = ({
               key={cellId}
               position={[x, 0, z]}
               rotation={[-Math.PI / 2, 0, 0]}
-              onPointerEnter={() => setHoveredCell(cellId)}
-              onPointerLeave={() => setHoveredCell(null)}
-              onClick={(e) => {
-                e.stopPropagation();
-                onCellClick(x, z, isInner, cellId);
+              onPointerEnter={() => {
+                if (isDraggingItem) {
+                  setHoveredCell(cellId);
+                }
+              }}
+              onPointerLeave={() => {
+                if (isDraggingItem) {
+                  setHoveredCell(null);
+                }
+              }}
+              onPointerDown={(e) => {
+                if (isDraggingItem) {
+                  e.stopPropagation();
+                  if (onCellDrop) {
+                    onCellDrop(cellId, x, z);
+                  }
+                } else {
+                  e.stopPropagation();
+                  onCellClick(x, z, isInner, cellId);
+                }
               }}
             >
               <planeGeometry args={[cellSize * 0.95, cellSize * 0.95]} />
@@ -337,27 +351,48 @@ const GridPlatform = ({
                 color={
                   hasWater
                     ? THEME.water
-                    : isHovered
-                    ? THEME.gridHighlight
-                    : isInner
-                    ? THEME.grass
-                    : THEME.darkGrass
+                    : isHovered && isDraggingItem
+                      ? "#FFD700"
+                      : isHovered
+                        ? THEME.gridHighlight
+                        : isInner
+                          ? THEME.grass
+                          : THEME.darkGrass
                 }
                 transparent
                 opacity={hasWater ? 0.8 : isHovered ? 0.9 : 0.6}
                 emissive={
-                  isHovered
-                    ? THEME.accent
-                    : hasWater
-                    ? THEME.crystal
-                    : THEME.grass
+                  isHovered && isDraggingItem
+                    ? "#FFA500"
+                    : isHovered
+                      ? THEME.accent
+                      : hasWater
+                        ? THEME.crystal
+                        : THEME.grass
                 }
-                emissiveIntensity={isHovered ? 0.4 : hasWater ? 0.2 : 0.1}
+                emissiveIntensity={
+                  isHovered && isDraggingItem
+                    ? 0.6
+                    : isHovered
+                      ? 0.4
+                      : hasWater
+                        ? 0.2
+                        : 0.1
+                }
               />
             </mesh>
           );
         })
       )}
+
+      {/* Render placed objects */}
+      {Object.entries(placedObjects).map(([key, obj]) => {
+        return (
+          <group key={key} position={[obj.x, obj.y * 0.6 + 0.3, obj.z]}>
+            {obj.node}
+          </group>
+        );
+      })}
     </group>
   );
 };
@@ -366,12 +401,18 @@ interface IslandProps {
   gridSize?: number;
   position?: [number, number, number];
   animate?: boolean;
+  isDraggingItem?: boolean;
+  onCellDrop?: (cellId: string, x: number, z: number) => void;
+  placedObjects?: Record<string, PlacedObject>;
 }
 
 const Island = ({
   gridSize = 5,
   position = [0, 0, 0],
   animate = true,
+  isDraggingItem = false,
+  onCellDrop,
+  placedObjects = {},
 }: IslandProps) => {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -390,8 +431,10 @@ const Island = ({
         gridSize={gridSize}
         islandLevel={1}
         onCellClick={() => {}}
-        placedObjects={{}}
+        placedObjects={placedObjects}
         waterCells={[]}
+        isDraggingItem={isDraggingItem}
+        onCellDrop={onCellDrop}
       />
     </group>
   );

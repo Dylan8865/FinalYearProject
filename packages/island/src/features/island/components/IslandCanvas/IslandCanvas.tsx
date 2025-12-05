@@ -11,13 +11,28 @@ export interface IslandData {
   gridSize: number;
 }
 
-interface IslandCanvasProps {
-  islands: IslandData[];
+interface PlacedObject {
+  x: number;
+  y: number;
+  z: number;
+  node: React.ReactNode;
 }
 
-const IslandCanvas = ({ islands }: IslandCanvasProps) => {
+interface IslandCanvasProps {
+  islands: IslandData[];
+  isDraggingItem?: boolean;
+  onCellDrop?: (cellId: string, x: number, z: number) => void;
+  placedObjects?: Record<string, PlacedObject>;
+}
+
+const IslandCanvas = ({
+  islands,
+  isDraggingItem = false,
+  onCellDrop,
+  placedObjects = {},
+}: IslandCanvasProps) => {
   return (
-    <div className="w-full h-full">
+    <div className="h-full w-full">
       <Canvas shadows camera={{ position: [10, 15, 5], fov: 50 }}>
         <ambientLight intensity={0.7} color="#ffffff" />
         <directionalLight
@@ -35,6 +50,10 @@ const IslandCanvas = ({ islands }: IslandCanvasProps) => {
             key={island.id}
             gridSize={island.gridSize}
             position={island.position}
+            animate={true}
+            isDraggingItem={isDraggingItem}
+            onCellDrop={onCellDrop}
+            placedObjects={placedObjects}
           />
         ))}
 

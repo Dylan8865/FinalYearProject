@@ -26,6 +26,9 @@ export interface ItemType {
   oxygen_rate: number;
   type: string;
   oxygen_required: number;
+  image_cover_path?: string;
+  model_path?: string;
+  model_url?: string;
 }
 
 export interface IslandItemType {
