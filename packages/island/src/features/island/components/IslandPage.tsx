@@ -36,40 +36,30 @@ interface PlacedObject {
 function Model3D({ url }: { url: string }) {
   console.log("Loading model from URL:", url);
 
-  try {
-    const { scene } = useGLTF(url);
-    console.log("Model loaded successfully:", scene);
+  // Hooks must be called unconditionally
+  const { scene } = useGLTF(url);
+  console.log("Model loaded successfully:", scene);
 
-    // Clone the scene to allow multiple instances
-    const clonedScene = scene.clone();
+  // Clone the scene to allow multiple instances
+  const clonedScene = scene.clone();
 
-    // Traverse and set up materials
-    clonedScene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
+  // Traverse and set up materials
+  clonedScene.traverse((child) => {
+    if ((child as THREE.Mesh).isMesh) {
+      const mesh = child as THREE.Mesh;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
 
-        // Log mesh info
-        console.log("Mesh found:", {
-          name: mesh.name,
-          geometry: mesh.geometry,
-          material: mesh.material,
-        });
-      }
-    });
+      // Log mesh info
+      console.log("Mesh found:", {
+        name: mesh.name,
+        geometry: mesh.geometry,
+        material: mesh.material,
+      });
+    }
+  });
 
-    return <primitive object={clonedScene} scale={0.5} />;
-  } catch (error) {
-    console.error("Error loading model:", url, error);
-    // Fallback to a colored cube if model fails to load
-    return (
-      <mesh>
-        <boxGeometry args={[0.5, 0.5, 0.5]} />
-        <meshStandardMaterial color="#FF0000" />
-      </mesh>
-    );
-  }
+  return <primitive object={clonedScene} scale={0.5} />;
 }
 
 // Loading placeholder
