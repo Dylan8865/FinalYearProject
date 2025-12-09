@@ -173,6 +173,31 @@ interface PlacedObject {
   node: React.ReactNode;
 }
 
+/**
+ * GridPlatform Component
+ * 
+ * Renders the grid overlay on the island surface and handles item placement.
+ * 
+ * Features:
+ * - Displays a visual grid with connecting lines
+ * - Highlights cells on hover when dragging items
+ * - Handles click/drop events for placing items
+ * - Renders all placed 3D objects at their grid positions
+ * - Uses pos_x and pos_y from island-item for 2D grid positioning
+ * 
+ * Grid Configuration:
+ * - Cell size is 1.2 units
+ * - Cells are rendered in a circular pattern
+ * - Inner area (center third) uses different coloring
+ * 
+ * @param gridSize - Number of cells in each dimension (default: 5)
+ * @param _islandLevel - Island level (currently unused but kept for future use)
+ * @param onCellClick - Callback when cell is clicked (not dragging)
+ * @param placedObjects - Map of all placed objects by position key
+ * @param waterCells - Array of cell IDs that contain water
+ * @param isDraggingItem - Whether user is currently dragging an item
+ * @param onCellDrop - Callback when item is dropped on a cell
+ */
 interface GridPlatformProps {
   gridSize?: number;
   islandLevel: number;
@@ -185,7 +210,7 @@ interface GridPlatformProps {
 
 const GridPlatform = ({
   gridSize = 5,
-  islandLevel,
+  islandLevel: _islandLevel,
   onCellClick,
   placedObjects,
   waterCells,
@@ -193,16 +218,26 @@ const GridPlatform = ({
   onCellDrop,
 }: GridPlatformProps) => {
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
-  const cellSize = 1.2;
+  
+  // Grid configuration constants
+  const cellSize = 1.2; // Size of each grid cell in world units
   const totalSize = gridSize * cellSize;
   const offset = totalSize / 2 - cellSize / 2;
   const center = Math.floor(gridSize / 2);
 
+  /**
+   * Determines if a cell is in the inner area of the island
+   * Inner area is defined as the center third of the grid
+   */
   const isInnerArea = (row: number, col: number) => {
     const distance = Math.max(Math.abs(row - center), Math.abs(col - center));
     return distance <= Math.floor(gridSize / 3);
   };
 
+  /**
+   * Determines if a cell should be rendered based on circular island shape
+   * Adds slight randomness to edge for organic appearance
+   */
   const shouldRenderCell = (row: number, col: number) => {
     const dx = col - center;
     const dz = row - center;
@@ -212,12 +247,19 @@ const GridPlatform = ({
     return distFromCenter <= maxRadius + randomOffset;
   };
 
+  /**
+   * Converts grid coordinates to world position
+   * @returns [x, z] world coordinates
+   */
   const getCellPosition = (row: number, col: number): [number, number] => {
     const x = col * cellSize - offset;
     const z = row * cellSize - offset;
     return [x, z];
   };
 
+  /**
+   * Checks if a cell exists at given grid coordinates
+   */
   const cellExists = (row: number, col: number) => {
     return (
       row >= 0 &&
