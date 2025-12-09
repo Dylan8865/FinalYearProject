@@ -4,20 +4,48 @@ import { useState, useEffect } from "react";
 import { IslandItemType } from "@/types/types";
 import { createClient } from "@/lib/supabase/client";
 
+/**
+ * useIslandItems Hook
+ * 
+ * Custom hook for managing island items (inventory and placed items).
+ * Handles fetching, purchasing, placing, updating, and deleting items.
+ * 
+ * Features:
+ * - Fetches items from island-item table with related item and island data
+ * - Generates model URLs from Supabase storage (items bucket)
+ * - Provides optimistic updates for better UX
+ * - Handles database persistence through API routes
+ * 
+ * Model URLs:
+ * - Models are stored in Supabase storage bucket "items"
+ * - Filename format: {item_id}.glb
+ * - Example: f612693e-b042-4a72-95f8-0736d7980a26.glb
+ * 
+ * @param profileId - Optional filter by profile ID
+ * @param islandId - Optional filter by island ID (null = inventory items)
+ * @returns Object with items, loading state, error, and CRUD functions
+ */
 export function useIslandItems(profileId?: string, islandId?: string) {
   const [islandItems, setIslandItems] = useState<IslandItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Fetches island items from the database
+   * Includes related item and island data
+   * Generates public URLs for 3D models from Supabase storage
+   */
   const fetchIslandItems = async () => {
     try {
       setLoading(true);
       setError(null);
 
+      // Build query parameters for filtering
       const params = new URLSearchParams();
       if (profileId) params.append("profile_id", profileId);
       if (islandId) params.append("island_id", islandId);
 
+      // Fetch items from API
       const response = await fetch(`/api/island-items?${params.toString()}`);
 
       if (!response.ok) {
@@ -26,7 +54,8 @@ export function useIslandItems(profileId?: string, islandId?: string) {
 
       const data: IslandItemType[] = await response.json();
 
-      // Fetch model URLs from Supabase storage
+      // Generate model URLs from Supabase storage
+      // Models are stored in "items" bucket with format: {item_id}.glb
       const supabase = createClient();
       const itemsWithModels = await Promise.all(
         data.map(async (item) => {
@@ -112,6 +141,22 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     }
   };
 
+  /**
+   * Places an item from inventory onto an island
+   * 
+   * Updates the island-item table with:
+   * - island_id: Links item to specific island
+   * - grid_x, grid_y, grid_z: 3D grid position
+   * 
+   * Uses optimistic updates for immediate UI feedback
+   * 
+   * @param islandItemId - ID of the island-item record
+   * @param islandId - ID of the island to place item on
+   * @param gridX - X coordinate on grid
+   * @param gridY - Y coordinate on grid (vertical stacking)
+   * @param gridZ - Z coordinate on grid
+   * @returns Promise<boolean> - Success status
+   */
   const placeItemOnIsland = async (
     islandItemId: string,
     islandId: string,
@@ -119,7 +164,7 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     gridY: number,
     gridZ: number
   ) => {
-    // Optimistic update
+    // Optimistic update - Update UI immediately for better UX
     setIslandItems((prevItems) =>
       prevItems.map((item) =>
         item.id === islandItemId

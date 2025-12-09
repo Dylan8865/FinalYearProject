@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable react-hooks/purity */
 import React, { useState } from "react";
 import { useItems } from "@/features/island/hooks/useItems";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
