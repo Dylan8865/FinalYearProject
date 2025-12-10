@@ -1,6 +1,7 @@
 "use client";
 
 import { Conversation } from "./SearchPage";
+import IslandIcon from "@/icons/IslandIcon";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -62,15 +63,8 @@ export default function Sidebar({
       {/* Header with Logo and Toggle */}
       <div className="flex h-14 items-center justify-between px-3">
         {/* Logo */}
-        <button className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-gray-700">
-          <svg
-            viewBox="0 0 40 40"
-            className="h-6 w-6 text-teal-400"
-            fill="currentColor"
-          >
-            {/* Wisdom Island logo */}
-            <path d="M20 4c-2 0-3.5 1.5-3.5 3.5 0 1.2.6 2.3 1.5 3v2h-2c-1.5 0-2.5 1-2.5 2.5 0 1 .5 1.8 1.2 2.3-.7.5-1.2 1.3-1.2 2.2 0 1.5 1 2.5 2.5 2.5h1v4h-6c-1 0-2 .8-2 2 0 1 .8 2 2 2h18c1 0 2-.8 2-2 0-1-.8-2-2-2h-6v-4h1c1.5 0 2.5-1 2.5-2.5 0-.9-.5-1.7-1.2-2.2.7-.5 1.2-1.3 1.2-2.3 0-1.5-1-2.5-2.5-2.5h-2v-2c.9-.7 1.5-1.8 1.5-3C23.5 5.5 22 4 20 4z" />
-          </svg>
+        <button className="flex h-10 w-10 items-center justify-center rounded-lg text-teal-400 hover:bg-gray-700">
+          <IslandIcon />
         </button>
 
         {/* Toggle/Expand button */}
