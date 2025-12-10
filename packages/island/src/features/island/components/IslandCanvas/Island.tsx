@@ -175,21 +175,21 @@ interface PlacedObject {
 
 /**
  * GridPlatform Component
- * 
+ *
  * Renders the grid overlay on the island surface and handles item placement.
- * 
+ *
  * Features:
  * - Displays a visual grid with connecting lines
  * - Highlights cells on hover when dragging items
  * - Handles click/drop events for placing items
  * - Renders all placed 3D objects at their grid positions
  * - Uses pos_x and pos_y from island-item for 2D grid positioning
- * 
+ *
  * Grid Configuration:
  * - Cell size is 1.2 units
  * - Cells are rendered in a circular pattern
  * - Inner area (center third) uses different coloring
- * 
+ *
  * @param gridSize - Number of cells in each dimension (default: 5)
  * @param _islandLevel - Island level (currently unused but kept for future use)
  * @param onCellClick - Callback when cell is clicked (not dragging)
@@ -218,7 +218,7 @@ const GridPlatform = ({
   onCellDrop,
 }: GridPlatformProps) => {
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
-  
+
   // Grid configuration constants
   const cellSize = 1.2; // Size of each grid cell in world units
   const totalSize = gridSize * cellSize;
@@ -368,6 +368,7 @@ const GridPlatform = ({
               rotation={[-Math.PI / 2, 0, 0]}
               onPointerEnter={() => {
                 if (isDraggingItem) {
+                  console.log("🖱️ Hovering cell:", cellId);
                   setHoveredCell(cellId);
                 }
               }}
@@ -376,14 +377,15 @@ const GridPlatform = ({
                   setHoveredCell(null);
                 }
               }}
-              onPointerDown={(e) => {
-                if (isDraggingItem) {
-                  e.stopPropagation();
-                  if (onCellDrop) {
-                    onCellDrop(cellId, x, z);
-                  }
-                } else {
-                  e.stopPropagation();
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log("🖱️ Cell clicked:", cellId, "isDragging:", isDraggingItem);
+
+                if (isDraggingItem && onCellDrop) {
+                  console.log("🎯 Calling onCellDrop for cell:", cellId);
+                  onCellDrop(cellId, x, z);
+                } else if (!isDraggingItem) {
+                  console.log("📍 Regular click (not dragging)");
                   onCellClick(x, z, isInner, cellId);
                 }
               }}
@@ -472,7 +474,7 @@ const Island = ({
       <GridPlatform
         gridSize={gridSize}
         islandLevel={1}
-        onCellClick={() => {}}
+        onCellClick={() => { }}
         placedObjects={placedObjects}
         waterCells={[]}
         isDraggingItem={isDraggingItem}

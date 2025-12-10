@@ -21,8 +21,8 @@ interface PlacedObject {
 interface IslandCanvasProps {
   islands: IslandData[];
   isDraggingItem?: boolean;
-  onCellDrop?: (cellId: string, x: number, z: number) => void;
-  placedObjects?: Record<string, PlacedObject>;
+  onCellDrop?: (islandId: string, cellId: string, x: number, z: number) => void;
+  placedObjects?: Record<string, PlacedObject & { islandId?: string }>;
 }
 
 const IslandCanvas = ({
@@ -45,17 +45,29 @@ const IslandCanvas = ({
         />
         <hemisphereLight args={["#87CEEB", "#A8A060", 0.6]} />
 
-        {islands.map((island) => (
-          <Island
-            key={island.id}
-            gridSize={island.gridSize}
-            position={island.position}
-            animate={true}
-            isDraggingItem={isDraggingItem}
-            onCellDrop={onCellDrop}
-            placedObjects={placedObjects}
-          />
-        ))}
+        {islands.map((island) => {
+          // Filter placed objects for this specific island
+          const islandPlacedObjects = Object.entries(placedObjects)
+            .filter(([_, obj]) => obj.islandId === island.id)
+            .reduce((acc, [key, obj]) => ({ ...acc, [key]: obj }), {});
+
+          return (
+            <Island
+              key={island.id}
+              gridSize={island.gridSize}
+              position={island.position}
+              animate={true}
+              isDraggingItem={isDraggingItem}
+              onCellDrop={(cellId, x, z) => {
+                if (onCellDrop) {
+                  console.log("🏝️ Island clicked:", island.id);
+                  onCellDrop(island.id, cellId, x, z);
+                }
+              }}
+              placedObjects={islandPlacedObjects}
+            />
+          );
+        })}
 
         <OrbitControls
           enablePan={true}

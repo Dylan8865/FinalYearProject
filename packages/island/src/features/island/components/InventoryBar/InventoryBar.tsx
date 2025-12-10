@@ -44,29 +44,6 @@ const InventoryBar = ({
     return islandItems.find((item) => item.pos_x === index && item.pos_y === 0);
   });
 
-  /**
-   * Handles the start of dragging an item from the inventory
-   * Sets up the drag data and notifies parent component
-   */
-  const handleDragStart = (e: React.DragEvent, item: any, index: number) => {
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("itemId", item.id);
-    e.dataTransfer.setData("itemIndex", index.toString());
-    if (onItemDragStart) {
-      onItemDragStart(item, index);
-    }
-  };
-
-  /**
-   * Handles the end of dragging an item
-   * Cleans up drag state in parent component
-   */
-  const handleDragEnd = () => {
-    if (onItemDragEnd) {
-      onItemDragEnd();
-    }
-  };
-
   return (
     <div className="pointer-events-none z-0 flex w-screen items-center justify-center">
       <div className="pointer-events-auto z-20 h-10 w-fit bg-black px-4">
@@ -75,9 +52,12 @@ const InventoryBar = ({
             <InventoryButton
               key={index}
               className="bg-[#d9d9d9] text-black"
-              draggable={!!item}
-              onDragStart={(e) => item && handleDragStart(e, item, index)}
-              onDragEnd={handleDragEnd}
+              onClick={() => {
+                if (item && onItemDragStart) {
+                  console.log("📦 Item clicked:", item.item?.name);
+                  onItemDragStart(item, index);
+                }
+              }}
             >
               {item && item.item?.image_cover_path ? (
                 <Image
