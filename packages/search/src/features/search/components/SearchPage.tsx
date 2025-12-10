@@ -5,6 +5,9 @@ import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 import WelcomeScreen from "./WelcomeScreen";
 import Sidebar from "./Sidebar";
+import UserMenu from "./UserMenu";
+import { useTheme } from "../context/ThemeContext";
+import type { User } from "@supabase/supabase-js";
 
 export interface Message {
   id: string;
@@ -21,12 +24,25 @@ export interface Conversation {
   createdAt: Date;
 }
 
-export default function SearchPage() {
+interface SearchPageProps {
+  user: User | null;
+}
+
+export default function SearchPage({ user }: SearchPageProps) {
+  const { theme } = useTheme();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Theme-based colors
+  const isDark = theme === "dark";
+  const bgColor = isDark ? "bg-[#1a1a1a]" : "bg-[#f5f5f5]";
+  const textColor = isDark ? "text-white" : "text-gray-900";
+  const mutedTextColor = isDark ? "text-gray-400" : "text-gray-600";
+  const borderColor = isDark ? "border-gray-700" : "border-gray-300";
+  const hoverBg = isDark ? "hover:bg-gray-800" : "hover:bg-gray-200";
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -120,32 +136,33 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="flex h-screen bg-[#1a1a1a]">
+    <div className={`flex h-screen ${bgColor} transition-colors duration-300`}>
       {/* Sidebar */}
       <Sidebar
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        conversations={conversations}
+        conversations={user ? conversations : []}
         activeConversation={activeConversation}
         onNewChat={handleNewChat}
         onSelectConversation={handleSelectConversation}
         onDeleteConversation={handleDeleteConversation}
+        isLoggedIn={!!user}
       />
 
       {/* Main Content */}
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Header with navigation */}
-        <div className="flex h-14 items-center justify-between px-4">
+        <div className="flex h-16 items-center justify-between px-6">
           <div className="flex items-center">
             {/* Expand sidebar button - only show when collapsed */}
             {!isSidebarOpen && (
               <button
                 onClick={() => setIsSidebarOpen(true)}
-                className="mr-3 flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+                className={`mr-4 flex h-12 w-12 items-center justify-center rounded-lg ${mutedTextColor} ${hoverBg} hover:${textColor}`}
                 title="Open sidebar"
               >
                 <svg
-                  className="h-5 w-5"
+                  className="h-6 w-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -161,26 +178,26 @@ export default function SearchPage() {
             )}
             
             {/* Title with navigation links */}
-            <div className="flex items-center gap-6">
-              <span className="font-medium text-white">Wisdom Search</span>
+            <div className="flex items-center gap-8">
+              <span className={`text-lg font-medium ${textColor}`}>Wisdom Search</span>
               
               {/* Navigation Links */}
-              <nav className="flex items-center gap-4">
+              <nav className="flex items-center gap-6">
                 <a
                   href="/search"
-                  className="text-sm text-teal-400 hover:text-teal-300"
+                  className="text-base text-teal-400 hover:text-teal-300"
                 >
                   Search
                 </a>
                 <a
                   href="/cloud"
-                  className="text-sm text-gray-400 hover:text-white"
+                  className={`text-base ${mutedTextColor} hover:${textColor}`}
                 >
                   Cloud
                 </a>
                 <a
                   href="/explore"
-                  className="text-sm text-gray-400 hover:text-white"
+                  className={`text-base ${mutedTextColor} hover:${textColor}`}
                 >
                   Explore
                 </a>
@@ -188,13 +205,17 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {/* Sign In Button */}
-          <a
-            href="/login"
-            className="rounded-full border border-gray-600 px-4 py-1.5 text-sm text-gray-300 transition-colors hover:border-teal-400 hover:text-white"
-          >
-            Sign in
-          </a>
+          {/* User Menu or Sign In Button */}
+          {user ? (
+            <UserMenu email={user.email || ""} />
+          ) : (
+            <a
+              href="/login"
+              className={`rounded-full border ${isDark ? "border-gray-600 text-gray-300 hover:border-teal-400 hover:text-white" : "border-gray-400 text-gray-700 hover:border-teal-500 hover:text-gray-900"} px-5 py-2 text-base transition-colors`}
+            >
+              Sign in
+            </a>
+          )}
         </div>
 
         {/* Chat Area */}
@@ -213,7 +234,7 @@ export default function SearchPage() {
 
         {/* Input Area - Only show after first message */}
         {activeConversation && activeConversation.messages.length > 0 && (
-          <div className="border-t border-gray-700 bg-[#1a1a1a] p-4">
+          <div className={`border-t ${borderColor} ${bgColor} p-4 transition-colors duration-300`}>
             <div className="mx-auto max-w-3xl">
               <ChatInput onSend={handleSendMessage} isLoading={isLoading} />
             </div>

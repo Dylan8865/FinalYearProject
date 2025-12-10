@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -8,8 +9,15 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
+  const { theme } = useTheme();
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const isDark = theme === "dark";
+  const textColor = isDark ? "text-white" : "text-gray-900";
+  const mutedTextColor = isDark ? "text-gray-400" : "text-gray-600";
+  const borderColor = isDark ? "border-gray-600" : "border-gray-400";
+  const placeholderColor = isDark ? "placeholder:text-gray-500" : "placeholder:text-gray-400";
 
   // Auto-resize textarea
   useEffect(() => {
@@ -35,10 +43,10 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
   };
 
   return (
-    <div className="relative flex items-end gap-2 rounded-full border border-gray-600 bg-transparent px-4 py-2 transition-colors focus-within:border-teal-400">
+    <div className={`relative flex items-end gap-3 rounded-full border ${borderColor} bg-transparent px-6 py-3 transition-colors focus-within:border-teal-400`}>
       {/* Search Icon */}
       <svg
-        className="mb-2 h-5 w-5 shrink-0 text-gray-400"
+        className={`mb-3 h-6 w-6 shrink-0 ${mutedTextColor}`}
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -59,7 +67,7 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
         onKeyDown={handleKeyDown}
         placeholder="Ask a follow-up question..."
         rows={1}
-        className="max-h-[200px] min-h-[36px] flex-1 resize-none bg-transparent py-2 text-sm text-white outline-none placeholder:text-gray-500"
+        className={`max-h-[200px] min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-lg ${textColor} outline-none ${placeholderColor}`}
         disabled={isLoading}
       />
 
@@ -68,11 +76,11 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
         <button
           onClick={handleSubmit}
           disabled={isLoading}
-          className="mb-2 text-teal-400 transition-colors hover:text-teal-300 disabled:opacity-50"
+          className="mb-3 text-teal-400 transition-colors hover:text-teal-300 disabled:opacity-50"
           title="Send message"
         >
           {isLoading ? (
-            <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+            <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24">
               <circle
                 className="opacity-25"
                 cx="12"
@@ -90,7 +98,7 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
             </svg>
           ) : (
             <svg
-              className="h-5 w-5"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

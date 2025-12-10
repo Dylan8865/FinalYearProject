@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 interface WelcomeScreenProps {
   onSuggestionClick: (suggestion: string) => void;
@@ -38,9 +39,20 @@ const suggestions = [
 ];
 
 export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps) {
+  const { theme } = useTheme();
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const greeting = getGreeting();
+
+  const isDark = theme === "dark";
+  const textColor = isDark ? "text-white" : "text-gray-900";
+  const mutedTextColor = isDark ? "text-gray-400" : "text-gray-600";
+  const placeholderColor = isDark ? "placeholder:text-gray-500" : "placeholder:text-gray-400";
+  const borderColor = isDark ? "border-gray-600" : "border-gray-400";
+  const cardBg = isDark ? "bg-gray-800/50" : "bg-white";
+  const cardBorder = isDark ? "border-gray-700" : "border-gray-300";
+  const cardHoverBg = isDark ? "hover:bg-gray-800" : "hover:bg-gray-100";
+  const kbdBg = isDark ? "bg-gray-800 text-gray-400" : "bg-gray-200 text-gray-600";
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -61,16 +73,16 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
   };
 
   return (
-    <div className="flex h-[calc(100vh-56px)] flex-col items-center justify-center px-4">
+    <div className="flex h-[calc(100vh-64px)] flex-col items-center justify-center px-6">
       {/* Greeting */}
-      <h1 className="mb-8 text-4xl font-light text-white">{greeting}</h1>
+      <h1 className={`mb-10 text-5xl font-light ${textColor}`}>{greeting}</h1>
 
       {/* Search Input */}
-      <div className="w-full max-w-xl">
-        <div className="relative flex items-center rounded-full border border-gray-600 bg-transparent px-4 py-3 transition-colors focus-within:border-teal-400">
+      <div className="w-full max-w-2xl">
+        <div className={`relative flex items-center rounded-full border ${borderColor} bg-transparent px-6 py-4 transition-colors focus-within:border-teal-400`}>
           {/* Search Icon */}
           <svg
-            className="mr-3 h-5 w-5 text-gray-400"
+            className={`mr-4 h-6 w-6 ${mutedTextColor}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -91,17 +103,17 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="What do you want to learn today?"
-            className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-gray-500"
+            className={`flex-1 bg-transparent text-lg ${textColor} outline-none ${placeholderColor}`}
           />
 
           {/* Submit button (appears when there's input) */}
           {input.trim() && (
             <button
               onClick={handleSubmit}
-              className="ml-2 text-teal-400 hover:text-teal-300"
+              className="ml-3 text-teal-400 hover:text-teal-300"
             >
               <svg
-                className="h-5 w-5"
+                className="h-6 w-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -119,20 +131,20 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
       </div>
 
       {/* Suggestions Grid */}
-      <div className="mt-10 grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-12 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
         {suggestions.map((suggestion, index) => (
           <button
             key={index}
             onClick={() => onSuggestionClick(suggestion.prompt)}
-            className="group flex flex-col items-start gap-2 rounded-xl border border-gray-700 bg-gray-800/50 p-4 text-left transition-all hover:border-teal-500/50 hover:bg-gray-800"
+            className={`group flex flex-col items-start gap-3 rounded-xl border ${cardBorder} ${cardBg} p-5 text-left transition-all hover:border-teal-500/50 ${cardHoverBg}`}
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{suggestion.icon}</span>
-              <span className="font-medium text-white group-hover:text-teal-400">
+            <div className="flex items-center gap-4">
+              <span className="text-3xl">{suggestion.icon}</span>
+              <span className={`text-lg font-medium ${textColor} group-hover:text-teal-400`}>
                 {suggestion.title}
               </span>
             </div>
-            <p className="text-sm text-gray-400 line-clamp-2">
+            <p className={`text-base ${mutedTextColor} line-clamp-2`}>
               {suggestion.prompt}
             </p>
           </button>
@@ -140,8 +152,8 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
       </div>
 
       {/* Bottom hint */}
-      <p className="mt-8 text-center text-sm text-gray-500">
-        Press <kbd className="rounded bg-gray-800 px-2 py-0.5 text-xs font-mono text-gray-400">Enter</kbd> to send
+      <p className={`mt-10 text-center text-base ${mutedTextColor}`}>
+        Press <kbd className={`rounded ${kbdBg} px-2.5 py-1 text-sm font-mono`}>Enter</kbd> to send
       </p>
     </div>
   );

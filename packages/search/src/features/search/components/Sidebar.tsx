@@ -1,6 +1,7 @@
 "use client";
 
 import { Conversation } from "./SearchPage";
+import { useTheme } from "../context/ThemeContext";
 import IslandIcon from "@/icons/IslandIcon";
 
 interface SidebarProps {
@@ -11,6 +12,7 @@ interface SidebarProps {
   onNewChat: () => void;
   onSelectConversation: (conversation: Conversation) => void;
   onDeleteConversation: (id: string) => void;
+  isLoggedIn: boolean;
 }
 
 export default function Sidebar({
@@ -21,7 +23,19 @@ export default function Sidebar({
   onNewChat,
   onSelectConversation,
   onDeleteConversation,
+  isLoggedIn,
 }: SidebarProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  // Theme-based colors
+  const sidebarBg = isDark ? "bg-[#171717]" : "bg-[#e8e8e8]";
+  const textColor = isDark ? "text-white" : "text-gray-900";
+  const mutedTextColor = isDark ? "text-gray-400" : "text-gray-600";
+  const hoverBg = isDark ? "hover:bg-gray-700" : "hover:bg-gray-300";
+  const activeBg = isDark ? "bg-gray-700" : "bg-gray-300";
+  const conversationText = isDark ? "text-gray-300" : "text-gray-700";
+  const conversationHoverBg = isDark ? "hover:bg-gray-800" : "hover:bg-gray-200";
   const groupConversationsByDate = (conversations: Conversation[]) => {
     const today = new Date();
     const yesterday = new Date(today);
@@ -56,27 +70,29 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`flex h-full flex-col bg-[#171717] transition-all duration-300 ${
-        isOpen ? "w-64" : "w-16"
+      className={`flex h-full flex-col ${sidebarBg} transition-all duration-300 ${
+        isOpen ? "w-72" : "w-20"
       }`}
     >
       {/* Header with Logo and Toggle */}
-      <div className="flex h-14 items-center justify-between px-3">
+      <div className="flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <button className="flex h-10 w-10 items-center justify-center rounded-lg text-teal-400 hover:bg-gray-700">
-          <IslandIcon />
+        <button className={`flex h-12 w-12 items-center justify-center rounded-lg text-teal-400 ${hoverBg}`}>
+          <div className="scale-125">
+            <IslandIcon />
+          </div>
         </button>
 
         {/* Toggle/Expand button */}
         <button
           onClick={onToggle}
-          className={`flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white ${
+          className={`flex h-12 w-12 items-center justify-center rounded-lg ${mutedTextColor} ${hoverBg} ${
             !isOpen ? "hidden" : ""
           }`}
           title="Close sidebar"
         >
           <svg
-            className="h-5 w-5"
+            className="h-6 w-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -92,15 +108,15 @@ export default function Sidebar({
       </div>
 
       {/* Menu Items */}
-      <div className="flex flex-col gap-1 px-2">
+      <div className="flex flex-col gap-2 px-3">
         {/* New Chat */}
         <button
           onClick={onNewChat}
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-white hover:bg-gray-700"
+          className={`flex items-center gap-4 rounded-lg px-4 py-3 text-base ${textColor} ${hoverBg}`}
           title="New chat"
         >
           <svg
-            className="h-5 w-5 shrink-0"
+            className="h-6 w-6 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -117,11 +133,11 @@ export default function Sidebar({
 
         {/* Search Chats */}
         <button
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white"
+          className={`flex items-center gap-4 rounded-lg px-4 py-3 text-base ${mutedTextColor} ${hoverBg}`}
           title="Search chats"
         >
           <svg
-            className="h-5 w-5 shrink-0"
+            className="h-6 w-6 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -138,11 +154,11 @@ export default function Sidebar({
 
         {/* Library */}
         <button
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white"
+          className={`flex items-center gap-4 rounded-lg px-4 py-3 text-base ${mutedTextColor} ${hoverBg}`}
           title="Library"
         >
           <svg
-            className="h-5 w-5 shrink-0"
+            className="h-6 w-6 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -160,26 +176,38 @@ export default function Sidebar({
 
       {/* Conversations List - Only show when expanded */}
       {isOpen && (
-        <div className="mt-4 flex-1 overflow-y-auto px-2">
-          {conversations.length === 0 ? (
-            <p className="px-3 py-4 text-center text-sm text-gray-500">
+        <div className="mt-4 flex-1 overflow-y-auto px-3">
+          {!isLoggedIn ? (
+            <div className="px-4 py-6 text-center">
+              <p className={`mb-4 text-base ${mutedTextColor}`}>
+                Sign in to save your search history
+              </p>
+              <a
+                href="/login"
+                className="inline-block rounded-lg bg-teal-600 px-5 py-2.5 text-base text-white transition-colors hover:bg-teal-500"
+              >
+                Sign in
+              </a>
+            </div>
+          ) : conversations.length === 0 ? (
+            <p className={`px-4 py-6 text-center text-base ${mutedTextColor}`}>
               No conversations yet
             </p>
           ) : (
             Object.entries(groupedConversations).map(
               ([group, convs]) =>
                 convs.length > 0 && (
-                  <div key={group} className="mb-4">
-                    <h3 className="mb-2 px-3 text-xs font-medium text-gray-500">
+                  <div key={group} className="mb-5">
+                    <h3 className={`mb-3 px-4 text-sm font-medium ${mutedTextColor}`}>
                       {group}
                     </h3>
                     {convs.map((conversation) => (
                       <div
                         key={conversation.id}
-                        className={`group relative mb-1 flex cursor-pointer items-center rounded-lg px-3 py-2 text-sm transition-colors ${
+                        className={`group relative mb-2 flex cursor-pointer items-center rounded-lg px-4 py-3 text-base transition-colors ${
                           activeConversation?.id === conversation.id
-                            ? "bg-gray-700 text-white"
-                            : "text-gray-300 hover:bg-gray-800"
+                            ? `${activeBg} ${textColor}`
+                            : `${conversationText} ${conversationHoverBg}`
                         }`}
                         onClick={() => onSelectConversation(conversation)}
                       >
@@ -189,11 +217,11 @@ export default function Sidebar({
                             e.stopPropagation();
                             onDeleteConversation(conversation.id);
                           }}
-                          className="absolute right-2 hidden rounded p-1 text-gray-500 hover:bg-gray-600 hover:text-red-400 group-hover:block"
+                          className={`absolute right-3 hidden rounded p-1.5 ${mutedTextColor} ${hoverBg} hover:text-red-400 group-hover:block`}
                           title="Delete"
                         >
                           <svg
-                            className="h-4 w-4"
+                            className="h-5 w-5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"

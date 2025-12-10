@@ -1,21 +1,30 @@
 "use client";
 
 import { Message } from "./SearchPage";
+import { useTheme } from "../context/ThemeContext";
 
 interface ChatMessageProps {
   message: Message;
 }
 
 export default function ChatMessage({ message }: ChatMessageProps) {
+  const { theme } = useTheme();
   const isUser = message.role === "user";
+
+  const isDark = theme === "dark";
+  const assistantBg = isDark ? "bg-gray-800" : "bg-white border border-gray-200";
+  const assistantText = isDark ? "text-gray-100" : "text-gray-900";
+  const userAvatarBg = isDark ? "bg-gray-600" : "bg-gray-500";
+  const timestampText = isDark ? "text-gray-500" : "text-gray-400";
+  const loadingDotBg = isDark ? "bg-gray-400" : "bg-gray-500";
 
   if (message.isLoading) {
     return (
-      <div className="mb-6 flex animate-fade-in gap-4">
+      <div className="mb-8 flex animate-fade-in gap-5">
         {/* Assistant Avatar */}
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-500">
           <svg
-            className="h-5 w-5 text-white"
+            className="h-6 w-6 text-white"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -30,22 +39,22 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         </div>
 
         {/* Loading dots */}
-        <div className="flex items-center gap-1 pt-2">
-          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-gray-400"></span>
-          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-gray-400"></span>
-          <span className="animate-pulse-dot h-2 w-2 rounded-full bg-gray-400"></span>
+        <div className="flex items-center gap-1.5 pt-3">
+          <span className={`animate-pulse-dot h-2.5 w-2.5 rounded-full ${loadingDotBg}`}></span>
+          <span className={`animate-pulse-dot h-2.5 w-2.5 rounded-full ${loadingDotBg}`}></span>
+          <span className={`animate-pulse-dot h-2.5 w-2.5 rounded-full ${loadingDotBg}`}></span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`mb-6 flex animate-fade-in gap-4 ${isUser ? "flex-row-reverse" : ""}`}>
+    <div className={`mb-8 flex animate-fade-in gap-5 ${isUser ? "flex-row-reverse" : ""}`}>
       {/* Avatar */}
       {isUser ? (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-600 text-white">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${userAvatarBg} text-white`}>
           <svg
-            className="h-5 w-5"
+            className="h-6 w-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -59,9 +68,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           </svg>
         </div>
       ) : (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-500">
           <svg
-            className="h-5 w-5 text-white"
+            className="h-6 w-6 text-white"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -78,15 +87,15 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
       {/* Message Content */}
       <div
-        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+        className={`max-w-[80%] rounded-2xl px-5 py-4 ${
           isUser
             ? "bg-teal-600 text-white"
-            : "bg-gray-800 text-gray-100"
+            : `${assistantBg} ${assistantText}`
         }`}
       >
-        <div className="text-sm leading-relaxed">
+        <div className="text-base leading-relaxed">
           {message.content.split("\n").map((line, i) => (
-            <p key={i} className="mb-2 last:mb-0">
+            <p key={i} className="mb-2.5 last:mb-0">
               {line.split(/(\*\*.*?\*\*)/).map((part, j) => {
                 if (part.startsWith("**") && part.endsWith("**")) {
                   return <strong key={j} className="font-semibold">{part.slice(2, -2)}</strong>;
@@ -99,8 +108,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
         {/* Timestamp */}
         <div
-          className={`mt-2 text-xs ${
-            isUser ? "text-teal-200" : "text-gray-500"
+          className={`mt-3 text-sm ${
+            isUser ? "text-teal-200" : timestampText
           }`}
         >
           {message.timestamp.toLocaleTimeString([], {
