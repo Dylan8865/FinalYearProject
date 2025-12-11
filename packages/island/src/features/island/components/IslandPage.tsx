@@ -147,6 +147,13 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     itemName: string;
   } | null>(null);
 
+  // Removal confirmation dialog
+  const [removalDialog, setRemovalDialog] = useState<{
+    open: boolean;
+    itemId: string;
+    itemName: string;
+  } | null>(null);
+
   /**
    * Load previously placed items from database on mount
    * Converts island-item records to placedObjects state format
@@ -213,7 +220,11 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           onDoubleClick={(itemId, type, name) => {
             console.log("Placed block double-clicked:", { itemId, type, name });
             if (type === "functional") {
+              // Open functional item editor
               setFunctionalItemDialog({ open: true, itemId, itemName: name });
+            } else {
+              // Show removal confirm ation for terrain/decorative
+              setRemovalDialog({ open: true, itemId, itemName: name });
             }
           }}
         />
@@ -234,20 +245,55 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
 
     console.log("Loaded placed objects:", newPlacedObjects);
     setPlacedObjects(newPlacedObjects);
-  }, [islandItems, islands]);
+  }, [islandItems, islands, selectedPlacedItem]);
 
   /**
    * Handles selecting an item from inventory
    * Click an item to select it, then click a grid cell to place it
    */
   const handleInventoryItemClick = (item: any, _index: number) => {
-    console.log("Item selected from inventory:", {
-      id: item.id,
-      item: item.item,
-      itemName: item.item?.name,
-      modelUrl: item.item?.model_url,
-    });
+    console.log("=== INVENTORY ITEM CLICKED ===");
+    console.log("Item object:", item);
+    console.log("Item ID:", item.id);
+    console.log("Item name:", item.item?.name);
+    console.log("Item model URL:", item.item?.model_url);
+    console.log("Setting selectedPlacedItem to:", item.id);
+
     setSelectedPlacedItem(item.id);
+
+    console.log("Selected item ID is now:", item.id);
+  };
+
+  /**
+   * Handles clicking an empty inventory slot
+   * Moves a selected placed item to the inventory
+   */
+  const handleInventorySlotClick = async (slotX: number, slotY: number) => {
+    console.log("=== INVENTORY SLOT CLICKED ===");
+    console.log("Slot position:", { slotX, slotY });
+    console.log("Current selectedPlacedItem:", selectedPlacedItem);
+
+    if (!selectedPlacedItem) {
+      console.log("No item selected");
+      return;
+    }
+
+    const selectedItem = islandItems.find(item => item.id === selectedPlacedItem);
+    console.log("Selected item:", selectedItem);
+
+    if (!selectedItem) {
+      console.log("Selected item not found in islandItems");
+      return;
+    }
+
+    // Check if item is currently on the island (has grid coordinates)
+    if (selectedItem.grid_x !== null && selectedItem.grid_y !== null && selectedItem.grid_z !== null) {
+      console.log("Moving item from island to inventory slot");
+      await moveToInventory(selectedPlacedItem, slotX, slotY);
+      setSelectedPlacedItem(null);
+    } else {
+      console.log("Item is not on island, ignoring");
+    }
   };
 
   /**
@@ -299,9 +345,34 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     x: number,
     z: number
   ) => {
+    console.log("=== GRID CELL CLICKED ===");
+    console.log("Island ID:", islandId);
+    console.log("Cell ID:", cellId);
+    console.log("Position:", { x, z });
+    console.log("Current selectedPlacedItem:", selectedPlacedItem);
+    console.log("All islandItems:", islandItems);
+
     // Get the selected item from islandItems
     const selectedItem = islandItems.find(item => item.id === selectedPlacedItem);
-    if (!selectedItem) return;
+
+    console.log("Found selected item:", selectedItem);
+
+    if (!selectedItem) {
+      console.log("❌ NO SELECTED ITEM - Exiting");
+      return;
+    }
+
+    console.log("✅ Selected item found:", {
+      id: selectedItem.id,
+      name: selectedItem.item?.name,
+      currentPos: {
+        pos_x: selectedItem.pos_x,
+        pos_y: selectedItem.pos_y,
+        grid_x: selectedItem.grid_x,
+        grid_y: selectedItem.grid_y,
+        grid_z: selectedItem.grid_z,
+      }
+    });
 
     const y = getNextYPosition(cellId);
 
@@ -349,6 +420,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           console.log("Placed block double-clicked:", { itemId, type, name });
           if (type === "functional") {
             setFunctionalItemDialog({ open: true, itemId, itemName: name });
+          } else {
+            setRemovalDialog({ open: true, itemId, itemName: name });
           }
         }}
       />
@@ -439,7 +512,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       <div className="absolute inset-0 z-0">
         <IslandCanvas
           islands={islands}
-          isDraggingItem={false}
+          isDraggingItem={!!selectedPlacedItem}
           isDraggingPlacedItem={false}
           onCellDrop={handleCellDrop}
           placedObjects={placedObjects}
@@ -456,6 +529,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
             setIsDialogOpen={setIsDialogOpen}
             onItemDragStart={handleInventoryItemClick}
             onItemDragEnd={() => { }}
+            onSlotClick={handleInventorySlotClick}
           />
         </div>
       </div>
@@ -507,6 +581,101 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           setIsDialogOpen={setIsDialogOpen}
         >
           <StoreContent userId={profile.id} />
+        </Dialog>
+      )}
+
+      {/* Removal Confirmation Dialog */}
+      {removalDialog && removalDialog.open && (
+        <Dialog
+          iconStyle="bg-red-600 text-white"
+          icon={<span>⚠️</span>}
+          title="Remove Block?"
+          className="flex items-center justify-center"
+          setIsDialogOpen={() => setRemovalDialog(null)}
+        >
+          <div className="p-4 space-y-4">
+            <p className="text-center">
+              Remove <strong>{removalDialog.itemName}</strong> from the island?
+            </p>
+            <p className="text-sm text-gray-600 text-center">
+              It will be moved back to your inventory.
+            </p>
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={() => setRemovalDialog(null)}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  // Find an empty inventory slot or stack with same item
+                  const removedItem = islandItems.find(i => i.id === removalDialog.itemId);
+                  if (!removedItem) {
+                    console.error("Item not found");
+                    setRemovalDialog(null);
+                    return;
+                  }
+
+                  // Try to find existing stack of same item_id  
+                  const existingStack = islandItems.find(
+                    i => i.item_id === removedItem.item_id &&
+                      i.pos_x !== null &&
+                      i.pos_y !== null &&
+                      i.id !== removedItem.id
+                  );
+
+                  let targetSlotX, targetSlotY;
+
+                  if (existingStack) {
+                    // Stack with existing item
+                    targetSlotX = existingStack.pos_x!;
+                    targetSlotY = existingStack.pos_y!;
+                    console.log("Stacking with existing item at:", { targetSlotX, targetSlotY });
+                  } else {
+                    // Find next empty slot
+                    const occupiedSlots = new Set(
+                      islandItems
+                        .filter(i => i.pos_x !== null && i.pos_y !== null)
+                        .map(i => `${i.pos_x}-${i.pos_y}`)
+                    );
+
+                    // Try hotbar first (pos_y = 0, pos_x = 0-9)
+                    let found = false;
+                    for (let x = 0; x < 10; x++) {
+                      if (!occupiedSlots.has(`${x}-0`)) {
+                        targetSlotX = x;
+                        targetSlotY = 0;
+                        found = true;
+                        break;
+                      }
+                    }
+
+                    if (!found) {
+                      // Use first slot as fallback
+                      targetSlotX = 0;
+                      targetSlotY = 1;
+                    }
+
+                    console.log("Moving to empty slot:", { targetSlotX, targetSlotY });
+                  }
+
+                  // Ensure values are defined
+                  if (targetSlotX === undefined || targetSlotY === undefined) {
+                    console.error("Could not find valid inventory slot");
+                    setRemovalDialog(null);
+                    return;
+                  }
+
+                  await moveToInventory(removalDialog.itemId, targetSlotX, targetSlotY);
+                  setRemovalDialog(null);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
         </Dialog>
       )}
     </div>

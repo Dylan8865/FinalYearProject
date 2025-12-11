@@ -12,6 +12,7 @@ interface InventoryBarProps {
   setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
   onItemDragStart?: (item: any, index: number) => void;
   onItemDragEnd?: () => void;
+  onSlotClick?: (slotX: number, slotY: number) => void;
 }
 
 /**
@@ -34,20 +35,52 @@ const InventoryBar = ({
   setIsDialogOpen,
   onItemDragStart,
   onItemDragEnd,
+  onSlotClick,
 }: InventoryBarProps) => {
   // Fetch all island items from context
   const { islandItems } = useIslandItemsContext();
 
   // Filter items for hotbar: pos_y === 0, pos_x === 0-9
-  // Creates an array of 10 slots and fills them with matching items
-  const hotbarItems = Array.from({ length: 10 }).map((_, index) => {
-    return islandItems.filter((item) => item.pos_x !== null && item.pos_y !== null).find((item) => item.pos_x === index && item.pos_y === 0);
-  });
+  // Group items by position and calculate quantities
+  const hotbarItems = React.useMemo(() => {
+    console.log("📦 Recalculating hotbar items, total islandItems:", islandItems.length);
+
+    return Array.from({ length: 10 }).map((_, index) => {
+      // Get ALL items at this position (pos_x = index, pos_y = 0)
+      const itemsAtPosition = islandItems.filter(
+        (item) => item.pos_x === index && item.pos_y === 0
+      );
+
+      if (itemsAtPosition.length === 0) return null;
+
+      // Group by item_id and count
+      const grouped = itemsAtPosition.reduce((acc, item) => {
+        const key = item.item_id || 'unknown';
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(item);
+        return acc;
+      }, {} as Record<string, typeof itemsAtPosition>);
+
+      // Get the first group (should only be one item_id per slot)
+      const firstGroup = Object.values(grouped)[0];
+      if (!firstGroup || firstGroup.length === 0) return null;
+
+      // Return the first item with calculated quantity
+      return {
+        ...firstGroup[0],
+        quantity: firstGroup.length,
+        allIds: firstGroup.map(i => i.id), // Store all IDs for potential future use
+      };
+    });
+  }, [islandItems]);
 
   // Debug: Log hotbar items with quantities
   console.log("Hotbar items with quantities:", hotbarItems.map(item => ({
     name: item?.item?.name,
     quantity: item?.quantity,
+    allIds: item?.allIds,
     pos_x: item?.pos_x,
     pos_y: item?.pos_y,
   })));
@@ -58,12 +91,16 @@ const InventoryBar = ({
         <div className="mt-[-24px] flex items-center justify-center gap-2">
           {hotbarItems.map((item, index) => (
             <InventoryButton
-              key={index}
+              key={`slot-${index}-${item?.id}-${item?.quantity || 0}`}
               className="bg-[#d9d9d9] text-black relative"
               onClick={() => {
                 if (item && onItemDragStart) {
                   console.log("Item clicked:", item.item?.name);
                   onItemDragStart(item, index);
+                } else if (!item && onSlotClick) {
+                  // Empty slot clicked - move selected placed item here
+                  console.log("Empty slot clicked:", index);
+                  onSlotClick(index, 0);
                 }
               }}
             >

@@ -163,6 +163,8 @@ export function useIslandItems(profileId?: string, islandId?: string) {
             grid_x: gridX,
             grid_y: gridY,
             grid_z: gridZ,
+            pos_x: null,  // Clear inventory position
+            pos_y: null,  // Clear inventory position
           }
           : item
       )

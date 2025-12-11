@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Suspense } from "react";
 import TerrainBlock from "../Block/TerrainBlocks";
 import DecorativeBlock from "../Block/DecorativeBlock";
@@ -20,7 +20,7 @@ interface PlacedBlockProps {
  * 
  * Interaction Model:
  * - Single click: Select the block
- * - Double click (functional only): Open sidebar
+ * - Double click: Open removal dialog (terrain/decorative) or editor (functional)
  * 
  * @param itemId - Unique ID of the placed item
  * @param itemName - Display name
@@ -29,7 +29,7 @@ interface PlacedBlockProps {
  * @param allowStacking - Whether this block type allows stacking other blocks on top
  * @param isSelected - Whether this block is currently selected
  * @param onClick - Callback for single click
- * @param onDoubleClick - Callback for double click (functional items only)
+ * @param onDoubleClick - Callback for double click
  */
 const PlacedBlock = ({
     itemId,
@@ -41,42 +41,47 @@ const PlacedBlock = ({
     onClick,
     onDoubleClick,
 }: PlacedBlockProps) => {
-    const [clickCount, setClickCount] = useState(0);
-    const [clickTimer, setClickTimer] = useState<NodeJS.Timeout | null>(null);
+    const clickCountRef = useRef(0);
+    const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const singleClickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleClick = (e: any) => {
         e.stopPropagation();
 
         // Increment click count
-        const newClickCount = clickCount + 1;
-        setClickCount(newClickCount);
+        clickCountRef.current += 1;
+        const currentCount = clickCountRef.current;
 
-        // Clear existing timer
-        if (clickTimer) {
-            clearTimeout(clickTimer);
+        console.log(`Click #${currentCount} on ${itemName} (${itemType})`);
+
+        // Clear existing timers
+        if (clickTimerRef.current) {
+            clearTimeout(clickTimerRef.current);
+        }
+        if (singleClickTimerRef.current) {
+            clearTimeout(singleClickTimerRef.current);
         }
 
         // Set timer to reset click count
-        const timer = setTimeout(() => {
-            setClickCount(0);
-        }, 300);
-        setClickTimer(timer);
+        clickTimerRef.current = setTimeout(() => {
+            clickCountRef.current = 0;
+        }, 400);
 
-        // Check for double-click (only for functional items)
-        if (newClickCount === 2 && itemType === "functional") {
-            console.log("Double-click detected on functional item:", itemName);
-            setClickCount(0);
-            if (clickTimer) clearTimeout(clickTimer);
+        // Check for double-click
+        if (currentCount === 2) {
+            console.log("✅ Double-click detected on:", itemName, itemType);
+            clickCountRef.current = 0;
+            if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
             onDoubleClick?.(itemId, itemType, itemName);
-        } else if (newClickCount === 1) {
-            // Wait a bit to see if it's a double-click
-            setTimeout(() => {
-                // Check if still only 1 click after delay
-                if (clickCount === 0 || clickCount === 1) {
-                    // Single click
+        } else if (currentCount === 1) {
+            // Wait to see if it's a double-click
+            singleClickTimerRef.current = setTimeout(() => {
+                if (clickCountRef.current === 1) {
+                    // Still only 1 click after delay - it's a single click
+                    console.log("Single click on:", itemName);
                     onClick?.(itemId, itemType, itemName);
                 }
-            }, 300);
+            }, 400);
         }
     };
 
