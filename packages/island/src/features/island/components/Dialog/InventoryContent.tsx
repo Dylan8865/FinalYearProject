@@ -3,6 +3,7 @@ import { IslandItemType } from "@/types/types";
 import QuestionIcon from "@/icons/QuestionIcon";
 import TrashIcon from "@/icons/TrashIcon";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
+import Image from "next/image";
 
 const InventoryContent = () => {
   const { islandItems, loading, updateItemPosition, deleteItem } =
@@ -96,14 +97,33 @@ const InventoryContent = () => {
             return (
               <div
                 key={`${row}-${col}`}
-                className={`${row == 0 ? "bg-[#d9d9d9] text-black" : "bg-[#8b8b8b]"} flex h-16 w-16 items-center justify-center overflow-hidden transition-opacity ${item ? "cursor-grab active:cursor-grabbing" : ""} ${draggedItem?.fromX === col && draggedItem?.fromY === row ? "opacity-50" : ""}`}
+                className={`${row == 0 ? "bg-[#d9d9d9] text-black" : "bg-[#8b8b8b]"} relative flex h-16 w-16 items-center justify-center overflow-hidden transition-opacity ${item ? "cursor-grab active:cursor-grabbing" : ""} ${draggedItem?.fromX === col && draggedItem?.fromY === row ? "opacity-50" : ""}`}
                 draggable={!!item}
                 onDragStart={(e) => item && handleDragStart(e, item, col, row)}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, col, row)}
                 onDragEnd={handleDragEnd}
               >
-                {item && <QuestionIcon />}
+                {item && item.item?.image_cover_url ? (
+                  <Image
+                    src={item.item.image_cover_url}
+                    alt={item.item.name || "Item"}
+                    width={50}
+                    height={50}
+                    className="object-contain"
+                    draggable={false}
+                    unoptimized
+                  />
+                ) : (
+                  item && <QuestionIcon />
+                )}
+
+                {/* Quantity Badge */}
+                {item && (item.quantity ?? 1) > 1 && (
+                  <div className="absolute bottom-1 right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-black/80 px-1.5 text-xs font-bold text-white">
+                    {item.quantity}
+                  </div>
+                )}
               </div>
             );
           })

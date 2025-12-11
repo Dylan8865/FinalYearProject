@@ -11,13 +11,30 @@ export interface IslandData {
   gridSize: number;
 }
 
-interface IslandCanvasProps {
-  islands: IslandData[];
+interface PlacedObject {
+  x: number;
+  y: number;
+  z: number;
+  node: React.ReactNode;
 }
 
-const IslandCanvas = ({ islands }: IslandCanvasProps) => {
+interface IslandCanvasProps {
+  islands: IslandData[];
+  isDraggingItem?: boolean;
+  isDraggingPlacedItem?: boolean;
+  onCellDrop?: (islandId: string, cellId: string, x: number, z: number) => void;
+  placedObjects?: Record<string, PlacedObject & { islandId?: string }>;
+}
+
+const IslandCanvas = ({
+  islands,
+  isDraggingItem = false,
+  isDraggingPlacedItem = false,
+  onCellDrop,
+  placedObjects = {},
+}: IslandCanvasProps) => {
   return (
-    <div className="w-full h-full">
+    <div className="h-full w-full">
       <Canvas shadows camera={{ position: [10, 15, 5], fov: 50 }}>
         <ambientLight intensity={0.7} color="#ffffff" />
         <directionalLight
@@ -30,17 +47,34 @@ const IslandCanvas = ({ islands }: IslandCanvasProps) => {
         />
         <hemisphereLight args={["#87CEEB", "#A8A060", 0.6]} />
 
-        {islands.map((island) => (
-          <Island
-            key={island.id}
-            gridSize={island.gridSize}
-            position={island.position}
-          />
-        ))}
+        {islands.map((island) => {
+          // Filter placed objects for this specific island
+          const islandPlacedObjects = Object.entries(placedObjects)
+            .filter(([_, obj]) => obj.islandId === island.id)
+            .reduce((acc, [key, obj]) => ({ ...acc, [key]: obj }), {});
+
+          return (
+            <Island
+              key={island.id}
+              gridSize={island.gridSize}
+              position={island.position}
+              animate={true}
+              isDraggingItem={isDraggingItem}
+              onCellDrop={(cellId, x, z) => {
+                if (onCellDrop) {
+                  console.log("🏝️ Island clicked:", island.id);
+                  onCellDrop(island.id, cellId, x, z);
+                }
+              }}
+              placedObjects={islandPlacedObjects}
+            />
+          );
+        })}
 
         <OrbitControls
-          enablePan={true}
-          enableRotate={true}
+          enabled={!isDraggingPlacedItem}
+          enablePan={!isDraggingPlacedItem}
+          enableRotate={!isDraggingPlacedItem}
           enableZoom={true}
           enableDamping={true}
           dampingFactor={0.05}

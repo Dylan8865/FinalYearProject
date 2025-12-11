@@ -23,6 +23,8 @@ interface IslandItemsContextType {
     posY: number
   ) => Promise<boolean>;
   deleteItem: (islandItemId: string) => Promise<boolean>;
+  removeItemFromIsland: (islandItemId: string, profileId: string) => Promise<boolean>;
+  moveToInventory: (islandItemId: string, slotX: number, slotY: number) => Promise<boolean>;
 }
 
 const IslandItemsContext = createContext<IslandItemsContextType | undefined>(

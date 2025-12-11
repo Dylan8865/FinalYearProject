@@ -26,6 +26,10 @@ export interface ItemType {
   oxygen_rate: number;
   type: string;
   oxygen_required: number;
+  image_cover_path?: string;
+  model_path?: string;
+  model_url?: string;
+  image_cover_url?: string; // Pre-resolved public URL from API
 }
 
 export interface IslandItemType {
@@ -42,6 +46,7 @@ export interface IslandItemType {
   pos_x: number | null;
   pos_y: number | null;
   profile_id: string;
+  quantity?: number; // Number of stacked items (default 1)
   item?: ItemType;
   island?: IslandType;
 }

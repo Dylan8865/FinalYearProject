@@ -1,8 +1,7 @@
 "use client";
-/* eslint-disable react-hooks/purity */
 import React, { useState } from "react";
 import { useItems } from "@/features/island/hooks/useItems";
-import { useIslandItems } from "@/features/island/hooks/useIslandItems";
+import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
 import FileIcon from "@/icons/FileIcon";
 import { ItemType } from "@/types/types";
 import SeedlingIcon from "@/icons/SeedlingIcon";
@@ -13,6 +12,7 @@ import QuestionIcon from "@/icons/QuestionIcon";
 import Dialog from "./Dialog";
 import ExclaimationIcon from "@/icons/ExclaimationIcon";
 import Button from "./Button";
+import Image from "next/image";
 
 interface StoreRowProps {
   items: ItemType[];
@@ -43,7 +43,17 @@ const StoreRow = ({
                 onClick={() => setSelectedItem(item)}
               >
                 <div className="flex items-center justify-center text-2xl text-black">
-                  <QuestionIcon />
+                  {item.image_cover_url ? (
+                    <Image
+                      src={item.image_cover_url}
+                      alt={item.name}
+                      width={50}
+                      height={50}
+                      unoptimized
+                    />
+                  ) : (
+                    <QuestionIcon />
+                  )}
                 </div>
               </button>
 
@@ -64,7 +74,7 @@ interface StoreContentProps {
 
 const StoreContent = ({ userId }: StoreContentProps) => {
   const { items, loading: itemsLoading } = useItems();
-  const { purchaseItem } = useIslandItems(userId);
+  const { purchaseItem } = useIslandItemsContext();
   const [selectedItem, setSelectedItem] = useState<ItemType | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
 
@@ -138,7 +148,7 @@ const StoreContent = ({ userId }: StoreContentProps) => {
                   onClick={() => handlePurchase(selectedItem.id)}
                   disabled={isPurchasing}
                 >
-                  Yes
+                  {isPurchasing ? "Purchasing..." : "Yes"}
                 </Button>
                 <Button
                   className="border border-transparent bg-[#1a1a1a] transition hover:border-[#515151] disabled:cursor-not-allowed disabled:opacity-50"
