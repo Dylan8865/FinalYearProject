@@ -33,7 +33,7 @@ export function useIslandItems(profileId?: string, islandId?: string) {
   /**
    * Fetches island items from the database
    * Includes related item and island data
-   * Generates public URLs for 3D models from Supabase storage
+   * Computes quantity by grouping items with same item_id at same position
    */
   const fetchIslandItems = async () => {
     try {
@@ -45,7 +45,7 @@ export function useIslandItems(profileId?: string, islandId?: string) {
       if (profileId) params.append("profile_id", profileId);
       if (islandId) params.append("island_id", islandId);
 
-      // Fetch items from API
+      // Fetch items from API (image URLs and model URLs are pre-resolved by the API)
       const response = await fetch(`/api/island-items?${params.toString()}`);
 
       if (!response.ok) {
@@ -54,37 +54,37 @@ export function useIslandItems(profileId?: string, islandId?: string) {
 
       const data: IslandItemType[] = await response.json();
 
-      // Generate model URLs from Supabase storage
-      // Models are stored in "items" bucket with format: {item_id}.glb
-      const supabase = createClient();
-      const itemsWithModels = await Promise.all(
-        data.map(async (item) => {
-          if (item.item?.id) {
-            // Get public URL for the model
-            const { data: urlData } = supabase.storage
-              .from("items")
-              .getPublicUrl(`${item.item.id}.glb`);
+      // Group items by their position and item_id to compute quantities
+      // Items with same item_id at same position (pos_x, pos_y) are stacked
+      const groupedItems = new Map<string, IslandItemType[]>();
 
-            console.log("Fetched model URL for item:", {
-              itemId: item.item.id,
-              itemName: item.item.name,
-              modelUrl: urlData.publicUrl,
-            });
+      data.forEach((item) => {
+        // Create a key for grouping: "itemId-posX-posY" for inventory items
+        // For placed items (on island), each gets unique key to not stack
+        const isInventoryItem = item.island_id === null && item.grid_x === null;
+        const key = isInventoryItem
+          ? `${item.item_id}-${item.pos_x}-${item.pos_y}`
+          : `placed-${item.id}`; // Placed items don't stack
 
-            return {
-              ...item,
-              item: {
-                ...item.item,
-                model_url: urlData.publicUrl,
-              },
-            };
-          }
-          return item;
-        })
-      );
+        if (!groupedItems.has(key)) {
+          groupedItems.set(key, []);
+        }
+        groupedItems.get(key)!.push(item);
+      });
 
-      console.log("All items with models:", itemsWithModels);
-      setIslandItems(itemsWithModels);
+      // Convert grouped items back to array, keeping only the first item of each group
+      // and adding a computed quantity property
+      const itemsWithQuantity: IslandItemType[] = [];
+      groupedItems.forEach((group) => {
+        const firstItem = group[0];
+        itemsWithQuantity.push({
+          ...firstItem,
+          quantity: group.length, // Computed quantity based on group size
+        });
+      });
+
+      console.log("Fetched island items with computed quantities:", itemsWithQuantity);
+      setIslandItems(itemsWithQuantity);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(errorMessage);
@@ -96,6 +96,8 @@ export function useIslandItems(profileId?: string, islandId?: string) {
 
   const purchaseItem = async (itemId: string, profileId: string) => {
     try {
+      // Always create a new item entry
+      // Quantity will be computed client-side by grouping items with same item_id
       const response = await fetch("/api/island-items", {
         method: "POST",
         headers: {
@@ -114,23 +116,10 @@ export function useIslandItems(profileId?: string, islandId?: string) {
 
       const newItem = await response.json();
 
-      // Fetch model URL for the new item
-      if (newItem.item?.id) {
-        const supabase = createClient();
-        const { data: urlData } = supabase.storage
-          .from("items")
-          .getPublicUrl(`${newItem.item.id}.glb`);
+      console.log("Purchased new item:", newItem);
 
-        newItem.item.model_url = urlData.publicUrl;
-
-        console.log("Purchased item with model:", {
-          itemId: newItem.item.id,
-          modelUrl: newItem.item.model_url,
-        });
-      }
-
-      // Optimistic update - add new item to state immediately
-      setIslandItems((prevItems) => [...prevItems, newItem]);
+      // Refetch to recompute quantities with the new item
+      await fetchIslandItems();
 
       return true;
     } catch (err) {
@@ -169,12 +158,12 @@ export function useIslandItems(profileId?: string, islandId?: string) {
       prevItems.map((item) =>
         item.id === islandItemId
           ? {
-              ...item,
-              island_id: islandId,
-              grid_x: gridX,
-              grid_y: gridY,
-              grid_z: gridZ,
-            }
+            ...item,
+            island_id: islandId,
+            grid_x: gridX,
+            grid_y: gridY,
+            grid_z: gridZ,
+          }
           : item
       )
     );
@@ -270,6 +259,90 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     }
   };
 
+  const removeItemFromIsland = async (
+    islandItemId: string,
+    profileId: string
+  ) => {
+    try {
+      const itemToRemove = islandItems.find((item) => item.id === islandItemId);
+      if (!itemToRemove) {
+        console.error("Item not found:", islandItemId);
+        return false;
+      }
+
+      const response = await fetch("/api/island-items/remove-from-island", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: islandItemId,
+          profile_id: profileId,
+          item_id: itemToRemove.item_id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to remove item from island");
+      }
+
+      await fetchIslandItems();
+      return true;
+    } catch (err) {
+      console.error("Failed to remove item from island:", err);
+      await fetchIslandItems();
+      return false;
+    }
+  };
+
+  const moveToInventory = async (
+    islandItemId: string,
+    slotX: number,
+    slotY: number
+  ) => {
+    try {
+      // Optimistic update - move to inventory immediately
+      setIslandItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === islandItemId
+            ? {
+              ...item,
+              island_id: null,
+              grid_x: null,
+              grid_y: null,
+              grid_z: null,
+              pos_x: slotX,
+              pos_y: slotY,
+            }
+            : item
+        )
+      );
+
+      const response = await fetch("/api/island-items/move-to-inventory", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: islandItemId,
+          pos_x: slotX,
+          pos_y: slotY,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to move item to inventory");
+      }
+
+      await fetchIslandItems();
+      return true;
+    } catch (err) {
+      console.error("Failed to move item to inventory:", err);
+      await fetchIslandItems();
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchIslandItems();
   }, [profileId, islandId]);
@@ -283,5 +356,7 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     placeItemOnIsland,
     updateItemPosition,
     deleteItem,
+    removeItemFromIsland,
+    moveToInventory,
   };
 }

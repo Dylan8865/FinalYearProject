@@ -18,6 +18,8 @@ import { IslandItemsProvider } from "@/features/island/contexts/IslandItemsConte
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import TerrainBlock from "./Block/TerrainBlocks";
+import PlacedBlock from "./Block/PlacedBlock";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -38,81 +40,58 @@ interface PlacedObject {
   y: number;
   z: number;
   itemId: string;
+  itemName: string;
+  itemType: "terrain" | "decorative" | "functional";
   modelUrl?: string;
   node: React.ReactNode;
   islandId?: string;
 }
 
 /**
- * FallbackCube Component
- * 
- * Grass block fallback when GLB model is not available
- */
-function FallbackCube() {
-  return (
-    <mesh castShadow receiveShadow>
-      <boxGeometry args={[1.2, 1.6, 1.2]} />
-      <meshStandardMaterial
-        color="#8c8d52"
-        roughness={0.5}
-        metalness={0.2}
-      />
-    </mesh>
-  );
-}
-
-/**
  * Model3D Component
  *
  * Loads and renders a 3D GLB model from Supabase storage using React Three Fiber.
- * The model file is loaded from the "items" bucket with filename format: {item_id}.glb
+ * The model file is loaded from the "items" bucket with pre-resolved public URLs.
  *
  * Features:
- * - Loads GLB model from provided URL
+ * - Loads GLB model from provided URL using useGLTF hook
  * - Clones the scene to allow multiple instances of the same model
  * - Sets up shadow casting and receiving for proper lighting
  * - Scales the model to fit the island grid (0.5x scale)
+ * - Automatically handles errors and falls back to TerrainBlock
  *
  * Note: This component should be wrapped in a Suspense boundary
- * Falls back to FallbackCube if model doesn't exist
+ * Falls back to TerrainBlock if model doesn't exist or fails to load
  *
- * @param url - Full URL to the GLB model file from Supabase storage
+ * @param url - Full public URL to the GLB model file from Supabase storage
  */
 function Model3D({ url }: { url: string }) {
-  console.log("🔄 Attempting to load GLB model from URL:", url);
+  try {
+    // Load the GLB model from the provided URL
+    const { scene } = useGLTF(url);
 
-  // useGLTF with error handling
-  const gltf = useGLTF(url, undefined, undefined, (error) => {
-    console.warn("⚠️ GLB model failed to load:", error);
-  });
+    // Clone the scene to allow multiple instances
+    const clonedScene = scene.clone();
 
-  // If model failed to load, gltf.scene might be undefined
-  if (!gltf || !gltf.scene) {
-    console.warn("⚠️ No scene found in GLB, using fallback");
-    return <FallbackCube />;
+    // Enable shadows on all meshes in the model
+    clonedScene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+
+    return (
+      <primitive
+        object={clonedScene}
+        scale={0.5}
+      />
+    );
+  } catch (error) {
+    console.error("Error loading 3D model:", error);
+    // Fallback to brick block if model fails to load
+    return <TerrainBlock name="Bricks" />;
   }
-
-  console.log("✅ GLB Model loaded successfully:", gltf.scene);
-
-  // Clone the scene to allow multiple instances
-  const clonedScene = gltf.scene.clone();
-
-  // Traverse and set up materials for shadows
-  clonedScene.traverse((child) => {
-    if ((child as THREE.Mesh).isMesh) {
-      const mesh = child as THREE.Mesh;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-
-      console.log("🎨 Mesh found in GLB:", {
-        name: mesh.name,
-        hasGeometry: !!mesh.geometry,
-        hasMaterial: !!mesh.material,
-      });
-    }
-  });
-
-  return <primitive object={clonedScene} scale={0.5} />;
 }
 
 /**
@@ -155,11 +134,18 @@ function ModelPlaceholder() {
 const IslandPageContent = ({ profile }: IslandPageProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error } = useIslands();
-  const [draggedItem, setDraggedItem] = useState<any>(null);
+  const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(null); // Currently selected placed item ID
   const [placedObjects, setPlacedObjects] = useState<
     Record<string, PlacedObject>
   >({});
-  const { islandItems, placeItemOnIsland } = useIslandItemsContext();
+  const { islandItems, placeItemOnIsland, removeItemFromIsland, moveToInventory } = useIslandItemsContext();
+
+  // Functional item dialog
+  const [functionalItemDialog, setFunctionalItemDialog] = useState<{
+    open: boolean;
+    itemId: string;
+    itemName: string;
+  } | null>(null);
 
   /**
    * Load previously placed items from database on mount
@@ -168,7 +154,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
   useEffect(() => {
     // Wait for islands to load first
     if (!islands || islands.length === 0) {
-      console.log("⏳ Waiting for islands to load...");
+      console.log("Waiting for islands to load...");
       return;
     }
 
@@ -209,37 +195,37 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       const positionKey = `${cellId}-${y}`;
 
       const modelUrl = item.item?.model_url;
+      const itemType = (item.item?.type as "terrain" | "decorative" | "functional") || "terrain";
+      const itemName = item.item?.name || "Unknown";
 
-      // Create 3D model node
-      let node: React.ReactNode;
-
-      if (modelUrl) {
-        console.log("Loading placed model:", {
-          itemId: item.id,
-          itemName: item.item?.name,
-          modelUrl,
-          position: { x, y, z },
-          island: island.name,
-          gridSize: island.gridSize,
-        });
-
-        // Wrap in Suspense with fallback
-        // If model fails to load, useGLTF will handle it and show FallbackCube
-        node = (
-          <Suspense fallback={<ModelPlaceholder />}>
-            <Model3D url={modelUrl} />
-          </Suspense>
-        );
-      } else {
-        console.warn("No model URL for placed item, using fallback cube");
-        node = <FallbackCube />;
-      }
+      // Create 3D model node using PlacedBlock wrapper
+      const node = (
+        <PlacedBlock
+          itemId={item.id}
+          itemName={itemName}
+          itemType={itemType}
+          modelUrl={modelUrl}
+          isSelected={selectedPlacedItem === item.id}
+          onClick={(itemId, type, name) => {
+            console.log("Placed block clicked:", { itemId, type, name });
+            setSelectedPlacedItem(itemId);
+          }}
+          onDoubleClick={(itemId, type, name) => {
+            console.log("Placed block double-clicked:", { itemId, type, name });
+            if (type === "functional") {
+              setFunctionalItemDialog({ open: true, itemId, itemName: name });
+            }
+          }}
+        />
+      );
 
       newPlacedObjects[positionKey] = {
         x,
         y,
         z,
         itemId: item.id,
+        itemName: item.item?.name || "Unknown",
+        itemType: (item.item?.type as "terrain" | "decorative" | "functional") || "terrain",
         modelUrl,
         node,
         islandId: item.island_id || undefined, // Track which island this belongs to
@@ -254,23 +240,14 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
    * Handles selecting an item from inventory
    * Click an item to select it, then click a grid cell to place it
    */
-  const handleItemDragStart = (item: any, _index: number) => {
-    console.log("🎮 Item selected:", {
+  const handleInventoryItemClick = (item: any, _index: number) => {
+    console.log("Item selected from inventory:", {
       id: item.id,
       item: item.item,
       itemName: item.item?.name,
       modelUrl: item.item?.model_url,
     });
-    setDraggedItem(item);
-  };
-
-  /**
-   * Handles deselecting an item
-   * Keep item selected until placed or clicked elsewhere
-   */
-  const handleItemDragEnd = () => {
-    console.log("🎮 Drag ended - item still selected");
-    // Keep item selected - user needs to click grid to place
+    setSelectedPlacedItem(item.id);
   };
 
   /**
@@ -322,13 +299,15 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     x: number,
     z: number
   ) => {
-    if (!draggedItem) return;
+    // Get the selected item from islandItems
+    const selectedItem = islandItems.find(item => item.id === selectedPlacedItem);
+    if (!selectedItem) return;
 
     const y = getNextYPosition(cellId);
 
     if (!isValidPosition(cellId, y)) {
       console.log("Invalid position - no support below!");
-      setDraggedItem(null);
+      setSelectedPlacedItem(null);
       return;
     }
 
@@ -336,39 +315,44 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     const [gridZ, gridX] = cellId.split("-").map(Number);
     const gridY = y;
 
-    const modelUrl = draggedItem.item?.model_url;
+    const modelUrl = selectedItem.item?.model_url;
+    const itemType = (selectedItem.item?.type as "terrain" | "decorative" | "functional") || "terrain";
+    const itemName = selectedItem.item?.name || "Unknown";
 
-    console.log("📦 Placing item on island:", {
+    console.log("Placing item on island:", {
       islandId,
       cellId,
       position: { x, y, z },
       gridPosition: { gridX, gridY, gridZ },
-      itemId: draggedItem.id,
-      itemName: draggedItem.item?.name,
-      itemData: draggedItem.item,
+      itemId: selectedItem.id,
+      itemName,
+      itemType,
       modelUrl,
       hasModelUrl: !!modelUrl,
     });
 
     const positionKey = `${cellId}-${y}`;
 
-    // Create the 3D model node based on whether we have a model URL
-    let node: React.ReactNode;
-
-    if (modelUrl) {
-      // Load 3D model from Supabase storage
-      // Model files are stored in "items" bucket with format: {item_id}.glb
-      console.log("🎯 Creating Model3D component with URL:", modelUrl);
-      node = (
-        <Suspense fallback={<ModelPlaceholder />}>
-          <Model3D url={modelUrl} />
-        </Suspense>
-      );
-    } else {
-      // Fallback: Show grass block if model URL is not available
-      console.warn("No model URL found, using fallback cube");
-      node = <FallbackCube />;
-    }
+    // Create PlacedBlock node for the newly placed item
+    const node = (
+      <PlacedBlock
+        itemId={selectedItem.id}
+        itemName={itemName}
+        itemType={itemType}
+        modelUrl={modelUrl}
+        isSelected={false}
+        onClick={(itemId, type, name) => {
+          console.log("Placed block clicked:", { itemId, type, name });
+          setSelectedPlacedItem(itemId);
+        }}
+        onDoubleClick={(itemId, type, name) => {
+          console.log("Placed block double-clicked:", { itemId, type, name });
+          if (type === "functional") {
+            setFunctionalItemDialog({ open: true, itemId, itemName: name });
+          }
+        }}
+      />
+    );
 
     // Add to placed objects state for immediate rendering (optimistic update)
     setPlacedObjects((prev) => {
@@ -378,7 +362,9 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           x,
           y,
           z,
-          itemId: draggedItem.id,
+          itemId: selectedItem.id,
+          itemName: selectedItem.item?.name || "Unknown",
+          itemType: (selectedItem.item?.type as "terrain" | "decorative" | "functional") || "terrain",
           modelUrl,
           node,
           islandId, // Track which island this object belongs to
@@ -391,7 +377,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     // Persist to database with the correct island_id
     try {
       const success = await placeItemOnIsland(
-        draggedItem.id,
+        selectedItem.id,
         islandId, // Use the island that was clicked
         gridX,
         gridY,
@@ -419,28 +405,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       });
     }
 
-    setDraggedItem(null);
+    setSelectedPlacedItem(null);
   };
-
-  // Prevent default drag behavior on the canvas container
-  useEffect(() => {
-    const handleDragOver = (e: DragEvent) => {
-      e.preventDefault();
-      e.dataTransfer!.dropEffect = "move";
-    };
-
-    const handleDrop = (e: DragEvent) => {
-      e.preventDefault();
-    };
-
-    document.addEventListener("dragover", handleDragOver);
-    document.addEventListener("drop", handleDrop);
-
-    return () => {
-      document.removeEventListener("dragover", handleDragOver);
-      document.removeEventListener("drop", handleDrop);
-    };
-  }, []);
 
   // Debug: Log islandItems when they change
   useEffect(() => {
@@ -473,7 +439,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       <div className="absolute inset-0 z-0">
         <IslandCanvas
           islands={islands}
-          isDraggingItem={!!draggedItem}
+          isDraggingItem={false}
+          isDraggingPlacedItem={false}
           onCellDrop={handleCellDrop}
           placedObjects={placedObjects}
         />
@@ -487,8 +454,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         <div className="pointer-events-auto">
           <InventoryBar
             setIsDialogOpen={setIsDialogOpen}
-            onItemDragStart={handleItemDragStart}
-            onItemDragEnd={handleItemDragEnd}
+            onItemDragStart={handleInventoryItemClick}
+            onItemDragEnd={() => { }}
           />
         </div>
       </div>

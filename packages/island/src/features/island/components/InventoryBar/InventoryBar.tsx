@@ -22,7 +22,7 @@ interface InventoryBarProps {
  * 
  * Features:
  * - Displays up to 10 items in a horizontal layout
- * - Shows item thumbnails from image_cover_path or a placeholder icon
+ * - Shows item thumbnails from image_cover_url (pre-resolved from API) or a placeholder icon
  * - Supports drag-and-drop to place items on the island
  * - Provides buttons to open inventory and store dialogs
  * 
@@ -41,8 +41,16 @@ const InventoryBar = ({
   // Filter items for hotbar: pos_y === 0, pos_x === 0-9
   // Creates an array of 10 slots and fills them with matching items
   const hotbarItems = Array.from({ length: 10 }).map((_, index) => {
-    return islandItems.find((item) => item.pos_x === index && item.pos_y === 0);
+    return islandItems.filter((item) => item.pos_x !== null && item.pos_y !== null).find((item) => item.pos_x === index && item.pos_y === 0);
   });
+
+  // Debug: Log hotbar items with quantities
+  console.log("Hotbar items with quantities:", hotbarItems.map(item => ({
+    name: item?.item?.name,
+    quantity: item?.quantity,
+    pos_x: item?.pos_x,
+    pos_y: item?.pos_y,
+  })));
 
   return (
     <div className="pointer-events-none z-0 flex w-screen items-center justify-center">
@@ -51,25 +59,33 @@ const InventoryBar = ({
           {hotbarItems.map((item, index) => (
             <InventoryButton
               key={index}
-              className="bg-[#d9d9d9] text-black"
+              className="bg-[#d9d9d9] text-black relative"
               onClick={() => {
                 if (item && onItemDragStart) {
-                  console.log("📦 Item clicked:", item.item?.name);
+                  console.log("Item clicked:", item.item?.name);
                   onItemDragStart(item, index);
                 }
               }}
             >
-              {item && item.item?.image_cover_path ? (
+              {item && item.item?.image_cover_url ? (
                 <Image
-                  src={item.item.image_cover_path}
+                  src={item.item.image_cover_url}
                   alt={item.item.name || "Item"}
-                  width={32}
-                  height={32}
+                  width={30}
+                  height={30}
                   className="object-contain"
                   draggable={false}
+                  unoptimized
                 />
               ) : (
                 item && <QuestionIcon />
+              )}
+
+              {/* Quantity Badge */}
+              {item && (item.quantity ?? 1) > 1 && (
+                <div className="absolute bottom-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-black/80 px-1 text-[10px] font-bold text-white">
+                  {item.quantity}
+                </div>
               )}
             </InventoryButton>
           ))}

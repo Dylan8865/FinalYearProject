@@ -12,6 +12,7 @@ import QuestionIcon from "@/icons/QuestionIcon";
 import Dialog from "./Dialog";
 import ExclaimationIcon from "@/icons/ExclaimationIcon";
 import Button from "./Button";
+import Image from "next/image";
 
 interface StoreRowProps {
   items: ItemType[];
@@ -42,7 +43,17 @@ const StoreRow = ({
                 onClick={() => setSelectedItem(item)}
               >
                 <div className="flex items-center justify-center text-2xl text-black">
-                  <QuestionIcon />
+                  {item.image_cover_url ? (
+                    <Image
+                      src={item.image_cover_url}
+                      alt={item.name}
+                      width={50}
+                      height={50}
+                      unoptimized
+                    />
+                  ) : (
+                    <QuestionIcon />
+                  )}
                 </div>
               </button>
 

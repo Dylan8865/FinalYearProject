@@ -30,7 +30,41 @@ export async function GET(request: Request) {
       );
     }
 
-    return NextResponse.json(islandItems);
+    // Enhance items with resolved image URLs from storage
+    const itemsWithImages = islandItems.map((islandItem) => {
+      if (islandItem.item) {
+        let imageCoverUrl = null;
+        let modelUrl = null;
+
+        // Get public URL for cover image if path exists
+        if (islandItem.item.image_cover_path) {
+          const { data } = supabase.storage
+            .from("items")
+            .getPublicUrl(islandItem.item.image_cover_path);
+          imageCoverUrl = data?.publicUrl || null;
+        }
+
+        // Get public URL for 3D model if path exists
+        if (islandItem.item.model_path) {
+          const { data } = supabase.storage
+            .from("items")
+            .getPublicUrl(islandItem.item.model_path);
+          modelUrl = data?.publicUrl || null;
+        }
+
+        return {
+          ...islandItem,
+          item: {
+            ...islandItem.item,
+            image_cover_url: imageCoverUrl,
+            model_url: modelUrl,
+          },
+        };
+      }
+      return islandItem;
+    });
+
+    return NextResponse.json(itemsWithImages);
   } catch (error) {
     console.error("Server error:", error);
     return NextResponse.json(
@@ -73,21 +107,52 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: inventoryPosition, error: inventoryPositionError } =
-      await supabase
-        .from("island-item")
-        .select("pos_x, pos_y")
-        .eq("profile_id", body.profile_id);
+    // First, check if user already has this item in inventory (not placed on island)
+    const { data: existingItems, error: existingItemsError } = await supabase
+      .from("island-item")
+      .select("pos_x, pos_y, item_id, island_id, grid_x")
+      .eq("profile_id", body.profile_id)
+      .eq("item_id", body.item_id)
+      .is("island_id", null)  // Only inventory items
+      .is("grid_x", null);     // Not placed on island
 
-    if (inventoryPositionError) {
-      console.error("Supabase error:", inventoryPositionError);
+    if (existingItemsError) {
+      console.error("Supabase error:", existingItemsError);
       return NextResponse.json(
-        { error: "Failed to fetch inventory positions" },
+        { error: "Failed to check existing items" },
         { status: 500 }
       );
     }
 
-    const nextPosition = getNextAvailablePosition(inventoryPosition);
+    let targetPosition: { pos_x: number; pos_y: number } | null = null;
+
+    if (existingItems && existingItems.length > 0) {
+      // User already has this item - use the same position to stack
+      const existingItem = existingItems[0];
+      targetPosition = {
+        pos_x: existingItem.pos_x!,
+        pos_y: existingItem.pos_y!,
+      };
+      console.log(`Stacking item ${body.item_id} at existing position:`, targetPosition);
+    } else {
+      // New item - find next available slot
+      const { data: inventoryPosition, error: inventoryPositionError } =
+        await supabase
+          .from("island-item")
+          .select("pos_x, pos_y")
+          .eq("profile_id", body.profile_id);
+
+      if (inventoryPositionError) {
+        console.error("Supabase error:", inventoryPositionError);
+        return NextResponse.json(
+          { error: "Failed to fetch inventory positions" },
+          { status: 500 }
+        );
+      }
+
+      targetPosition = getNextAvailablePosition(inventoryPosition);
+      console.log(`New item ${body.item_id} - next available position:`, targetPosition);
+    }
 
     const { data: islandItem, error } = await supabase
       .from("island-item")
@@ -100,8 +165,8 @@ export async function POST(request: Request) {
         grid_z: body.grid_z || null,
         island_id: body.island_id || null,
         item_id: body.item_id,
-        pos_x: nextPosition ? nextPosition.pos_x : body.pos_x || null,
-        pos_y: nextPosition ? nextPosition.pos_y : body.pos_y || null,
+        pos_x: targetPosition ? targetPosition.pos_x : body.pos_x || null,
+        pos_y: targetPosition ? targetPosition.pos_y : body.pos_y || null,
         profile_id: body.profile_id,
         status: body.status || null,
       })
@@ -148,8 +213,8 @@ export async function PUT(request: Request) {
         grid_y: body.grid_y,
         grid_z: body.grid_z,
         island_id: body.island_id,
-        pos_x: body.pos_x,
-        pos_y: body.pos_y,
+        pos_x: null,
+        pos_y: null,
       })
       .eq("id", body.id)
       .select("*, item(*), island(*)")
@@ -214,7 +279,7 @@ export async function PATCH(request: Request) {
 
     if (!id || pos_x === undefined || pos_y === undefined) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields: id, pos_x, pos_y" },
         { status: 400 }
       );
     }

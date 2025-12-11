@@ -18,7 +18,27 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json(items);
+    // Enhance items with resolved image URLs from storage
+    // This prevents client-side storage requests and improves performance
+    const itemsWithImages = items.map((item) => {
+      let imageCoverUrl = null;
+      let modelUrl = null;
+
+      // Get public URL for cover image if path exists
+      if (item.image_cover_path) {
+        const { data } = supabase.storage
+          .from("items")
+          .getPublicUrl(item.image_cover_path);
+        imageCoverUrl = data?.publicUrl || null;
+      }
+
+      return {
+        ...item,
+        image_cover_url: imageCoverUrl,
+      };
+    });
+
+    return NextResponse.json(itemsWithImages);
   } catch (error) {
     console.error("Server error:", error);
     return NextResponse.json(

@@ -21,6 +21,7 @@ interface PlacedObject {
 interface IslandCanvasProps {
   islands: IslandData[];
   isDraggingItem?: boolean;
+  isDraggingPlacedItem?: boolean;
   onCellDrop?: (islandId: string, cellId: string, x: number, z: number) => void;
   placedObjects?: Record<string, PlacedObject & { islandId?: string }>;
 }
@@ -28,6 +29,7 @@ interface IslandCanvasProps {
 const IslandCanvas = ({
   islands,
   isDraggingItem = false,
+  isDraggingPlacedItem = false,
   onCellDrop,
   placedObjects = {},
 }: IslandCanvasProps) => {
@@ -70,8 +72,9 @@ const IslandCanvas = ({
         })}
 
         <OrbitControls
-          enablePan={true}
-          enableRotate={true}
+          enabled={!isDraggingPlacedItem}
+          enablePan={!isDraggingPlacedItem}
+          enableRotate={!isDraggingPlacedItem}
           enableZoom={true}
           enableDamping={true}
           dampingFactor={0.05}
