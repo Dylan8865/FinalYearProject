@@ -404,6 +404,14 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
 
     const positionKey = `${cellId}-${y}`;
 
+    // Check if this item is already placed somewhere (moving it)
+    const oldPositionKey = selectedItem.grid_x !== null && selectedItem.grid_y !== null && selectedItem.grid_z !== null
+      ? `${selectedItem.grid_z}-${selectedItem.grid_x}-${selectedItem.grid_y}`
+      : null;
+
+    console.log("Old position key:", oldPositionKey);
+    console.log("New position key:", positionKey);
+
     // Create PlacedBlock node for the newly placed item
     const node = (
       <PlacedBlock
@@ -429,19 +437,25 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
 
     // Add to placed objects state for immediate rendering (optimistic update)
     setPlacedObjects((prev) => {
-      const newObjects = {
-        ...prev,
-        [positionKey]: {
-          x,
-          y,
-          z,
-          itemId: selectedItem.id,
-          itemName: selectedItem.item?.name || "Unknown",
-          itemType: (selectedItem.item?.type as "terrain" | "decorative" | "functional") || "terrain",
-          modelUrl,
-          node,
-          islandId, // Track which island this object belongs to
-        },
+      const newObjects = { ...prev };
+
+      // Remove from old position if moving
+      if (oldPositionKey && newObjects[oldPositionKey]?.itemId === selectedItem.id) {
+        console.log("Removing item from old position:", oldPositionKey);
+        delete newObjects[oldPositionKey];
+      }
+
+      // Add to new position
+      newObjects[positionKey] = {
+        x,
+        y,
+        z,
+        itemId: selectedItem.id,
+        itemName: selectedItem.item?.name || "Unknown",
+        itemType: (selectedItem.item?.type as "terrain" | "decorative" | "functional") || "terrain",
+        modelUrl,
+        node,
+        islandId, // Track which island this object belongs to
       };
       console.log("Updated placed objects:", newObjects);
       return newObjects;

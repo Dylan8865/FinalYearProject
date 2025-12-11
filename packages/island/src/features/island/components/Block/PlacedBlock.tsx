@@ -72,16 +72,19 @@ const PlacedBlock = ({
             console.log("✅ Double-click detected on:", itemName, itemType);
             clickCountRef.current = 0;
             if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+            if (singleClickTimerRef.current) clearTimeout(singleClickTimerRef.current);
             onDoubleClick?.(itemId, itemType, itemName);
         } else if (currentCount === 1) {
             // Wait to see if it's a double-click
             singleClickTimerRef.current = setTimeout(() => {
+                // Check current value (not closure)
                 if (clickCountRef.current === 1) {
                     // Still only 1 click after delay - it's a single click
-                    console.log("Single click on:", itemName);
+                    console.log("✅ Single click confirmed on:", itemName);
                     onClick?.(itemId, itemType, itemName);
+                    clickCountRef.current = 0;
                 }
-            }, 400);
+            }, 250); // Reduced from 400ms for faster response
         }
     };
 
