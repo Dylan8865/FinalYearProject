@@ -617,48 +617,42 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
                     return;
                   }
 
-                  // Try to find existing stack of same item_id  
-                  const existingStack = islandItems.find(
-                    i => i.item_id === removedItem.item_id &&
-                      i.pos_x !== null &&
-                      i.pos_y !== null &&
-                      i.id !== removedItem.id
+                  // Find next empty slot - no more stacking!
+                  const occupiedSlots = new Set(
+                    islandItems
+                      .filter(i => i.pos_x !== null && i.pos_y !== null)
+                      .map(i => `${i.pos_x}-${i.pos_y}`)
                   );
 
                   let targetSlotX, targetSlotY;
 
-                  if (existingStack) {
-                    // Stack with existing item
-                    targetSlotX = existingStack.pos_x!;
-                    targetSlotY = existingStack.pos_y!;
-                    console.log("Stacking with existing item at:", { targetSlotX, targetSlotY });
-                  } else {
-                    // Find next empty slot
-                    const occupiedSlots = new Set(
-                      islandItems
-                        .filter(i => i.pos_x !== null && i.pos_y !== null)
-                        .map(i => `${i.pos_x}-${i.pos_y}`)
-                    );
-
-                    // Try hotbar first (pos_y = 0, pos_x = 0-9)
-                    let found = false;
-                    for (let x = 0; x < 10; x++) {
-                      if (!occupiedSlots.has(`${x}-0`)) {
-                        targetSlotX = x;
-                        targetSlotY = 0;
-                        found = true;
-                        break;
-                      }
+                  // Try hotbar first (pos_y = 0, pos_x = 0-9)
+                  let found = false;
+                  for (let x = 0; x < 10; x++) {
+                    if (!occupiedSlots.has(`${x}-0`)) {
+                      targetSlotX = x;
+                      targetSlotY = 0;
+                      found = true;
+                      break;
                     }
-
-                    if (!found) {
-                      // Use first slot as fallback
-                      targetSlotX = 0;
-                      targetSlotY = 1;
-                    }
-
-                    console.log("Moving to empty slot:", { targetSlotX, targetSlotY });
                   }
+
+                  if (!found) {
+                    // Search rest of inventory (y = 1+)
+                    for (let y = 1; y < 100; y++) {
+                      for (let x = 0; x < 10; x++) {
+                        if (!occupiedSlots.has(`${x}-${y}`)) {
+                          targetSlotX = x;
+                          targetSlotY = y;
+                          found = true;
+                          break;
+                        }
+                      }
+                      if (found) break;
+                    }
+                  }
+
+                  console.log("Moving to empty slot:", { targetSlotX, targetSlotY });
 
                   // Ensure values are defined
                   if (targetSlotX === undefined || targetSlotY === undefined) {

@@ -40,47 +40,22 @@ const InventoryBar = ({
   // Fetch all island items from context
   const { islandItems } = useIslandItemsContext();
 
-  // Filter items for hotbar: pos_y === 0, pos_x === 0-9
-  // Group items by position and calculate quantities
+  // Simple mapping: Each item occupies its own slot
+  // No grouping or stacking - cleaner and simpler
   const hotbarItems = React.useMemo(() => {
-    console.log("📦 Recalculating hotbar items, total islandItems:", islandItems.length);
+    console.log("📦 Loading hotbar items, total islandItems:", islandItems.length);
 
     return Array.from({ length: 10 }).map((_, index) => {
-      // Get ALL items at this position (pos_x = index, pos_y = 0)
-      const itemsAtPosition = islandItems.filter(
+      // Get the item at this exact position
+      return islandItems.find(
         (item) => item.pos_x === index && item.pos_y === 0
-      );
-
-      if (itemsAtPosition.length === 0) return null;
-
-      // Group by item_id and count
-      const grouped = itemsAtPosition.reduce((acc, item) => {
-        const key = item.item_id || 'unknown';
-        if (!acc[key]) {
-          acc[key] = [];
-        }
-        acc[key].push(item);
-        return acc;
-      }, {} as Record<string, typeof itemsAtPosition>);
-
-      // Get the first group (should only be one item_id per slot)
-      const firstGroup = Object.values(grouped)[0];
-      if (!firstGroup || firstGroup.length === 0) return null;
-
-      // Return the first item with calculated quantity
-      return {
-        ...firstGroup[0],
-        quantity: firstGroup.length,
-        allIds: firstGroup.map(i => i.id), // Store all IDs for potential future use
-      };
+      ) || null;
     });
   }, [islandItems]);
 
-  // Debug: Log hotbar items with quantities
-  console.log("Hotbar items with quantities:", hotbarItems.map(item => ({
+  // Debug: Log hotbar items
+  console.log("Hotbar items:", hotbarItems.map(item => ({
     name: item?.item?.name,
-    quantity: item?.quantity,
-    allIds: item?.allIds,
     pos_x: item?.pos_x,
     pos_y: item?.pos_y,
   })));
@@ -91,7 +66,7 @@ const InventoryBar = ({
         <div className="mt-[-24px] flex items-center justify-center gap-2">
           {hotbarItems.map((item, index) => (
             <InventoryButton
-              key={`slot-${index}-${item?.id}-${item?.quantity || 0}`}
+              key={`slot-${index}-${item?.id || 'empty'}`}
               className="bg-[#d9d9d9] text-black relative"
               onClick={() => {
                 if (item && onItemDragStart) {
@@ -116,13 +91,6 @@ const InventoryBar = ({
                 />
               ) : (
                 item && <QuestionIcon />
-              )}
-
-              {/* Quantity Badge */}
-              {item && (item.quantity ?? 1) > 1 && (
-                <div className="absolute bottom-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-black/80 px-1 text-[10px] font-bold text-white">
-                  {item.quantity}
-                </div>
               )}
             </InventoryButton>
           ))}

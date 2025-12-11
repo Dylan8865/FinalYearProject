@@ -96,8 +96,8 @@ export function useIslandItems(profileId?: string, islandId?: string) {
 
   const purchaseItem = async (itemId: string, profileId: string) => {
     try {
-      // Always create a new item entry
-      // Quantity will be computed client-side by grouping items with same item_id
+      // Create a new item entry - each purchase creates a unique item
+      // No stacking - the API will find the next available inventory slot
       const response = await fetch("/api/island-items", {
         method: "POST",
         headers: {
@@ -118,7 +118,7 @@ export function useIslandItems(profileId?: string, islandId?: string) {
 
       console.log("Purchased new item:", newItem);
 
-      // Refetch to recompute quantities with the new item
+      // Refetch to update UI with the new item in inventory
       await fetchIslandItems();
 
       return true;

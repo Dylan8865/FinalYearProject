@@ -107,52 +107,24 @@ export async function POST(request: Request) {
       );
     }
 
-    // First, check if user already has this item in inventory (not placed on island)
-    const { data: existingItems, error: existingItemsError } = await supabase
-      .from("island-item")
-      .select("pos_x, pos_y, item_id, island_id, grid_x")
-      .eq("profile_id", body.profile_id)
-      .eq("item_id", body.item_id)
-      .is("island_id", null)  // Only inventory items
-      .is("grid_x", null);     // Not placed on island
+    // Find next available inventory slot - no more stacking!
+    // Each item gets its own unique slot
+    const { data: inventoryPosition, error: inventoryPositionError } =
+      await supabase
+        .from("island-item")
+        .select("pos_x, pos_y")
+        .eq("profile_id", body.profile_id);
 
-    if (existingItemsError) {
-      console.error("Supabase error:", existingItemsError);
+    if (inventoryPositionError) {
+      console.error("Supabase error:", inventoryPositionError);
       return NextResponse.json(
-        { error: "Failed to check existing items" },
+        { error: "Failed to fetch inventory positions" },
         { status: 500 }
       );
     }
 
-    let targetPosition: { pos_x: number; pos_y: number } | null = null;
-
-    if (existingItems && existingItems.length > 0) {
-      // User already has this item - use the same position to stack
-      const existingItem = existingItems[0];
-      targetPosition = {
-        pos_x: existingItem.pos_x!,
-        pos_y: existingItem.pos_y!,
-      };
-      console.log(`Stacking item ${body.item_id} at existing position:`, targetPosition);
-    } else {
-      // New item - find next available slot
-      const { data: inventoryPosition, error: inventoryPositionError } =
-        await supabase
-          .from("island-item")
-          .select("pos_x, pos_y")
-          .eq("profile_id", body.profile_id);
-
-      if (inventoryPositionError) {
-        console.error("Supabase error:", inventoryPositionError);
-        return NextResponse.json(
-          { error: "Failed to fetch inventory positions" },
-          { status: 500 }
-        );
-      }
-
-      targetPosition = getNextAvailablePosition(inventoryPosition);
-      console.log(`New item ${body.item_id} - next available position:`, targetPosition);
-    }
+    const targetPosition = getNextAvailablePosition(inventoryPosition);
+    console.log(`New item ${body.item_id} - next available position:`, targetPosition);
 
     const { data: islandItem, error } = await supabase
       .from("island-item")
