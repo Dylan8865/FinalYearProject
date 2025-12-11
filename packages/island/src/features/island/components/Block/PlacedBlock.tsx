@@ -69,7 +69,7 @@ const PlacedBlock = ({
 
         // Check for double-click
         if (currentCount === 2) {
-            console.log("✅ Double-click detected on:", itemName, itemType);
+            console.log("Double-click detected on:", itemName, itemType);
             clickCountRef.current = 0;
             if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
             if (singleClickTimerRef.current) clearTimeout(singleClickTimerRef.current);
@@ -80,7 +80,7 @@ const PlacedBlock = ({
                 // Check current value (not closure)
                 if (clickCountRef.current === 1) {
                     // Still only 1 click after delay - it's a single click
-                    console.log("✅ Single click confirmed on:", itemName);
+                    console.log("Single click confirmed on:", itemName);
                     onClick?.(itemId, itemType, itemName);
                     clickCountRef.current = 0;
                 }
@@ -95,7 +95,7 @@ const PlacedBlock = ({
         case "terrain":
             // Terrain blocks allow stacking and use the TerrainBlock component
             content = (
-                <Suspense fallback={<TerrainBlock name="Grass" />}>
+                <Suspense fallback={<TerrainBlock name={itemName} />}>
                     <TerrainBlock name={itemName} />
                 </Suspense>
             );

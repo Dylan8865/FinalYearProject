@@ -213,9 +213,49 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           itemType={itemType}
           modelUrl={modelUrl}
           isSelected={selectedPlacedItem === item.id}
-          onClick={(itemId, type, name) => {
-            console.log("Placed block clicked:", { itemId, type, name });
-            setSelectedPlacedItem(itemId);
+          onClick={(clickedItemId, clickedType, clickedName) => {
+            console.log("Placed block clicked:", { clickedItemId, clickedType, clickedName });
+
+            // Check if user has an inventory item selected
+            if (selectedPlacedItem && selectedPlacedItem !== clickedItemId) {
+              const selectedItem = islandItems.find(i => i.id === selectedPlacedItem);
+
+              // Only allow placement if:
+              // 1. Selected item is from inventory (not already placed)
+              // 2. Clicked block is a terrain type
+              if (selectedItem &&
+                selectedItem.grid_x === null &&
+                selectedItem.grid_y === null &&
+                selectedItem.grid_z === null &&
+                itemType === "terrain") {
+
+                console.log("Placing inventory item on top of terrain block!");
+
+                // Get the island this terrain block belongs to
+                if (item.island_id) {
+                  handleCellDrop(item.island_id, cellId, x, z);
+                }
+              } else if (selectedItem &&
+                (selectedItem.grid_x !== null ||
+                  selectedItem.grid_y !== null ||
+                  selectedItem.grid_z !== null) &&
+                itemType === "terrain") {
+
+                console.log("Moving placed item on top of terrain block!");
+
+                // Get the island this terrain block belongs to
+                if (item.island_id) {
+                  handleCellDrop(item.island_id, cellId, x, z);
+                }
+              } else if (itemType !== "terrain") {
+                console.log("Cannot place on non-terrain blocks");
+                alert("Items can only be placed on terrain blocks, not on decorative or functional items.");
+              }
+            } else {
+              // No item selected, or clicking the same item - select this item for moving
+              console.log("Selecting placed item for moving:", clickedItemId);
+              setSelectedPlacedItem(clickedItemId);
+            }
           }}
           onDoubleClick={(itemId, type, name) => {
             console.log("Placed block double-clicked:", { itemId, type, name });
@@ -313,7 +353,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
 
   /**
    * Check if a position is valid for placing an item
-   * Items must be placed on ground level (y=0) or have support below
+   * Items must be placed on ground level (y=0) or on top of a terrain block
    *
    * @param cellId - Grid cell identifier
    * @param y - Y position to check
@@ -321,7 +361,13 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
    */
   const isValidPosition = (cellId: string, y: number): boolean => {
     if (y === 0) return true; // Ground level is always valid
-    return !!placedObjects[`${cellId}-${y - 1}`]; // Must have item below
+
+    // Check if there's an item below
+    const itemBelow = placedObjects[`${cellId}-${y - 1}`];
+    if (!itemBelow) return false; // No support below
+
+    // Only allow placement on top of terrain blocks
+    return itemBelow.itemType === "terrain";
   };
 
   /**
@@ -362,22 +408,37 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       return;
     }
 
-    console.log("✅ Selected item found:", {
-      id: selectedItem.id,
-      name: selectedItem.item?.name,
-      currentPos: {
-        pos_x: selectedItem.pos_x,
-        pos_y: selectedItem.pos_y,
-        grid_x: selectedItem.grid_x,
-        grid_y: selectedItem.grid_y,
-        grid_z: selectedItem.grid_z,
-      }
-    });
+    // Determine if this is an inventory item or a placed item being moved
+    const isInventoryItem = selectedItem.grid_x === null &&
+      selectedItem.grid_y === null &&
+      selectedItem.grid_z === null;
+
+    if (isInventoryItem) {
+      console.log("✅ Placing inventory item:", {
+        id: selectedItem.id,
+        name: selectedItem.item?.name,
+        currentPos: {
+          pos_x: selectedItem.pos_x,
+          pos_y: selectedItem.pos_y,
+        }
+      });
+    } else {
+      console.log("🔄 Moving placed item:", {
+        id: selectedItem.id,
+        name: selectedItem.item?.name,
+        currentPos: {
+          grid_x: selectedItem.grid_x,
+          grid_y: selectedItem.grid_y,
+          grid_z: selectedItem.grid_z,
+        }
+      });
+    }
 
     const y = getNextYPosition(cellId);
 
     if (!isValidPosition(cellId, y)) {
-      console.log("Invalid position - no support below!");
+      console.log("Invalid position - blocks can only be placed on ground or on terrain blocks!");
+      alert("Invalid placement: Blocks can only be placed on the ground or on top of terrain blocks.");
       setSelectedPlacedItem(null);
       return;
     }
@@ -419,10 +480,41 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         itemName={itemName}
         itemType={itemType}
         modelUrl={modelUrl}
-        isSelected={false}
-        onClick={(itemId, type, name) => {
-          console.log("Placed block clicked:", { itemId, type, name });
-          setSelectedPlacedItem(itemId);
+        isSelected={selectedPlacedItem === selectedItem.id}
+        onClick={(clickedItemId, clickedType, clickedName) => {
+          console.log("Placed block clicked:", { clickedItemId, clickedType, clickedName });
+
+          // Check if user has an item selected (could be inventory or placed item)
+          if (selectedPlacedItem && selectedPlacedItem !== clickedItemId) {
+            const currentSelectedItem = islandItems.find(i => i.id === selectedPlacedItem);
+
+            // Check if selected item is from inventory or already placed
+            const isInventoryItem = currentSelectedItem &&
+              currentSelectedItem.grid_x === null &&
+              currentSelectedItem.grid_y === null &&
+              currentSelectedItem.grid_z === null;
+
+            const isPlacedItem = currentSelectedItem &&
+              (currentSelectedItem.grid_x !== null ||
+                currentSelectedItem.grid_y !== null ||
+                currentSelectedItem.grid_z !== null);
+
+            // Allow placement/movement if clicked block is terrain
+            if ((isInventoryItem || isPlacedItem) && itemType === "terrain") {
+
+              console.log(isInventoryItem ? "Placing inventory item on terrain!" : "Moving placed item to terrain!");
+
+              // Place/move on top of this block
+              handleCellDrop(islandId, cellId, x, z);
+            } else if (itemType !== "terrain") {
+              console.log("Cannot place on non-terrain blocks");
+              alert("Items can only be placed on terrain blocks, not on decorative or functional items.");
+            }
+          } else {
+            // No item selected, or clicking the same item - select this item for moving
+            console.log("Selecting placed item for moving:", clickedItemId);
+            setSelectedPlacedItem(clickedItemId);
+          }
         }}
         onDoubleClick={(itemId, type, name) => {
           console.log("Placed block double-clicked:", { itemId, type, name });
