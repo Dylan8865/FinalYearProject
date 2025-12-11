@@ -19,8 +19,8 @@ interface PlacedBlockProps {
  * PlacedBlock - Wrapper for all placed block types
  * 
  * Interaction Model:
- * - Single click: Select the block
- * - Double click: Open removal dialog (terrain/decorative) or editor (functional)
+ * - Single click: Open dialog (currently removal, extendable)
+ * - Double click: Select for moving (gold wireframe)
  * 
  * @param itemId - Unique ID of the placed item
  * @param itemName - Display name

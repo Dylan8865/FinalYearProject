@@ -216,32 +216,29 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           onClick={(clickedItemId, clickedType, clickedName) => {
             console.log("Placed block clicked:", { clickedItemId, clickedType, clickedName });
 
-            // Check if user has an inventory item selected
-            if (selectedPlacedItem && selectedPlacedItem !== clickedItemId) {
+            // Single-click: Open dialog (if no item selected for placement)
+            if (!selectedPlacedItem || selectedPlacedItem === clickedItemId) {
+              // Check if there are blocks above - if so, prevent dialog
+              if (hasBlockAbove(cellId, y)) {
+                console.log("Cannot interact with block that has items above it");
+                alert("Cannot interact with this block - remove blocks above it first!");
+                return;
+              }
+
+              // Open dialog for this item
+              console.log("Opening dialog for item:", clickedItemId);
+              setRemovalDialog({ open: true, itemId: clickedItemId, itemName: clickedName });
+            } else {
+              // User has a different item selected - try to place it here
               const selectedItem = islandItems.find(i => i.id === selectedPlacedItem);
 
-              // Only allow placement if:
-              // 1. Selected item is from inventory (not already placed)
-              // 2. Clicked block is a terrain type
-              if (selectedItem &&
-                selectedItem.grid_x === null &&
-                selectedItem.grid_y === null &&
-                selectedItem.grid_z === null &&
-                itemType === "terrain") {
+              // Only allow placement if clicked block is a terrain type
+              if (selectedItem && itemType === "terrain") {
+                const isInventoryItem = selectedItem.grid_x === null &&
+                  selectedItem.grid_y === null &&
+                  selectedItem.grid_z === null;
 
-                console.log("Placing inventory item on top of terrain block!");
-
-                // Get the island this terrain block belongs to
-                if (item.island_id) {
-                  handleCellDrop(item.island_id, cellId, x, z);
-                }
-              } else if (selectedItem &&
-                (selectedItem.grid_x !== null ||
-                  selectedItem.grid_y !== null ||
-                  selectedItem.grid_z !== null) &&
-                itemType === "terrain") {
-
-                console.log("Moving placed item on top of terrain block!");
+                console.log(isInventoryItem ? "Placing inventory item on terrain!" : "Moving placed item to terrain!");
 
                 // Get the island this terrain block belongs to
                 if (item.island_id) {
@@ -251,36 +248,22 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
                 console.log("Cannot place on non-terrain blocks");
                 alert("Items can only be placed on terrain blocks, not on decorative or functional items.");
               }
-            } else {
-              // No item selected, or clicking the same item - try to select this item for moving
-              // Only allow selecting if this is the top block (no blocks above it)
-              if (hasBlockAbove(cellId, y)) {
-                console.log("Cannot select block with items above it");
-                alert("Cannot move this block - remove blocks above it first!");
-                return;
-              }
-
-              console.log("Selecting placed item for moving:", clickedItemId);
-              setSelectedPlacedItem(clickedItemId);
             }
           }}
           onDoubleClick={(itemId, type, name) => {
             console.log("Placed block double-clicked:", { itemId, type, name });
 
-            // Check if there are blocks above - if so, prevent removal
+            // Double-click: Select for moving
+            // Only allow selecting if this is the top block (no blocks above it)
             if (hasBlockAbove(cellId, y)) {
-              console.log("Cannot remove block with items above it");
-              alert("Cannot remove this block - remove blocks above it first!");
+              console.log("Cannot select block with items above it");
+              alert("Cannot move this block - remove blocks above it first!");
               return;
             }
 
-            if (type === "functional") {
-              // Open functional item editor
-              setFunctionalItemDialog({ open: true, itemId, itemName: name });
-            } else {
-              // Show removal confirmation for terrain/decorative
-              setRemovalDialog({ open: true, itemId, itemName: name });
-            }
+            // Select this item for moving
+            console.log("Selecting placed item for moving:", itemId);
+            setSelectedPlacedItem(itemId);
           }}
         />
       );
@@ -511,23 +494,27 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         onClick={(clickedItemId, clickedType, clickedName) => {
           console.log("Placed block clicked:", { clickedItemId, clickedType, clickedName });
 
-          // Check if user has an item selected (could be inventory or placed item)
-          if (selectedPlacedItem && selectedPlacedItem !== clickedItemId) {
+          // Single-click: Open dialog (if no item selected for placement)
+          if (!selectedPlacedItem || selectedPlacedItem === clickedItemId) {
+            // Check if there are blocks above - if so, prevent dialog
+            if (hasBlockAbove(cellId, y)) {
+              console.log("Cannot interact with block that has items above it");
+              alert("Cannot interact with this block - remove blocks above it first!");
+              return;
+            }
+
+            // Open dialog for this item
+            console.log("Opening dialog for item:", clickedItemId);
+            setRemovalDialog({ open: true, itemId: clickedItemId, itemName: clickedName });
+          } else {
+            // User has a different item selected - try to place it here
             const currentSelectedItem = islandItems.find(i => i.id === selectedPlacedItem);
 
-            // Check if selected item is from inventory or already placed
-            const isInventoryItem = currentSelectedItem &&
-              currentSelectedItem.grid_x === null &&
-              currentSelectedItem.grid_y === null &&
-              currentSelectedItem.grid_z === null;
-
-            const isPlacedItem = currentSelectedItem &&
-              (currentSelectedItem.grid_x !== null ||
-                currentSelectedItem.grid_y !== null ||
-                currentSelectedItem.grid_z !== null);
-
-            // Allow placement/movement if clicked block is terrain
-            if ((isInventoryItem || isPlacedItem) && itemType === "terrain") {
+            // Only allow placement if clicked block is a terrain type
+            if (currentSelectedItem && itemType === "terrain") {
+              const isInventoryItem = currentSelectedItem.grid_x === null &&
+                currentSelectedItem.grid_y === null &&
+                currentSelectedItem.grid_z === null;
 
               console.log(isInventoryItem ? "Placing inventory item on terrain!" : "Moving placed item to terrain!");
 
@@ -537,34 +524,22 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
               console.log("Cannot place on non-terrain blocks");
               alert("Items can only be placed on terrain blocks, not on decorative or functional items.");
             }
-          } else {
-            // No item selected, or clicking the same item - try to select this item for moving
-            // Only allow selecting if this is the top block (no blocks above it)
-            if (hasBlockAbove(cellId, y)) {
-              console.log("Cannot select block with items above it");
-              alert("Cannot move this block - remove blocks above it first!");
-              return;
-            }
-
-            console.log("Selecting placed item for moving:", clickedItemId);
-            setSelectedPlacedItem(clickedItemId);
           }
         }}
         onDoubleClick={(itemId, type, name) => {
           console.log("Placed block double-clicked:", { itemId, type, name });
 
-          // Check if there are blocks above - if so, prevent removal
+          // Double-click: Select for moving
+          // Only allow selecting if this is the top block (no blocks above it)
           if (hasBlockAbove(cellId, y)) {
-            console.log("Cannot remove block with items above it");
-            alert("Cannot remove this block - remove blocks above it first!");
+            console.log("Cannot select block with items above it");
+            alert("Cannot move this block - remove blocks above it first!");
             return;
           }
 
-          if (type === "functional") {
-            setFunctionalItemDialog({ open: true, itemId, itemName: name });
-          } else {
-            setRemovalDialog({ open: true, itemId, itemName: name });
-          }
+          // Select this item for moving
+          console.log("Selecting placed item for moving:", itemId);
+          setSelectedPlacedItem(itemId);
         }}
       />
     );

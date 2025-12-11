@@ -12,27 +12,16 @@ export interface FunctionalBlockProps {
  * FunctionalBlock Component
  * 
  * Represents functional items with special abilities
- * - Single click → Opens dialog/interface
- * - Can be removed
- * - Has custom functionality per item
+ * - Click interactions handled by PlacedBlock wrapper
+ * - Single-click: Opens dialog (extendable for custom functionality)
+ * - Double-click: Selects for moving
+ * - Can be customized per item type in the future
  * 
  * Examples: Houses, Workbenches, Machines, Storage
  */
 const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: FunctionalBlockProps) => {
     return (
-        <group
-            onClick={(e) => {
-                e.stopPropagation();
-                // Single click opens the functional item
-                console.log("Opening functional item:", itemName);
-                onOpen?.(itemId, itemName);
-            }}
-            onContextMenu={(e) => {
-                e.stopPropagation();
-                // Right-click shows options (open + remove)
-                onRemove?.(itemId);
-            }}
-        >
+        <group>
             {/* Placeholder - replace with actual model loading */}
             <mesh castShadow receiveShadow>
                 <boxGeometry args={[0.6, 0.6, 0.6]} />

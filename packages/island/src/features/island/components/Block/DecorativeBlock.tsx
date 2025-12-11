@@ -10,27 +10,17 @@ export interface DecorativeBlockProps {
 /**
  * DecorativeBlock Component
  * 
- * Represents decorative items
- * - Cannot be stacked upon
- * - Only provides "Remove" action
- * - No special click behavior
+ * Represents decorative items placed on the island
+ * - Cannot be stacked upon (only terrain supports stacking)
+ * - Click interactions handled by PlacedBlock wrapper
+ * - Single-click: Opens dialog
+ * - Double-click: Selects for moving
  * 
  * Examples: Trees, Rocks, Flowers, Decorations
  */
 const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlockProps) => {
     return (
-        <group
-            onClick={(e) => {
-                e.stopPropagation();
-                // Decorative items don't have click actions
-                console.log("Decorative item clicked:", itemName);
-            }}
-            onContextMenu={(e) => {
-                e.stopPropagation();
-                // Right-click shows remove option
-                onRemove?.(itemId);
-            }}
-        >
+        <group>
             {/* Placeholder - replace with actual model loading */}
             <mesh castShadow receiveShadow>
                 <boxGeometry args={[0.5, 0.8, 0.5]} />
