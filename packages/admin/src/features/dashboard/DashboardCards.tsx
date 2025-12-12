@@ -1,0 +1,176 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
+interface Stats {
+  shop: {
+    functional: number;
+    decorative: number;
+    terrain: number;
+  };
+  knowledge: {
+    pending: number;
+    declined: number;
+    verified: number;
+  };
+  users: {
+    admin: number;
+    island: number;
+    nonIsland: number;
+  };
+}
+
+interface DashboardCardsProps {
+  stats: Stats;
+}
+
+export default function DashboardCards({ stats }: DashboardCardsProps) {
+  const router = useRouter();
+
+  return (
+    <div className="pl-8 pr-8 pt-2">
+      <div className="grid grid-cols-2 grid-rows-2 gap-6 h-[calc(100vh-120px)]">
+        {/* Shop Management - Takes 2 rows on left */}
+        <div className="row-span-2">
+          <MainCard
+            title="Shop Management"
+            description="Manage shop items, prices, etc."
+            onClick={() => router.push("/dashboard/shop")}
+            horizontal={false}
+          >
+            <SubCard
+              title="Functional Items"
+              description="Items capable of generating O2"
+              count={stats.shop.functional}
+              onClick={() => router.push("/dashboard/shop?filter=functional")}
+            />
+            <SubCard
+              title="Decorative Items"
+              description="Items incapable of generating O2"
+              count={stats.shop.decorative}
+              onClick={() => router.push("/dashboard/shop?filter=decorative")}
+            />
+            <SubCard
+              title="Terrain Items"
+              description="Items for terrain modification"
+              count={stats.shop.terrain}
+              onClick={() => router.push("/dashboard/shop?filter=terrain")}
+            />
+          </MainCard>
+        </div>
+
+        {/* Knowledge-base Moderation - Top right */}
+        <MainCard
+          title="Knowledge-base Moderation"
+          description="Manage user contributed knowledge"
+          onClick={() => router.push("/dashboard/knowledge")}
+          horizontal={true}
+        >
+          <SubCard
+            title="Pending"
+            description="55%-59%"
+            count={stats.knowledge.pending}
+            onClick={() => router.push("/dashboard/knowledge?filter=pending")}
+          />
+          <SubCard
+            title="Declined"
+            description="≤54%"
+            count={stats.knowledge.declined}
+            onClick={() => router.push("/dashboard/knowledge?filter=declined")}
+          />
+          <SubCard
+            title="Verified"
+            description="≥60%"
+            count={stats.knowledge.verified}
+            onClick={() => router.push("/dashboard/knowledge?filter=verified")}
+          />
+        </MainCard>
+
+        {/* User Management - Bottom right */}
+        <MainCard
+          title="User Management"
+          description="Manage registered users"
+          onClick={() => router.push("/dashboard/users")}
+          horizontal={true}
+        >
+          <SubCard
+            title="Admin"
+            description="Admin Dashboard Access Accounts"
+            count={stats.users.admin}
+            onClick={() => router.push("/dashboard/users?filter=admin")}
+          />
+          <SubCard
+            title="Island"
+            description="Wisdom Island Game Accounts"
+            count={stats.users.island}
+            onClick={() => router.push("/dashboard/users?filter=island")}
+          />
+          <SubCard
+            title="Non-Island"
+            description="Non-Wisdom Island Game Accounts"
+            count={stats.users.nonIsland}
+            onClick={() => router.push("/dashboard/users?filter=non-island")}
+          />
+        </MainCard>
+      </div>
+    </div>
+  );
+}
+
+// Main Card Component
+interface MainCardProps {
+  title: string;
+  description: string;
+  onClick: () => void;
+  children: React.ReactNode;
+  horizontal?: boolean;
+}
+
+function MainCard({ title, description, onClick, children, horizontal = false }: MainCardProps) {
+  return (
+    <div
+      onClick={onClick}
+      className="bg-[#333333] rounded-lg p-6 h-full flex flex-col cursor-pointer hover:bg-[#3a3a3a] transition-colors relative group"
+    >
+      {/* Title and Description */}
+      <div className="mb-4">
+        <h2 className="text-white text-xl font-semibold">{title}</h2>
+        <p className="text-white text-xs">{description}</p>
+      </div>
+
+      {/* Arrow Icon */}
+      <div className="absolute top-6 right-6 text-white text-2xl group-hover:translate-x-1 transition-transform">
+        &gt;
+      </div>
+
+      {/* Sub Cards */}
+      <div className={`flex-1 grid place-content-center grid ${horizontal ? 'grid-cols-3' : 'grid-cols-1'} gap-4`}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Sub Card Component
+interface SubCardProps {
+  title: string;
+  description: string;
+  count: number;
+  onClick: (e: React.MouseEvent) => void;
+}
+
+function SubCard({ title, description, count, onClick }: SubCardProps) {
+  return (
+    <div
+      onClick={(e) => {
+        e.stopPropagation(); // Prevent parent card click
+        onClick(e);
+      }}
+      className="bg-[#333333] rounded-lg px-4 pt-3 pb-0 hover:bg-[#252525] transition-colors cursor-pointer border border-[#7B7B7B]"
+    >
+      <h3 className="text-white font-semibold text-base mb-0">{title}</h3>
+      <p className="text-white text-xs mb-5">{description}</p>
+      <p className="text-white text-3xl font-bold text-right mb-2">{count}</p>
+    </div>
+  );
+}

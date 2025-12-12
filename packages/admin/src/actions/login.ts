@@ -1,44 +1,73 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import bcrypt from "bcryptjs";
+
+type Provider = "google";
 
 export async function login(formData: FormData) {
+  const supabase = await createClient();
+
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  // Server-side validation
-  if (!email || !password) {
-    return { error: "All fields are required" };
+  // Step 1: Authenticate with Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (authError) {
+    return { error: authError.message };
   }
 
-  const supabase = await createClient();
+  if (!authData.user) {
+    return { error: "Authentication failed" };
+  }
 
-  // Check if email exists
-  const { data: user, error: fetchError } = await supabase
-    .from("user")
-    .select("id, email, password, name")
-    .eq("email", email)
+  // Step 2: Check if user is admin in profile table
+  const { data: profile, error: profileError } = await supabase
+    .from("profile")
+    .select("type")
+    .eq("id", authData.user.id)
     .single();
 
-  if (fetchError || !user) {
+  if (profileError || !profile) {
+    // Sign out the user since they're not in profile table
+    await supabase.auth.signOut();
     return { error: "Invalid email or password" };
   }
 
-  // Compare password with hashed password
-  const passwordMatch = await bcrypt.compare(password, user.password);
-
-  if (!passwordMatch) {
+  // Step 3: Check if user type is "admin"
+  if (profile.type !== "admin") {
+    // Sign out the user since they're not an admin
+    await supabase.auth.signOut();
     return { error: "Invalid email or password" };
   }
 
-  // Update last_login_time
-  await supabase
-    .from("user")
-    .update({ last_login_time: new Date().toISOString() })
-    .eq("id", user.id);
+  // Step 4: User is authenticated and is an admin
+  revalidatePath("/", "layout");
+  return { error: null };
+}
 
-  // TODO (Maybe): Set session/cookie etc.
-  redirect("/");
+export async function oAuthLogin(provider: Provider) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  if (data.url) {
+    redirect(data.url);
+  }
+
+  return { error: null };
 }
