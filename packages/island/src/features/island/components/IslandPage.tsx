@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import StatusBar from "@/features/island/components/StatusBar/StatusBar";
 import InventoryBar from "@/features/island/components/InventoryBar/InventoryBar";
 import IslandCanvas from "@/features/island/components/IslandCanvas/IslandCanvas";
@@ -21,6 +21,8 @@ import * as THREE from "three";
 import TerrainBlock from "./Block/TerrainBlocks";
 import PlacedBlock from "./Block/PlacedBlock";
 import SidebarPage from "./Page/SidebarPage";
+import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
+import RefreshIcon from "@/features/shared/icons/RefreshIcon";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -587,6 +589,18 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     setSelectedPlacedItem(null);
   };
 
+  // reset camera button
+  const controlsRef = useRef<CameraControlsHandle>(null);
+  const [isCameraAtDefault, setIsCameraAtDefault] = useState(true);
+  
+  const resetCamera = () => {
+    controlsRef.current?.reset();
+  };
+  
+  const handleCameraChanged = (isAtDefault: boolean) => {
+    setIsCameraAtDefault(isAtDefault);
+  };
+
   // Debug: Log islandItems when they change
   useEffect(() => {
     console.log("Island items updated:", islandItems);
@@ -614,7 +628,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
   }
 
   return (
-    <div className="relative h-screen w-screen bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+    <div className="relative h-screen w-screen overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
       <div className="absolute inset-0 z-0">
         <IslandCanvas
           islands={islands}
@@ -622,6 +636,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           isDraggingPlacedItem={false}
           onCellDrop={handleCellDrop}
           placedObjects={placedObjects}
+          controlsRef={controlsRef}
+          onCameraChanged={handleCameraChanged}
         />
       </div>
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-10">
@@ -646,6 +662,17 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           />
         </div>
       </div>
+
+
+      {/* reset camera button - only show when camera has moved */}
+      {!isCameraAtDefault && (
+        <button
+          onClick={resetCamera}
+          className="absolute flex justify-center items-center text-2xl bottom-6 right-6 z-10 pointer-events-auto bg-transparent hover:rotate-180 transition-all duration-300 animate-fade-in"
+        >
+          <RefreshIcon />
+        </button>
+      )}
 
       {isDialogOpen === "profile" && (
         <Dialog

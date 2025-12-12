@@ -1,9 +1,9 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import React from "react";
+import React, { useRef } from "react";
 import Island from "./Island";
+import CameraControls, { type CameraControlsHandle } from "./CameraControls";
 
 export interface IslandData {
   id: string;
@@ -24,6 +24,8 @@ interface IslandCanvasProps {
   isDraggingPlacedItem?: boolean;
   onCellDrop?: (islandId: string, cellId: string, x: number, z: number) => void;
   placedObjects?: Record<string, PlacedObject & { islandId?: string }>;
+  controlsRef: React.RefObject<CameraControlsHandle | null>;
+  onCameraChanged?: (isAtDefault: boolean) => void;
 }
 
 const IslandCanvas = ({
@@ -32,23 +34,26 @@ const IslandCanvas = ({
   isDraggingPlacedItem = false,
   onCellDrop,
   placedObjects = {},
+  controlsRef,
+  onCameraChanged,
 }: IslandCanvasProps) => {
+  const defaultCameraPos: [number, number, number] = [10, 15, 5];
+  const defaultTarget: [number, number, number] = [0, 0, 0];
+
   return (
-    <div className="h-full w-full">
-      <Canvas shadows camera={{ position: [10, 15, 5], fov: 50 }}>
-        <ambientLight intensity={0.7} color="#ffffff" />
+    <div className="relative h-full w-full">
+      <Canvas shadows camera={{ position: defaultCameraPos, fov: 50 }}>
+        {/* lights + environment */}
+        <ambientLight intensity={0.7} />
         <directionalLight
           position={[10, 15, 5]}
           intensity={1.2}
-          color="#ffffff"
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
         />
         <hemisphereLight args={["#87CEEB", "#A8A060", 0.6]} />
 
+        {/* islands */}
         {islands.map((island) => {
-          // Filter placed objects for this specific island
           const islandPlacedObjects = Object.entries(placedObjects)
             .filter(([_, obj]) => obj.islandId === island.id)
             .reduce((acc, [key, obj]) => ({ ...acc, [key]: obj }), {});
@@ -61,30 +66,20 @@ const IslandCanvas = ({
               animate={true}
               isDraggingItem={isDraggingItem}
               onCellDrop={(cellId, x, z) => {
-                if (onCellDrop) {
-                  console.log("🏝️ Island clicked:", island.id);
-                  onCellDrop(island.id, cellId, x, z);
-                }
+                onCellDrop?.(island.id, cellId, x, z);
               }}
               placedObjects={islandPlacedObjects}
             />
           );
         })}
 
-        <OrbitControls
-          enabled={!isDraggingPlacedItem}
-          enablePan={!isDraggingPlacedItem}
-          enableRotate={!isDraggingPlacedItem}
-          enableZoom={true}
-          enableDamping={true}
-          dampingFactor={0.05}
-          minDistance={5}
-          maxDistance={Infinity}
-          mouseButtons={{
-            LEFT: 2,
-            MIDDLE: 1,
-            RIGHT: 0,
-          }}
+        {/* Orbit Controls with ref */}
+        <CameraControls
+          ref={controlsRef}
+          isDraggingPlacedItem={isDraggingPlacedItem}
+          defaultPosition={defaultCameraPos}
+          defaultTarget={defaultTarget}
+          onCameraChanged={onCameraChanged}
         />
 
         <fog attach="fog" args={["#B0E0E6", 15, 50]} />
@@ -92,5 +87,6 @@ const IslandCanvas = ({
     </div>
   );
 };
+
 
 export default IslandCanvas;
