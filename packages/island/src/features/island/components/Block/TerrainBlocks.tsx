@@ -143,7 +143,7 @@ export default function TerrainBlock({ name }: { name: string }) {
 
     // Define geometry variations - rough blocks have slightly irregular dimensions
     const geometry = useMemo(() => {
-        const baseSize = [1.2, 1.6, 1.2];
+        const baseSize = [1, 1, 1];
 
         switch (name) {
             case "Stone":
@@ -175,10 +175,12 @@ export default function TerrainBlock({ name }: { name: string }) {
         }
     }, [name]);
 
+    const position = [0, 0.5, 0] as [number, number, number];
+
     switch (name) {
         case "Grass":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -190,7 +192,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Stone":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -202,7 +204,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Sand":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -214,7 +216,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Snow":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}   >
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -226,7 +228,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Wood":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -238,7 +240,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Ice":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         color="#a8d5ff"
@@ -251,7 +253,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Dirt":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -263,7 +265,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Clay":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -275,7 +277,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Cobblestone":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -287,7 +289,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Bricks":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -299,7 +301,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Sandstone":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -311,7 +313,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Gravel":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -323,7 +325,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Mud":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -335,7 +337,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Limestone":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         map={texture}
@@ -347,7 +349,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Crystal":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         color="#b19cd9"
@@ -360,7 +362,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Obsidian":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         color="#1a1a1a"
@@ -371,7 +373,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Marble":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         color="#f5f5f5"
@@ -382,7 +384,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Gold":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         color="#ffd700"
@@ -393,7 +395,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Silver":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         color="#c0c0c0"
@@ -404,7 +406,7 @@ export default function TerrainBlock({ name }: { name: string }) {
             );
         case "Copper":
             return (
-                <mesh castShadow receiveShadow position={[0, -0.8, 0]}>
+                <mesh castShadow receiveShadow position={position}>
                     <boxGeometry args={geometry} />
                     <meshStandardMaterial
                         color="#b87333"
@@ -417,3 +419,4 @@ export default function TerrainBlock({ name }: { name: string }) {
             return null;
     }
 }
+

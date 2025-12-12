@@ -181,7 +181,18 @@ const PlacedBlock = ({
             
             {/* Tooltip rendered in 3D space */}
             {isHovered && (
-               <Tooltip itemName={itemName} itemType={itemType} />
+                <>
+                    <Tooltip itemName={itemName} itemType={itemType} />
+                    <mesh position={[0, 0, 0]}>
+                        <boxGeometry args={[1.3, 1.7, 1.3]} />
+                        <meshBasicMaterial
+                            color="white"
+                            transparent
+                            opacity={0.3}
+                            wireframe
+                        />
+                    </mesh>
+                </>
             )}
         </group>
     );

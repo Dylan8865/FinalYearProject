@@ -20,12 +20,14 @@ export interface DecorativeBlockProps {
  * Cannot be stacked upon - purely decorative
  */
 const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlockProps) => {
+    const position = [0, 0.6, 0] as [number, number, number];
+
     const renderBlock = () => {
         switch (itemName) {
         // === FLOWERS ===
         case "Sunflower":
             return (
-                <group>
+                <group position={position}>
                     {/* Stem */}
                     <mesh position={[0, -0.2, 0]} castShadow>
                         <cylinderGeometry args={[0.04, 0.04, 0.8, 8]} />
@@ -64,7 +66,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Rose":
             return (
-                <group>
+                <group position={position}>
                     {/* Stem with thorns */}
                     <mesh position={[0, -0.2, 0]} castShadow>
                         <cylinderGeometry args={[0.03, 0.03, 0.8, 8]} />
@@ -101,7 +103,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Tulip":
             return (
-                <group>
+                <group position={position}>
                     {/* Stem */}
                     <mesh position={[0, -0.3, 0]} castShadow>
                         <cylinderGeometry args={[0.03, 0.03, 0.6, 8]} />
@@ -129,7 +131,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Daisy":
             return (
-                <group>
+                <group position={position}>
                     {/* Stem */}
                     <mesh position={[0, -0.3, 0]} castShadow>
                         <cylinderGeometry args={[0.02, 0.02, 0.6, 8]} />
@@ -160,7 +162,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Poppy":
             return (
-                <group>
+                <group position={position}>
                     {/* Stem */}
                     <mesh position={[0, -0.25, 0]} castShadow>
                         <cylinderGeometry args={[0.02, 0.02, 0.7, 6]} />
@@ -193,7 +195,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
         // === MUSHROOMS ===
         case "Red Mushroom":
             return (
-                <group>
+                <group position={position}>
                     {/* Stem */}
                     <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.08, 0.06, 0.4, 12]} />
@@ -223,7 +225,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Brown Mushroom":
             return (
-                <group>
+                <group position={position}>
                     {/* Stem */}
                     <mesh position={[0, -0.45, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.06, 0.05, 0.3, 10]} />
@@ -244,7 +246,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Glowing Mushroom":
             return (
-                <group>
+                <group position={position}>
                     {/* Stem - glowing */}
                     <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.05, 0.04, 0.4, 12]} />
@@ -279,7 +281,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
         // === TREES ===
         case "Oak Tree":
             return (
-                <group>
+                <group position={position}>
                     {/* Trunk */}
                     <mesh position={[0, -0.3, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.12, 0.15, 0.8, 8]} />
@@ -299,7 +301,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Pine Tree":
             return (
-                <group>
+                <group position={position}>
                     {/* Trunk */}
                     <mesh position={[0, -0.35, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.08, 0.1, 0.6, 8]} />
@@ -322,7 +324,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Palm Tree":
             return (
-                <group>
+                <group position={position}>
                     {/* Curved trunk */}
                     <mesh position={[0, -0.2, 0]} rotation={[0, 0, 0.15]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.08, 0.1, 0.9, 8]} />
@@ -352,7 +354,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Cherry Blossom":
             return (
-                <group>
+                <group position={position}>
                     {/* Trunk */}
                     <mesh position={[0, -0.3, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.1, 0.12, 0.7, 8]} />
@@ -387,7 +389,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
         // === ROCKS & NATURAL ===
         case "Boulder":
             return (
-                <group>
+                <group position={position}>
                     {/* Main rock - irregular */}
                     <mesh position={[0, -0.5, 0]} castShadow receiveShadow>
                         <dodecahedronGeometry args={[0.35, 0]} />
@@ -407,7 +409,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Crystal Cluster":
             return (
-                <group>
+                <group position={position}>
                     {/* Base */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.18, 0.2, 0.15, 8]} />
@@ -441,7 +443,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Cactus":
             return (
-                <group>
+                <group position={position}>
                     {/* Main body */}
                     <mesh position={[0, -0.3, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.12, 0.12, 0.8, 8]} />
@@ -476,7 +478,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Bamboo":
             return (
-                <group>
+                <group position={position}>
                     {/* Bamboo stalks */}
                     {[0, 1, 2].map((stalk) => (
                         <group key={stalk} position={[stalk * 0.12 - 0.12, 0, 0]}>
@@ -512,7 +514,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
         // === SPECIAL ===
         case "Lantern":
             return (
-                <group>
+                <group position={position}>
                     {/* Post */}
                     <mesh position={[0, -0.2, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.05, 0.05, 0.8, 8]} />
@@ -547,7 +549,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Fountain":
             return (
-                <group>
+                <group position={position}>
                     {/* Base basin */}
                     <mesh position={[0, -0.55, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.35, 0.3, 0.25, 16]} />
@@ -586,7 +588,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Statue":
             return (
-                <group>
+                <group position={position}>
                     {/* Pedestal */}
                     <mesh position={[0, -0.55, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.2, 0.25, 0.3, 8]} />
@@ -612,7 +614,7 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
 
         case "Garden Gnome":
             return (
-                <group>
+                <group position={position}>
                     {/* Body */}
                     <mesh position={[0, -0.5, 0]} castShadow receiveShadow>
                         <coneGeometry args={[0.15, 0.4, 8]} />
@@ -644,21 +646,17 @@ const DecorativeBlock = ({ itemId, itemName, modelUrl, onRemove }: DecorativeBlo
         default:
             // Fallback for unknown decorative blocks
             return (
-                <group>
+                <group position={position}>
                     <mesh castShadow receiveShadow>
                         <boxGeometry args={[0.5, 0.8, 0.5]} />
                         <meshStandardMaterial color="#4A7C59" />
                     </mesh>
                 </group>
             );
-    }
+        }
     };
-
-    return (
-        <group position={[0, 0.8, 0]}>
-            {renderBlock()}
-        </group>
-    );
+    
+    return renderBlock();
 };
 
 export default DecorativeBlock;

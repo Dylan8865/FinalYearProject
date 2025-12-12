@@ -21,11 +21,13 @@ export interface FunctionalBlockProps {
  * Each has distinct visual representation using Three.js primitives
  */
 const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: FunctionalBlockProps) => {
+    const position = [0, 0.75, 0] as [number, number, number];
+
     switch (itemName) {
         // === SAPLINGS (Young Trees) ===
         case "Oak Sapling":
             return (
-                <group>
+                <group position={position}>
                     {/* Small pot */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.2, 0.25, 0.3, 8]} />
@@ -51,7 +53,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Spruce Sapling":
             return (
-                <group>
+                <group position={position}>
                     {/* Small pot */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.2, 0.25, 0.3, 8]} />
@@ -77,7 +79,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Birch Sapling":
             return (
-                <group>
+                <group position={position}>
                     {/* Small pot */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.2, 0.25, 0.3, 8]} />
@@ -103,7 +105,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Jungle Sapling":
             return (
-                <group>
+                <group position={position}>
                     {/* Small pot */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.2, 0.25, 0.3, 8]} />
@@ -130,7 +132,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
         // === CROPS ===
         case "Wheat Crop":
             return (
-                <group>
+                <group position={position}>
                     {/* Dirt base */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.5, 0.2, 0.5]} />
@@ -160,7 +162,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Carrot Crop":
             return (
-                <group>
+                <group position={position}>
                     {/* Dirt base */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.5, 0.2, 0.5]} />
@@ -183,7 +185,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Potato Crop":
             return (
-                <group>
+                <group position={position}>
                     {/* Dirt base */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.5, 0.2, 0.5]} />
@@ -208,7 +210,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Pumpkin Crop":
             return (
-                <group>
+                <group position={position}>
                     {/* Dirt base */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.5, 0.2, 0.5]} />
@@ -235,7 +237,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
         // === MACHINES ===
         case "Furnace":
             return (
-                <group>
+                <group position={position}>
                     {/* Main body */}
                     <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.6, 0.8, 0.6]} />
@@ -261,7 +263,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Anvil":
             return (
-                <group>
+                <group position={position}>
                     {/* Base */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.5, 0.2, 0.5]} />
@@ -292,7 +294,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Loom":
             return (
-                <group>
+                <group position={position}>
                     {/* Base */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.6, 0.15, 0.5]} />
@@ -327,7 +329,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Brewing Stand":
             return (
-                <group>
+                <group position={position}>
                     {/* Base */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.3, 0.35, 0.1, 8]} />
@@ -373,7 +375,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
         // === WORKBENCHES ===
         case "Crafting Table":
             return (
-                <group>
+                <group position={position}>
                     {/* Main table */}
                     <mesh position={[0, -0.5, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.7, 0.5, 0.7]} />
@@ -403,7 +405,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Enchanting Table":
             return (
-                <group>
+                <group position={position}>
                     {/* Base pedestal */}
                     <mesh position={[0, -0.65, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.25, 0.3, 0.3, 8]} />
@@ -440,7 +442,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Smithing Table":
             return (
-                <group>
+                <group position={position}>
                     {/* Main table */}
                     <mesh position={[0, -0.5, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.7, 0.5, 0.7]} />
@@ -475,7 +477,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Fletching Table":
             return (
-                <group>
+                <group position={position}>
                     {/* Main table */}
                     <mesh position={[0, -0.5, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.7, 0.5, 0.7]} />
@@ -509,7 +511,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
         // === STORAGE ===
         case "Chest":
             return (
-                <group>
+                <group position={position}>
                     {/* Bottom half */}
                     <mesh position={[0, -0.55, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.6, 0.5, 0.4]} />
@@ -535,7 +537,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Barrel":
             return (
-                <group>
+                <group position={position}>
                     {/* Main barrel */}
                     <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
                         <cylinderGeometry args={[0.28, 0.25, 0.7, 12]} />
@@ -563,7 +565,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Shulker Box":
             return (
-                <group>
+                <group position={position}>
                     {/* Base */}
                     <mesh position={[0, -0.6, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.5, 0.3, 0.5]} />
@@ -598,7 +600,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
 
         case "Ender Chest":
             return (
-                <group>
+                <group position={position}>
                     {/* Bottom half */}
                     <mesh position={[0, -0.55, 0]} castShadow receiveShadow>
                         <boxGeometry args={[0.6, 0.5, 0.4]} />
@@ -653,7 +655,7 @@ const FunctionalBlock = ({ itemId, itemName, modelUrl, onOpen, onRemove }: Funct
         default:
             // Fallback for unknown functional blocks
             return (
-                <group>
+                <group position={position}>
                     <mesh castShadow receiveShadow>
                         <boxGeometry args={[0.6, 0.6, 0.6]} />
                         <meshStandardMaterial color="#8B4513" emissive="#FFA500" emissiveIntensity={0.2} />

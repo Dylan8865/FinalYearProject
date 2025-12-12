@@ -379,13 +379,13 @@ const GridPlatform = ({
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                console.log("🖱️ Cell clicked:", cellId, "isDragging:", isDraggingItem);
+                console.log("Cell clicked:", cellId, "isDragging:", isDraggingItem);
 
                 if (isDraggingItem && onCellDrop) {
-                  console.log("🎯 Calling onCellDrop for cell:", cellId);
+                  console.log("Calling onCellDrop for cell:", cellId);
                   onCellDrop(cellId, x, z);
                 } else if (!isDraggingItem) {
-                  console.log("📍 Regular click (not dragging)");
+                  console.log("Regular click (not dragging)");
                   onCellClick(x, z, isInner, cellId);
                 }
               }}
@@ -432,7 +432,7 @@ const GridPlatform = ({
       {/* Render placed objects */}
       {Object.entries(placedObjects).map(([key, obj]) => {
         return (
-          <group key={key} position={[obj.x, obj.y * 0.6 + 0.3, obj.z]}>
+          <group key={key} position={[obj.x, obj.y, obj.z]}>
             {obj.node}
           </group>
         );
