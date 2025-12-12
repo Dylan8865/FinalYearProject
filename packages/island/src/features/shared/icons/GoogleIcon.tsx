@@ -4,7 +4,7 @@ interface IconProps {
   className?: string;
 }
 
-const GoogleLogo: React.FC<IconProps> = ({ className }) => {
+const GoogleIcon: React.FC<IconProps> = ({ className }) => {
   return (
     <svg
       className={className}
@@ -44,4 +44,4 @@ const GoogleLogo: React.FC<IconProps> = ({ className }) => {
   );
 };
 
-export default GoogleLogo;
+export default GoogleIcon;

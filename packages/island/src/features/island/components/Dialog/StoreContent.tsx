@@ -2,15 +2,15 @@
 import React, { useState } from "react";
 import { useItems } from "@/features/island/hooks/useItems";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
-import FileIcon from "@/icons/FileIcon";
+import FileIcon from "@/features/shared/icons/FileIcon";
 import { ItemType } from "@/types/types";
-import SeedlingIcon from "@/icons/SeedlingIcon";
-import BlockIcon from "@/icons/BlockIcon";
-import OxygenIcon from "@/icons/OxygenIcon";
+import SeedlingIcon from "@/features/shared/icons/SeedlingIcon";
+import BlockIcon from "@/features/shared/icons/BlockIcon";
+import OxygenIcon from "@/features/shared/icons/OxygenIcon";
 import { ScrollArea } from "@/features/island/components/Dialog/ScrollArea";
-import QuestionIcon from "@/icons/QuestionIcon";
+import QuestionIcon from "@/features/shared/icons/QuestionIcon";
 import Dialog from "./Dialog";
-import ExclaimationIcon from "@/icons/ExclaimationIcon";
+import ExclaimationIcon from "@/features/shared/icons/ExclaimationIcon";
 import Button from "./Button";
 import Image from "next/image";
 

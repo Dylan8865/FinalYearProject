@@ -1,8 +1,11 @@
 import React, { useState, useRef } from "react";
 import { Suspense } from "react";
+import { Html } from "@react-three/drei";
 import TerrainBlock from "../Block/TerrainBlocks";
 import DecorativeBlock from "../Block/DecorativeBlock";
 import FunctionalBlock from "../Block/FunctionalBlock";
+import Tooltip from "./Tooltip";
+
 
 interface PlacedBlockProps {
     itemId: string;
@@ -19,8 +22,9 @@ interface PlacedBlockProps {
  * PlacedBlock - Wrapper for all placed block types
  * 
  * Interaction Model:
- * - Single click: Select the block
- * - Double click: Open removal dialog (terrain/decorative) or editor (functional)
+ * - Hover: Shows tooltip with item name
+ * - Single click: Open dialog (currently removal, extendable)
+ * - Double click: Select for moving (gold wireframe)
  * 
  * @param itemId - Unique ID of the placed item
  * @param itemName - Display name
@@ -36,7 +40,6 @@ const PlacedBlock = ({
     itemName,
     itemType,
     modelUrl,
-    allowStacking = true,
     isSelected = false,
     onClick,
     onDoubleClick,
@@ -44,6 +47,17 @@ const PlacedBlock = ({
     const clickCountRef = useRef(0);
     const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
     const singleClickTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const handlePointerEnter = (e: any) => {
+        e.stopPropagation();
+        setIsHovered(true);
+    };
+
+    const handlePointerLeave = (e: any) => {
+        e.stopPropagation();
+        setIsHovered(false);
+    };
 
     const handleClick = (e: any) => {
         e.stopPropagation();
@@ -69,7 +83,7 @@ const PlacedBlock = ({
 
         // Check for double-click
         if (currentCount === 2) {
-            console.log("✅ Double-click detected on:", itemName, itemType);
+            console.log("Double-click detected on:", itemName, itemType);
             clickCountRef.current = 0;
             if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
             if (singleClickTimerRef.current) clearTimeout(singleClickTimerRef.current);
@@ -80,7 +94,7 @@ const PlacedBlock = ({
                 // Check current value (not closure)
                 if (clickCountRef.current === 1) {
                     // Still only 1 click after delay - it's a single click
-                    console.log("✅ Single click confirmed on:", itemName);
+                    console.log("Single click confirmed on:", itemName);
                     onClick?.(itemId, itemType, itemName);
                     clickCountRef.current = 0;
                 }
@@ -95,7 +109,7 @@ const PlacedBlock = ({
         case "terrain":
             // Terrain blocks allow stacking and use the TerrainBlock component
             content = (
-                <Suspense fallback={<TerrainBlock name="Grass" />}>
+                <Suspense fallback={<TerrainBlock name={itemName} />}>
                     <TerrainBlock name={itemName} />
                 </Suspense>
             );
@@ -133,7 +147,22 @@ const PlacedBlock = ({
     }
 
     return (
-        <group onClick={handleClick}>
+        <group>
+            {/* Invisible bounding box to capture hover events */}
+            <mesh 
+                position={[0, 0, 0]}
+                onClick={handleClick}
+                onPointerEnter={handlePointerEnter}
+                onPointerLeave={handlePointerLeave}
+            >
+                <boxGeometry args={[1.4, 1.8, 1.4]} />
+                <meshBasicMaterial 
+                    transparent 
+                    opacity={0} 
+                    depthWrite={false}
+                />
+            </mesh>
+
             {/* Selection highlight */}
             {isSelected && (
                 <mesh position={[0, 0, 0]}>
@@ -146,7 +175,25 @@ const PlacedBlock = ({
                     />
                 </mesh>
             )}
+            
+            {/* Actual block content */}
             {content}
+            
+            {/* Tooltip rendered in 3D space */}
+            {isHovered && (
+                <>
+                    <Tooltip itemName={itemName} itemType={itemType} />
+                    <mesh position={[0, 0, 0]}>
+                        <boxGeometry args={[1.3, 1.7, 1.3]} />
+                        <meshBasicMaterial
+                            color="white"
+                            transparent
+                            opacity={0.3}
+                            wireframe
+                        />
+                    </mesh>
+                </>
+            )}
         </group>
     );
 };

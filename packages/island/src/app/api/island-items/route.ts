@@ -175,19 +175,27 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Build update object with optional pos_x/pos_y clearing
+    const updateData: Record<string, any> = {
+      title: body.title,
+      cover_image: body.cover_image,
+      level: body.level,
+      grid_x: body.grid_x,
+      grid_y: body.grid_y,
+      grid_z: body.grid_z,
+      island_id: body.island_id,
+    };
+    
+    // Handle pos_x/pos_y - they should be null when placing on island
+    if (body.pos_x !== undefined) updateData.pos_x = body.pos_x;
+    else updateData.pos_x = null;
+    
+    if (body.pos_y !== undefined) updateData.pos_y = body.pos_y;
+    else updateData.pos_y = null;
+
     const { data: islandItem, error } = await supabase
       .from("island-item")
-      .update({
-        title: body.title,
-        cover_image: body.cover_image,
-        level: body.level,
-        grid_x: body.grid_x,
-        grid_y: body.grid_y,
-        grid_z: body.grid_z,
-        island_id: body.island_id,
-        pos_x: null,
-        pos_y: null,
-      })
+      .update(updateData)
       .eq("id", body.id)
       .select("*, item(*), island(*)")
       .single();
@@ -198,6 +206,32 @@ export async function PUT(request: Request) {
         { error: "Failed to update island item" },
         { status: 500 }
       );
+    }
+
+    // Resolve image and model URLs from storage paths
+    if (islandItem && islandItem.item) {
+      let imageCoverUrl = null;
+      let modelUrl = null;
+
+      // Get public URL for cover image if path exists
+      if (islandItem.item.image_cover_path) {
+        const { data } = supabase.storage
+          .from("items")
+          .getPublicUrl(islandItem.item.image_cover_path);
+        imageCoverUrl = data?.publicUrl || null;
+      }
+
+      // Get public URL for 3D model if path exists
+      if (islandItem.item.model_path) {
+        const { data } = supabase.storage
+          .from("items")
+          .getPublicUrl(islandItem.item.model_path);
+        modelUrl = data?.publicUrl || null;
+      }
+
+      // Add resolved URLs to item
+      islandItem.item.image_cover_url = imageCoverUrl;
+      islandItem.item.model_url = modelUrl;
     }
 
     return NextResponse.json(islandItem);
@@ -247,7 +281,7 @@ export async function PATCH(request: Request) {
   try {
     const supabase = await createClient();
     const body = await request.json();
-    const { id, pos_x, pos_y } = body;
+    const { id, pos_x, pos_y, island_id, grid_x, grid_y, grid_z } = body;
 
     if (!id || pos_x === undefined || pos_y === undefined) {
       return NextResponse.json(
@@ -256,19 +290,54 @@ export async function PATCH(request: Request) {
       );
     }
 
+    // Build update object - include grid clearing if provided
+    const updateData: Record<string, any> = {
+      pos_x,
+      pos_y,
+    };
+    
+    // If grid coordinates are explicitly provided (even as null), include them
+    if (island_id !== undefined) updateData.island_id = island_id;
+    if (grid_x !== undefined) updateData.grid_x = grid_x;
+    if (grid_y !== undefined) updateData.grid_y = grid_y;
+    if (grid_z !== undefined) updateData.grid_z = grid_z;
+
     const { data, error } = await supabase
       .from("island-item")
-      .update({
-        pos_x,
-        pos_y,
-      })
+      .update(updateData)
       .eq("id", id)
-      .select()
+      .select("*, item(*), island(*)")
       .single();
 
     if (error) {
       console.error("Error updating item position:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Resolve image and model URLs from storage paths
+    if (data && data.item) {
+      let imageCoverUrl = null;
+      let modelUrl = null;
+
+      // Get public URL for cover image if path exists
+      if (data.item.image_cover_path) {
+        const { data: imageData } = supabase.storage
+          .from("items")
+          .getPublicUrl(data.item.image_cover_path);
+        imageCoverUrl = imageData?.publicUrl || null;
+      }
+
+      // Get public URL for 3D model if path exists
+      if (data.item.model_path) {
+        const { data: modelData } = supabase.storage
+          .from("items")
+          .getPublicUrl(data.item.model_path);
+        modelUrl = modelData?.publicUrl || null;
+      }
+
+      // Add resolved URLs to item
+      data.item.image_cover_url = imageCoverUrl;
+      data.item.model_url = modelUrl;
     }
 
     return NextResponse.json(data);

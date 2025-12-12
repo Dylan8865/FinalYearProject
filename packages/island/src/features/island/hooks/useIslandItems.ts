@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { IslandItemType } from "@/types/types";
-import { createClient } from "@/lib/supabase/client";
 
 /**
  * useIslandItems Hook
@@ -182,6 +181,8 @@ export function useIslandItems(profileId?: string, islandId?: string) {
           grid_x: gridX,
           grid_y: gridY,
           grid_z: gridZ,
+          pos_x: null,
+          pos_y: null,
         }),
       });
 
@@ -220,6 +221,10 @@ export function useIslandItems(profileId?: string, islandId?: string) {
           id: islandItemId,
           pos_x: posX,
           pos_y: posY,
+          island_id: null,
+          grid_x: null,
+          grid_y: null,
+          grid_z: null,
         }),
       });
 
@@ -302,6 +307,10 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     slotX: number,
     slotY: number
   ) => {
+    console.log("=== MOVE TO INVENTORY ===");
+    console.log("Item ID:", islandItemId);
+    console.log("Target slot:", { slotX, slotY });
+    
     try {
       // Optimistic update - move to inventory immediately
       setIslandItems((prevItems) =>
@@ -333,13 +342,49 @@ export function useIslandItems(profileId?: string, islandId?: string) {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Failed to move item to inventory:", errorText);
+        // Revert on failure by refetching
+        await fetchIslandItems();
         throw new Error("Failed to move item to inventory");
       }
 
-      await fetchIslandItems();
+      const responseData = await response.json();
+      console.log("Move to inventory API response:", responseData);
+      console.log("Response item coords:", {
+        grid_x: responseData.grid_x,
+        grid_y: responseData.grid_y,
+        grid_z: responseData.grid_z,
+        island_id: responseData.island_id,
+        pos_x: responseData.pos_x,
+        pos_y: responseData.pos_y,
+      });
+
+      // Update local state with the API response data directly
+      // This is more reliable than refetching which might get stale data
+      setIslandItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === islandItemId
+            ? {
+              ...item,
+              ...responseData,
+              // Ensure these are explicitly null (API should return them as null)
+              island_id: responseData.island_id ?? null,
+              grid_x: responseData.grid_x ?? null,
+              grid_y: responseData.grid_y ?? null,
+              grid_z: responseData.grid_z ?? null,
+              pos_x: responseData.pos_x ?? slotX,
+              pos_y: responseData.pos_y ?? slotY,
+            }
+            : item
+        )
+      );
+      
+      console.log("Item updated successfully in local state");
       return true;
     } catch (err) {
       console.error("Failed to move item to inventory:", err);
+      // Refetch to restore correct state on error
       await fetchIslandItems();
       return false;
     }

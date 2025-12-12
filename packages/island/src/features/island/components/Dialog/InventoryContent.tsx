@@ -1,84 +1,85 @@
 import React, { useState } from "react";
 import { IslandItemType } from "@/types/types";
-import QuestionIcon from "@/icons/QuestionIcon";
-import TrashIcon from "@/icons/TrashIcon";
+import QuestionIcon from "@/features/shared/icons/QuestionIcon";
+import TrashIcon from "@/features/shared/icons/TrashIcon";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
 import Image from "next/image";
 
-const InventoryContent = () => {
+interface InventoryContentProps {
+  selectedPlacedItem?: string | null;
+  onSelect?: (itemId: string | null) => void;
+}
+
+const InventoryContent = ({ selectedPlacedItem, onSelect }: InventoryContentProps) => {
   const { islandItems, loading, updateItemPosition, deleteItem } =
     useIslandItemsContext();
-  const [draggedItem, setDraggedItem] = useState<{
-    item: IslandItemType;
-    fromX: number;
-    fromY: number;
-  } | null>(null);
-  const [isTrashHovered, setIsTrashHovered] = useState(false);
+    
+    // Local state for selection if not controlled by parent (fallback)
+   const [localSelected, setLocalSelected] = useState<string | null>(null);
+   
+   // Use controlled state if available, otherwise local
+   const selectedId = selectedPlacedItem !== undefined ? selectedPlacedItem : localSelected;
+   const handleSelect = onSelect || setLocalSelected;
 
-  const handleDragStart = (
-    e: React.DragEvent,
-    item: IslandItemType,
-    x: number,
-    y: number
-  ) => {
-    setDraggedItem({ item, fromX: x, fromY: y });
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
-
-  const handleDrop = async (e: React.DragEvent, toX: number, toY: number) => {
-    e.preventDefault();
-
-    if (!draggedItem) return;
-
-    const { item, fromX, fromY } = draggedItem;
-
-    // Check if target slot is empty or swap items
-    const targetItem = islandItems.find(
-      (i) => i.pos_x === toX && i.pos_y === toY
-    );
-
-    if (targetItem) {
-      // Swap items - no await, happens in background
-      updateItemPosition(item.id, toX, toY);
-      updateItemPosition(targetItem.id, fromX, fromY);
-    } else {
-      // Move to empty slot - no await, happens in background
-      updateItemPosition(item.id, toX, toY);
+  const handleSlotClick = async (x: number, y: number) => {
+    // If nothing selected, try to select item in slot
+    if (!selectedId) {
+        const itemInSlot = islandItems.find(i => i.pos_x === x && i.pos_y === y);
+        if (itemInSlot) {
+            handleSelect(itemInSlot.id);
+        }
+        return;
     }
 
-    setDraggedItem(null);
+    // Something is selected
+    const selectedItem = islandItems.find(i => i.id === selectedId);
+    
+    // If selected item is not in inventory (e.g. placed), and we click a slot
+    if (!selectedItem) {
+        // Parent context handles "Placed -> Inventory" move usually. 
+        // But here we are inside the Inventory Modal.
+        // Usually the Inventory Modal doesn't show up when placing items?
+        // If we are in "Inventory Mode", selectedPlacedItem comes from hotbar?
+        // Let's assume standard behavior:
+        // If we click an empty slot, valid logic is move.
+        // If we click an occupied slot, valid logic is select (if placed) or swap (if placed?).
+        // Actually, if item is placed, `updateItemPosition` handles "Move to Inventory" if we give it safe X,Y.
+        
+        // Let's simplify: If selected item is NOT found in `islandItems`, it means it's NOT in the inventory list?
+        // WAIT. `islandItems` includes ALL items belonging to profile, including `is_placed`.
+        // Let's check `IslandItemType` definition.
+        // Usually `islandItems` from context are ALL items.
+        // So `selectedItem` should be found.
+        return;
+    }
+
+    // Check target slot
+    const targetItem = islandItems.find(i => i.pos_x === x && i.pos_y === y);
+
+    if (targetItem) {
+        if (targetItem.id === selectedId) {
+            // Clicked self -> Deselect
+            handleSelect(null);
+        } else {
+            // Clicked other item -> Swap
+            await updateItemPosition(selectedId, x, y);
+            await updateItemPosition(targetItem.id, selectedItem.pos_x ?? 0, selectedItem.pos_y ?? 0);
+            // Optional: Keep selection on moved item or deselect?
+            // Deselecting is safer to avoid confusion
+             handleSelect(null);
+        }
+    } else {
+        // Empty slot -> Move
+        await updateItemPosition(selectedId, x, y);
+        handleSelect(null);
+    }
   };
 
-  const handleDragEnd = () => {
-    setDraggedItem(null);
-    setIsTrashHovered(false);
-  };
-
-  const handleTrashDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setIsTrashHovered(true);
-  };
-
-  const handleTrashDragLeave = () => {
-    setIsTrashHovered(false);
-  };
-
-  const handleTrashDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-
-    if (!draggedItem) return;
-
-    // Delete item - optimistic update and background deletion
-    deleteItem(draggedItem.item.id);
-
-    setDraggedItem(null);
-    setIsTrashHovered(false);
+  const handleTrashClick = () => {
+      if (selectedId) {
+          deleteItem(selectedId);
+          handleSelect(null);
+      }
   };
 
   if (loading) {
@@ -90,19 +91,25 @@ const InventoryContent = () => {
       <div className="grid grid-cols-10 gap-4">
         {Array.from({ length: 5 }).map((_, row) =>
           Array.from({ length: 10 }).map((_, col) => {
+            // Find item at this inventory position
+            // IMPORTANT: Only show items that are NOT on the island grid
             const item = islandItems.find(
-              (i) => i.pos_x === col && i.pos_y === row
+              (i) => 
+                i.pos_x === col && 
+                i.pos_y === row &&
+                i.grid_x === null && // Must NOT be on grid
+                i.grid_y === null &&
+                i.grid_z === null &&
+                i.island_id === null // Must NOT be assigned to an island
             );
+            
+            const isSelected = item && item.id === selectedId;
 
             return (
               <div
                 key={`${row}-${col}`}
-                className={`${row == 0 ? "bg-[#d9d9d9] text-black" : "bg-[#8b8b8b]"} relative flex h-16 w-16 items-center justify-center overflow-hidden transition-opacity ${item ? "cursor-grab active:cursor-grabbing" : ""} ${draggedItem?.fromX === col && draggedItem?.fromY === row ? "opacity-50" : ""}`}
-                draggable={!!item}
-                onDragStart={(e) => item && handleDragStart(e, item, col, row)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, col, row)}
-                onDragEnd={handleDragEnd}
+                className={`${row == 0 ? "bg-[#d9d9d9] text-black" : "bg-[#8b8b8b]"} ${isSelected ? "bg-[#fbbf24]" : ""} relative flex h-16 w-16 items-center justify-center overflow-hidden transition-all cursor-pointer hover:scale-110`}
+                onClick={() => handleSlotClick(col, row)}
               >
                 {item && item.item?.image_cover_url ? (
                   <Image
@@ -130,10 +137,8 @@ const InventoryContent = () => {
         )}
       </div>
       <div
-        className={`absolute bottom-8 right-9 text-3xl transition-colors ${isTrashHovered ? "text-red-500" : ""}`}
-        onDragOver={handleTrashDragOver}
-        onDragLeave={handleTrashDragLeave}
-        onDrop={handleTrashDrop}
+        className={`absolute bottom-8 right-9 text-3xl transition-colors cursor-pointer hover:scale-110 active:scale-95 ${selectedId ? "text-red-500 animate-pulse" : "text-gray-400"}`}
+        onClick={handleTrashClick}
       >
         <TrashIcon />
       </div>

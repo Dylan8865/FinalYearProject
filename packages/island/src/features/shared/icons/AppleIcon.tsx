@@ -4,7 +4,7 @@ interface IconProps {
   className?: string;
 }
 
-const AppleLogo: React.FC<IconProps> = ({ className }) => {
+const AppleIcon: React.FC<IconProps> = ({ className }) => {
   return (
     <svg
       className={className}
@@ -20,4 +20,4 @@ const AppleLogo: React.FC<IconProps> = ({ className }) => {
   );
 };
 
-export default AppleLogo;
+export default AppleIcon;
