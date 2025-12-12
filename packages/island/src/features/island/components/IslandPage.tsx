@@ -154,7 +154,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     worldX?: number,
     worldZ?: number
   ) => {
-    console.log("Placed block clicked:", { clickedItemId, clickedType, clickedName });
+    console.log("Placed block clicked (Unique ID):", { clickedItemId, clickedType, clickedName });
 
     // Single-click: Open dialog (if no item selected for placement)
     if (!selectedPlacedItem || selectedPlacedItem === clickedItemId) {
@@ -166,7 +166,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       }
 
       // Open dialog for this item
-      console.log("Opening dialog for item:", clickedItemId);
+      console.log("Opening dialog for item (Unique ID):", clickedItemId);
       if (clickedType == "functional") {
         setSidebarContentPage({ open: true, itemId: clickedItemId, itemName: clickedName });
       }
@@ -271,23 +271,38 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
 
     // Filter for items that have been placed on an island (have island_id and grid coordinates)
     const placedItems = islandItems.filter(
-      (item) =>
-        item.island_id &&
-        item.grid_x !== null &&
-        item.grid_y !== null &&
-        item.grid_z !== null
+      (islandItem) =>
+        islandItem.island_id &&
+        islandItem.grid_x !== null &&
+        islandItem.grid_y !== null &&
+        islandItem.grid_z !== null
     );
 
-    console.log("Loading placed items from database:", placedItems);
+    console.log("=== UPDATING PLACED OBJECTS ===");
+    console.log("Total island items:", islandItems.length);
+    console.log("Items with grid coords:", placedItems.length);
+    
+    // Debug: Show items that have BOTH grid and inventory coords (shouldn't exist)
+    const duplicateItems = islandItems.filter(item => 
+      item.grid_x !== null && item.pos_x !== null
+    );
+    if (duplicateItems.length > 0) {
+      console.error("⚠️ FOUND ITEMS IN BOTH LOCATIONS:", duplicateItems.map(item => ({
+        id: item.id,
+        name: item.item?.name,
+        grid: { x: item.grid_x, y: item.grid_y, z: item.grid_z },
+        inv: { x: item.pos_x, y: item.pos_y }
+      })));
+    }
 
     // Convert placed items to placedObjects format
     const newPlacedObjects: Record<string, PlacedObject> = {};
 
-    placedItems.forEach((item) => {
+    placedItems.forEach((islandItem) => {
       // Find the island this item belongs to
-      const island = islands.find((isl) => isl.id === item.island_id);
+      const island = islands.find((isl) => isl.id === islandItem.island_id);
       if (!island) {
-        console.warn("Island not found for item:", item.id);
+        console.warn("Island not found for item:", islandItem.id);
         return;
       }
 
@@ -297,25 +312,25 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       const offset = (gridSize * cellSize) / 2 - cellSize / 2;
 
       // Convert grid coordinates to world coordinates
-      const x = item.grid_x! * cellSize - offset;
-      const z = item.grid_z! * cellSize - offset;
-      const y = item.grid_y!;
+      const x = islandItem.grid_x! * cellSize - offset;
+      const z = islandItem.grid_z! * cellSize - offset;
+      const y = islandItem.grid_y!;
 
       // Create cell ID (format: "row-col" where row=gridZ, col=gridX)
-      const cellId = `${item.grid_z}-${item.grid_x}`;
+      const cellId = `${islandItem.grid_z}-${islandItem.grid_x}`;
       const positionKey = `${cellId}-${y}`;
 
-      const { modelUrl, itemType, itemName } = getItemMetadata(item);
+      const { modelUrl, itemType, itemName } = getItemMetadata(islandItem);
 
       // Create 3D model node using PlacedBlock wrapper
       const node = createPlacedBlockNode(
-        item.id,
+        islandItem.id, // Use UNIQUE island_item.id
         itemName,
         itemType,
         modelUrl,
         cellId,
         y,
-        item.island_id || undefined,
+        islandItem.island_id || undefined,
         x,
         z
       );
@@ -324,16 +339,16 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         x,
         y,
         z,
-        itemId: item.id,
+        itemId: islandItem.id, // Use UNIQUE island_item.id
         itemName,
         itemType,
         modelUrl,
         node,
-        islandId: item.island_id || undefined, // Track which island this belongs to
+        islandId: islandItem.island_id || undefined, // Track which island this belongs to
       };
     });
 
-    console.log("Loaded placed objects:", newPlacedObjects);
+    console.log("Loaded placed objects (Unique IDs verified):", Object.keys(newPlacedObjects).length, "items");
     setPlacedObjects(newPlacedObjects);
   }, [islandItems, islands, selectedPlacedItem]);
 
@@ -341,17 +356,29 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
    * Handles selecting an item from inventory
    * Click an item to select it, then click a grid cell to place it
    */
-  const handleInventoryItemClick = (item: any, _index: number) => {
+  const handleInventoryItemClick = (islandItem: any | null, _index: number) => {
+    // Handle explicit deselection (passed from InventoryBar)
+    if (!islandItem) {
+        console.log("Deselecting item via inventory click");
+        setSelectedPlacedItem(null);
+        return;
+    }
+
     console.log("=== INVENTORY ITEM CLICKED ===");
-    console.log("Item object:", item);
-    console.log("Item ID:", item.id);
-    console.log("Item name:", item.item?.name);
-    console.log("Item model URL:", item.item?.model_url);
-    console.log("Setting selectedPlacedItem to:", item.id);
+    console.log("Unique ID:", islandItem.id);
+    console.log("Item name:", islandItem.item?.name);
+    console.log("Item model URL:", islandItem.item?.model_url);
+    console.log("Setting selectedPlacedItem to:", islandItem.id);
 
-    setSelectedPlacedItem(item.id);
+    // Toggle selection if clicking the same item (backup check)
+    if (selectedPlacedItem === islandItem.id) {
+        setSelectedPlacedItem(null);
+        return;
+    }
 
-    console.log("Selected item ID is now:", item.id);
+    setSelectedPlacedItem(islandItem.id);
+    
+    console.log("Selected item ID is now:", islandItem.id);
   };
 
   /**
@@ -605,8 +632,16 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-10">
         <div className="pointer-events-auto">
           <InventoryBar
+            selectedPlacedItem={selectedPlacedItem}
+            setSelectedPlacedItem={setSelectedPlacedItem}
             setIsDialogOpen={setIsDialogOpen}
-            onItemClick={handleInventoryItemClick}
+            onItemClick={(item, index) => {
+                if (item === null) {
+                    setSelectedPlacedItem(null);
+                } else {
+                    handleInventoryItemClick(item, index);
+                }
+            }}
             onSlotClick={handleInventorySlotClick}
           />
         </div>
@@ -645,7 +680,10 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <InventoryContent />
+          <InventoryContent 
+            selectedPlacedItem={selectedPlacedItem}
+            onSelect={setSelectedPlacedItem}
+          />
         </Dialog>
       )}
 

@@ -42,6 +42,32 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
+        // Resolve image and model URLs from storage paths
+        if (data && data.item) {
+            let imageCoverUrl = null;
+            let modelUrl = null;
+
+            // Get public URL for cover image if path exists
+            if (data.item.image_cover_path) {
+                const { data: imageData } = supabase.storage
+                    .from("items")
+                    .getPublicUrl(data.item.image_cover_path);
+                imageCoverUrl = imageData?.publicUrl || null;
+            }
+
+            // Get public URL for 3D model if path exists
+            if (data.item.model_path) {
+                const { data: modelData } = supabase.storage
+                    .from("items")
+                    .getPublicUrl(data.item.model_path);
+                modelUrl = modelData?.publicUrl || null;
+            }
+
+            // Add resolved URLs to item
+            data.item.image_cover_url = imageCoverUrl;
+            data.item.model_url = modelUrl;
+        }
+
         return NextResponse.json(data);
     } catch (error) {
         console.error("Error in POST /api/island-items/move-to-inventory:", error);
