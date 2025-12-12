@@ -1,9 +1,10 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import React, { useRef } from "react";
+import React from "react";
 import Island from "./Island";
 import CameraControls, { type CameraControlsHandle } from "./CameraControls";
+import { IslandIndicatorTracker, IslandIndicatorsOverlay, type OffscreenIsland } from "./IslandIndicators";
 
 export interface IslandData {
   id: string;
@@ -26,6 +27,8 @@ interface IslandCanvasProps {
   placedObjects?: Record<string, PlacedObject & { islandId?: string }>;
   controlsRef: React.RefObject<CameraControlsHandle | null>;
   onCameraChanged?: (isAtDefault: boolean) => void;
+  offscreenIslands?: OffscreenIsland[];
+  onOffscreenIslandsChange?: (islands: OffscreenIsland[]) => void;
 }
 
 const IslandCanvas = ({
@@ -36,6 +39,8 @@ const IslandCanvas = ({
   placedObjects = {},
   controlsRef,
   onCameraChanged,
+  offscreenIslands = [],
+  onOffscreenIslandsChange,
 }: IslandCanvasProps) => {
   const defaultCameraPos: [number, number, number] = [10, 15, 5];
   const defaultTarget: [number, number, number] = [0, 0, 0];
@@ -73,6 +78,14 @@ const IslandCanvas = ({
           );
         })}
 
+        {/* Track off-screen islands */}
+        {onOffscreenIslandsChange && (
+          <IslandIndicatorTracker 
+            islands={islands.map(i => ({ id: i.id, position: i.position }))}
+            onUpdate={onOffscreenIslandsChange}
+          />
+        )}
+
         {/* Orbit Controls with ref */}
         <CameraControls
           ref={controlsRef}
@@ -84,9 +97,13 @@ const IslandCanvas = ({
 
         <fog attach="fog" args={["#B0E0E6", 15, 50]} />
       </Canvas>
+
+      {/* Off-screen island indicators overlay */}
+      <IslandIndicatorsOverlay offscreenIslands={offscreenIslands} />
     </div>
   );
 };
 
 
 export default IslandCanvas;
+

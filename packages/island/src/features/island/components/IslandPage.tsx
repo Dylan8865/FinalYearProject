@@ -22,6 +22,7 @@ import TerrainBlock from "./Block/TerrainBlocks";
 import PlacedBlock from "./Block/PlacedBlock";
 import SidebarPage from "./Page/SidebarPage";
 import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
+import { type OffscreenIsland } from "./IslandCanvas/IslandIndicators";
 import RefreshIcon from "@/features/shared/icons/RefreshIcon";
 
 interface IslandPageProps {
@@ -592,6 +593,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
   // reset camera button
   const controlsRef = useRef<CameraControlsHandle>(null);
   const [isCameraAtDefault, setIsCameraAtDefault] = useState(true);
+  const [offscreenIslands, setOffscreenIslands] = useState<OffscreenIsland[]>([]);
   
   const resetCamera = () => {
     controlsRef.current?.reset();
@@ -599,6 +601,10 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
   
   const handleCameraChanged = (isAtDefault: boolean) => {
     setIsCameraAtDefault(isAtDefault);
+  };
+  
+  const handleOffscreenIslandsChange = (islands: OffscreenIsland[]) => {
+    setOffscreenIslands(islands);
   };
 
   // Debug: Log islandItems when they change
@@ -638,6 +644,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           placedObjects={placedObjects}
           controlsRef={controlsRef}
           onCameraChanged={handleCameraChanged}
+          offscreenIslands={offscreenIslands}
+          onOffscreenIslandsChange={handleOffscreenIslandsChange}
         />
       </div>
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-10">
