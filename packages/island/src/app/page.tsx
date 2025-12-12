@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import WILogo from "@/icons/WILogo";
 import LoginIcon from "@/icons/LoginIcon";
 import UserIcon from "@/icons/UserIcon";
 import IslandIcon from "@/icons/IslandIcon";

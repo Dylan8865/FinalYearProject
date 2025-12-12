@@ -4,7 +4,7 @@ interface IconProps {
   className?: string;
 }
 
-const FBLogo: React.FC<IconProps> = ({ className }) => {
+const FacebookIcon: React.FC<IconProps> = ({ className }) => {
   return (
     <svg
       className={className}
@@ -31,4 +31,4 @@ const FBLogo: React.FC<IconProps> = ({ className }) => {
   );
 };
 
-export default FBLogo;
+export default FacebookIcon;

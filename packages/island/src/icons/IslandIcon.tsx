@@ -1,8 +1,13 @@
 import React from "react";
 
-const IslandIcon = () => {
+interface IslandIconProps {
+    className?: string;
+}
+
+const IslandIcon = ({ className }: IslandIconProps) => {
   return (
     <svg
+      className={className}
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"

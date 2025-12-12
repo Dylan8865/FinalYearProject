@@ -10,8 +10,7 @@ import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsCon
 
 interface InventoryBarProps {
   setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
-  onItemDragStart?: (item: any, index: number) => void;
-  onItemDragEnd?: () => void;
+  onItemClick?: (item: any, index: number) => void;
   onSlotClick?: (slotX: number, slotY: number) => void;
 }
 
@@ -28,13 +27,12 @@ interface InventoryBarProps {
  * - Provides buttons to open inventory and store dialogs
  * 
  * @param setIsDialogOpen - Function to control which dialog is open
- * @param onItemDragStart - Callback when user starts dragging an item
- * @param onItemDragEnd - Callback when user stops dragging an item
+ * @param onItemClick - Callback when user clicks an item
+ * @param onSlotClick - Callback when user clicks an empty slot
  */
 const InventoryBar = ({
   setIsDialogOpen,
-  onItemDragStart,
-  onItemDragEnd,
+  onItemClick,
   onSlotClick,
 }: InventoryBarProps) => {
   // Fetch all island items from context
@@ -43,7 +41,7 @@ const InventoryBar = ({
   // Simple mapping: Each item occupies its own slot
   // No grouping or stacking - cleaner and simpler
   const hotbarItems = React.useMemo(() => {
-    console.log("📦 Loading hotbar items, total islandItems:", islandItems.length);
+    console.log("Loading hotbar items, total islandItems:", islandItems.length);
 
     return Array.from({ length: 10 }).map((_, index) => {
       // Get the item at this exact position
@@ -69,9 +67,9 @@ const InventoryBar = ({
               key={`slot-${index}-${item?.id || 'empty'}`}
               className="bg-[#d9d9d9] text-black relative"
               onClick={() => {
-                if (item && onItemDragStart) {
+                if (item && onItemClick) {
                   console.log("Item clicked:", item.item?.name);
-                  onItemDragStart(item, index);
+                  onItemClick(item, index);
                 } else if (!item && onSlotClick) {
                   // Empty slot clicked - move selected placed item here
                   console.log("Empty slot clicked:", index);
