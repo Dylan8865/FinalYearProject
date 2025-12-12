@@ -3,9 +3,9 @@
 import React from "react";
 import Image from "next/image";
 import InventoryButton from "./InventoryButton";
-import MenuIcon from "@/icons/MenuIcon";
-import StoreIcon from "@/icons/StoreIcon";
-import QuestionIcon from "@/icons/QuestionIcon";
+import MenuIcon from "@/features/shared/icons/MenuIcon";
+import StoreIcon from "@/features/shared/icons/StoreIcon";
+import QuestionIcon from "@/features/shared/icons/QuestionIcon";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
 
 interface InventoryBarProps {

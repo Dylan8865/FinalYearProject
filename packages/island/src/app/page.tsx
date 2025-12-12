@@ -1,11 +1,4 @@
 import React from "react";
-import Link from "next/link";
-import LoginIcon from "@/icons/LoginIcon";
-import UserIcon from "@/icons/UserIcon";
-import IslandIcon from "@/icons/IslandIcon";
-import SeedlingIcon from "@/icons/SeedlingIcon";
-import TrophyIcon from "@/icons/TrophyIcon";
-import StoreIcon from "@/icons/StoreIcon";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import IslandsBg from "@/features/home/components/Background/IslandsBg";

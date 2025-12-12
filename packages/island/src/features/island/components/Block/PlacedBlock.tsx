@@ -1,8 +1,11 @@
 import React, { useState, useRef } from "react";
 import { Suspense } from "react";
+import { Html } from "@react-three/drei";
 import TerrainBlock from "../Block/TerrainBlocks";
 import DecorativeBlock from "../Block/DecorativeBlock";
 import FunctionalBlock from "../Block/FunctionalBlock";
+import Tooltip from "./Tooltip";
+
 
 interface PlacedBlockProps {
     itemId: string;
@@ -19,6 +22,7 @@ interface PlacedBlockProps {
  * PlacedBlock - Wrapper for all placed block types
  * 
  * Interaction Model:
+ * - Hover: Shows tooltip with item name
  * - Single click: Open dialog (currently removal, extendable)
  * - Double click: Select for moving (gold wireframe)
  * 
@@ -36,7 +40,6 @@ const PlacedBlock = ({
     itemName,
     itemType,
     modelUrl,
-    allowStacking = true,
     isSelected = false,
     onClick,
     onDoubleClick,
@@ -44,6 +47,17 @@ const PlacedBlock = ({
     const clickCountRef = useRef(0);
     const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
     const singleClickTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const handlePointerEnter = (e: any) => {
+        e.stopPropagation();
+        setIsHovered(true);
+    };
+
+    const handlePointerLeave = (e: any) => {
+        e.stopPropagation();
+        setIsHovered(false);
+    };
 
     const handleClick = (e: any) => {
         e.stopPropagation();
@@ -133,7 +147,22 @@ const PlacedBlock = ({
     }
 
     return (
-        <group onClick={handleClick}>
+        <group>
+            {/* Invisible bounding box to capture hover events */}
+            <mesh 
+                position={[0, 0, 0]}
+                onClick={handleClick}
+                onPointerEnter={handlePointerEnter}
+                onPointerLeave={handlePointerLeave}
+            >
+                <boxGeometry args={[1.4, 1.8, 1.4]} />
+                <meshBasicMaterial 
+                    transparent 
+                    opacity={0} 
+                    depthWrite={false}
+                />
+            </mesh>
+
             {/* Selection highlight */}
             {isSelected && (
                 <mesh position={[0, 0, 0]}>
@@ -146,7 +175,14 @@ const PlacedBlock = ({
                     />
                 </mesh>
             )}
+            
+            {/* Actual block content */}
             {content}
+            
+            {/* Tooltip rendered in 3D space */}
+            {isHovered && (
+               <Tooltip itemName={itemName} itemType={itemType} />
+            )}
         </group>
     );
 };

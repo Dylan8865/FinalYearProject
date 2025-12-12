@@ -1,7 +1,7 @@
-import IslandIcon from "@/icons/IslandIcon";
-import LoginIcon from "@/icons/LoginIcon";
-import ScrollDownIcon from "@/icons/ScrollDownIcon";
-import UserIcon from "@/icons/UserIcon";
+import IslandIcon from "@/features/shared/icons/IslandIcon";
+import LoginIcon from "@/features/shared/icons/LoginIcon";
+import ScrollDownIcon from "@/features/shared/icons/ScrollDownIcon";
+import UserIcon from "@/features/shared/icons/UserIcon";
 import Link from "next/link";
 import React from "react";
 

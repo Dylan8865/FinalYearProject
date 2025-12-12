@@ -3,11 +3,11 @@
 import { useState, useTransition } from "react";
 import { login } from "../actions/login";
 import { signInWithOAuth } from "../actions/oauth";
-import GoogleIcon from "@/icons/GoogleIcon";
-import AppleIcon from "@/icons/AppleIcon";
-import FacebookIcon from "@/icons/FacebookIcon";
+import GoogleIcon from "@/features/shared/icons/GoogleIcon";
+import AppleIcon from "@/features/shared/icons/AppleIcon";
+import FacebookIcon from "@/features/shared/icons/FacebookIcon";
 import Link from "next/link";
-import IslandIcon from "@/icons/IslandIcon";
+import IslandIcon from "@/features/shared/icons/IslandIcon";
 
 const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);

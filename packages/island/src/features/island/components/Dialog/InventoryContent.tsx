@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IslandItemType } from "@/types/types";
-import QuestionIcon from "@/icons/QuestionIcon";
-import TrashIcon from "@/icons/TrashIcon";
+import QuestionIcon from "@/features/shared/icons/QuestionIcon";
+import TrashIcon from "@/features/shared/icons/TrashIcon";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
 import Image from "next/image";
 

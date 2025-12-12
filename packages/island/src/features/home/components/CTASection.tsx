@@ -1,4 +1,4 @@
-import UserIcon from "@/icons/UserIcon";
+import UserIcon from "@/features/shared/icons/UserIcon";
 import Link from "next/link";
 import React from "react";
 
