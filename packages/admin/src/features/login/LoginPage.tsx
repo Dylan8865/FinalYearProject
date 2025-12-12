@@ -1,16 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { login } from "@/actions/login";
-import WILogo from "@/features/auth/login/icons/WILogo";
-import GoogleLogo from "@/features/auth/login/icons/GoogleLogo";
-import AppleLogo from "@/features/auth/login/icons/AppleLogo";
-import FBLogo from "@/features/auth/login/icons/FBLogo";
-import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { login, oAuthLogin } from "@/actions/login";
+import WILogo from "@/features/login/icons/WILogo";
+import GoogleLogo from "@/features/login/icons/GoogleLogo";
 
 const LoginPage = () => {
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    const typeParam = searchParams.get("type");
+    
+    if (errorParam === "not_admin") {
+      setError(`Access denied. Admin privileges required. Your type: ${typeParam || "unknown"}`);
+    } else if (errorParam === "auth_failed") {
+      setError("Authentication failed. Please try again.");
+    } else if (errorParam === "profile_not_found") {
+      setError("Profile not found in database. Contact administrator.");
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,6 +35,20 @@ const LoginPage = () => {
     if (result?.error) {
       setError(result.error);
       setIsSubmitting(false);
+    } else {
+      window.location.href = "/dashboard";
+    }
+  };
+
+  const handleOAuthLogin = async (provider: "google") => {
+    setError(null);
+    setIsSubmitting(true);
+    
+    const result = await oAuthLogin(provider);
+    
+    if (result?.error) {
+      setError(result.error);
+      setIsSubmitting(false);
     }
   };
 
@@ -32,10 +58,10 @@ const LoginPage = () => {
         <div className="mb-6 text-left">
           <WILogo className="w-8 h-8 text-white mb-3" />
           <h1 className="text-lg sm:text-xl font-semibold text-white">
-            Sign in to Wisdom Island
+            Sign In
           </h1>
           <p className="text-[10px] sm:text-xs font-normal text-[#5D5D5D] mt-1">
-            Welcome back
+            Access the admin dashboard
           </p>
         </div>
 
@@ -92,37 +118,15 @@ const LoginPage = () => {
             <hr className="flex-grow border-t border-[#3B3B3B]" />
           </div>
 
-          <div className="flex justify-between mt-3 space-x-3">
-            <button
-              type="button"
-              className="flex-1 bg-[#282828] border border-[#3B3B3B] rounded-md p-2 flex items-center justify-center hover:bg-[#18181A]"
-            >
-              <GoogleLogo className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              className="flex-1 bg-[#282828] border border-[#3B3B3B] rounded-md p-2 flex items-center justify-center hover:bg-[#18181A]"
-            >
-              <AppleLogo className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              className="flex-1 bg-[#282828] border border-[#3B3B3B] rounded-md p-2 flex items-center justify-center hover:bg-[#18181A]"
-            >
-              <FBLogo className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="flex justify-center mt-4">
-            <p className="text-[12px] text-[#5D5D5D]">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/register"
-                className="text-[#6D3F33] visited:text-[#6D3F33] hover:underline font-bold"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={() => handleOAuthLogin("google")}
+            disabled={isSubmitting}
+            className="w-full bg-[#282828] border border-[#3B3B3B] rounded-md p-2 flex items-center justify-center hover:bg-[#18181A] disabled:opacity-50"
+          >
+            <GoogleLogo className="w-4 h-4" />
+            <span className="ml-2 text-white text-xs">Continue with Google</span>
+          </button>
         </form>
       </div>
     </div>
