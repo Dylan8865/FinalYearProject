@@ -1,5 +1,5 @@
 import React from "react";
-import LoginPage from "@/features/auth/login/LoginPage";
+import LoginPage from "@/features/login/LoginPage";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 

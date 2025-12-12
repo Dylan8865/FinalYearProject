@@ -35,26 +35,26 @@ export default function DashboardCards({ stats }: DashboardCardsProps) {
           <MainCard
             title="Shop Management"
             description="Manage shop items, prices, etc."
-            onClick={() => router.push("/dashboard/shop")}
+            onClick={() => router.push("/shop")}
             horizontal={false}
           >
             <SubCard
               title="Functional Items"
               description="Items capable of generating O2"
               count={stats.shop.functional}
-              onClick={() => router.push("/dashboard/shop?filter=functional")}
+              onClick={() => router.push("/shop?filter=functional")}
             />
             <SubCard
               title="Decorative Items"
               description="Items incapable of generating O2"
               count={stats.shop.decorative}
-              onClick={() => router.push("/dashboard/shop?filter=decorative")}
+              onClick={() => router.push("/shop?filter=decorative")}
             />
             <SubCard
               title="Terrain Items"
               description="Items for terrain modification"
               count={stats.shop.terrain}
-              onClick={() => router.push("/dashboard/shop?filter=terrain")}
+              onClick={() => router.push("/shop?filter=terrain")}
             />
           </MainCard>
         </div>
@@ -63,26 +63,26 @@ export default function DashboardCards({ stats }: DashboardCardsProps) {
         <MainCard
           title="Knowledge-base Moderation"
           description="Manage user contributed knowledge"
-          onClick={() => router.push("/dashboard/knowledge")}
+          onClick={() => router.push("/knowledge")}
           horizontal={true}
         >
           <SubCard
             title="Pending"
             description="55%-59%"
             count={stats.knowledge.pending}
-            onClick={() => router.push("/dashboard/knowledge?filter=pending")}
+            onClick={() => router.push("/knowledge?filter=pending")}
           />
           <SubCard
             title="Declined"
             description="≤54%"
             count={stats.knowledge.declined}
-            onClick={() => router.push("/dashboard/knowledge?filter=declined")}
+            onClick={() => router.push("/knowledge?filter=declined")}
           />
           <SubCard
             title="Verified"
             description="≥60%"
             count={stats.knowledge.verified}
-            onClick={() => router.push("/dashboard/knowledge?filter=verified")}
+            onClick={() => router.push("/knowledge?filter=verified")}
           />
         </MainCard>
 
@@ -90,26 +90,26 @@ export default function DashboardCards({ stats }: DashboardCardsProps) {
         <MainCard
           title="User Management"
           description="Manage registered users"
-          onClick={() => router.push("/dashboard/users")}
+          onClick={() => router.push("/user")}
           horizontal={true}
         >
           <SubCard
             title="Admin"
             description="Admin Dashboard Access Accounts"
             count={stats.users.admin}
-            onClick={() => router.push("/dashboard/users?filter=admin")}
+            onClick={() => router.push("/user?filter=admin")}
           />
           <SubCard
             title="Island"
             description="Wisdom Island Game Accounts"
             count={stats.users.island}
-            onClick={() => router.push("/dashboard/users?filter=island")}
+            onClick={() => router.push("/user?filter=island")}
           />
           <SubCard
             title="Non-Island"
             description="Non-Wisdom Island Game Accounts"
             count={stats.users.nonIsland}
-            onClick={() => router.push("/dashboard/users?filter=non-island")}
+            onClick={() => router.push("/user?filter=non-island")}
           />
         </MainCard>
       </div>
@@ -144,7 +144,7 @@ function MainCard({ title, description, onClick, children, horizontal = false }:
       </div>
 
       {/* Sub Cards */}
-      <div className={`flex-1 grid place-content-center grid ${horizontal ? 'grid-cols-3' : 'grid-cols-1'} gap-4`}>
+      <div className={`flex-1 grid place-content-center ${horizontal ? 'grid-cols-3' : 'grid-cols-1'} gap-4`}>
         {children}
       </div>
     </div>

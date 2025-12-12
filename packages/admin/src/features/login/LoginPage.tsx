@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { login, oAuthLogin } from "@/actions/login";
-import WILogo from "@/features/auth/login/icons/WILogo";
-import GoogleLogo from "@/features/auth/login/icons/GoogleLogo";
+import WILogo from "@/features/login/icons/WILogo";
+import GoogleLogo from "@/features/login/icons/GoogleLogo";
 
 const LoginPage = () => {
   const searchParams = useSearchParams();

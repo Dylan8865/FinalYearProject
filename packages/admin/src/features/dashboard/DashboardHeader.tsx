@@ -1,6 +1,6 @@
 "use client";
 
-import WILogo from "@/features/auth/login/icons/WILogo";
+import WILogo from "@/features/login/icons/WILogo";
 import { useRouter } from "next/navigation";
 
 interface DashboardHeaderProps {
@@ -18,7 +18,7 @@ export default function DashboardHeader({ username }: DashboardHeaderProps) {
   return (
     <header className="bg-[#1E1E1E] px-8 py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-baseline gap-">
+        <div className="flex items-baseline">
           <WILogo className="w-8 h-8 text-white" />
           <span className="text-white text-sm font-semibold leading-none">Admin</span>
         </div>

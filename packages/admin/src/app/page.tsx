@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-import WILogo from "@/features/auth/login/icons/WILogo";
+import WILogo from "@/features/login/icons/WILogo";
 
 const AdminHome = () => {
   const router = useRouter();
