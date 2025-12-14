@@ -14,7 +14,8 @@ export async function createClient() {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
+            cookiesToSet.forEach(({ name, value, options }) => {
+              // Session-only cookies: no maxAge or expires means they expire on browser close
               cookieStore.set(name, value, {
                 ...options,
                 maxAge: undefined,
@@ -22,9 +23,11 @@ export async function createClient() {
                 path: "/",
                 sameSite: "lax",
                 secure: process.env.NODE_ENV === "production",
-              })
-            );
+                httpOnly: false, // Supabase needs client-side access
+              });
+            });
           } catch {
+            // Cookie setting can fail in middleware/edge runtime
           }
         },
       },
