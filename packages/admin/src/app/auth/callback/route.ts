@@ -21,8 +21,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/login?error=auth_failed`);
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
-
     const { data: profile, error: profileError } = await supabase
       .from("profile")
       .select("type")
@@ -37,6 +35,20 @@ export async function GET(request: NextRequest) {
     if (!profile.type || profile.type.trim().toLowerCase() !== "admin") {
       await supabase.auth.signOut();
       return NextResponse.redirect(`${origin}/login?error=not_admin`);
+    }
+
+    // Update last login time
+    const now = new Date().toISOString().replace('T', ' ').replace('Z', '');
+    const { error: updateError } = await supabase
+      .from("profile")
+      .update({ last_login_time: now })
+      .eq("id", user.id);
+
+    if (updateError) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to update last login time:", updateError);
+      }
+      // Don't fail the login for this, just log it
     }
 
     const forwardedHost = request.headers.get("x-forwarded-host");
