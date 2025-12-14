@@ -24,64 +24,35 @@ export async function POST(request: Request) {
             );
         }
 
-        // Check if user has same item type already in inventory
-        const { data: existingInventoryItems, error: existingError } = await supabase
+        // Always find next available inventory slot (no stacking)
+        const { data: allInventoryPositions, error: posError } = await supabase
             .from("island-item")
             .select("pos_x, pos_y")
-            .eq("profile_id", profile_id)
-            .eq("item_id", item_id)
-            .is("island_id", null)
-            .is("grid_x", null)
-            .neq("id", id); // Not the item being removed
+            .eq("profile_id", profile_id);
 
-        if (existingError) {
-            console.error("Error checking existing inventory:", existingError);
+        if (posError) {
+            console.error("Error fetching inventory positions:", posError);
             return NextResponse.json(
-                { error: "Failed to check inventory" },
+                { error: "Failed to fetch inventory positions" },
                 { status: 500 }
             );
         }
 
+        // Find next available slot
+        const used = new Set(allInventoryPositions.map((p) => `${p.pos_x},${p.pos_y}`));
         let targetPos = { pos_x: 0, pos_y: 0 };
+        let found = false;
 
-        if (existingInventoryItems && existingInventoryItems.length > 0) {
-            // Stack with existing item - use same position
-            const existingItem = existingInventoryItems[0];
-            targetPos = {
-                pos_x: existingItem.pos_x!,
-                pos_y: existingItem.pos_y!,
-            };
-            console.log(`Returning item to existing inventory position for stacking:`, targetPos);
-        } else {
-            // Find next available inventory slot
-            const { data: allInventoryPositions, error: posError } = await supabase
-                .from("island-item")
-                .select("pos_x, pos_y")
-                .eq("profile_id", profile_id);
-
-            if (posError) {
-                console.error("Error fetching inventory positions:", posError);
-                return NextResponse.json(
-                    { error: "Failed to fetch inventory positions" },
-                    { status: 500 }
-                );
-            }
-
-            // Find next available slot
-            const used = new Set(allInventoryPositions.map((p) => `${p.pos_x},${p.pos_y}`));
-            let found = false;
-
-            for (let y = 0; y < 5 && !found; y++) {
-                for (let x = 0; x < 10 && !found; x++) {
-                    if (!used.has(`${x},${y}`)) {
-                        targetPos = { pos_x: x, pos_y: y };
-                        found = true;
-                    }
+        for (let y = 0; y < 5 && !found; y++) {
+            for (let x = 0; x < 10 && !found; x++) {
+                if (!used.has(`${x},${y}`)) {
+                    targetPos = { pos_x: x, pos_y: y };
+                    found = true;
                 }
             }
-
-            console.log(`Returning item to new inventory position:`, targetPos);
         }
+
+        console.log(`Returning item to new inventory position:`, targetPos);
 
         // Update the item: clear island data, set inventory position
         const { data: updatedItem, error: updateError } = await supabase

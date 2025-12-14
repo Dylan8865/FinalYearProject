@@ -106,11 +106,13 @@ const StoreContent = ({ profile, onUpdateMana }: StoreContentProps) => {
       return;
     }
 
-    const remainingMana = profile.mana - (selectedItem?.mana_required || 0);
-    const success = await purchaseItem(itemId, profile.id, remainingMana);
-    if (success) {
+    const manaCost = selectedItem?.mana_required || 0;
+    const result = await purchaseItem(itemId, profile.id, manaCost);
+    if (result.success) {
       alert("Item purchased successfully!");
-      onUpdateMana(remainingMana);
+      if (result.newMana !== undefined) {
+        onUpdateMana(result.newMana);
+      }
     } else {
       alert("Failed to purchase item");
     }
