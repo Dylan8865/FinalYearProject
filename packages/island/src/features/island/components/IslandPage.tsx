@@ -69,11 +69,18 @@ interface PlacedObject {
 const IslandPageContent = ({ profile }: IslandPageProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error } = useIslands();
-  const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(null); // Currently selected placed item ID
+  const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(
+    null
+  ); // Currently selected placed item ID
   const [placedObjects, setPlacedObjects] = useState<
     Record<string, PlacedObject>
   >({});
-  const { islandItems, placeItemOnIsland, removeItemFromIsland, moveToInventory } = useIslandItemsContext();
+  const {
+    islandItems,
+    placeItemOnIsland,
+    removeItemFromIsland,
+    moveToInventory,
+  } = useIslandItemsContext();
 
   // Functional item dialog
   const [functionalItemDialog, setFunctionalItemDialog] = useState<{
@@ -140,7 +147,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
    */
   const getItemMetadata = (item: any) => ({
     modelUrl: item.item?.model_url,
-    itemType: (item.item?.type as "terrain" | "decorative" | "functional") || "terrain",
+    itemType:
+      (item.item?.type as "terrain" | "decorative" | "functional") || "terrain",
     itemName: item.item?.name || "Unknown",
   });
 
@@ -157,33 +165,50 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     worldX?: number,
     worldZ?: number
   ) => {
-    console.log("Placed block clicked (Unique ID):", { clickedItemId, clickedType, clickedName });
+    console.log("Placed block clicked (Unique ID):", {
+      clickedItemId,
+      clickedType,
+      clickedName,
+    });
 
     // Single-click: Open dialog (if no item selected for placement)
     if (!selectedPlacedItem || selectedPlacedItem === clickedItemId) {
       // Check if there are blocks above - if so, prevent dialog
       if (hasBlockAbove(cellId, y)) {
         console.log("Cannot interact with block that has items above it");
-        alert("Cannot interact with this block - remove blocks above it first!");
+        alert(
+          "Cannot interact with this block - remove blocks above it first!"
+        );
         return;
       }
 
       // Open dialog for this item
       console.log("Opening dialog for item (Unique ID):", clickedItemId);
       if (clickedType == "functional") {
-        setSidebarContentPage({ open: true, itemId: clickedItemId, itemName: clickedName });
+        setSidebarContentPage({
+          open: true,
+          itemId: clickedItemId,
+          itemName: clickedName,
+        });
       }
     } else {
       // User has a different item selected - try to place it here
-      const currentSelectedItem = islandItems.find(i => i.id === selectedPlacedItem);
+      const currentSelectedItem = islandItems.find(
+        (i) => i.id === selectedPlacedItem
+      );
 
       // Only allow placement if clicked block is a terrain type
       if (currentSelectedItem && clickedType === "terrain") {
-        const isInventoryItem = currentSelectedItem.grid_x === null &&
+        const isInventoryItem =
+          currentSelectedItem.grid_x === null &&
           currentSelectedItem.grid_y === null &&
           currentSelectedItem.grid_z === null;
 
-        console.log(isInventoryItem ? "Placing inventory item on terrain!" : "Moving placed item to terrain!");
+        console.log(
+          isInventoryItem
+            ? "Placing inventory item on terrain!"
+            : "Moving placed item to terrain!"
+        );
 
         // Place/move on top of this block
         if (islandId && worldX !== undefined && worldZ !== undefined) {
@@ -191,7 +216,9 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         }
       } else if (clickedType !== "terrain") {
         console.log("Cannot place on non-terrain blocks");
-        alert("Items can only be placed on terrain blocks, not on decorative or functional items.");
+        alert(
+          "Items can only be placed on terrain blocks, not on decorative or functional items."
+        );
       }
     }
   };
@@ -255,7 +282,13 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           )
         }
         onDoubleClick={(clickedItemId, clickedType, clickedName) =>
-          handlePlacedBlockDoubleClick(clickedItemId, clickedType, clickedName, cellId, y)
+          handlePlacedBlockDoubleClick(
+            clickedItemId,
+            clickedType,
+            clickedName,
+            cellId,
+            y
+          )
         }
       />
     );
@@ -284,18 +317,21 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     console.log("=== UPDATING PLACED OBJECTS ===");
     console.log("Total island items:", islandItems.length);
     console.log("Items with grid coords:", placedItems.length);
-    
+
     // Debug: Show items that have BOTH grid and inventory coords (shouldn't exist)
-    const duplicateItems = islandItems.filter(item => 
-      item.grid_x !== null && item.pos_x !== null
+    const duplicateItems = islandItems.filter(
+      (item) => item.grid_x !== null && item.pos_x !== null
     );
     if (duplicateItems.length > 0) {
-      console.error("⚠️ FOUND ITEMS IN BOTH LOCATIONS:", duplicateItems.map(item => ({
-        id: item.id,
-        name: item.item?.name,
-        grid: { x: item.grid_x, y: item.grid_y, z: item.grid_z },
-        inv: { x: item.pos_x, y: item.pos_y }
-      })));
+      console.error(
+        "FOUND ITEMS IN BOTH LOCATIONS:",
+        duplicateItems.map((item) => ({
+          id: item.id,
+          name: item.item?.name,
+          grid: { x: item.grid_x, y: item.grid_y, z: item.grid_z },
+          inv: { x: item.pos_x, y: item.pos_y },
+        }))
+      );
     }
 
     // Convert placed items to placedObjects format
@@ -351,7 +387,11 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       };
     });
 
-    console.log("Loaded placed objects (Unique IDs verified):", Object.keys(newPlacedObjects).length, "items");
+    console.log(
+      "Loaded placed objects (Unique IDs verified):",
+      Object.keys(newPlacedObjects).length,
+      "items"
+    );
     setPlacedObjects(newPlacedObjects);
   }, [islandItems, islands, selectedPlacedItem]);
 
@@ -362,9 +402,9 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
   const handleInventoryItemClick = (islandItem: any | null, _index: number) => {
     // Handle explicit deselection (passed from InventoryBar)
     if (!islandItem) {
-        console.log("Deselecting item via inventory click");
-        setSelectedPlacedItem(null);
-        return;
+      console.log("Deselecting item via inventory click");
+      setSelectedPlacedItem(null);
+      return;
     }
 
     console.log("=== INVENTORY ITEM CLICKED ===");
@@ -375,12 +415,12 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
 
     // Toggle selection if clicking the same item (backup check)
     if (selectedPlacedItem === islandItem.id) {
-        setSelectedPlacedItem(null);
-        return;
+      setSelectedPlacedItem(null);
+      return;
     }
 
     setSelectedPlacedItem(islandItem.id);
-    
+
     console.log("Selected item ID is now:", islandItem.id);
   };
 
@@ -398,7 +438,9 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       return;
     }
 
-    const selectedItem = islandItems.find(item => item.id === selectedPlacedItem);
+    const selectedItem = islandItems.find(
+      (item) => item.id === selectedPlacedItem
+    );
     console.log("Selected item:", selectedItem);
 
     if (!selectedItem) {
@@ -407,7 +449,11 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     }
 
     // Check if item is currently on the island (has grid coordinates)
-    if (selectedItem.grid_x !== null && selectedItem.grid_y !== null && selectedItem.grid_z !== null) {
+    if (
+      selectedItem.grid_x !== null &&
+      selectedItem.grid_y !== null &&
+      selectedItem.grid_z !== null
+    ) {
       console.log("Moving item from island to inventory slot");
       await moveToInventory(selectedPlacedItem, slotX, slotY);
       setSelectedPlacedItem(null);
@@ -445,7 +491,9 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     console.log("All islandItems:", islandItems);
 
     // Get the selected item from islandItems
-    const selectedItem = islandItems.find(item => item.id === selectedPlacedItem);
+    const selectedItem = islandItems.find(
+      (item) => item.id === selectedPlacedItem
+    );
 
     console.log("Found selected item:", selectedItem);
 
@@ -455,7 +503,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     }
 
     // Determine if this is an inventory item or a placed item being moved
-    const isInventoryItem = selectedItem.grid_x === null &&
+    const isInventoryItem =
+      selectedItem.grid_x === null &&
       selectedItem.grid_y === null &&
       selectedItem.grid_z === null;
 
@@ -466,7 +515,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         currentPos: {
           pos_x: selectedItem.pos_x,
           pos_y: selectedItem.pos_y,
-        }
+        },
       });
     } else {
       console.log("Moving placed item:", {
@@ -476,15 +525,19 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           grid_x: selectedItem.grid_x,
           grid_y: selectedItem.grid_y,
           grid_z: selectedItem.grid_z,
-        }
+        },
       });
     }
 
     const y = getNextYPosition(cellId);
 
     if (!isValidPosition(cellId, y)) {
-      console.log("Invalid position - blocks can only be placed on ground or on terrain blocks!");
-      alert("Invalid placement: Blocks can only be placed on the ground or on top of terrain blocks.");
+      console.log(
+        "Invalid position - blocks can only be placed on ground or on terrain blocks!"
+      );
+      alert(
+        "Invalid placement: Blocks can only be placed on the ground or on top of terrain blocks."
+      );
       setSelectedPlacedItem(null);
       return;
     }
@@ -510,9 +563,12 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     const positionKey = `${cellId}-${y}`;
 
     // Check if this item is already placed somewhere (moving it)
-    const oldPositionKey = selectedItem.grid_x !== null && selectedItem.grid_y !== null && selectedItem.grid_z !== null
-      ? `${selectedItem.grid_z}-${selectedItem.grid_x}-${selectedItem.grid_y}`
-      : null;
+    const oldPositionKey =
+      selectedItem.grid_x !== null &&
+      selectedItem.grid_y !== null &&
+      selectedItem.grid_z !== null
+        ? `${selectedItem.grid_z}-${selectedItem.grid_x}-${selectedItem.grid_y}`
+        : null;
 
     console.log("Old position key:", oldPositionKey);
     console.log("New position key:", positionKey);
@@ -535,7 +591,10 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       const newObjects = { ...prev };
 
       // Remove from old position if moving
-      if (oldPositionKey && newObjects[oldPositionKey]?.itemId === selectedItem.id) {
+      if (
+        oldPositionKey &&
+        newObjects[oldPositionKey]?.itemId === selectedItem.id
+      ) {
         console.log("Removing item from old position:", oldPositionKey);
         delete newObjects[oldPositionKey];
       }
@@ -593,16 +652,18 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
   // reset camera button
   const controlsRef = useRef<CameraControlsHandle>(null);
   const [isCameraAtDefault, setIsCameraAtDefault] = useState(true);
-  const [offscreenIslands, setOffscreenIslands] = useState<OffscreenIsland[]>([]);
-  
+  const [offscreenIslands, setOffscreenIslands] = useState<OffscreenIsland[]>(
+    []
+  );
+
   const resetCamera = () => {
     controlsRef.current?.reset();
   };
-  
+
   const handleCameraChanged = (isAtDefault: boolean) => {
     setIsCameraAtDefault(isAtDefault);
   };
-  
+
   const handleOffscreenIslandsChange = (islands: OffscreenIsland[]) => {
     setOffscreenIslands(islands);
   };
@@ -660,23 +721,22 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
             setSelectedPlacedItem={setSelectedPlacedItem}
             setIsDialogOpen={setIsDialogOpen}
             onItemClick={(item, index) => {
-                if (item === null) {
-                    setSelectedPlacedItem(null);
-                } else {
-                    handleInventoryItemClick(item, index);
-                }
+              if (item === null) {
+                setSelectedPlacedItem(null);
+              } else {
+                handleInventoryItemClick(item, index);
+              }
             }}
             onSlotClick={handleInventorySlotClick}
           />
         </div>
       </div>
 
-
       {/* reset camera button - only show when camera has moved */}
       {!isCameraAtDefault && (
         <button
           onClick={resetCamera}
-          className="absolute flex justify-center items-center text-2xl bottom-6 right-6 z-10 pointer-events-auto bg-transparent hover:rotate-180 transition-all duration-300 animate-fade-in"
+          className="animate-fade-in pointer-events-auto absolute bottom-6 right-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180"
         >
           <RefreshIcon />
         </button>
@@ -715,7 +775,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <InventoryContent 
+          <InventoryContent
             selectedPlacedItem={selectedPlacedItem}
             onSelect={setSelectedPlacedItem}
           />
@@ -740,9 +800,10 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         isOpen={sidebarContentPage?.open}
         itemId={sidebarContentPage?.itemId}
         itemName={sidebarContentPage?.itemName}
-        onClick={() => setSidebarContentPage({ open: false, itemId: '', itemName: '' })}
+        onClick={() =>
+          setSidebarContentPage({ open: false, itemId: "", itemName: "" })
+        }
       />
-
     </div>
   );
 };

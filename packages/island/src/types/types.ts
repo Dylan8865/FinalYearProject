@@ -4,7 +4,7 @@ export interface ProfileType {
   name: string;
   email: string;
   last_login_time: string;
-  oxygen: number;
+  mana: number;
   level: number;
   type: string;
 }
@@ -23,9 +23,9 @@ export interface ItemType {
   id: string;
   created_at: string;
   name: string;
-  oxygen_rate: number;
+  mana_rate: number;
   type: string;
-  oxygen_required: number;
+  mana_required: number;
   image_cover_path?: string;
   model_path?: string;
   model_url?: string;

@@ -22,7 +22,6 @@ export async function GET() {
     // This prevents client-side storage requests and improves performance
     const itemsWithImages = items.map((item) => {
       let imageCoverUrl = null;
-      let modelUrl = null;
 
       // Get public URL for cover image if path exists
       if (item.image_cover_path) {
@@ -57,9 +56,9 @@ export async function POST(request: Request) {
       .from("item")
       .insert({
         name: body.name,
-        oxygen_rate: body.oxygen_rate || 0,
+        mana_rate: body.mana_rate || 0,
         type: body.type || "resource",
-        oxygen_required: body.oxygen_required || 0,
+        mana_required: body.mana_required || 0,
       })
       .select()
       .single();
@@ -98,9 +97,9 @@ export async function PUT(request: Request) {
       .from("item")
       .update({
         name: body.name,
-        oxygen_rate: body.oxygen_rate,
+        mana_rate: body.mana_rate,
         type: body.type,
-        oxygen_required: body.oxygen_required,
+        mana_required: body.mana_required,
       })
       .eq("id", body.id)
       .select()

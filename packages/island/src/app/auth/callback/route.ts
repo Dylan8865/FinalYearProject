@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
             "User",
           email: data.user.email || "",
           last_login_time: new Date().toISOString(),
-          oxygen: 100,
+          mana: 100,
           level: 1,
           type: "user",
         });

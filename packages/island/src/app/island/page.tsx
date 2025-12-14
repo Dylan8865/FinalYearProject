@@ -42,7 +42,7 @@ const Island = async () => {
     name: profile.name,
     email: profile.email,
     last_login_time: profile.last_login_time,
-    oxygen: profile.oxygen,
+    mana: profile.mana,
     level: profile.level,
     type: profile.type,
     no_of_islands: islandCount || 0,
