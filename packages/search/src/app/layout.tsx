@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/features/search/context/ThemeContext";
 
 export const metadata: Metadata = {
-  title: "Wisdom Island - Home",
+  title: "Wisdom Island - Search",
   description: "A gamified knowledge sharing platform.",
 };
 
@@ -12,9 +13,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased m-0 p-0">
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased m-0 p-0 min-h-screen">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
