@@ -18,7 +18,26 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json(items);
+    // Enhance items with resolved image URLs from storage
+    // This prevents client-side storage requests and improves performance
+    const itemsWithImages = items.map((item) => {
+      let imageCoverUrl = null;
+
+      // Get public URL for cover image if path exists
+      if (item.image_cover_path) {
+        const { data } = supabase.storage
+          .from("items")
+          .getPublicUrl(item.image_cover_path);
+        imageCoverUrl = data?.publicUrl || null;
+      }
+
+      return {
+        ...item,
+        image_cover_url: imageCoverUrl,
+      };
+    });
+
+    return NextResponse.json(itemsWithImages);
   } catch (error) {
     console.error("Server error:", error);
     return NextResponse.json(
@@ -37,9 +56,9 @@ export async function POST(request: Request) {
       .from("item")
       .insert({
         name: body.name,
-        oxygen_rate: body.oxygen_rate || 0,
+        mana_rate: body.mana_rate || 0,
         type: body.type || "resource",
-        oxygen_required: body.oxygen_required || 0,
+        mana_required: body.mana_required || 0,
       })
       .select()
       .single();
@@ -78,9 +97,9 @@ export async function PUT(request: Request) {
       .from("item")
       .update({
         name: body.name,
-        oxygen_rate: body.oxygen_rate,
+        mana_rate: body.mana_rate,
         type: body.type,
-        oxygen_required: body.oxygen_required,
+        mana_required: body.mana_required,
       })
       .eq("id", body.id)
       .select()

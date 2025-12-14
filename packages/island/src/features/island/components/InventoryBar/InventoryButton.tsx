@@ -4,6 +4,7 @@ interface InventoryButtonProps {
   className: string;
   children?: React.ReactNode;
   onClick?: () => void;
+
 }
 
 const InventoryButton = ({
@@ -13,7 +14,7 @@ const InventoryButton = ({
 }: InventoryButtonProps) => {
   return (
     <button
-      className={`${className} flex justify-center items-center border-black border-4 h-12 w-12`}
+      className={`${className} flex h-12 w-12 items-center justify-center border-4 border-black`}
       onClick={onClick}
     >
       {children}

@@ -3,11 +3,11 @@
 import { useState, useTransition } from "react";
 import { login } from "../actions/login";
 import { signInWithOAuth } from "../actions/oauth";
-import WILogo from "@/icons/WILogo";
-import GoogleLogo from "@/icons/GoogleLogo";
-import AppleLogo from "@/icons/AppleLogo";
-import FBLogo from "@/icons/FBLogo";
+import GoogleIcon from "@/features/shared/icons/GoogleIcon";
+import AppleIcon from "@/features/shared/icons/AppleIcon";
+import FacebookIcon from "@/features/shared/icons/FacebookIcon";
 import Link from "next/link";
+import IslandIcon from "@/features/shared/icons/IslandIcon";
 
 const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +41,7 @@ const LoginPage = () => {
     <div className="flex min-h-screen items-center justify-center bg-[#1E1E20] p-0 sm:bg-[#18181A]">
       <div className="-ms-overflow-style-none scrollbar-none max-h-screen w-full max-w-md overflow-auto border-none bg-[#1E1E20] p-4 sm:rounded-lg sm:border sm:border-[#3B3B3B] sm:p-6 sm:shadow-md [&::-webkit-scrollbar]:hidden">
         <div className="mb-6 text-left">
-          <WILogo className="mb-3 h-8 w-8 text-white" />
+          <IslandIcon className="mb-3 h-8 w-8 text-white" />
           <h1 className="text-lg font-semibold text-white sm:text-xl">
             Sign in to Wisdom Island
           </h1>
@@ -112,7 +112,7 @@ const LoginPage = () => {
               disabled={isPending}
               className="flex flex-1 items-center justify-center rounded-md border border-[#3B3B3B] bg-[#282828] p-2 hover:bg-[#18181A] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <GoogleLogo className="h-4 w-4" />
+              <GoogleIcon className="h-4 w-4" />
             </button>
             <button
               type="button"
@@ -120,7 +120,7 @@ const LoginPage = () => {
               disabled={isPending}
               className="flex flex-1 items-center justify-center rounded-md border border-[#3B3B3B] bg-[#282828] p-2 hover:bg-[#18181A] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <AppleLogo className="h-4 w-4" />
+              <AppleIcon className="h-4 w-4" />
             </button>
             <button
               type="button"
@@ -128,7 +128,7 @@ const LoginPage = () => {
               disabled={isPending}
               className="flex flex-1 items-center justify-center rounded-md border border-[#3B3B3B] bg-[#282828] p-2 hover:bg-[#18181A] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <FBLogo className="h-4 w-4" />
+              <FacebookIcon className="h-4 w-4" />
             </button>
           </div>
           <div className="mt-4 flex justify-center">

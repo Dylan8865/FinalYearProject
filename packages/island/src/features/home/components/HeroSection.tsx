@@ -1,7 +1,7 @@
-import LoginIcon from "@/icons/LoginIcon";
-import ScrollDownIcon from "@/icons/ScrollDownIcon";
-import UserIcon from "@/icons/UserIcon";
-import WILogo from "@/icons/WILogo";
+import IslandIcon from "@/features/shared/icons/IslandIcon";
+import LoginIcon from "@/features/shared/icons/LoginIcon";
+import ScrollDownIcon from "@/features/shared/icons/ScrollDownIcon";
+import UserIcon from "@/features/shared/icons/UserIcon";
 import Link from "next/link";
 import React from "react";
 
@@ -10,7 +10,7 @@ const HeroSection = () => {
     <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
       <div className="mb-12 flex flex-col items-center space-y-4">
         <div className="text-8xl text-white drop-shadow-[0_8px_8px_rgba(0,0,0,0.3)]">
-          <WILogo />
+          <IslandIcon />
         </div>
         <h1 className="text-5xl font-bold text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.3)]">
           Wisdom Island

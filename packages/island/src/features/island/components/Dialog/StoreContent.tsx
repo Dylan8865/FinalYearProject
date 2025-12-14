@@ -1,18 +1,18 @@
 "use client";
-/* eslint-disable react-hooks/purity */
 import React, { useState } from "react";
 import { useItems } from "@/features/island/hooks/useItems";
-import { useIslandItems } from "@/features/island/hooks/useIslandItems";
-import FileIcon from "@/icons/FileIcon";
+import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
+import FileIcon from "@/features/shared/icons/FileIcon";
 import { ItemType } from "@/types/types";
-import SeedlingIcon from "@/icons/SeedlingIcon";
-import BlockIcon from "@/icons/BlockIcon";
-import OxygenIcon from "@/icons/OxygenIcon";
+import SeedlingIcon from "@/features/shared/icons/SeedlingIcon";
+import BlockIcon from "@/features/shared/icons/BlockIcon";
+import ManaIcon from "@/features/shared/icons/ManaIcon";
 import { ScrollArea } from "@/features/island/components/Dialog/ScrollArea";
-import QuestionIcon from "@/icons/QuestionIcon";
+import QuestionIcon from "@/features/shared/icons/QuestionIcon";
 import Dialog from "./Dialog";
-import ExclaimationIcon from "@/icons/ExclaimationIcon";
+import ExclaimationIcon from "@/features/shared/icons/ExclaimationIcon";
 import Button from "./Button";
+import Image from "next/image";
 
 interface StoreRowProps {
   items: ItemType[];
@@ -43,13 +43,23 @@ const StoreRow = ({
                 onClick={() => setSelectedItem(item)}
               >
                 <div className="flex items-center justify-center text-2xl text-black">
-                  <QuestionIcon />
+                  {item.image_cover_url ? (
+                    <Image
+                      src={item.image_cover_url}
+                      alt={item.name}
+                      width={50}
+                      height={50}
+                      unoptimized
+                    />
+                  ) : (
+                    <QuestionIcon />
+                  )}
                 </div>
               </button>
 
               <div className="flex w-16 items-center justify-between">
-                <OxygenIcon width={16} height={16} />
-                <div className="text-xs">{item.oxygen_required}</div>
+                <ManaIcon width={16} height={16} />
+                <div className="text-xs">{item.mana_required}</div>
               </div>
             </div>
           ))}
@@ -64,16 +74,20 @@ interface StoreContentProps {
 
 const StoreContent = ({ userId }: StoreContentProps) => {
   const { items, loading: itemsLoading } = useItems();
-  const { purchaseItem } = useIslandItems(userId);
+  const { purchaseItem } = useIslandItemsContext();
   const [selectedItem, setSelectedItem] = useState<ItemType | null>(null);
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
   const handlePurchase = async (itemId: string) => {
+    setIsPurchasing(true);
     const success = await purchaseItem(itemId, userId);
     if (success) {
       alert("Item purchased successfully!");
     } else {
       alert("Failed to purchase item");
     }
+    setIsPurchasing(false);
+    setSelectedItem(null);
   };
 
   if (itemsLoading) {
@@ -130,14 +144,16 @@ const StoreContent = ({ userId }: StoreContentProps) => {
               </p>
               <div className="flex justify-center gap-4">
                 <Button
-                  className="border border-transparent bg-[#333333] transition hover:border-[#515151]"
+                  className="border border-transparent bg-[#333333] transition hover:border-[#515151] disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => handlePurchase(selectedItem.id)}
+                  disabled={isPurchasing}
                 >
-                  Yes
+                  {isPurchasing ? "Purchasing..." : "Yes"}
                 </Button>
                 <Button
-                  className="border border-transparent bg-[#1a1a1a] transition hover:border-[#515151]"
+                  className="border border-transparent bg-[#1a1a1a] transition hover:border-[#515151] disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setSelectedItem(null)}
+                  disabled={isPurchasing}
                 >
                   No
                 </Button>

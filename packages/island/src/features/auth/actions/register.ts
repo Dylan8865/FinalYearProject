@@ -34,7 +34,7 @@ export async function register(formData: FormData) {
       name: name,
       email: email,
       last_login_time: new Date().toISOString(),
-      oxygen: 0,
+      mana: 0,
       level: 1,
       type: "island",
     });

@@ -1,12 +1,12 @@
-export interface UserType {
+export interface ProfileType {
   id: string;
   created_at: string;
   name: string;
   email: string;
-  password: string;
   last_login_time: string;
-  oxygen: number;
+  mana: number;
   level: number;
+  type: string;
 }
 
 export interface IslandType {
@@ -15,17 +15,21 @@ export interface IslandType {
   name: string;
   level: number;
   theme: string;
-  user_id: string;
-  user: UserType;
+  profile_id: string;
+  user: ProfileType;
 }
 
 export interface ItemType {
   id: string;
   created_at: string;
   name: string;
-  oxygen_rate: number;
+  mana_rate: number;
   type: string;
-  oxygen_required: number;
+  mana_required: number;
+  image_cover_path?: string;
+  model_path?: string;
+  model_url?: string;
+  image_cover_url?: string; // Pre-resolved public URL from API
 }
 
 export interface IslandItemType {
@@ -41,7 +45,8 @@ export interface IslandItemType {
   item_id: string;
   pos_x: number | null;
   pos_y: number | null;
-  user_id: string;
+  profile_id: string;
+  quantity?: number; // Number of stacked items (default 1)
   item?: ItemType;
   island?: IslandType;
 }
