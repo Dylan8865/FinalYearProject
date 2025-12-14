@@ -50,23 +50,9 @@ interface PlacedObject {
   node: React.ReactNode;
   islandId?: string;
 }
-/**
- * IslandPageContent Component
- *
- * Main component that manages the island view and item placement functionality.
- *
- * Features:
- * - Displays the 3D island with placed items
- * - Handles drag-and-drop from inventory to island
- * - Manages dialogs for profile, store, and inventory
- * - Tracks placed objects and their positions
- *
- * State Management:
- * - draggedItem: Currently dragged item from inventory
- * - placedObjects: Map of placed items by position key (cellId-y)
- * - isDialogOpen: Currently open dialog name
- */
-const IslandPageContent = ({ profile }: IslandPageProps) => {
+
+const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
+  const [profile, setProfile] = useState(initialProfile);
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error } = useIslands();
   const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(
@@ -649,7 +635,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     setSelectedPlacedItem(null);
   };
 
-  // reset camera button
+  // reset camera button initialisation
   const controlsRef = useRef<CameraControlsHandle>(null);
   const [isCameraAtDefault, setIsCameraAtDefault] = useState(true);
   const [offscreenIslands, setOffscreenIslands] = useState<OffscreenIsland[]>(
@@ -736,7 +722,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       {!isCameraAtDefault && (
         <button
           onClick={resetCamera}
-          className="animate-fade-in pointer-events-auto absolute bottom-6 right-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180"
+          className="animate-fade-in pointer-events-auto absolute bottom-6 left-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180"
         >
           <RefreshIcon />
         </button>
@@ -791,7 +777,10 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <StoreContent userId={profile.id} />
+          <StoreContent 
+            profile={profile} 
+            onUpdateMana={(newMana) => setProfile(prev => ({ ...prev, mana: newMana }))}
+          />
         </Dialog>
       )}
 

@@ -1,6 +1,6 @@
 import { Html } from "@react-three/drei";
 
-const Tooltip = ({ itemName, itemType }: { itemName: string; itemType: string }) => (
+const ItemTooltip = ({ title, description }: { title: string; description: string }) => (
     <Html
         position={[0, 1.2, 0]}
         center
@@ -24,16 +24,16 @@ const Tooltip = ({ itemName, itemType }: { itemName: string; itemType: string })
                 whiteSpace: 'nowrap'
             }}
         >
-            <div style={{ marginBottom: '2px' }}>{itemName}</div>
+            <div style={{ marginBottom: '2px' }}>{title}</div>
             <div style={{ 
                 fontSize: '11px', 
                 color: '#9ca3af',
                 textTransform: 'capitalize'
             }}>
-                {itemType}
+                {description}
             </div>
         </div>
     </Html>
 )
 
-export default Tooltip;
+export default ItemTooltip;

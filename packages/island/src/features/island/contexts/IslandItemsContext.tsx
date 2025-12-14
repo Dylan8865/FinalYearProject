@@ -9,7 +9,7 @@ interface IslandItemsContextType {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  purchaseItem: (itemId: string, profileId: string) => Promise<boolean>;
+  purchaseItem: (itemId: string, profileId: string, remainingMana: number) => Promise<boolean>;
   placeItemOnIsland: (
     islandItemId: string,
     islandId: string,

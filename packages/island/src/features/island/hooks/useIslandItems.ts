@@ -93,11 +93,11 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     }
   };
 
-  const purchaseItem = async (itemId: string, profileId: string) => {
+  const purchaseItem = async (itemId: string, profileId: string, remainingMana: number) => {
     try {
       // Create a new item entry - each purchase creates a unique item
       // No stacking - the API will find the next available inventory slot
-      const response = await fetch("/api/island-items", {
+      const islandItemResponse = await fetch("/api/island-items", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,11 +109,22 @@ export function useIslandItems(profileId?: string, islandId?: string) {
         }),
       });
 
-      if (!response.ok) {
+      const profileResponse = await fetch("/api/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: profileId,
+          mana: remainingMana,
+        }),
+      });
+
+      if (!islandItemResponse.ok) {
         throw new Error("Failed to purchase item");
       }
 
-      const newItem = await response.json();
+      const newItem = await islandItemResponse.json();
 
       console.log("Purchased new item:", newItem);
 

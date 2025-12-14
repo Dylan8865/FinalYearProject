@@ -1,10 +1,9 @@
 import React, { useState, useRef } from "react";
 import { Suspense } from "react";
-import { Html } from "@react-three/drei";
 import TerrainBlock from "../Block/TerrainBlocks";
 import DecorativeBlock from "../Block/DecorativeBlock";
 import FunctionalBlock from "../Block/FunctionalBlock";
-import Tooltip from "./Tooltip";
+import ItemTooltip from "./ItemTooltip";
 
 
 interface PlacedBlockProps {
@@ -182,7 +181,7 @@ const PlacedBlock = ({
             {/* Tooltip rendered in 3D space */}
             {isHovered && (
                 <>
-                    <Tooltip itemName={itemName} itemType={itemType} />
+                    <ItemTooltip title={itemName} description={itemType} />
                     <mesh position={[0, 0, 0]}>
                         <boxGeometry args={[1.3, 1.7, 1.3]} />
                         <meshBasicMaterial
