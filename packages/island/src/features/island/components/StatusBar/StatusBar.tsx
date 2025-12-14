@@ -3,7 +3,7 @@ import StatusButton from "./StatusButton";
 import UserIcon from "@/features/shared/icons/UserIcon";
 import TrophyIcon from "@/features/shared/icons/TrophyIcon";
 import MenuIcon from "@/features/shared/icons/MenuIcon";
-import OxygenIcon from "@/features/shared/icons/OxygenIcon";
+import ManaIcon from "@/features/shared/icons/ManaIcon";
 import IslandIcon from "@/features/shared/icons/IslandIcon";
 import PlusIcon from "@/features/shared/icons/PlusIcon";
 import { ProfileType } from "@/types/types";
@@ -36,8 +36,8 @@ const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
       </div>
       <div className="space-y-2">
         <StatusButton
-          icon={<OxygenIcon />}
-          data={new Intl.NumberFormat("en").format(profile.oxygen)}
+          icon={<ManaIcon />}
+          data={new Intl.NumberFormat("en").format(profile.mana)}
           bgColor="bg-[#cfa272]"
           orientation="right"
         />

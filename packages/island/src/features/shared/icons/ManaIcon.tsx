@@ -1,11 +1,11 @@
 import React from "react";
 
-interface OxygenIconProps {
+interface ManaIconProps {
   width?: number;
   height?: number;
 }
 
-const OxygenIcon = ({ width = 24, height = 24 }: OxygenIconProps) => {
+const ManaIcon = ({ width = 24, height = 24 }: ManaIconProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -21,4 +21,4 @@ const OxygenIcon = ({ width = 24, height = 24 }: OxygenIconProps) => {
   );
 };
 
-export default OxygenIcon;
+export default ManaIcon;

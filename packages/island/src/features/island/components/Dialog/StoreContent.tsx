@@ -6,7 +6,7 @@ import FileIcon from "@/features/shared/icons/FileIcon";
 import { ItemType } from "@/types/types";
 import SeedlingIcon from "@/features/shared/icons/SeedlingIcon";
 import BlockIcon from "@/features/shared/icons/BlockIcon";
-import OxygenIcon from "@/features/shared/icons/OxygenIcon";
+import ManaIcon from "@/features/shared/icons/ManaIcon";
 import { ScrollArea } from "@/features/island/components/Dialog/ScrollArea";
 import QuestionIcon from "@/features/shared/icons/QuestionIcon";
 import Dialog from "./Dialog";
@@ -58,8 +58,8 @@ const StoreRow = ({
               </button>
 
               <div className="flex w-16 items-center justify-between">
-                <OxygenIcon width={16} height={16} />
-                <div className="text-xs">{item.oxygen_required}</div>
+                <ManaIcon width={16} height={16} />
+                <div className="text-xs">{item.mana_required}</div>
               </div>
             </div>
           ))}

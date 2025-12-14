@@ -55,7 +55,7 @@ export async function register(formData: FormData) {
     name: username,
     email: email,
     password: hashedPassword,
-    oxygen: 0,
+    mana: 0,
     level: 1,
   });
 
