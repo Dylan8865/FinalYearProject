@@ -101,9 +101,7 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
   };
 
   const handleDiscard = () => {
-    setMana(user.mana?.toString() || "0");
-    setLevel(user.level?.toString() || "0");
-    setAccountType(user.type || "island");
+    onClose();
   };
 
   const handleDeleteConfirm = async () => {
