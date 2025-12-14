@@ -3,11 +3,11 @@
 import { useState, useTransition } from "react";
 import { register } from "../actions/register";
 import { signInWithOAuth } from "../actions/oauth";
-import GoogleIcon from "@/features/shared/icons/GoogleIcon";
-import AppleIcon from "@/features/shared/icons/AppleIcon";
-import FacebookIcon from "@/features/shared/icons/FacebookIcon";
+import GoogleIcon from "@/icons/GoogleIcon";
+import AppleIcon from "@/icons/AppleIcon";
+import FacebookIcon from "@/icons/FacebookIcon";
 import Link from "next/link";
-import IslandIcon from "@/features/shared/icons/IslandIcon";
+import IslandIcon from "@/icons/IslandIcon";
 
 const RegisterPage = () => {
   const [error, setError] = useState<string | null>(null);

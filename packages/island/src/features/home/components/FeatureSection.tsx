@@ -1,7 +1,7 @@
-import IslandIcon from "@/features/shared/icons/IslandIcon";
-import SeedlingIcon from "@/features/shared/icons/SeedlingIcon";
-import StoreIcon from "@/features/shared/icons/StoreIcon";
-import TrophyIcon from "@/features/shared/icons/TrophyIcon";
+import IslandIcon from "@/icons/IslandIcon";
+import SeedlingIcon from "@/icons/SeedlingIcon";
+import StoreIcon from "@/icons/StoreIcon";
+import TrophyIcon from "@/icons/TrophyIcon";
 import React from "react";
 
 const FeatureSection = () => {

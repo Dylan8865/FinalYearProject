@@ -5,25 +5,22 @@ import StatusBar from "@/features/island/components/StatusBar/StatusBar";
 import InventoryBar from "@/features/island/components/InventoryBar/InventoryBar";
 import IslandCanvas from "@/features/island/components/IslandCanvas/IslandCanvas";
 import Dialog from "@/features/island/components/Dialog/Dialog";
-import UserIcon from "@/features/shared/icons/UserIcon";
-import TrophyIcon from "@/features/shared/icons/TrophyIcon";
+import UserIcon from "@/icons/UserIcon";
+import TrophyIcon from "@/icons/TrophyIcon";
 import { useIslands } from "@/features/island/hooks/useIslands";
-import MenuIcon from "@/features/shared/icons/MenuIcon";
-import StoreIcon from "@/features/shared/icons/StoreIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import StoreIcon from "@/icons/StoreIcon";
 import StoreContent from "@/features/island/components/Dialog/StoreContent";
 import InventoryContent from "@/features/island/components/Dialog/InventoryContent";
 import { ProfileType } from "@/types/types";
 import ProfileContent from "./Dialog/ProfileContent";
 import { IslandItemsProvider } from "@/features/island/contexts/IslandItemsContext";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
-import { useGLTF } from "@react-three/drei";
-import * as THREE from "three";
-import TerrainBlock from "./Block/TerrainBlocks";
 import PlacedBlock from "./Block/PlacedBlock";
 import SidebarPage from "./Page/SidebarPage";
 import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
 import { type OffscreenIsland } from "./IslandCanvas/IslandIndicators";
-import RefreshIcon from "@/features/shared/icons/RefreshIcon";
+import RefreshIcon from "@/icons/RefreshIcon";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -241,6 +238,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     itemId: string,
     itemName: string,
     itemType: "terrain" | "decorative" | "functional",
+    itemManaRate: number,
     modelUrl: string | undefined,
     cellId: string,
     y: number,
@@ -253,6 +251,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         itemId={itemId}
         itemName={itemName}
         itemType={itemType}
+        itemManaRate={itemManaRate}
         modelUrl={modelUrl}
         isSelected={selectedPlacedItem === itemId}
         onClick={(clickedItemId, clickedType, clickedName) =>
@@ -352,6 +351,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         islandItem.id, // Use UNIQUE island_item.id
         itemName,
         itemType,
+        islandItem.item?.mana_rate ?? 0,
         modelUrl,
         cellId,
         y,
@@ -564,6 +564,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       selectedItem.id,
       itemName,
       itemType,
+      selectedItem.item?.mana_rate ?? 0,
       modelUrl,
       cellId,
       y,

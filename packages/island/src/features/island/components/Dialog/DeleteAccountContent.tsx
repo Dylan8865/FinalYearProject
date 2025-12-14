@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import { deleteAccount } from "@/features/auth/actions/deleteAccount";
-import ExclaimationIcon from "@/features/shared/icons/ExclaimationIcon";
+import ExclaimationIcon from "@/icons/ExclaimationIcon";
 import Dialog from "./Dialog";
 import Button from "./Button";
 

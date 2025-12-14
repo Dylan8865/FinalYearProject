@@ -1,5 +1,5 @@
 import React from "react";
-import CloseIcon from "@/features/shared/icons/CloseIcon";
+import CloseIcon from "@/icons/CloseIcon";
 
 interface DialogProps {
   iconStyle: string;
@@ -24,33 +24,33 @@ const Dialog = ({
   setIsDialogOpen,
 }: DialogProps) => {
   return (
-    <div className="relative h-screen w-screen flex justify-center items-center z-90 bg-black bg-opacity-25">
+    <div className="z-90 relative flex h-screen w-screen items-center justify-center bg-black bg-opacity-25">
       <div
         className={`${
           size == "medium"
             ? "h-[500px] w-[500px]" // medium
             : size == "large"
-            ? "h-[500px] w-[1000px]" // large
-            : "h-[300px] w-[300px]" // small
-        } relative ${borderColor} border-4`}
+              ? "h-[500px] w-[1000px]" // large
+              : "h-[300px] w-[300px]" // small
+        } relative ${borderColor} select-none border-4`}
       >
         {/* header */}
-        <div className="relative z-20 flex justify-between h-10 bg-[#333333]">
+        <div className="relative z-20 flex h-10 justify-between bg-[#333333]">
           {/* left */}
           <div className="flex">
             <div
-              className={`${iconStyle} h-14 w-14  ${borderColor} border-4 mt-[-10px] ml-[-10px] flex justify-center items-center`}
+              className={`${iconStyle} h-14 w-14 ${borderColor} ml-[-10px] mt-[-10px] flex items-center justify-center border-4`}
             >
               {icon}
             </div>
-            <div className="ps-4 flex items-center text-lg text-white">
+            <div className="flex items-center ps-4 text-lg text-white">
               {title}
             </div>
           </div>
           {/* right */}
           <button
             onClick={() => setIsDialogOpen("")}
-            className="bg-[#1a1a1a] h-10 w-10 ps-0.5 pb-0.5 flex justify-center items-center text-white"
+            className="flex h-10 w-10 items-center justify-center bg-[#1a1a1a] pb-0.5 ps-0.5 text-white"
           >
             <CloseIcon />
           </button>
@@ -58,7 +58,7 @@ const Dialog = ({
 
         {/* body */}
         <div
-          className={`${className} relative bg-black text-white p-4 h-[calc(100%-2.5rem)]`}
+          className={`${className} relative h-[calc(100%-2.5rem)] bg-black p-4 text-white`}
         >
           {children}
         </div>

@@ -21,12 +21,12 @@ const StatusButton = ({
     <div
       className={`${
         orientation == "right" && "scale-x-[-1]"
-      } relative flex justify-center items-center text-white pointer-events-auto`}
+      } pointer-events-auto relative flex select-none items-center justify-center text-white`}
     >
       <div
         className={`${
           orientation == "right" && "scale-x-[-1]"
-        } ${bgColor} border-4 text-2xl border-black flex justify-center items-center w-10 h-10`}
+        } ${bgColor} flex h-10 w-10 items-center justify-center border-4 border-black text-2xl`}
       >
         {icon}
       </div>
@@ -35,7 +35,7 @@ const StatusButton = ({
           orientation == "right"
             ? "scale-x-[-1] justify-end border-l-4"
             : "border-r-4"
-        } border-y-4 border-black bg-[#333333] w-48 h-8 px-3 flex items-center`}
+        } flex h-8 w-48 items-center border-y-4 border-black bg-[#333333] px-3`}
       >
         {data}
       </div>
@@ -43,7 +43,7 @@ const StatusButton = ({
         <button
           className={`${
             orientation == "right" && "scale-x-[-1]"
-          } absolute right-0 border-black border-4 w-10 h-8 flex items-center justify-center bg-[#1a1a1a]`}
+          } absolute right-0 flex h-8 w-10 items-center justify-center border-4 border-black bg-[#1a1a1a]`}
           onClick={onClick}
         >
           {btnIcon}

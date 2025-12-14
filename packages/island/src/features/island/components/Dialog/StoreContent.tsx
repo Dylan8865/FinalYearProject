@@ -2,19 +2,18 @@
 import React, { useState } from "react";
 import { useItems } from "@/features/island/hooks/useItems";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
-import FileIcon from "@/features/shared/icons/FileIcon";
+import FileIcon from "@/icons/FileIcon";
 import { ItemType, ProfileType } from "@/types/types";
-import SeedlingIcon from "@/features/shared/icons/SeedlingIcon";
-import BlockIcon from "@/features/shared/icons/BlockIcon";
-import ManaIcon from "@/features/shared/icons/ManaIcon";
+import SeedlingIcon from "@/icons/SeedlingIcon";
+import BlockIcon from "@/icons/BlockIcon";
+import ManaIcon from "@/icons/ManaIcon";
 import { ScrollArea } from "@/features/island/components/Dialog/ScrollArea";
-import QuestionIcon from "@/features/shared/icons/QuestionIcon";
+import QuestionIcon from "@/icons/QuestionIcon";
 import Dialog from "./Dialog";
-import ExclaimationIcon from "@/features/shared/icons/ExclaimationIcon";
+import ExclaimationIcon from "@/icons/ExclaimationIcon";
 import Button from "./Button";
 import Image from "next/image";
-import StoreTooltip from "./StoreTooltip";
-
+import SlotTooltip from "./SlotTooltip";
 
 interface StoreRowProps {
   items: ItemType[];
@@ -49,7 +48,9 @@ const StoreRow = ({
                   onClick={() => setSelectedItem(item)}
                   onMouseEnter={() => setShowTooltip(item)}
                   onMouseLeave={() => setShowTooltip(null)}
-                  onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
+                  onMouseMove={(e) =>
+                    setMousePos({ x: e.clientX, y: e.clientY })
+                  }
                 >
                   <div className="flex items-center justify-center text-2xl text-black">
                     {item.image_cover_url ? (
@@ -75,9 +76,12 @@ const StoreRow = ({
         </div>
       </div>
       {showTooltip && (
-        <StoreTooltip 
-          title={showTooltip.name || ""} 
-          description={"Click To Purchase"} 
+        <SlotTooltip
+          title={showTooltip.name || ""}
+          description={[
+            `Mana Rate: ${showTooltip.mana_rate}/s`,
+            "Click To Purchase",
+          ]}
           x={mousePos.x}
           y={mousePos.y}
         />

@@ -1,11 +1,11 @@
 import React from "react";
 import StatusButton from "./StatusButton";
-import UserIcon from "@/features/shared/icons/UserIcon";
-import TrophyIcon from "@/features/shared/icons/TrophyIcon";
-import MenuIcon from "@/features/shared/icons/MenuIcon";
-import ManaIcon from "@/features/shared/icons/ManaIcon";
-import IslandIcon from "@/features/shared/icons/IslandIcon";
-import PlusIcon from "@/features/shared/icons/PlusIcon";
+import UserIcon from "@/icons/UserIcon";
+import TrophyIcon from "@/icons/TrophyIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import ManaIcon from "@/icons/ManaIcon";
+import IslandIcon from "@/icons/IslandIcon";
+import PlusIcon from "@/icons/PlusIcon";
 import { ProfileType } from "@/types/types";
 
 interface StatusBarProps {

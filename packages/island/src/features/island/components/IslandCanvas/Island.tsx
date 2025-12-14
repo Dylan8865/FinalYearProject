@@ -379,7 +379,12 @@ const GridPlatform = ({
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                console.log("Cell clicked:", cellId, "isDragging:", isDraggingItem);
+                console.log(
+                  "Cell clicked:",
+                  cellId,
+                  "isDragging:",
+                  isDraggingItem
+                );
 
                 if (isDraggingItem && onCellDrop) {
                   console.log("Calling onCellDrop for cell:", cellId);
@@ -474,7 +479,7 @@ const Island = ({
       <GridPlatform
         gridSize={gridSize}
         islandLevel={1}
-        onCellClick={() => { }}
+        onCellClick={() => {}}
         placedObjects={placedObjects}
         waterCells={[]}
         isDraggingItem={isDraggingItem}

@@ -1,8 +1,8 @@
-import UserIcon from "@/features/shared/icons/UserIcon";
+import UserIcon from "@/icons/UserIcon";
 import Link from "next/link";
 import React from "react";
 
-const CTASection = () => {
+const CtaSection = () => {
   return (
     <div className="relative z-10 bg-white py-20">
       <div className="mx-auto max-w-3xl px-4 text-center">
@@ -30,4 +30,4 @@ const CTASection = () => {
   );
 };
 
-export default CTASection;
+export default CtaSection;

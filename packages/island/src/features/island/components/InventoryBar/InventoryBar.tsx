@@ -1,12 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import InventoryButton from "./InventoryButton";
-import MenuIcon from "@/features/shared/icons/MenuIcon";
-import StoreIcon from "@/features/shared/icons/StoreIcon";
-import QuestionIcon from "@/features/shared/icons/QuestionIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import StoreIcon from "@/icons/StoreIcon";
+import QuestionIcon from "@/icons/QuestionIcon";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
+import { ItemType } from "@/types/types";
+import SlotTooltip from "../Dialog/SlotTooltip";
+import { toCapitalise } from "@/lib/capitalise";
 
 interface InventoryBarProps {
   selectedPlacedItem: string | null;
@@ -144,86 +147,106 @@ const InventoryBar = ({
     }))
   );
 
+  const [showTooltip, setShowTooltip] = useState<ItemType | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
   return (
-    <div className="pointer-events-none z-0 flex w-screen items-center justify-center">
-      <div className="pointer-events-auto z-20 h-10 w-fit bg-black px-4">
-        <div className="mt-[-24px] flex items-center justify-center gap-2">
-          {hotbarItems.map((islandItem, index) => (
-            <InventoryButton
-              key={`slot-${index}-${islandItem?.id || "empty"}`}
-              className={`${islandItem && selectedPlacedItem === islandItem.id ? "bg-[#fbbf24]" : "bg-[#d9d9d9] hover:bg-[#808080]"} relative text-black transition-colors`}
-              onClick={() => {
-                // If we have a selection that is NOT the current item, try to move/swap first
-                // Use explicit islandItem.id for comparison (unique instance ID)
-                if (
-                  selectedPlacedItem &&
-                  selectedPlacedItem !== islandItem?.id
-                ) {
-                  const selectedItemInstance = islandItems.find(
-                    (i) => i.id === selectedPlacedItem
-                  );
-                  if (selectedItemInstance) {
-                    // Selected item is in inventory -> Swap/Move logic
-                    handleSlotClick(index);
+    <>
+      <div className="pointer-events-none z-0 flex w-screen items-center justify-center">
+        <div className="pointer-events-auto z-20 h-10 w-fit bg-black px-4">
+          <div className="mt-[-24px] flex items-center justify-center gap-2">
+            {hotbarItems.map((islandItem, index) => (
+              <InventoryButton
+                key={`slot-${index}-${islandItem?.id || "empty"}`}
+                className={`${islandItem && selectedPlacedItem === islandItem.id ? "bg-[#fbbf24]" : "bg-[#d9d9d9] hover:bg-[#808080]"} relative text-black transition-colors`}
+                onClick={() => {
+                  // If we have a selection that is NOT the current item, try to move/swap first
+                  // Use explicit islandItem.id for comparison (unique instance ID)
+                  if (
+                    selectedPlacedItem &&
+                    selectedPlacedItem !== islandItem?.id
+                  ) {
+                    const selectedItemInstance = islandItems.find(
+                      (i) => i.id === selectedPlacedItem
+                    );
+                    if (selectedItemInstance) {
+                      // Selected item is in inventory -> Swap/Move logic
+                      handleSlotClick(index);
+                      return;
+                    }
+
+                    if (!islandItem && onSlotClick) {
+                      onSlotClick(index, 0);
+                      return;
+                    }
+                  }
+
+                  // Deselect if already selected
+                  if (
+                    islandItem &&
+                    selectedPlacedItem === islandItem.id &&
+                    onItemClick
+                  ) {
+                    onItemClick(null, index);
                     return;
                   }
 
-                  if (!islandItem && onSlotClick) {
+                  if (islandItem && onItemClick) {
+                    console.log("Item clicked (Unique ID):", islandItem.id);
+                    onItemClick(islandItem, index);
+                  } else if (!islandItem && onSlotClick) {
                     onSlotClick(index, 0);
-                    return;
                   }
-                }
-
-                // Deselect if already selected
-                if (
-                  islandItem &&
-                  selectedPlacedItem === islandItem.id &&
-                  onItemClick
-                ) {
-                  onItemClick(null, index);
-                  return;
-                }
-
-                if (islandItem && onItemClick) {
-                  console.log("Item clicked (Unique ID):", islandItem.id);
-                  onItemClick(islandItem, index);
-                } else if (!islandItem && onSlotClick) {
-                  onSlotClick(index, 0);
-                }
-              }}
-            >
-              {islandItem && islandItem.item?.image_cover_url ? (
-                <Image
-                  src={islandItem.item.image_cover_url}
-                  alt={islandItem.item.name || "Item"}
-                  width={30}
-                  height={30}
-                  className="object-contain"
-                  draggable={false}
-                  unoptimized
-                />
-              ) : (
-                islandItem && <QuestionIcon />
-              )}
-            </InventoryButton>
-          ))}
-          <div className="ml-4 flex gap-2">
-            <InventoryButton
-              className="bg-[#dcd1c1] hover:bg-[#aaa194]"
-              onClick={() => setIsDialogOpen("inventory")}
-            >
-              <MenuIcon />
-            </InventoryButton>
-            <InventoryButton
-              className="bg-[#dcd1c1] text-2xl hover:bg-[#aaa194]"
-              onClick={() => setIsDialogOpen("store")}
-            >
-              <StoreIcon />
-            </InventoryButton>
+                }}
+                onMouseEnter={() => setShowTooltip(islandItem?.item || null)}
+                onMouseLeave={() => setShowTooltip(null)}
+                onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
+              >
+                {islandItem && islandItem.item?.image_cover_url ? (
+                  <Image
+                    src={islandItem.item.image_cover_url}
+                    alt={islandItem.item.name || "Item"}
+                    width={30}
+                    height={30}
+                    className="object-contain"
+                    draggable={false}
+                    unoptimized
+                  />
+                ) : (
+                  islandItem && <QuestionIcon />
+                )}
+              </InventoryButton>
+            ))}
+            <div className="ml-4 flex gap-2">
+              <InventoryButton
+                className="bg-[#dcd1c1] hover:bg-[#aaa194]"
+                onClick={() => setIsDialogOpen("inventory")}
+              >
+                <MenuIcon />
+              </InventoryButton>
+              <InventoryButton
+                className="bg-[#dcd1c1] text-2xl hover:bg-[#aaa194]"
+                onClick={() => setIsDialogOpen("store")}
+              >
+                <StoreIcon />
+              </InventoryButton>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      {showTooltip && (
+        <SlotTooltip
+          title={showTooltip.name || ""}
+          description={[
+            `Type: ${toCapitalise(showTooltip.type ?? "")}`,
+            `Mana Rate: ${showTooltip.mana_rate}/s`,
+            "Click To Move",
+          ]}
+          x={mousePos.x}
+          y={mousePos.y - 100}
+        />
+      )}
+    </>
   );
 };
 

@@ -6,7 +6,7 @@ import CloudsBg from "@/features/home/components/Background/CloudsBg";
 import HeroSection from "@/features/home/components/HeroSection";
 import FeatureSection from "@/features/home/components/FeatureSection";
 import HowItWorksSection from "@/features/home/components/HowItWorksSection";
-import CTASection from "@/features/home/components/CTASection";
+import CtaSection from "@/features/home/components/CTASection";
 import FooterSection from "@/features/home/components/FooterSection";
 
 const Home = async () => {
@@ -30,7 +30,7 @@ const Home = async () => {
       <HeroSection />
       <FeatureSection />
       <HowItWorksSection />
-      <CTASection />
+      <CtaSection />
       <FooterSection />
     </div>
   );

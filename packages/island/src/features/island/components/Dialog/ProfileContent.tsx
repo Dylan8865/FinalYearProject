@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import EditButton from "./EditButton";
 import SettingButton from "./SettingButton";
-import LockIcon from "@/features/shared/icons/LockIcon";
-import LoginIcon from "@/features/shared/icons/LoginIcon";
-import WarningIcon from "@/features/shared/icons/WarningIcon";
+import LockIcon from "@/icons/LockIcon";
+import LoginIcon from "@/icons/LoginIcon";
+import WarningIcon from "@/icons/WarningIcon";
 import { signOut } from "@/features/auth/actions/logout";
 import DeleteAccountContent from "./DeleteAccountContent";
 
