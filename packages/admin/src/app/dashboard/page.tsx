@@ -12,17 +12,17 @@ export default async function DashboardPage() {
   // Fetch stats from database
   // Shop Management counts
   const { count: functionalItems } = await supabase
-    .from("items")
+    .from("item")
     .select("*", { count: "exact", head: true })
     .eq("type", "functional");
 
   const { count: decorativeItems } = await supabase
-    .from("items")
+    .from("item")
     .select("*", { count: "exact", head: true })
     .eq("type", "decorative");
 
   const { count: terrainItems } = await supabase
-    .from("items")
+    .from("item")
     .select("*", { count: "exact", head: true })
     .eq("type", "terrain");
 
