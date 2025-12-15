@@ -54,4 +54,4 @@ const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
   );
 };
 
-export default StatusBar;
+export default React.memo(StatusBar);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import StatusBar from "@/features/island/components/StatusBar/StatusBar";
 import InventoryBar from "@/features/island/components/InventoryBar/InventoryBar";
 import IslandCanvas from "@/features/island/components/IslandCanvas/IslandCanvas";
@@ -21,6 +21,8 @@ import SidebarPage from "./Page/SidebarPage";
 import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
 import { type OffscreenIsland } from "./IslandCanvas/IslandIndicators";
 import RefreshIcon from "@/icons/RefreshIcon";
+import ManaCollectionPopup from "@/features/island/components/IslandCanvas/ManaCollectionPopup";
+import { calculateIslandTotalManaRate } from "@/utils/manaCalculations";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -78,6 +80,20 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     itemId: string;
     itemName: string;
   } | null>(null);
+
+  // Mana system state
+  interface IslandManaState {
+    manaRate: number;
+    accumulatedMana: number;
+    lastCollectionTime: Date;
+  }
+  const [islandManaStates, setIslandManaStates] = useState<
+    Record<string, IslandManaState>
+  >({});
+  const [manaPopup, setManaPopup] = useState<{
+    visible: boolean;
+    amount: number;
+  }>({ visible: false, amount: 0 });
 
   /**
    * Get the next available Y position (vertical stacking) for a given grid cell
@@ -665,6 +681,147 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     console.log("Placed objects updated:", placedObjects);
   }, [placedObjects]);
 
+  // Initialize mana states for islands
+  useEffect(() => {
+    if (!islands || islands.length === 0) return;
+
+    setIslandManaStates((prev) => {
+      const newStates = { ...prev };
+      islands.forEach((island) => {
+        if (!newStates[island.id]) {
+          // Get placed items for this island
+          const islandPlacedItems = islandItems.filter(
+            (item) => item.island_id === island.id && item.grid_x !== null
+          );
+          const manaRate = calculateIslandTotalManaRate(
+            { id: island.id, level: island.level || 1 },
+            islandPlacedItems
+          );
+          newStates[island.id] = {
+            manaRate,
+            accumulatedMana: 0,
+            lastCollectionTime: new Date(),
+          };
+        }
+      });
+      return newStates;
+    });
+  }, [islands, islandItems]);
+
+  // Update mana rates when placed items change
+  useEffect(() => {
+    if (!islands || islands.length === 0) return;
+
+    setIslandManaStates((prev) => {
+      const newStates = { ...prev };
+      islands.forEach((island) => {
+        const islandPlacedItems = islandItems.filter(
+          (item) => item.island_id === island.id && item.grid_x !== null
+        );
+        const manaRate = calculateIslandTotalManaRate(
+          { id: island.id, level: island.level || 1 },
+          islandPlacedItems
+        );
+        if (newStates[island.id]) {
+          newStates[island.id] = {
+            ...newStates[island.id],
+            manaRate,
+          };
+        }
+      });
+      return newStates;
+    });
+  }, [islandItems, islands]);
+
+
+  // Use ref to track mana without causing re-renders every second
+  const manaStatesRef = useRef<Record<string, IslandManaState>>({});
+  
+  // Keep ref in sync with state (for collection handler)
+  useEffect(() => {
+    manaStatesRef.current = islandManaStates;
+  }, [islandManaStates]);
+
+  // Accumulate mana - use ref to avoid re-renders, only update state periodically
+  useEffect(() => {
+    // Update ref every second (no re-render)
+    const fastInterval = setInterval(() => {
+      const now = new Date();
+      Object.keys(manaStatesRef.current).forEach((islandId) => {
+        const state = manaStatesRef.current[islandId];
+        if (state) {
+          const elapsedSeconds =
+            (now.getTime() - state.lastCollectionTime.getTime()) / 1000;
+          manaStatesRef.current[islandId] = {
+            ...state,
+            accumulatedMana: Math.floor(state.manaRate * elapsedSeconds),
+          };
+        }
+      });
+    }, 1000);
+
+    // Update state every 5 seconds (causes re-render but less frequently)
+    const slowInterval = setInterval(() => {
+      setIslandManaStates({ ...manaStatesRef.current });
+    }, 5000);
+
+    return () => {
+      clearInterval(fastInterval);
+      clearInterval(slowInterval);
+    };
+  }, []);
+
+  // Handle mana collection from island click
+  const handleIslandClick = useCallback(
+    async (islandId: string) => {
+      const state = islandManaStates[islandId];
+      if (!state || state.accumulatedMana < 1) {
+        console.log("No mana to collect");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/islands/collect-mana", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            island_id: islandId,
+            last_collection_time: state.lastCollectionTime.toISOString(),
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to collect mana");
+        }
+
+        const data = await response.json();
+
+        // Show collection popup
+        setManaPopup({ visible: true, amount: data.collected });
+
+        // Update profile mana
+        setProfile((prev) => ({ ...prev, mana: data.new_mana }));
+
+        // Reset island mana state
+        setIslandManaStates((prev) => ({
+          ...prev,
+          [islandId]: {
+            ...prev[islandId],
+            accumulatedMana: 0,
+            lastCollectionTime: new Date(data.collection_time),
+          },
+        }));
+
+        console.log(`Collected ${data.collected} mana from island ${islandId}`);
+      } catch (err) {
+        console.error("Failed to collect mana:", err);
+      }
+    },
+    [islandManaStates]
+  );
+
   if (loading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
@@ -694,6 +851,8 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           onCameraChanged={handleCameraChanged}
           offscreenIslands={offscreenIslands}
           onOffscreenIslandsChange={handleOffscreenIslandsChange}
+          islandManaStates={islandManaStates}
+          onIslandClick={handleIslandClick}
         />
       </div>
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-10">
@@ -778,9 +937,11 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <StoreContent 
-            profile={profile} 
-            onUpdateMana={(newMana) => setProfile(prev => ({ ...prev, mana: newMana }))}
+          <StoreContent
+            profile={profile}
+            onUpdateMana={(newMana) =>
+              setProfile((prev) => ({ ...prev, mana: newMana }))
+            }
           />
         </Dialog>
       )}
@@ -793,6 +954,13 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         onClick={() =>
           setSidebarContentPage({ open: false, itemId: "", itemName: "" })
         }
+      />
+
+      {/* Mana Collection Popup */}
+      <ManaCollectionPopup
+        amount={manaPopup.amount}
+        visible={manaPopup.visible}
+        onComplete={() => setManaPopup({ visible: false, amount: 0 })}
       />
     </div>
   );

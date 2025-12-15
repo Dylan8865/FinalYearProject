@@ -117,7 +117,6 @@ const InventoryBar = ({
   // Simple mapping: Each item occupies its own slot
   // No grouping or stacking - cleaner and simpler
   const hotbarItems = React.useMemo(() => {
-    console.log("Loading hotbar items, total islandItems:", islandItems.length);
 
     return Array.from({ length: 10 }).map((_, index) => {
       // Get the item at this exact position
@@ -136,16 +135,6 @@ const InventoryBar = ({
       );
     });
   }, [islandItems]);
-
-  // Debug: Log hotbar items
-  console.log(
-    "Hotbar items:",
-    hotbarItems.map((item) => ({
-      name: item?.item?.name,
-      pos_x: item?.pos_x,
-      pos_y: item?.pos_y,
-    }))
-  );
 
   const [showTooltip, setShowTooltip] = useState<ItemType | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -250,4 +239,4 @@ const InventoryBar = ({
   );
 };
 
-export default InventoryBar;
+export default React.memo(InventoryBar);
