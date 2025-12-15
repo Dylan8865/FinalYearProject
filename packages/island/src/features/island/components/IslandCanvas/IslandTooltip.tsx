@@ -25,7 +25,7 @@ interface IslandTooltipProps {
  * - Total mana rate (per second)
  * - Accumulated mana ready to collect
  * - Quick collect button
- * 
+ *
  * Features:
  * - Stays visible when hovering over the tooltip itself
  * - Has close button for mobile/tablet touch interactions
@@ -79,7 +79,7 @@ const IslandTooltip = ({
             }}
             style={{
               position: "absolute",
-              top: "8px",
+              top: "14px",
               right: "8px",
               width: "20px",
               height: "20px",
@@ -109,8 +109,9 @@ const IslandTooltip = ({
           </button>
         )}
 
-        {/* Header */}x
+        {/* Header */}
         <div
+          className="flex items-center justify-center"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -173,7 +174,7 @@ const IslandTooltip = ({
             }}
           >
             <span
-              className="flex gap-1 justify-center items-center"
+              className="flex items-center justify-center gap-1"
               style={{ color: "#9ca3af", fontSize: "12px" }}
             >
               Accumulated

@@ -15,7 +15,7 @@ interface StatusBarProps {
 
 const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
   return (
-    <div className="pointer-events-none flex justify-between p-4">
+    <div className="pointer-events-none flex flex-col items-start gap-2 p-4 md:flex-row md:justify-between md:gap-0">
       <div className="space-y-2">
         <StatusButton
           icon={<UserIcon />}

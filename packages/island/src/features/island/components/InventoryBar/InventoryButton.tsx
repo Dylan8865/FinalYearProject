@@ -1,5 +1,4 @@
-import { ItemType } from "@/types/types";
-import React, { useState } from "react";
+import React from "react";
 
 interface InventoryButtonProps {
   className: string;
@@ -20,7 +19,7 @@ const InventoryButton = ({
 }: InventoryButtonProps) => {
   return (
     <button
-      className={`${className} flex h-12 w-12 select-none items-center justify-center border-4 border-black`}
+      className={`${className} flex h-14 w-14 select-none items-center justify-center border-4 border-black md:h-12 md:w-12`}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

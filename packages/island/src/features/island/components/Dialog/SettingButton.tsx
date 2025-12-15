@@ -16,17 +16,17 @@ const SettingButton = ({
   onClick,
 }: SettingButtonProps) => {
   return (
-    <div className="flex justify-between gap-4">
+    <div className="flex w-80 justify-between md:w-auto md:gap-4">
       <div className={`${!fieldName && "opacity-0"} flex items-center`}>
         {fieldName}
       </div>
-      <button className="flex h-10 w-80" onClick={onClick}>
+      <button className="flex h-8 w-60 md:h-10 md:w-80" onClick={onClick}>
         <div
           className={`${
             color == "gray"
               ? "bg-[#6c6d6a] text-black"
               : "bg-[#4c0000] text-white"
-          } flex h-10 w-11 items-center justify-center text-2xl`}
+          } flex h-8 w-9 items-center justify-center text-base md:h-10 md:w-11 md:text-2xl`}
         >
           {icon}
         </div>

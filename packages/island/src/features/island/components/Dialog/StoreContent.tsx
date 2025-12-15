@@ -34,11 +34,11 @@ const StoreRow = ({
   return (
     <>
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-lg">
+        <div className="flex items-center gap-2 text-sm md:text-lg">
           {icon}
           <h1>{category}</h1>
         </div>
-        <div className="grid grid-cols-10 gap-4">
+        <div className="grid grid-cols-4 gap-4 md:grid-cols-10">
           {items
             .filter((item) => item.type === category.toLowerCase())
             .map((item) => (

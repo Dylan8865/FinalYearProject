@@ -117,7 +117,6 @@ const InventoryBar = ({
   // Simple mapping: Each item occupies its own slot
   // No grouping or stacking - cleaner and simpler
   const hotbarItems = React.useMemo(() => {
-
     return Array.from({ length: 10 }).map((_, index) => {
       // Get the item at this exact position
       // IMPORTANT: Only include items that are NOT on the island grid
@@ -142,12 +141,12 @@ const InventoryBar = ({
   return (
     <>
       <div className="pointer-events-none z-0 flex w-screen items-center justify-center">
-        <div className="pointer-events-auto z-20 h-10 w-fit bg-black px-4">
-          <div className="mt-[-24px] flex items-center justify-center gap-2">
+        <div className="pointer-events-auto z-20 flex h-full w-full items-center justify-center bg-black px-4 pb-4 md:h-10 md:w-fit md:pb-0">
+          <div className="mt-[-24px] grid w-96 grid-cols-6 items-center justify-center gap-2 md:flex md:w-full">
             {hotbarItems.map((islandItem, index) => (
               <InventoryButton
                 key={`slot-${index}-${islandItem?.id || "empty"}`}
-                className={`${islandItem && selectedPlacedItem === islandItem.id ? "bg-[#fbbf24]" : "bg-[#d9d9d9] hover:bg-[#808080]"} relative text-black transition-colors`}
+                className={`${islandItem && selectedPlacedItem === islandItem.id ? "bg-[#fbbf24]" : "bg-[#d9d9d9] hover:bg-[#808080]"} relative text-black transition-colors ${index === 6 ? "md:ml-0" : ""}`}
                 onClick={() => {
                   // If we have a selection that is NOT the current item, try to move/swap first
                   // Use explicit islandItem.id for comparison (unique instance ID)
@@ -206,7 +205,7 @@ const InventoryBar = ({
                 )}
               </InventoryButton>
             ))}
-            <div className="ml-4 flex gap-2">
+            <div className="ml-0 flex w-fit gap-2 md:ml-4">
               <InventoryButton
                 className="bg-[#dcd1c1] hover:bg-[#aaa194]"
                 onClick={() => setIsDialogOpen("inventory")}

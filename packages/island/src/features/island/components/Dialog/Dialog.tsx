@@ -28,18 +28,18 @@ const Dialog = ({
       <div
         className={`${
           size == "medium"
-            ? "h-[500px] w-[500px]" // medium
+            ? "h-[400px] w-[400px] md:h-[500px] md:w-[500px]" // medium
             : size == "large"
-              ? "h-[500px] w-[1000px]" // large
+              ? "h-[400px] w-[400px] md:h-[500px] md:w-[1000px]" // large
               : "h-[300px] w-[300px]" // small
         } relative ${borderColor} select-none border-4`}
       >
         {/* header */}
-        <div className="relative z-20 flex h-10 justify-between bg-[#333333]">
+        <div className="relative z-20 flex h-8 justify-between bg-[#333333] md:h-10">
           {/* left */}
           <div className="flex">
             <div
-              className={`${iconStyle} h-14 w-14 ${borderColor} ml-[-10px] mt-[-10px] flex items-center justify-center border-4`}
+              className={`${iconStyle} h-12 w-12 md:h-14 md:w-14 ${borderColor} ml-[-10px] mt-[-10px] flex items-center justify-center border-4`}
             >
               {icon}
             </div>
@@ -50,7 +50,7 @@ const Dialog = ({
           {/* right */}
           <button
             onClick={() => setIsDialogOpen("")}
-            className="flex h-10 w-10 items-center justify-center bg-[#1a1a1a] pb-0.5 ps-0.5 text-white"
+            className="flex h-8 w-8 items-center justify-center bg-[#1a1a1a] pb-0.5 ps-0.5 text-white md:h-10 md:w-10"
           >
             <CloseIcon />
           </button>
@@ -58,7 +58,7 @@ const Dialog = ({
 
         {/* body */}
         <div
-          className={`${className} relative h-[calc(100%-2.5rem)] bg-black p-4 text-white`}
+          className={`${className} relative h-[calc(100%-2rem)] overflow-hidden bg-black p-4 text-white md:h-[calc(100%-2.5rem)]`}
         >
           {children}
         </div>

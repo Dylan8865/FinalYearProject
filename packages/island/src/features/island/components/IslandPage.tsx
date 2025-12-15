@@ -733,10 +733,9 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     });
   }, [islandItems, islands]);
 
-
   // Use ref to track mana without causing re-renders every second
   const manaStatesRef = useRef<Record<string, IslandManaState>>({});
-  
+
   // Keep ref in sync with state (for collection handler)
   useEffect(() => {
     manaStatesRef.current = islandManaStates;
@@ -839,7 +838,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+    <div className="relative h-screen w-screen max-w-[100dvw] overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
       <div className="absolute inset-0 z-0">
         <IslandCanvas
           islands={islands}
@@ -882,7 +881,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       {!isCameraAtDefault && (
         <button
           onClick={resetCamera}
-          className="animate-fade-in pointer-events-auto absolute bottom-6 left-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180"
+          className="animate-fade-in pointer-events-auto absolute right-6 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180 md:bottom-6 md:left-6 md:right-auto md:top-auto"
         >
           <RefreshIcon />
         </button>

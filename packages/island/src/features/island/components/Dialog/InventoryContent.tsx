@@ -102,8 +102,8 @@ const InventoryContent = ({
   }
 
   return (
-    <>
-      <div className="grid grid-cols-10 gap-4">
+    <div className="relative h-[300px] overflow-y-scroll md:h-fit md:overflow-visible">
+      <div className="grid grid-cols-5 gap-4 md:grid-cols-10">
         {Array.from({ length: 5 }).map((_, row) =>
           Array.from({ length: 10 }).map((_, col) => {
             // Find item at this inventory position
@@ -123,10 +123,10 @@ const InventoryContent = ({
             return (
               <button
                 key={`${row}-${col}`}
-                className={`${row == 0 ? "bg-[#d9d9d9] text-black" : "bg-[#8b8b8b]"} ${isSelected ? "bg-[#fbbf24]" : ""} relative flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden transition-all hover:scale-110`}
+                className={`${row == 0 ? "bg-[#d9d9d9] text-black" : "bg-[#8b8b8b]"} ${isSelected ? "bg-[#fbbf24]" : ""} relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden transition-all hover:scale-110 md:h-16 md:w-16`}
                 onClick={() => handleSlotClick(col, row)}
                 onMouseEnter={() => setShowTooltip(item || null)}
-                onMouseLeave={() => setShowTooltip(null)} 
+                onMouseLeave={() => setShowTooltip(null)}
                 onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
               >
                 {item && item.item?.image_cover_url ? (
@@ -148,7 +148,7 @@ const InventoryContent = ({
         )}
       </div>
       <div
-        className={`absolute bottom-8 right-9 cursor-pointer text-3xl transition-colors hover:scale-110 active:scale-95 ${selectedId ? "animate-pulse text-red-500" : "text-gray-400"}`}
+        className={`fixed bottom-[293px] right-[33px] cursor-pointer text-3xl transition-colors hover:scale-110 active:scale-95 md:absolute md:bottom-[-5px] md:right-[-65px] ${selectedId ? "animate-pulse text-red-500" : "text-gray-400"}`}
         onClick={handleTrashClick}
       >
         <TrashIcon />
@@ -165,7 +165,7 @@ const InventoryContent = ({
           y={mousePos.y}
         />
       )}
-    </>
+    </div>
   );
 };
 
