@@ -6,8 +6,17 @@ import ChatMessage from "./ChatMessage";
 import WelcomeScreen from "./WelcomeScreen";
 import Sidebar from "./Sidebar";
 import UserMenu from "./UserMenu";
+import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "../context/ThemeContext";
 import type { User } from "@supabase/supabase-js";
+
+export interface SearchSource {
+  id: string;
+  title: string;
+  content: string;
+  validityScore: number;
+  createdAt: string;
+}
 
 export interface Message {
   id: string;
@@ -15,6 +24,9 @@ export interface Message {
   content: string;
   timestamp: Date;
   isLoading?: boolean;
+  sources?: SearchSource[];
+  relatedTopics?: string[];
+  feedback?: "positive" | "negative" | null;
 }
 
 export interface Conversation {
@@ -102,13 +114,67 @@ export default function SearchPage({ user }: SearchPageProps) {
     };
     setActiveConversation(withLoading);
 
-    // Simulate API response (replace with actual API call)
-    setTimeout(() => {
+    // Log search analytics (non-blocking)
+    fetch("/api/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventType: "search",
+        profileId: user?.id,
+        chatId: conversation.id,
+        query: content,
+      }),
+    }).catch(() => {}); // Ignore analytics errors
+
+    // Call search API
+    try {
+      const response = await fetch("/api/search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: content }),
+      });
+
+      const data = await response.json();
+
+      let assistantContent: string;
+
+      if (!data.success && data.error) {
+        // API error
+        assistantContent = `Sorry, there was an error processing your request: ${data.error}`;
+      } else if (!data.hasResults) {
+        // No results found (A3 flow)
+        assistantContent = data.answer || "I couldn't find any knowledge matching your query.";
+        
+        if (data.suggestions && data.suggestions.length > 0) {
+          assistantContent += "\n\n**Suggestions:**\n";
+          data.suggestions.forEach((suggestion: string) => {
+            assistantContent += `• ${suggestion}\n`;
+          });
+          assistantContent += "\nYou can also try browsing the Knowledge Repository or contribute your own knowledge (if registered).";
+        }
+      } else {
+        // Success with results
+        assistantContent = data.answer;
+      }
+
+      // Map API results to sources
+      const sources: SearchSource[] = data.results?.map((result: { id: string; source: string; content: string; validityScore: number; created_at?: string }) => ({
+        id: result.id,
+        title: result.source,
+        content: result.content,
+        validityScore: result.validityScore,
+        createdAt: result.created_at || new Date().toISOString(),
+      })) || [];
+
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: `I found some interesting results for "${content}". Here's what I discovered:\n\n• **Result 1**: This is a sample search result that matches your query.\n• **Result 2**: Another relevant finding from Wisdom Island.\n• **Result 3**: Additional information that might be helpful.\n\nWould you like me to elaborate on any of these findings?`,
+        content: assistantContent,
         timestamp: new Date(),
+        sources: data.hasResults ? sources : undefined,
+        relatedTopics: data.relatedTopics,
       };
 
       const finalConversation = {
@@ -120,8 +186,28 @@ export default function SearchPage({ user }: SearchPageProps) {
       setConversations((prev) =>
         prev.map((c) => (c.id === conversation!.id ? finalConversation : c))
       );
+    } catch (error) {
+      console.error("Search error:", error);
+      
+      const errorMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "Sorry, I encountered an error while searching. Please try again.",
+        timestamp: new Date(),
+      };
+
+      const finalConversation = {
+        ...updatedConversation,
+        messages: [...updatedConversation.messages, errorMessage],
+      };
+
+      setActiveConversation(finalConversation);
+      setConversations((prev) =>
+        prev.map((c) => (c.id === conversation!.id ? finalConversation : c))
+      );
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleSelectConversation = (conversation: Conversation) => {
@@ -132,6 +218,61 @@ export default function SearchPage({ user }: SearchPageProps) {
     setConversations((prev) => prev.filter((c) => c.id !== id));
     if (activeConversation?.id === id) {
       setActiveConversation(null);
+    }
+  };
+
+  // Handle feedback submission
+  const handleFeedback = async (messageId: string, type: "positive" | "negative") => {
+    try {
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messageId,
+          chatId: activeConversation?.id,
+          feedbackType: type,
+          profileId: user?.id,
+        }),
+      });
+
+      // Update message feedback state locally
+      if (activeConversation) {
+        const updatedMessages = activeConversation.messages.map((msg) =>
+          msg.id === messageId ? { ...msg, feedback: type } : msg
+        );
+        const updatedConversation = { ...activeConversation, messages: updatedMessages };
+        setActiveConversation(updatedConversation);
+        setConversations((prev) =>
+          prev.map((c) => (c.id === activeConversation.id ? updatedConversation : c))
+        );
+      }
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+    }
+  };
+
+  // Handle report submission
+  const handleReport = async (messageId: string, reason: string, details?: string) => {
+    try {
+      const response = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messageId,
+          chatId: activeConversation?.id,
+          reason,
+          details,
+          profileId: user?.id,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // Could show a toast notification here
+        console.log("Report submitted successfully");
+      }
+    } catch (error) {
+      console.error("Error submitting report:", error);
     }
   };
 
@@ -205,17 +346,20 @@ export default function SearchPage({ user }: SearchPageProps) {
             </div>
           </div>
 
-          {/* User Menu or Sign In Button */}
-          {user ? (
-            <UserMenu email={user.email || ""} />
-          ) : (
-            <a
-              href="/login"
-              className={`rounded-full border ${isDark ? "border-gray-600 text-gray-300 hover:border-teal-400 hover:text-white" : "border-gray-400 text-gray-700 hover:border-teal-500 hover:text-gray-900"} px-5 py-2 text-base transition-colors`}
-            >
-              Sign in
-            </a>
-          )}
+          {/* Theme Toggle and User Menu/Sign In Button */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            {user ? (
+              <UserMenu email={user.email || ""} />
+            ) : (
+              <a
+                href="/login"
+                className={`rounded-full border ${isDark ? "border-gray-600 text-gray-300 hover:border-teal-400 hover:text-white" : "border-gray-400 text-gray-700 hover:border-teal-500 hover:text-gray-900"} px-5 py-2 text-base transition-colors`}
+              >
+                Sign in
+              </a>
+            )}
+          </div>
         </div>
 
         {/* Chat Area */}
@@ -225,7 +369,13 @@ export default function SearchPage({ user }: SearchPageProps) {
           ) : (
             <div className="mx-auto max-w-3xl px-4 py-8">
               {activeConversation.messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+                <ChatMessage 
+                  key={message.id} 
+                  message={message} 
+                  onRelatedTopicClick={handleSendMessage}
+                  onFeedback={handleFeedback}
+                  onReport={handleReport}
+                />
               ))}
               <div ref={messagesEndRef} />
             </div>

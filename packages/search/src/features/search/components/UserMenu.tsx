@@ -9,7 +9,7 @@ interface UserMenuProps {
 }
 
 export default function UserMenu({ email }: UserMenuProps) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -61,39 +61,6 @@ export default function UserMenu({ email }: UserMenuProps) {
 
           {/* Menu Items */}
           <div className="py-2">
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className={`flex w-full items-center gap-4 px-5 py-3 text-left text-base ${mutedTextColor} ${hoverBg}`}
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                {theme === "dark" ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
-                )}
-              </svg>
-              <span>Theme</span>
-              <span className={`ml-auto text-sm ${isDark ? "text-gray-500" : "text-gray-400"}`}>
-                {theme === "dark" ? "Dark" : "Light"}
-              </span>
-            </button>
-
             {/* Get Help */}
             <a
               href="/help"

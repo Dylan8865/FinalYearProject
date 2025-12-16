@@ -8,9 +8,34 @@ interface ChatInputProps {
   isLoading: boolean;
 }
 
+// Validation helpers
+const INVALID_CHARS_REGEX = /[<>{}[\]\\^`|]/g;
+
+function validateQuery(query: string): { isValid: boolean; error: string | null; sanitized: string } {
+  const trimmed = query.trim();
+  
+  // Check for empty query (M3)
+  if (!trimmed) {
+    return { isValid: false, error: "Please enter a search query to begin.", sanitized: "" };
+  }
+  
+  // Check for invalid characters (M4)
+  if (INVALID_CHARS_REGEX.test(trimmed)) {
+    const sanitized = trimmed.replace(INVALID_CHARS_REGEX, "");
+    return { 
+      isValid: true, 
+      error: "Your query contains invalid characters. Please use only letters, numbers, and common punctuation.", 
+      sanitized 
+    };
+  }
+  
+  return { isValid: true, error: null, sanitized: trimmed };
+}
+
 export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
   const { theme } = useTheme();
   const [input, setInput] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isDark = theme === "dark";
@@ -18,6 +43,7 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
   const mutedTextColor = isDark ? "text-gray-400" : "text-gray-600";
   const borderColor = isDark ? "border-gray-600" : "border-gray-400";
   const placeholderColor = isDark ? "placeholder:text-gray-500" : "placeholder:text-gray-400";
+  const errorBorderColor = "border-red-500";
 
   // Auto-resize textarea
   useEffect(() => {
@@ -28,11 +54,30 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
     }
   }, [input]);
 
-  const handleSubmit = () => {
-    if (input.trim() && !isLoading) {
-      onSend(input.trim());
-      setInput("");
+  // Clear error when user starts typing
+  useEffect(() => {
+    if (error && input.trim()) {
+      setError(null);
     }
+  }, [input, error]);
+
+  const handleSubmit = () => {
+    if (isLoading) return;
+    
+    const validation = validateQuery(input);
+    
+    if (!validation.isValid) {
+      setError(validation.error);
+      return;
+    }
+    
+    // Show warning if characters were sanitized, but still proceed
+    if (validation.error) {
+      setError(validation.error);
+    }
+    
+    onSend(validation.sanitized);
+    setInput("");
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -43,42 +88,53 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
   };
 
   return (
-    <div className={`relative flex items-end gap-3 rounded-full border ${borderColor} bg-transparent px-6 py-3 transition-colors focus-within:border-teal-400`}>
-      {/* Search Icon */}
-      <svg
-        className={`mb-3 h-6 w-6 shrink-0 ${mutedTextColor}`}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-
-      {/* Text input */}
-      <textarea
-        ref={textareaRef}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Ask a follow-up question..."
-        rows={1}
-        className={`max-h-[200px] min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-lg ${textColor} outline-none ${placeholderColor}`}
-        disabled={isLoading}
-      />
-
-      {/* Send button */}
-      {input.trim() && (
-        <button
-          onClick={handleSubmit}
-          disabled={isLoading}
-          className="mb-3 text-teal-400 transition-colors hover:text-teal-300 disabled:opacity-50"
-          title="Send message"
+    <div className="flex flex-col gap-2">
+      {/* Error Message */}
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg bg-red-500/10 px-4 py-2 text-sm text-red-500">
+          <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
+      
+      <div className={`relative flex items-end gap-3 rounded-full border ${error ? errorBorderColor : borderColor} bg-transparent px-6 py-3 transition-colors focus-within:border-teal-400`}>
+        {/* Search Icon */}
+        <svg
+          className={`mb-3 h-6 w-6 shrink-0 ${mutedTextColor}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+
+        {/* Text input */}
+        <textarea
+          ref={textareaRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask a follow-up question..."
+          rows={1}
+          className={`max-h-[200px] min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-lg ${textColor} outline-none ${placeholderColor}`}
+          disabled={isLoading}
+        />
+
+        {/* Send button */}
+        {input.trim() && (
+          <button
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="mb-3 text-teal-400 transition-colors hover:text-teal-300 disabled:opacity-50"
+            title="Send message"
+          >
           {isLoading ? (
             <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24">
               <circle
@@ -113,6 +169,7 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
           )}
         </button>
       )}
+      </div>
     </div>
   );
 }
