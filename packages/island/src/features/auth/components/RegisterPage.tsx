@@ -3,11 +3,11 @@
 import { useState, useTransition } from "react";
 import { register } from "../actions/register";
 import { signInWithOAuth } from "../actions/oauth";
-import GoogleIcon from "@/features/shared/icons/GoogleIcon";
-import AppleIcon from "@/features/shared/icons/AppleIcon";
-import FacebookIcon from "@/features/shared/icons/FacebookIcon";
+import GoogleIcon from "@/icons/GoogleIcon";
+import AppleIcon from "@/icons/AppleIcon";
+import FacebookIcon from "@/icons/FacebookIcon";
 import Link from "next/link";
-import IslandIcon from "@/features/shared/icons/IslandIcon";
+import IslandIcon from "@/icons/IslandIcon";
 
 const RegisterPage = () => {
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +56,9 @@ const RegisterPage = () => {
     <div className="flex min-h-screen items-center justify-center bg-[#1E1E20] p-0 sm:bg-[#18181A]">
       <div className="-ms-overflow-style-none scrollbar-none max-h-screen w-full max-w-md overflow-auto border-none bg-[#1E1E20] p-4 sm:rounded-lg sm:border sm:border-[#3B3B3B] sm:p-6 sm:shadow-md [&::-webkit-scrollbar]:hidden">
         <div className="mb-6 text-left">
-          <IslandIcon className="mb-3 h-8 w-8 text-white" />
+          <Link href="/">
+            <IslandIcon className="mb-3 h-8 w-8 text-white" />
+          </Link>
           <h1 className="text-lg font-semibold text-white sm:text-xl">
             Sign up to Wisdom Island
           </h1>

@@ -1,5 +1,5 @@
-import ExpandIcon from '@/features/shared/icons/ExpandIcon';
-import RightArrowIcon from '@/features/shared/icons/RightArrowIcon';
+import ExpandIcon from '@/icons/ExpandIcon';
+import RightArrowIcon from '@/icons/RightArrowIcon';
 import React from 'react'
 
 interface SidebarPageProps {

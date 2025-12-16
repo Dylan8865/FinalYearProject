@@ -35,7 +35,10 @@ export default function ShopManagement({ items }: ShopManagementProps) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const filterParam = params.get("filter");
-    if (filterParam && ["decorative", "terrain", "functional"].includes(filterParam)) {
+    if (
+      filterParam &&
+      ["decorative", "terrain", "functional"].includes(filterParam)
+    ) {
       setFilterType(filterParam);
     }
   }, []);
@@ -75,9 +78,7 @@ export default function ShopManagement({ items }: ShopManagementProps) {
       item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.id.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesFilter =
-      filterType === "all" ||
-      item.type === filterType;
+    const matchesFilter = filterType === "all" || item.type === filterType;
 
     return matchesSearch && matchesFilter;
   });
@@ -96,7 +97,7 @@ export default function ShopManagement({ items }: ShopManagementProps) {
   };
 
   const handleImageError = (itemId: string) => {
-    setImageErrors(prev => new Set(prev).add(itemId));
+    setImageErrors((prev) => new Set(prev).add(itemId));
   };
 
   return (
@@ -115,7 +116,9 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                   &lt;
                 </button>
                 <div>
-                  <h2 className="text-white text-xl font-semibold">Shop Management</h2>
+                  <h2 className="text-white text-xl font-semibold">
+                    Shop Management
+                  </h2>
                 </div>
               </div>
             </div>
@@ -143,7 +146,9 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                 {/* Filter Dropdown */}
                 {showFilter && (
                   <div className="absolute top-10 right-0 bg-[#282828] border border-[#3B3B3B] rounded-lg p-4 min-w-[200px] z-10">
-                    <h4 className="text-white text-sm font-semibold mb-2">Filter by Type</h4>
+                    <h4 className="text-white text-sm font-semibold mb-2">
+                      Filter by Type
+                    </h4>
                     <select
                       value={filterType}
                       onChange={(e) => {
@@ -187,10 +192,12 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                             onError={() => handleImageError(item.id)}
                           />
                         ) : (
-                          <div className="text-gray-500 text-xs text-center">No Image</div>
+                          <div className="text-gray-500 text-xs text-center">
+                            No Image
+                          </div>
                         )}
                       </div>
-                      
+
                       {/* Item Info */}
                       <div className="p-3 flex-1 flex flex-col">
                         <h3 className="text-white text-sm font-semibold mb-2 truncate">
@@ -213,11 +220,15 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-gray-400">Price:</span>
-                            <span className="text-white">{item.mana_required?.toLocaleString() || "0"}</span>
+                            <span className="text-white">
+                              {item.mana_required?.toLocaleString() || "0"}
+                            </span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-gray-400">Mana Rate:</span>
-                            <span className="text-white">{item.mana_rate || "0"}/s</span>
+                            <span className="text-white">
+                              {item.mana_rate || "0"}/m
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -232,7 +243,9 @@ export default function ShopManagement({ items }: ShopManagementProps) {
               <div className="flex items-center justify-between pt-4 border-t border-[#3B3B3B]">
                 <div className="flex items-center gap-4">
                   <div className="text-gray-400 text-sm">
-                    Showing {startIndex + 1}-{Math.min(endIndex, filteredItems.length)} of {filteredItems.length} items
+                    Showing {startIndex + 1}-
+                    {Math.min(endIndex, filteredItems.length)} of{" "}
+                    {filteredItems.length} items
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="text-gray-400 text-sm">Per page:</label>
@@ -272,18 +285,22 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                           >
                             1
                           </button>
-                          {currentPage > 4 && <span className="text-gray-400">...</span>}
+                          {currentPage > 4 && (
+                            <span className="text-gray-400">...</span>
+                          )}
                         </>
                       )}
-                      
+
                       {/* Show pages around current page */}
                       {Array.from({ length: totalPages }, (_, i) => i + 1)
-                        .filter(page => {
-                          return page === currentPage || 
-                                 page === currentPage - 1 || 
-                                 page === currentPage - 2 ||
-                                 page === currentPage + 1 || 
-                                 page === currentPage + 2;
+                        .filter((page) => {
+                          return (
+                            page === currentPage ||
+                            page === currentPage - 1 ||
+                            page === currentPage - 2 ||
+                            page === currentPage + 1 ||
+                            page === currentPage + 2
+                          );
                         })
                         .map((page) => (
                           <button
@@ -298,11 +315,13 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                             {page}
                           </button>
                         ))}
-                      
+
                       {/* Show last page */}
                       {currentPage < totalPages - 2 && (
                         <>
-                          {currentPage < totalPages - 3 && <span className="text-gray-400">...</span>}
+                          {currentPage < totalPages - 3 && (
+                            <span className="text-gray-400">...</span>
+                          )}
                           <button
                             onClick={() => setCurrentPage(totalPages)}
                             className="px-3 py-2 rounded border bg-[#1E1E1E] text-white border-[#3B3B3B] hover:bg-[#252525] transition-colors"
@@ -313,7 +332,9 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                       )}
                     </div>
                     <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
                       disabled={currentPage === totalPages}
                       className="bg-[#1E1E1E] text-white px-4 py-2 rounded border border-[#3B3B3B] hover:bg-[#252525] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -343,7 +364,11 @@ export default function ShopManagement({ items }: ShopManagementProps) {
 
       {/* Error Toast */}
       {errorMessage && (
-        <div className={`fixed bottom-4 right-4 bg-[#333333] border border-red-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${isErrorAnimatingOut ? 'animate-slide-out' : 'animate-slide-in'}`}>
+        <div
+          className={`fixed bottom-4 right-4 bg-[#333333] border border-red-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${
+            isErrorAnimatingOut ? "animate-slide-out" : "animate-slide-in"
+          }`}
+        >
           <div className="flex items-center gap-3">
             <div className="text-2xl flex-shrink-0 mr-2">✕</div>
             <div className="flex-1">
@@ -362,7 +387,11 @@ export default function ShopManagement({ items }: ShopManagementProps) {
 
       {/* Success Toast */}
       {successMessage && (
-        <div className={`fixed bottom-4 right-4 bg-[#333333] border border-green-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${isSuccessAnimatingOut ? 'animate-slide-out' : 'animate-slide-in'}`}>
+        <div
+          className={`fixed bottom-4 right-4 bg-[#333333] border border-green-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${
+            isSuccessAnimatingOut ? "animate-slide-out" : "animate-slide-in"
+          }`}
+        >
           <div className="flex items-center gap-3">
             <div className="text-2xl flex-shrink-0 mr-2">✓</div>
             <div className="flex-1">

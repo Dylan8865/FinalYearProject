@@ -14,7 +14,7 @@ export function useIslands() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/islands");
+      const response = await fetch("/api/islands", { cache: "no-store" });
 
       if (!response.ok) {
         throw new Error("Failed to fetch islands");

@@ -1,29 +1,31 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import StatusBar from "@/features/island/components/StatusBar/StatusBar";
 import InventoryBar from "@/features/island/components/InventoryBar/InventoryBar";
 import IslandCanvas from "@/features/island/components/IslandCanvas/IslandCanvas";
 import Dialog from "@/features/island/components/Dialog/Dialog";
-import UserIcon from "@/features/shared/icons/UserIcon";
-import TrophyIcon from "@/features/shared/icons/TrophyIcon";
+import UserIcon from "@/icons/UserIcon";
+import TrophyIcon from "@/icons/TrophyIcon";
 import { useIslands } from "@/features/island/hooks/useIslands";
-import MenuIcon from "@/features/shared/icons/MenuIcon";
-import StoreIcon from "@/features/shared/icons/StoreIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import StoreIcon from "@/icons/StoreIcon";
 import StoreContent from "@/features/island/components/Dialog/StoreContent";
 import InventoryContent from "@/features/island/components/Dialog/InventoryContent";
 import { ProfileType } from "@/types/types";
 import ProfileContent from "./Dialog/ProfileContent";
 import { IslandItemsProvider } from "@/features/island/contexts/IslandItemsContext";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
-import { useGLTF } from "@react-three/drei";
-import * as THREE from "three";
-import TerrainBlock from "./Block/TerrainBlocks";
 import PlacedBlock from "./Block/PlacedBlock";
 import SidebarPage from "./Page/SidebarPage";
 import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
 import { type OffscreenIsland } from "./IslandCanvas/IslandIndicators";
-import RefreshIcon from "@/features/shared/icons/RefreshIcon";
+import RefreshIcon from "@/icons/RefreshIcon";
+import ManaCollectionPopup from "@/features/island/components/IslandCanvas/ManaCollectionPopup";
+import {
+  calculateIslandTotalManaRate,
+  MAX_ACCUMULATION_TIME,
+} from "@/utils/manaCalculations";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -50,23 +52,9 @@ interface PlacedObject {
   node: React.ReactNode;
   islandId?: string;
 }
-/**
- * IslandPageContent Component
- *
- * Main component that manages the island view and item placement functionality.
- *
- * Features:
- * - Displays the 3D island with placed items
- * - Handles drag-and-drop from inventory to island
- * - Manages dialogs for profile, store, and inventory
- * - Tracks placed objects and their positions
- *
- * State Management:
- * - draggedItem: Currently dragged item from inventory
- * - placedObjects: Map of placed items by position key (cellId-y)
- * - isDialogOpen: Currently open dialog name
- */
-const IslandPageContent = ({ profile }: IslandPageProps) => {
+
+const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
+  const [profile, setProfile] = useState(initialProfile);
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error } = useIslands();
   const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(
@@ -95,6 +83,19 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     itemId: string;
     itemName: string;
   } | null>(null);
+
+  // Mana system state - simplified
+  interface IslandManaState {
+    manaRate: number;
+    accumulatedMana: number;
+  }
+  const [islandManaStates, setIslandManaStates] = useState<
+    Record<string, IslandManaState>
+  >({});
+  const [manaPopup, setManaPopup] = useState<{
+    visible: boolean;
+    amount: number;
+  }>({ visible: false, amount: 0 });
 
   /**
    * Get the next available Y position (vertical stacking) for a given grid cell
@@ -255,6 +256,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     itemId: string,
     itemName: string,
     itemType: "terrain" | "decorative" | "functional",
+    itemManaRate: number,
     modelUrl: string | undefined,
     cellId: string,
     y: number,
@@ -267,6 +269,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         itemId={itemId}
         itemName={itemName}
         itemType={itemType}
+        itemManaRate={itemManaRate}
         modelUrl={modelUrl}
         isSelected={selectedPlacedItem === itemId}
         onClick={(clickedItemId, clickedType, clickedName) =>
@@ -366,6 +369,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         islandItem.id, // Use UNIQUE island_item.id
         itemName,
         itemType,
+        islandItem.item?.mana_rate ?? 0,
         modelUrl,
         cellId,
         y,
@@ -578,6 +582,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       selectedItem.id,
       itemName,
       itemType,
+      selectedItem.item?.mana_rate ?? 0,
       modelUrl,
       cellId,
       y,
@@ -649,7 +654,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     setSelectedPlacedItem(null);
   };
 
-  // reset camera button
+  // reset camera button initialisation
   const controlsRef = useRef<CameraControlsHandle>(null);
   const [isCameraAtDefault, setIsCameraAtDefault] = useState(true);
   const [offscreenIslands, setOffscreenIslands] = useState<OffscreenIsland[]>(
@@ -678,6 +683,221 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     console.log("Placed objects updated:", placedObjects);
   }, [placedObjects]);
 
+  // Sync accumulated mana to database
+  const syncManaToDb = useCallback(
+    async (islandId: string, accumulatedMana: number) => {
+      try {
+        await fetch("/api/islands", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: islandId,
+            accumulated_mana: Math.floor(accumulatedMana),
+            last_updated_at: new Date().toISOString(),
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to sync mana to DB:", err);
+      }
+    },
+    []
+  );
+
+  // Initialize mana states for islands
+  useEffect(() => {
+    if (!islands || islands.length === 0) return;
+
+    setIslandManaStates((prev) => {
+      const newStates = { ...prev };
+      const now = new Date();
+
+      islands.forEach((island) => {
+        if (!newStates[island.id]) {
+          // Get placed items for this island
+          const islandPlacedItems = islandItems.filter(
+            (item) => item.island_id === island.id && item.grid_x !== null
+          );
+          const manaRate = calculateIslandTotalManaRate(
+            { id: island.id, level: island.level || 1 },
+            islandPlacedItems
+          );
+
+          // Get stored accumulated mana from DB
+          const storedMana = Number(island.accumulated_mana || 0);
+
+          // Calculate offline bonus since last update
+          let offlineBonus = 0;
+          if (island.last_updated_at) {
+            const lastUpdate = new Date(island.last_updated_at);
+            const elapsedSeconds = Math.max(
+              0,
+              (now.getTime() - lastUpdate.getTime()) / 1000
+            );
+            const cappedSeconds = Math.min(
+              elapsedSeconds,
+              MAX_ACCUMULATION_TIME
+            );
+            offlineBonus = Math.floor(manaRate * cappedSeconds);
+          }
+
+          const totalMana = storedMana + offlineBonus;
+
+          console.log(`Island ${island.id} mana init:`, {
+            storedMana,
+            offlineBonus,
+            totalMana,
+            manaRate,
+          });
+
+          newStates[island.id] = {
+            manaRate,
+            accumulatedMana: totalMana,
+          };
+        }
+      });
+      return newStates;
+    });
+  }, [islands, islandItems]);
+
+  // Update mana rates when placed items change
+  useEffect(() => {
+    if (!islands || islands.length === 0) return;
+
+    setIslandManaStates((prev) => {
+      const newStates = { ...prev };
+      islands.forEach((island) => {
+        const islandPlacedItems = islandItems.filter(
+          (item) => item.island_id === island.id && item.grid_x !== null
+        );
+        const manaRate = calculateIslandTotalManaRate(
+          { id: island.id, level: island.level || 1 },
+          islandPlacedItems
+        );
+        if (newStates[island.id]) {
+          newStates[island.id] = {
+            ...newStates[island.id],
+            manaRate,
+          };
+        }
+      });
+      return newStates;
+    });
+  }, [islandItems, islands]);
+
+  // Increment mana every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIslandManaStates((prev) => {
+        if (Object.keys(prev).length === 0) return prev;
+
+        const updated: Record<string, IslandManaState> = {};
+        Object.entries(prev).forEach(([islandId, state]) => {
+          updated[islandId] = {
+            ...state,
+            accumulatedMana: state.accumulatedMana + state.manaRate,
+          };
+        });
+        return updated;
+      });
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sync to database every minute (more frequent to prevent data loss)
+  useEffect(() => {
+    const syncInterval = setInterval(() => {
+      Object.entries(islandManaStates).forEach(([islandId, state]) => {
+        // Only sync if value has changed significantly or enough time passed
+        // For now, just sync if > 0 to be safe
+        if (state.accumulatedMana > 1000) {
+          syncManaToDb(islandId, state.accumulatedMana);
+        }
+      });
+    }, 60000);
+
+    return () => clearInterval(syncInterval);
+  }, [islandManaStates, syncManaToDb]);
+
+  // Sync on window unload/refresh
+  useEffect(() => {
+    const handleUnload = () => {
+      Object.entries(islandManaStates).forEach(([islandId, state]) => {
+        if (state.accumulatedMana > 0) {
+          // Use fetch with keepalive for reliable send on unload
+          fetch("/api/islands", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: islandId,
+              accumulated_mana: Math.floor(state.accumulatedMana),
+              last_updated_at: new Date().toISOString(),
+            }),
+            keepalive: true,
+          });
+        }
+      });
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, [islandManaStates]);
+
+  // Handle mana collection from island click
+  const handleIslandClick = useCallback(
+    async (islandId: string) => {
+      const state = islandManaStates[islandId];
+      if (!state || state.accumulatedMana < 1) {
+        console.log("No mana to collect");
+        return;
+      }
+
+      const manaToCollect = Math.floor(state.accumulatedMana);
+
+      try {
+        const response = await fetch("/api/islands/collect-mana", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            island_id: islandId,
+            mana_to_collect: manaToCollect,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to collect mana");
+        }
+
+        const data = await response.json();
+
+        // Show collection popup
+        setManaPopup({ visible: true, amount: data.collected }); // TODO: change to tooltip
+
+        // Update profile mana
+        setProfile((prev) => ({ ...prev, mana: data.new_mana }));
+
+        // Reset island mana state after collection
+        setIslandManaStates((prev) => ({
+          ...prev,
+          [islandId]: {
+            ...prev[islandId],
+            accumulatedMana: 0,
+          },
+        }));
+
+        // Also sync the reset to DB
+        syncManaToDb(islandId, 0);
+
+        console.log(`Collected ${data.collected} mana from island ${islandId}`);
+      } catch (err) {
+        console.error("Failed to collect mana:", err);
+      }
+    },
+    [islandManaStates, syncManaToDb]
+  );
+
   if (loading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
@@ -695,7 +915,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+    <div className="relative h-screen w-screen max-w-[100dvw] overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
       <div className="absolute inset-0 z-0">
         <IslandCanvas
           islands={islands}
@@ -707,6 +927,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           onCameraChanged={handleCameraChanged}
           offscreenIslands={offscreenIslands}
           onOffscreenIslandsChange={handleOffscreenIslandsChange}
+          islandManaStates={islandManaStates}
+          onIslandClick={handleIslandClick}
         />
       </div>
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-10">
@@ -736,7 +958,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       {!isCameraAtDefault && (
         <button
           onClick={resetCamera}
-          className="animate-fade-in pointer-events-auto absolute bottom-6 right-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180"
+          className="animate-fade-in pointer-events-auto absolute right-6 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180 md:bottom-6 md:left-6 md:right-auto md:top-auto"
         >
           <RefreshIcon />
         </button>
@@ -791,7 +1013,12 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <StoreContent userId={profile.id} />
+          <StoreContent
+            profile={profile}
+            onUpdateMana={(newMana) =>
+              setProfile((prev) => ({ ...prev, mana: newMana }))
+            }
+          />
         </Dialog>
       )}
 
@@ -803,6 +1030,13 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         onClick={() =>
           setSidebarContentPage({ open: false, itemId: "", itemName: "" })
         }
+      />
+
+      {/* Mana Collection Popup */}
+      <ManaCollectionPopup
+        amount={manaPopup.amount}
+        visible={manaPopup.visible}
+        onComplete={() => setManaPopup({ visible: false, amount: 0 })}
       />
     </div>
   );

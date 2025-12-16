@@ -17,6 +17,8 @@ export interface IslandType {
   theme: string;
   profile_id: string;
   user: ProfileType;
+  accumulated_mana?: number; // Total accumulated mana stored in DB
+  last_updated_at?: string; // When accumulated_mana was last synced
 }
 
 export interface ItemType {
@@ -46,7 +48,6 @@ export interface IslandItemType {
   pos_x: number | null;
   pos_y: number | null;
   profile_id: string;
-  quantity?: number; // Number of stacked items (default 1)
   item?: ItemType;
   island?: IslandType;
 }
