@@ -1,11 +1,5 @@
 import { IslandItemType } from "@/types/types";
 import React from "react";
-import {
-  PageTitle,
-  PageText,
-  PageBulletList,
-  PageBulletPoint,
-} from "./PageComponents";
 import Image from "next/image";
 
 interface PageHeaderProps {
@@ -14,16 +8,24 @@ interface PageHeaderProps {
 
 const PageHeader = ({ islandItem }: PageHeaderProps) => {
   return (
-    <div className="absolute top-10 w-full space-y-4 px-6 text-white">
-      <div className="relative h-[200px] w-full">
-        <Image
-          src={islandItem?.cover_image || ""}
-          alt={islandItem?.title || ""}
-          fill
-          className="object-cover"
-        />
+    <div className="absolute top-10 w-full space-y-4 text-white md:top-9">
+      {islandItem?.cover_image ? (
+        <div className="relative h-[200px] w-full">
+          <Image
+            src={islandItem?.cover_image}
+            alt={islandItem?.title || ""}
+            fill
+            className="object-cover"
+          />
+        </div>
+      ) : (
+        <div className="h-[200px] w-full bg-gray-700"></div>
+      )}
+      <div className="px-6">
+        <h1 className="text-3xl font-bold">
+          {islandItem?.title ? islandItem.title : "Untitled"}
+        </h1>
       </div>
-      <PageTitle>{islandItem?.title ? islandItem.title : "Untitled"}</PageTitle>
     </div>
   );
 };

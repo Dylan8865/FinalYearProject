@@ -56,3 +56,73 @@ export interface IslandTypeWithPosition extends IslandType {
   position: [number, number, number];
   gridSize: number;
 }
+
+// Block types supported (like Notion)
+export type BlockType =
+  | "paragraph"
+  | "heading_1"
+  | "heading_2"
+  | "heading_3"
+  | "bulleted_list"
+  | "numbered_list"
+  | "todo"
+  | "toggle"
+  | "quote"
+  | "divider"
+  | "callout"
+  | "code"
+  | "image"
+  | "video"
+  | "audio"
+  | "file"
+  | "table"
+  | "table_row"
+  | "bookmark"
+  | "embed";
+
+// Properties for different block types
+export interface BlockProperties {
+  // Text formatting
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+  code?: boolean;
+  color?: string;
+  backgroundColor?: string;
+
+  // List properties
+  checked?: boolean; // For todo items
+
+  // Code block properties
+  language?: string;
+
+  // Callout properties
+  icon?: string;
+
+  // Media properties
+  url?: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+
+  // Table properties
+  columnCount?: number;
+  rowCount?: number;
+  headers?: boolean;
+
+  // Any other custom properties
+  [key: string]: any;
+}
+
+export interface ItemDataType {
+  id: string;
+  created_at: string;
+  type: BlockType | string | null;
+  content: any | null;
+  island_item_id: string | null;
+  valid: boolean | null;
+  order_index: number | null;
+  parent_id?: string | null; // For nested blocks
+  properties?: BlockProperties | null; // Additional block properties
+}
