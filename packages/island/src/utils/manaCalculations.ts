@@ -2,21 +2,24 @@
  * Mana Calculations Utility
  *
  * Handles all mana rate calculations for islands and items.
+ * All rates are expressed as MANA PER MINUTE.
  *
- * Island Base Mana Rates:
- * - Level 1: 9 mana/second
- * - Level 2: 25 mana/second
- * - Level 3: 49 mana/second
+ * Island Base Mana Rates (per minute):
+ * - Level 1: 9 mana/minute
+ * - Level 2: 25 mana/minute
+ * - Level 3: 49 mana/minute
  *
  * Formula: (level * 2 - 1)^2 + level^2 = base rate
  * Simplified: (2*level - 1)^2 for odd squares pattern
+ *
+ * Item mana_rate in database = mana per minute
  */
 
 import { IslandItemType, IslandType } from "@/types/types";
 
 /**
- * Base mana rates by island level
- * Level 1: 9/s, Level 2: 25/s, Level 3: 49/s
+ * Base mana rates by island level (per minute)
+ * Level 1: 9/m, Level 2: 25/m, Level 3: 49/m
  * Pattern: (2n - 1)^2 where n is the level
  */
 export const ISLAND_BASE_MANA_RATES: Record<number, number> = {
@@ -30,7 +33,7 @@ export const ISLAND_BASE_MANA_RATES: Record<number, number> = {
  * Uses lookup table with fallback to formula for higher levels
  *
  * @param level - Island level (1, 2, 3, etc.)
- * @returns Mana per second base rate
+ * @returns Mana per minute base rate
  */
 export function getIslandBaseManaRate(level: number): number {
   // Use lookup for known levels, formula for unknown
@@ -46,7 +49,7 @@ export function getIslandBaseManaRate(level: number): number {
  *
  * @param island - The island object with level
  * @param placedItems - Array of island items placed on this island
- * @returns Total mana per second
+ * @returns Total mana per minute
  */
 export function calculateIslandTotalManaRate(
   island: { id: string; level: number },

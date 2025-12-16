@@ -158,7 +158,7 @@ const InventoryContent = ({
           title={showTooltip.item?.name || ""}
           description={[
             `Type: ${toCapitalise(showTooltip.item?.type ?? "")}`,
-            `Mana Rate: ${showTooltip.item?.mana_rate}/s`,
+            `Mana Rate: ${showTooltip.item?.mana_rate ?? 0}/m`,
             "Click To Move",
           ]}
           x={mousePos.x}

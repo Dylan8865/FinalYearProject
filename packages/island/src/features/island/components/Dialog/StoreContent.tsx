@@ -79,7 +79,7 @@ const StoreRow = ({
         <SlotTooltip
           title={showTooltip.name || ""}
           description={[
-            `Mana Rate: ${showTooltip.mana_rate}/s`,
+            `Mana Rate: ${showTooltip.mana_rate}/m`,
             "Click To Purchase",
           ]}
           x={mousePos.x}

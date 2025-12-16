@@ -784,7 +784,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     });
   }, [islandItems, islands]);
 
-  // Increment mana every second
+  // Increment mana every minute
   useEffect(() => {
     const interval = setInterval(() => {
       setIslandManaStates((prev) => {
@@ -799,12 +799,12 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         });
         return updated;
       });
-    }, 1000);
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Sync to database every 5 seconds (more frequent to prevent data loss)
+  // Sync to database every minute (more frequent to prevent data loss)
   useEffect(() => {
     const syncInterval = setInterval(() => {
       Object.entries(islandManaStates).forEach(([islandId, state]) => {
@@ -814,7 +814,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           syncManaToDb(islandId, state.accumulatedMana);
         }
       });
-    }, 5000);
+    }, 60000);
 
     return () => clearInterval(syncInterval);
   }, [islandManaStates, syncManaToDb]);
@@ -873,7 +873,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         const data = await response.json();
 
         // Show collection popup
-        setManaPopup({ visible: true, amount: data.collected });
+        setManaPopup({ visible: true, amount: data.collected }); // TODO: change to tooltip
 
         // Update profile mana
         setProfile((prev) => ({ ...prev, mana: data.new_mana }));

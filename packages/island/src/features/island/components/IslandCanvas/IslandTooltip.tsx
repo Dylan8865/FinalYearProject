@@ -22,7 +22,7 @@ interface IslandTooltipProps {
  * Displays island statistics when hovering over an island.
  * Shows:
  * - Island name and level
- * - Total mana rate (per second)
+ * - Total mana rate (per minute)
  * - Accumulated mana ready to collect
  * - Quick collect button
  *
@@ -161,7 +161,7 @@ const IslandTooltip = ({
               >
                 {manaRate}
               </span>
-              <span style={{ color: "#9ca3af", fontSize: "11px" }}>/s</span>
+              <span style={{ color: "#9ca3af", fontSize: "11px" }}>/m</span>
             </div>
           </div>
 
@@ -216,7 +216,7 @@ const IslandTooltip = ({
         </div>
 
         {/* Collect Button */}
-        {accumulatedMana >= 1 && onCollectClick && (
+        {accumulatedMana >= 1000 && onCollectClick && (
           <button
             onClick={(e) => {
               e.stopPropagation();

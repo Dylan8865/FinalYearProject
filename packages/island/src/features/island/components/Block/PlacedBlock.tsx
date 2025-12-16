@@ -109,7 +109,7 @@ const PlacedBlock = ({
   let content: React.ReactNode;
   const description = [
     `Type: ${toCapitalise(itemType)}`,
-    `Mana Rate: ${itemManaRate}/s`,
+    `Mana Rate: ${itemManaRate}/m`,
   ];
 
   switch (itemType) {
