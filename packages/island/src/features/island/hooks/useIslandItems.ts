@@ -15,11 +15,6 @@ import { IslandItemType } from "@/types/types";
  * - Provides optimistic updates for better UX
  * - Handles database persistence through API routes
  *
- * Model URLs:
- * - Models are stored in Supabase storage bucket "items"
- * - Filename format: {item_id}.glb
- * - Example: f612693e-b042-4a72-95f8-0736d7980a26.glb
- *
  * @param profileId - Optional filter by profile ID
  * @param islandId - Optional filter by island ID (null = inventory items)
  * @returns Object with items, loading state, error, and CRUD functions
@@ -53,40 +48,8 @@ export function useIslandItems(profileId?: string, islandId?: string) {
 
       const data: IslandItemType[] = await response.json();
 
-      // Group items by their position and item_id to compute quantities
-      // Items with same item_id at same position (pos_x, pos_y) are stacked
-      const groupedItems = new Map<string, IslandItemType[]>();
-
-      data.forEach((item) => {
-        // Create a key for grouping: "itemId-posX-posY" for inventory items
-        // For placed items (on island), each gets unique key to not stack
-        const isInventoryItem = item.island_id === null && item.grid_x === null;
-        const key = isInventoryItem
-          ? `${item.item_id}-${item.pos_x}-${item.pos_y}`
-          : `placed-${item.id}`; // Placed items don't stack
-
-        if (!groupedItems.has(key)) {
-          groupedItems.set(key, []);
-        }
-        groupedItems.get(key)!.push(item);
-      });
-
-      // Convert grouped items back to array, keeping only the first item of each group
-      // and adding a computed quantity property
-      const itemsWithQuantity: IslandItemType[] = [];
-      groupedItems.forEach((group) => {
-        const firstItem = group[0];
-        itemsWithQuantity.push({
-          ...firstItem,
-          quantity: group.length, // Computed quantity based on group size
-        });
-      });
-
-      console.log(
-        "Fetched island items with computed quantities:",
-        itemsWithQuantity
-      );
-      setIslandItems(itemsWithQuantity);
+      console.log("Fetched island items:", data);
+      setIslandItems(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(errorMessage);

@@ -182,6 +182,7 @@ const IslandTooltip = ({
             </span>
             <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
               <span
+                className="truncate"
                 style={{
                   color: accumulatedMana > 0 ? "#34d399" : "#9ca3af",
                   fontWeight: "600",

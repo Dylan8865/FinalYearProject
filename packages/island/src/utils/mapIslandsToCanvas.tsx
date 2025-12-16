@@ -55,13 +55,7 @@ export function mapIslandsToCanvas(
     );
 
     mappedIslands.push({
-      id: dbIsland.id,
-      created_at: dbIsland.created_at,
-      name: dbIsland.name,
-      level: dbIsland.level,
-      theme: dbIsland.theme,
-      profile_id: dbIsland.profile_id,
-      user: dbIsland.user,
+      ...dbIsland, // Spread all properties including accumulated_mana and last_updated_at
       position,
       gridSize,
     });
@@ -108,13 +102,7 @@ export function arrangeIslandsCircular(
     const gridSize = Math.min(Math.max(dbIsland.level * 2 + 3, 5), 9);
 
     return {
-      id: dbIsland.id,
-      created_at: dbIsland.created_at,
-      name: dbIsland.name,
-      level: dbIsland.level,
-      theme: dbIsland.theme,
-      profile_id: dbIsland.profile_id,
-      user: dbIsland.user,
+      ...dbIsland,
       position: [x, y, z],
       gridSize,
     };
@@ -140,13 +128,7 @@ export function arrangeIslandsGrid(
     const gridSize = Math.min(Math.max(dbIsland.level * 2 + 3, 5), 9);
 
     return {
-      id: dbIsland.id,
-      created_at: dbIsland.created_at,
-      name: dbIsland.name,
-      level: dbIsland.level,
-      theme: dbIsland.theme,
-      profile_id: dbIsland.profile_id,
-      user: dbIsland.user,
+      ...dbIsland,
       position: [x, y, z],
       gridSize,
     };

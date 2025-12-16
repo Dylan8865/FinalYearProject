@@ -87,9 +87,9 @@ export function calculateAccumulatedMana(
 
 /**
  * Maximum time (in seconds) mana can accumulate before capping
- * Default: 1 hour (3600 seconds)
+ * Default: 24 hours (86400 seconds)
  */
-export const MAX_ACCUMULATION_TIME = 3600;
+export const MAX_ACCUMULATION_TIME = 86400;
 
 /**
  * Minimum mana required before the aura visual effect appears

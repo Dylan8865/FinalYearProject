@@ -4,7 +4,11 @@ import { Canvas } from "@react-three/fiber";
 import React, { useState } from "react";
 import Island from "./Island";
 import CameraControls, { type CameraControlsHandle } from "./CameraControls";
-import { IslandIndicatorTracker, IslandIndicatorsOverlay, type OffscreenIsland } from "./IslandIndicators";
+import {
+  IslandIndicatorTracker,
+  IslandIndicatorsOverlay,
+  type OffscreenIsland,
+} from "./IslandIndicators";
 
 export interface IslandData {
   id: string;
@@ -56,7 +60,7 @@ const IslandCanvas = ({
 }: IslandCanvasProps) => {
   const defaultCameraPos: [number, number, number] = [10, 15, 5];
   const defaultTarget: [number, number, number] = [0, 0, 0];
-  
+
   // Track hovered island
   const [hoveredIslandId, setHoveredIslandId] = useState<string | null>(null);
 
@@ -65,11 +69,7 @@ const IslandCanvas = ({
       <Canvas shadows camera={{ position: defaultCameraPos, fov: 50 }}>
         {/* lights + environment */}
         <ambientLight intensity={0.7} />
-        <directionalLight
-          position={[10, 15, 5]}
-          intensity={1.2}
-          castShadow
-        />
+        <directionalLight position={[10, 15, 5]} intensity={1.2} castShadow />
         <hemisphereLight args={["#87CEEB", "#A8A060", 0.6]} />
 
         {/* islands */}
@@ -77,9 +77,12 @@ const IslandCanvas = ({
           const islandPlacedObjects = Object.entries(placedObjects)
             .filter(([_, obj]) => obj.islandId === island.id)
             .reduce((acc, [key, obj]) => ({ ...acc, [key]: obj }), {});
-          
+
           const itemCount = Object.keys(islandPlacedObjects).length;
-          const manaState = islandManaStates[island.id] || { manaRate: 9, accumulatedMana: 0 };
+          const manaState = islandManaStates[island.id] || {
+            manaRate: 9,
+            accumulatedMana: 0,
+          };
 
           return (
             <Island
@@ -106,15 +109,15 @@ const IslandCanvas = ({
               onIslandClick={() => {
                 onIslandClick?.(island.id);
               }}
-              showManaAura={true}
+              showManaAura={islandManaStates[island.id]?.accumulatedMana > 1000}
             />
           );
         })}
 
         {/* Track off-screen islands */}
         {onOffscreenIslandsChange && (
-          <IslandIndicatorTracker 
-            islands={islands.map(i => ({ id: i.id, position: i.position }))}
+          <IslandIndicatorTracker
+            islands={islands.map((i) => ({ id: i.id, position: i.position }))}
             onUpdate={onOffscreenIslandsChange}
           />
         )}
@@ -136,6 +139,5 @@ const IslandCanvas = ({
     </div>
   );
 };
-
 
 export default IslandCanvas;

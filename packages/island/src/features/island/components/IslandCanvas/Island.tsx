@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState, useEffect, JSX } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Line } from "@react-three/drei";
 import ManaAura from "./ManaAura";
@@ -36,7 +36,7 @@ interface IslandBaseProps {
   onClick?: (e: any) => void;
 }
 
-const IslandBase = ({ 
+const IslandBase = ({
   gridSize = 5,
   onPointerEnter,
   onPointerLeave,
@@ -498,10 +498,10 @@ const Island = ({
   showManaAura = true,
 }: IslandProps) => {
   const groupRef = useRef<THREE.Group>(null);
-  
+
   // Track if tooltip itself is being hovered (to keep it visible)
   const [isTooltipHovered, setIsTooltipHovered] = useState(false);
-  
+
   // Track if tooltip was opened via click (for mobile/tablet)
   const [isClickedOpen, setIsClickedOpen] = useState(false);
 
@@ -514,13 +514,14 @@ const Island = ({
 
   // Determine if tooltip should be visible
   // Show if: (hovered OR tooltip itself is hovered OR clicked open) AND not dragging
-  const shouldShowTooltip = (isHovered || isTooltipHovered || isClickedOpen) && !isDraggingItem;
+  const shouldShowTooltip =
+    (isHovered || isTooltipHovered || isClickedOpen) && !isDraggingItem;
 
   // Handle island base click - toggle tooltip on mobile, collect mana on desktop
   const handleIslandBaseClick = (e: any) => {
     if (isDraggingItem) return;
     e.stopPropagation();
-    
+
     // Toggle tooltip visibility (for mobile/tablet)
     if (!isHovered && !isTooltipHovered) {
       // Not hovering, so this is likely a touch/click on mobile
@@ -538,7 +539,7 @@ const Island = ({
   return (
     <group ref={groupRef} position={position}>
       {/* Island base handles hover/click for showing tooltip and collecting mana */}
-      <IslandBase 
+      <IslandBase
         gridSize={gridSize}
         onPointerEnter={() => onIslandHover?.(true)}
         onPointerLeave={() => {
@@ -549,7 +550,7 @@ const Island = ({
         onClick={handleIslandBaseClick}
       />
       <GrassBase gridSize={gridSize} />
-      
+
       {/* Mana Aura Effect */}
       {showManaAura && (
         <ManaAura

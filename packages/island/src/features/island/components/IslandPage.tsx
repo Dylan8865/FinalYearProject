@@ -22,7 +22,10 @@ import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
 import { type OffscreenIsland } from "./IslandCanvas/IslandIndicators";
 import RefreshIcon from "@/icons/RefreshIcon";
 import ManaCollectionPopup from "@/features/island/components/IslandCanvas/ManaCollectionPopup";
-import { calculateIslandTotalManaRate } from "@/utils/manaCalculations";
+import {
+  calculateIslandTotalManaRate,
+  MAX_ACCUMULATION_TIME,
+} from "@/utils/manaCalculations";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -81,11 +84,10 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     itemName: string;
   } | null>(null);
 
-  // Mana system state
+  // Mana system state - simplified
   interface IslandManaState {
     manaRate: number;
     accumulatedMana: number;
-    lastCollectionTime: Date;
   }
   const [islandManaStates, setIslandManaStates] = useState<
     Record<string, IslandManaState>
@@ -681,12 +683,34 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     console.log("Placed objects updated:", placedObjects);
   }, [placedObjects]);
 
+  // Sync accumulated mana to database
+  const syncManaToDb = useCallback(
+    async (islandId: string, accumulatedMana: number) => {
+      try {
+        await fetch("/api/islands", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: islandId,
+            accumulated_mana: Math.floor(accumulatedMana),
+            last_updated_at: new Date().toISOString(),
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to sync mana to DB:", err);
+      }
+    },
+    []
+  );
+
   // Initialize mana states for islands
   useEffect(() => {
     if (!islands || islands.length === 0) return;
 
     setIslandManaStates((prev) => {
       const newStates = { ...prev };
+      const now = new Date();
+
       islands.forEach((island) => {
         if (!newStates[island.id]) {
           // Get placed items for this island
@@ -697,10 +721,37 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
             { id: island.id, level: island.level || 1 },
             islandPlacedItems
           );
+
+          // Get stored accumulated mana from DB
+          const storedMana = Number(island.accumulated_mana || 0);
+
+          // Calculate offline bonus since last update
+          let offlineBonus = 0;
+          if (island.last_updated_at) {
+            const lastUpdate = new Date(island.last_updated_at);
+            const elapsedSeconds = Math.max(
+              0,
+              (now.getTime() - lastUpdate.getTime()) / 1000
+            );
+            const cappedSeconds = Math.min(
+              elapsedSeconds,
+              MAX_ACCUMULATION_TIME
+            );
+            offlineBonus = Math.floor(manaRate * cappedSeconds);
+          }
+
+          const totalMana = storedMana + offlineBonus;
+
+          console.log(`Island ${island.id} mana init:`, {
+            storedMana,
+            offlineBonus,
+            totalMana,
+            manaRate,
+          });
+
           newStates[island.id] = {
             manaRate,
-            accumulatedMana: 0,
-            lastCollectionTime: new Date(),
+            accumulatedMana: totalMana,
           };
         }
       });
@@ -733,42 +784,64 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     });
   }, [islandItems, islands]);
 
-  // Use ref to track mana without causing re-renders every second
-  const manaStatesRef = useRef<Record<string, IslandManaState>>({});
-
-  // Keep ref in sync with state (for collection handler)
+  // Increment mana every second
   useEffect(() => {
-    manaStatesRef.current = islandManaStates;
-  }, [islandManaStates]);
+    const interval = setInterval(() => {
+      setIslandManaStates((prev) => {
+        if (Object.keys(prev).length === 0) return prev;
 
-  // Accumulate mana - use ref to avoid re-renders, only update state periodically
-  useEffect(() => {
-    // Update ref every second (no re-render)
-    const fastInterval = setInterval(() => {
-      const now = new Date();
-      Object.keys(manaStatesRef.current).forEach((islandId) => {
-        const state = manaStatesRef.current[islandId];
-        if (state) {
-          const elapsedSeconds =
-            (now.getTime() - state.lastCollectionTime.getTime()) / 1000;
-          manaStatesRef.current[islandId] = {
+        const updated: Record<string, IslandManaState> = {};
+        Object.entries(prev).forEach(([islandId, state]) => {
+          updated[islandId] = {
             ...state,
-            accumulatedMana: Math.floor(state.manaRate * elapsedSeconds),
+            accumulatedMana: state.accumulatedMana + state.manaRate,
           };
-        }
+        });
+        return updated;
       });
     }, 1000);
 
-    // Update state every 5 seconds (causes re-render but less frequently)
-    const slowInterval = setInterval(() => {
-      setIslandManaStates({ ...manaStatesRef.current });
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sync to database every 5 seconds (more frequent to prevent data loss)
+  useEffect(() => {
+    const syncInterval = setInterval(() => {
+      Object.entries(islandManaStates).forEach(([islandId, state]) => {
+        // Only sync if value has changed significantly or enough time passed
+        // For now, just sync if > 0 to be safe
+        if (state.accumulatedMana > 1000) {
+          syncManaToDb(islandId, state.accumulatedMana);
+        }
+      });
     }, 5000);
 
-    return () => {
-      clearInterval(fastInterval);
-      clearInterval(slowInterval);
+    return () => clearInterval(syncInterval);
+  }, [islandManaStates, syncManaToDb]);
+
+  // Sync on window unload/refresh
+  useEffect(() => {
+    const handleUnload = () => {
+      Object.entries(islandManaStates).forEach(([islandId, state]) => {
+        if (state.accumulatedMana > 0) {
+          // Use fetch with keepalive for reliable send on unload
+          fetch("/api/islands", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: islandId,
+              accumulated_mana: Math.floor(state.accumulatedMana),
+              last_updated_at: new Date().toISOString(),
+            }),
+            keepalive: true,
+          });
+        }
+      });
     };
-  }, []);
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, [islandManaStates]);
 
   // Handle mana collection from island click
   const handleIslandClick = useCallback(
@@ -779,6 +852,8 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         return;
       }
 
+      const manaToCollect = Math.floor(state.accumulatedMana);
+
       try {
         const response = await fetch("/api/islands/collect-mana", {
           method: "POST",
@@ -787,7 +862,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           },
           body: JSON.stringify({
             island_id: islandId,
-            last_collection_time: state.lastCollectionTime.toISOString(),
+            mana_to_collect: manaToCollect,
           }),
         });
 
@@ -803,22 +878,24 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         // Update profile mana
         setProfile((prev) => ({ ...prev, mana: data.new_mana }));
 
-        // Reset island mana state
+        // Reset island mana state after collection
         setIslandManaStates((prev) => ({
           ...prev,
           [islandId]: {
             ...prev[islandId],
             accumulatedMana: 0,
-            lastCollectionTime: new Date(data.collection_time),
           },
         }));
+
+        // Also sync the reset to DB
+        syncManaToDb(islandId, 0);
 
         console.log(`Collected ${data.collected} mana from island ${islandId}`);
       } catch (err) {
         console.error("Failed to collect mana:", err);
       }
     },
-    [islandManaStates]
+    [islandManaStates, syncManaToDb]
   );
 
   if (loading) {
