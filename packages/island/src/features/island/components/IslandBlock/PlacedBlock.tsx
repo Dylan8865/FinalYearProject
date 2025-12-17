@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
 import { Suspense } from "react";
-import TerrainBlock from "../Block/TerrainBlocks";
-import DecorativeBlock from "../Block/DecorativeBlock";
-import FunctionalBlock from "../Block/FunctionalBlock";
+import TerrainBlock from "./TerrainBlocks";
+import DecorativeBlock from "./DecorativeBlock";
+import FunctionalBlock from "./FunctionalBlock";
 import ItemTooltip from "./ItemTooltip";
 import { toCapitalise } from "@/lib/capitalise";
 

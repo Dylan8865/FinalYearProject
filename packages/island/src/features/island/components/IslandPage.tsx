@@ -16,7 +16,7 @@ import { ProfileType } from "@/types/types";
 import ProfileContent from "./Dialog/ProfileContent";
 import { IslandItemsProvider } from "@/features/island/contexts/IslandItemsContext";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
-import PlacedBlock from "./Block/PlacedBlock";
+import PlacedBlock from "./IslandBlock/PlacedBlock";
 import SidebarPage from "./Page/SidebarPage";
 import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
 import { type OffscreenIsland } from "./IslandCanvas/IslandIndicators";
