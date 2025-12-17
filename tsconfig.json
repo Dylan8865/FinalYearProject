@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -16,13 +12,19 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "exclude": [
-    "node_modules",
-    "apps",
-    "packages",
-    ".next",
-    "dist"
-  ]
+  "files": [],
+  "include": [],
+  "references": [
+    { "path": "./packages/admin" },
+    { "path": "./packages/cloud" },
+    { "path": "./packages/explore" },
+    { "path": "./packages/island" },
+    { "path": "./packages/search" }
+  ],
+  "exclude": ["node_modules", ".next", "dist"]
 }
