@@ -1,5 +1,10 @@
 import { IslandItemType } from "@/types/types";
-import React, { Dispatch, SetStateAction, useRef } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useRef,
+  useLayoutEffect,
+} from "react";
 import Image from "next/image";
 import { useIslandItems } from "../../hooks/useIslandItems";
 
@@ -16,11 +21,32 @@ const PageHeader = ({
 }: PageHeaderProps) => {
   const { updateIslandName } = useIslandItems();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const title = islandItem?.title || "";
+
+  useLayoutEffect(() => {
+    if (titleRef.current) {
+      if (!title && document.activeElement !== titleRef.current) {
+        // Force clear to ensure :empty works
+        titleRef.current.innerHTML = "";
+      } else if (
+        titleRef.current.innerText !== title &&
+        document.activeElement !== titleRef.current
+      ) {
+        titleRef.current.innerText = title;
+      }
+    }
+  }, [title]);
 
   const handleTitleChange = (e: React.FormEvent<HTMLHeadingElement>) => {
     if (!islandItem?.id) return;
 
-    const title = e.currentTarget.innerText;
+    // Force clear DOM if text is empty to ensure :empty works
+    if (e.currentTarget.innerText.trim() === "") {
+      e.currentTarget.innerHTML = "";
+    }
+
+    const newTitle = e.currentTarget.innerText;
 
     setIsSaving(true);
 
@@ -30,7 +56,7 @@ const PageHeader = ({
 
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        await updateIslandName(islandItem.id, title);
+        await updateIslandName(islandItem.id, newTitle);
       } catch {
         setSaveError("Failed to save title");
       } finally {
@@ -40,7 +66,7 @@ const PageHeader = ({
   };
 
   return (
-    <div className="w-full space-y-4 border-b text-white">
+    <div className="w-full space-y-4 text-white">
       {islandItem?.cover_image ? (
         <div className="relative h-[200px] w-full">
           <Image
@@ -56,13 +82,18 @@ const PageHeader = ({
 
       <div className="px-6">
         <h1
+          ref={titleRef}
           contentEditable
           suppressContentEditableWarning
           onInput={handleTitleChange}
-          className="text-3xl font-bold outline-none"
-        >
-          {islandItem?.title || "Untitled"}
-        </h1>
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+            }
+          }}
+          className="min-h-[1.5em] cursor-text truncate text-5xl font-bold outline-none empty:before:text-gray-500 empty:before:content-[attr(data-placeholder)]"
+          data-placeholder="Untitled"
+        />
       </div>
     </div>
   );

@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { BlockType, ItemDataType } from "@/types/types";
+import AddIcon from "@/icons/AddIcon";
+import DragIcon from "@/icons/DragIcon";
 
 interface BlockActionsProps {
   block: ItemDataType;
@@ -96,19 +98,7 @@ const BlockActions = ({
         className="rounded p-1 text-gray-500 opacity-0 transition-all hover:bg-gray-700 hover:text-gray-300 group-hover:opacity-100"
         title="Add block below"
       >
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
+        <AddIcon />
       </button>
 
       {/* Drag Handle / Menu Button */}
@@ -117,14 +107,7 @@ const BlockActions = ({
         className="cursor-grab rounded p-1 text-gray-500 opacity-0 transition-all hover:bg-gray-700 hover:text-gray-300 active:cursor-grabbing group-hover:opacity-100"
         title="Drag to move / Click for options"
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="9" cy="6" r="1.5" />
-          <circle cx="15" cy="6" r="1.5" />
-          <circle cx="9" cy="12" r="1.5" />
-          <circle cx="15" cy="12" r="1.5" />
-          <circle cx="9" cy="18" r="1.5" />
-          <circle cx="15" cy="18" r="1.5" />
-        </svg>
+        <DragIcon />
       </button>
 
       {/* Dropdown Menu */}

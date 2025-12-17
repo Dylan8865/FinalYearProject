@@ -5,7 +5,7 @@ import PageHeader from "./PageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
 import { useItemData } from "../../hooks/useItemData";
-import { BlockEditorContainer } from "../block-system";
+import { BlockEditorContainer } from "../NotionBlock";
 
 interface SidebarPageProps {
   isOpen?: boolean;
@@ -94,7 +94,7 @@ const SidebarPage = ({
 
   return (
     <div
-      className="absolute right-0 top-0 z-50 h-full w-4/5 overflow-y-auto bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
+      className="absolute right-0 top-0 z-50 h-full w-4/5 overflow-y-auto bg-[#191919] pb-96 transition-transform duration-300 md:w-[34dvw]"
       style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
     >
       <PageControls
@@ -112,13 +112,15 @@ const SidebarPage = ({
       />
 
       {/* Block Editor */}
-      {islandItem && (
-        <BlockEditorContainer
-          islandItemId={islandItem.id}
-          initialBlocks={itemData || []}
-          onRefetch={refetch}
-        />
-      )}
+      <div className="px-4">
+        {islandItem && (
+          <BlockEditorContainer
+            islandItemId={islandItem.id}
+            initialBlocks={itemData || []}
+            onRefetch={refetch}
+          />
+        )}
+      </div>
     </div>
   );
 };

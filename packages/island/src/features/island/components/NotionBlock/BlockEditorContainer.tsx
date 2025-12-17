@@ -8,14 +8,10 @@ import React, {
   useMemo,
 } from "react";
 import { ItemDataType, BlockType, BlockProperties } from "@/types/types";
-import BlockRenderer from "../block-system/BlockRenderer";
-import BlockWrapper from "../block-system/BlockWrapper";
-import BlockMenu from "../block-system/BlockMenu";
-import {
-  useBlockEditor,
-  useFocusManager,
-  useKeyboardShortcuts,
-} from "../block-system";
+import BlockRenderer from "./BlockRenderer";
+import BlockWrapper from "./BlockWrapper";
+import BlockMenu from "./BlockMenu";
+import { useBlockEditor, useFocusManager, useKeyboardShortcuts } from ".";
 
 interface BlockEditorContainerProps {
   islandItemId: string;

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { ItemDataType, BlockProperties, BlockType } from "@/types/types";
 import Image from "next/image";
 
@@ -12,52 +12,58 @@ interface BlockProps {
 }
 
 // Editable content component
-const EditableContent = ({
-  content,
-  onChange,
-  placeholder = "Type something...",
-  className = "",
-}: {
-  content: string;
-  onChange: (content: string) => void;
-  placeholder?: string;
-  className?: string;
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+// Using React.memo to prevent re-renders when parent re-renders but content/handlers haven't changed
+// though the issue is mostly about the internal DOM management
+const EditableContent = React.memo(
+  ({
+    content,
+    onChange,
+    placeholder = "Type something...",
+    className = "",
+  }: {
+    content: string;
+    onChange: (content: string) => void;
+    placeholder?: string;
+    className?: string;
+  }) => {
+    const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (isEditing && ref.current) {
-      ref.current.focus();
-      // Set cursor to end
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.selectNodeContents(ref.current);
-      range.collapse(false);
-      sel?.removeAllRanges();
-      sel?.addRange(range);
-    }
-  }, [isEditing]);
-
-  return (
-    <div
-      ref={ref}
-      contentEditable={isEditing}
-      suppressContentEditableWarning
-      onFocus={() => setIsEditing(true)}
-      onBlur={() => {
-        setIsEditing(false);
-        if (ref.current) {
-          onChange(ref.current.textContent || "");
+    // Use useLayoutEffect to update DOM before paint
+    // This handles both initial load and external updates
+    useLayoutEffect(() => {
+      // We only update the DOM if:
+      // 1. The new content is different from what's currently in the DOM
+      // 2. AND (we are not focused OR the DOM is empty)
+      // This ensures we don't mess with the cursor while the user is typing,
+      // but we still update if the content changed externally or it's the first render.
+      if (ref.current && ref.current.innerText !== content) {
+        if (document.activeElement !== ref.current) {
+          ref.current.innerText = content;
         }
-      }}
-      className={`outline-none ${!content && !isEditing ? "text-gray-500" : ""} ${className}`}
-      data-placeholder={placeholder}
-    >
-      {content || (!isEditing ? placeholder : "")}
-    </div>
-  );
-};
+      }
+    }, [content]);
+
+    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+      const text = e.currentTarget.innerText;
+      // Only fire change if actually different to avoid unnecessary loops
+      if (text !== content) {
+        onChange(text);
+      }
+    };
+
+    return (
+      <div
+        ref={ref}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        className={`min-h-[1.5em] cursor-text outline-none empty:before:text-gray-500 empty:before:content-[attr(data-placeholder)] ${className}`}
+        data-placeholder={placeholder}
+      />
+    );
+  }
+);
+EditableContent.displayName = "EditableContent";
 
 // Paragraph Block
 export const ParagraphBlock = ({ block, onUpdate }: BlockProps) => {
@@ -69,7 +75,7 @@ export const ParagraphBlock = ({ block, onUpdate }: BlockProps) => {
   };
 
   return (
-    <div className="group relative border py-1">
+    <div className="group relative py-1">
       <EditableContent
         content={textContent}
         onChange={handleChange}
@@ -90,7 +96,7 @@ export const Heading1Block = ({ block, onUpdate }: BlockProps) => {
   };
 
   return (
-    <div className="group relative border py-2">
+    <div className="group relative py-2">
       <EditableContent
         content={textContent}
         onChange={handleChange}
@@ -110,7 +116,7 @@ export const Heading2Block = ({ block, onUpdate }: BlockProps) => {
   };
 
   return (
-    <div className="group relative border py-2">
+    <div className="group relative py-2">
       <EditableContent
         content={textContent}
         onChange={handleChange}
@@ -130,7 +136,7 @@ export const Heading3Block = ({ block, onUpdate }: BlockProps) => {
   };
 
   return (
-    <div className="group relative border py-1">
+    <div className="group relative py-1">
       <EditableContent
         content={textContent}
         onChange={handleChange}
@@ -151,8 +157,8 @@ export const BulletedListBlock = ({ block, onUpdate }: BlockProps) => {
   };
 
   return (
-    <div className="group relative flex gap-2 border py-1">
-      <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-gray-400" />
+    <div className="group relative flex gap-2 py-1">
+      <span className="mt-2.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-gray-400" />
       <EditableContent
         content={textContent}
         onChange={handleChange}
@@ -218,7 +224,7 @@ export const TodoBlock = ({ block, onUpdate }: BlockProps) => {
   };
 
   return (
-    <div className="group relative flex gap-2 border py-1">
+    <div className="group relative flex gap-2 py-1">
       <input
         type="checkbox"
         checked={checked}
@@ -236,17 +242,26 @@ export const TodoBlock = ({ block, onUpdate }: BlockProps) => {
 };
 
 // Toggle Block
+// Toggle Block
 export const ToggleBlock = ({ block, onUpdate, children }: BlockProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const textContent = typeof block.content === "string" ? block.content : "";
+  const summaryContent = typeof block.content === "string" ? block.content : "";
+  // Optional: extended details stored in properties, if the user wants text *inside* the toggle besides nested blocks
+  const detailsContent = block.properties?.details || "";
 
-  const handleChange = (content: string) => {
-    console.log("ToggleBlock onChange:", { id: block.id, content });
-    onUpdate?.(block.id, content);
+  const handleSummaryChange = (content: string) => {
+    onUpdate?.(block.id, content, block.properties || undefined);
+  };
+
+  const handleDetailsChange = (content: string) => {
+    onUpdate?.(block.id, summaryContent, {
+      ...block.properties,
+      details: content,
+    });
   };
 
   return (
-    <div className="group relative border py-1">
+    <div className="group relative py-1">
       <div className="flex gap-2">
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -256,13 +271,24 @@ export const ToggleBlock = ({ block, onUpdate, children }: BlockProps) => {
           ▶
         </button>
         <EditableContent
-          content={textContent}
-          onChange={handleChange}
+          content={summaryContent}
+          onChange={handleSummaryChange}
           placeholder="Toggle list"
           className="flex-1 text-base leading-relaxed text-gray-200"
         />
       </div>
-      {isOpen && <div className="ml-6 mt-2">{children}</div>}
+      {isOpen && (
+        <div className="ml-6 mt-2">
+          {/* If user specifically wants a text area inside the toggle *before* nested blocks */}
+          <EditableContent
+            content={detailsContent}
+            onChange={handleDetailsChange}
+            className="mb-2 text-white/70"
+            placeholder="Empty toggle details..."
+          />
+          {children}
+        </div>
+      )}
     </div>
   );
 };
@@ -294,17 +320,42 @@ export const DividerBlock = () => {
 };
 
 // Callout Block
+// Callout Block
 export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
   const [icon, setIcon] = useState(block.properties?.icon || "💡");
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const bgColor = block.properties?.backgroundColor || "bg-blue-900/20";
   const textContent = typeof block.content === "string" ? block.content : "";
+  const iconPickerRef = useRef<HTMLDivElement>(null);
+
+  const commonIcons = [
+    "💡",
+    "⚠️",
+    "🚫",
+    "✅",
+    "🔥",
+    "📝",
+    "📌",
+    "🎉",
+    "❤️",
+    "⭐",
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        iconPickerRef.current &&
+        !iconPickerRef.current.contains(event.target as Node)
+      ) {
+        setShowIconPicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleContentChange = (content: string) => {
-    console.log("CalloutBlock onChange:", {
-      id: block.id,
-      content,
-      properties: { icon, backgroundColor: bgColor },
-    });
     onUpdate?.(block.id, content, {
       ...block.properties,
       icon,
@@ -312,13 +363,9 @@ export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
     });
   };
 
-  const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newIcon = e.target.value;
+  const handleIconSelect = (newIcon: string) => {
     setIcon(newIcon);
-    console.log("CalloutBlock icon change:", {
-      id: block.id,
-      icon: newIcon,
-    });
+    setShowIconPicker(false);
     onUpdate?.(block.id, textContent, {
       ...block.properties,
       icon: newIcon,
@@ -328,15 +375,33 @@ export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
 
   return (
     <div
-      className={`group relative flex gap-3 rounded-lg border ${bgColor} p-4`}
+      className={`group relative flex items-center gap-3 rounded-lg border border-neutral-700 ${bgColor} p-4`}
     >
-      <input
-        type="text"
-        value={icon}
-        onChange={handleIconChange}
-        className="w-8 bg-transparent text-center text-2xl outline-none"
-        maxLength={2}
-      />
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setShowIconPicker(!showIconPicker)}
+          className="flex h-8 w-8 items-center justify-center rounded text-2xl hover:bg-white/10"
+        >
+          {icon}
+        </button>
+        {showIconPicker && (
+          <div
+            ref={iconPickerRef}
+            className="absolute left-0 top-10 z-50 grid w-48 grid-cols-5 gap-2 rounded-lg border border-gray-700 bg-gray-900 p-2 shadow-xl"
+          >
+            {commonIcons.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => handleIconSelect(emoji)}
+                className="flex h-8 w-8 items-center justify-center rounded text-xl hover:bg-gray-700"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <EditableContent
         content={textContent}
         onChange={handleContentChange}
@@ -380,7 +445,7 @@ export const CodeBlock = ({ block, onUpdate }: BlockProps) => {
   };
 
   return (
-    <div className="group relative my-2 border">
+    <div className="group relative my-2 rounded-lg border border-neutral-700">
       <div className="mb-1 flex items-center justify-between rounded-t-lg bg-gray-800 px-3 py-1">
         <select
           value={language}
@@ -434,8 +499,7 @@ export const ImageBlock = ({ block, onUpdate }: BlockProps) => {
     });
   };
 
-  const handleCaptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newCaption = e.target.value;
+  const handleCaptionChange = (newCaption: string) => {
     setCaption(newCaption);
     console.log("ImageBlock caption change:", {
       id: block.id,
@@ -478,12 +542,11 @@ export const ImageBlock = ({ block, onUpdate }: BlockProps) => {
           className="cursor-pointer object-contain"
         />
       </div>
-      <input
-        type="text"
-        value={caption}
+      <EditableContent
+        content={caption}
         onChange={handleCaptionChange}
         placeholder="Add a caption..."
-        className="mt-2 w-full bg-transparent text-center text-sm text-gray-400 outline-none"
+        className="mt-2 text-center text-sm text-gray-400"
       />
     </div>
   );
@@ -514,8 +577,7 @@ export const VideoBlock = ({ block, onUpdate }: BlockProps) => {
     });
   };
 
-  const handleCaptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newCaption = e.target.value;
+  const handleCaptionChange = (newCaption: string) => {
     setCaption(newCaption);
     console.log("VideoBlock caption change:", {
       id: block.id,
@@ -550,12 +612,11 @@ export const VideoBlock = ({ block, onUpdate }: BlockProps) => {
       <div onClick={() => setIsEditingUrl(true)} className="cursor-pointer">
         <video src={url} controls className="w-full rounded-lg" />
       </div>
-      <input
-        type="text"
-        value={caption}
+      <EditableContent
+        content={caption}
         onChange={handleCaptionChange}
         placeholder="Add a caption..."
-        className="mt-2 w-full bg-transparent text-center text-sm text-gray-400 outline-none"
+        className="mt-2 text-center text-sm text-gray-400"
       />
     </div>
   );
@@ -586,8 +647,7 @@ export const AudioBlock = ({ block, onUpdate }: BlockProps) => {
     });
   };
 
-  const handleCaptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newCaption = e.target.value;
+  const handleCaptionChange = (newCaption: string) => {
     setCaption(newCaption);
     console.log("AudioBlock caption change:", {
       id: block.id,
@@ -622,12 +682,11 @@ export const AudioBlock = ({ block, onUpdate }: BlockProps) => {
       <div onClick={() => setIsEditingUrl(true)} className="cursor-pointer">
         <audio src={url} controls className="w-full rounded-lg" />
       </div>
-      <input
-        type="text"
-        value={caption}
+      <EditableContent
+        content={caption}
         onChange={handleCaptionChange}
         placeholder="Add a caption..."
-        className="mt-2 w-full bg-transparent text-sm text-gray-400 outline-none"
+        className="mt-2 text-center text-sm text-gray-400"
       />
     </div>
   );
@@ -660,8 +719,7 @@ export const FileBlock = ({ block, onUpdate }: BlockProps) => {
     });
   };
 
-  const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newFileName = e.target.value;
+  const handleFileNameChange = (newFileName: string) => {
     setFileName(newFileName);
     console.log("FileBlock fileName change:", {
       id: block.id,
@@ -707,11 +765,10 @@ export const FileBlock = ({ block, onUpdate }: BlockProps) => {
             d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
           />
         </svg>
-        <input
-          type="text"
-          value={fileName}
+        <EditableContent
+          content={fileName}
           onChange={handleFileNameChange}
-          className="flex-1 bg-transparent text-sm text-gray-200 outline-none"
+          className="flex-1 text-sm text-gray-200"
         />
         <a
           href={url}
@@ -762,15 +819,14 @@ export const TableBlock = ({ block, onUpdate }: BlockProps) => {
               {row.map((cell: string, cellIndex: number) => (
                 <td
                   key={cellIndex}
-                  className="border-r border-gray-700 p-2 last:border-r-0"
+                  className="min-w-[100px] border-r border-gray-700 p-2 align-top last:border-r-0"
                 >
-                  <input
-                    type="text"
-                    value={cell}
-                    onChange={(e) =>
-                      handleCellChange(rowIndex, cellIndex, e.target.value)
+                  <EditableContent
+                    content={cell}
+                    onChange={(val) =>
+                      handleCellChange(rowIndex, cellIndex, val)
                     }
-                    className="w-full bg-transparent text-sm text-gray-200 outline-none"
+                    className="text-sm text-gray-200"
                     placeholder="Empty"
                   />
                 </td>
@@ -813,8 +869,7 @@ export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
     });
   };
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
+  const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
     console.log("BookmarkBlock title change:", {
       id: block.id,
@@ -828,8 +883,7 @@ export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
     });
   };
 
-  const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDescription = e.target.value;
+  const handleDescriptionChange = (newDescription: string) => {
     setDescription(newDescription);
     console.log("BookmarkBlock description change:", {
       id: block.id,
@@ -862,19 +916,17 @@ export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
 
   return (
     <div className="group relative my-2 rounded-lg border border-gray-700 bg-gray-800/30 p-4">
-      <input
-        type="text"
-        value={title}
+      <EditableContent
+        content={title}
         onChange={handleTitleChange}
         placeholder="Bookmark title..."
-        className="mb-2 w-full bg-transparent font-medium text-gray-200 outline-none"
+        className="mb-2 font-medium text-gray-200"
       />
-      <input
-        type="text"
-        value={description}
+      <EditableContent
+        content={description}
         onChange={handleDescriptionChange}
         placeholder="Description..."
-        className="mb-2 w-full bg-transparent text-sm text-gray-400 outline-none"
+        className="mb-2 text-sm text-gray-400"
       />
       <div className="flex items-center gap-2">
         <p className="flex-1 truncate text-xs text-gray-500">{url}</p>

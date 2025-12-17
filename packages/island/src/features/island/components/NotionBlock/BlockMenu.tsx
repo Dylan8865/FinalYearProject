@@ -340,7 +340,11 @@ const BlockMenu = ({
     <div
       ref={menuRef}
       className="fixed z-50 w-80 overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl"
-      style={{ top: position.y, left: position.x }}
+      style={{
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+      }}
       onKeyDown={handleKeyDown}
     >
       {/* Search input */}
