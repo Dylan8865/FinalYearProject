@@ -2,7 +2,7 @@
 
 import PageControls from "./PageControls";
 import PageHeader from "./PageHeader";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
 import { useItemData } from "../../hooks/useItemData";
 import { BlockEditorContainer } from "../block-system";
@@ -37,6 +37,9 @@ const SidebarPage = ({
     error,
     refetch,
   } = useItemData(islandItem?.id);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("itemData", itemData);
@@ -94,10 +97,19 @@ const SidebarPage = ({
       className="absolute right-0 top-0 z-50 h-full w-4/5 overflow-y-auto bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
       style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
     >
-      <PageControls onClick={onClick} onExpand={onExpand} />
+      <PageControls
+        onClick={onClick}
+        onExpand={onExpand}
+        isSaving={isSaving}
+        saveError={saveError}
+      />
 
       {/* Page Header */}
-      <PageHeader islandItem={islandItem} />
+      <PageHeader
+        islandItem={islandItem}
+        setIsSaving={setIsSaving}
+        setSaveError={setSaveError}
+      />
 
       {/* Block Editor */}
       {islandItem && (

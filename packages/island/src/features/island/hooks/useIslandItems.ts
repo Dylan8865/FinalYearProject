@@ -48,7 +48,6 @@ export function useIslandItems(profileId?: string, islandId?: string) {
 
       const data: IslandItemType[] = await response.json();
 
-      console.log("Fetched island items:", data);
       setIslandItems(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
@@ -82,8 +81,6 @@ export function useIslandItems(profileId?: string, islandId?: string) {
       }
 
       const { item, mana } = await response.json();
-
-      console.log("Purchased new item:", item);
 
       // Refetch to update UI with the new item in inventory
       await fetchIslandItems();
@@ -275,10 +272,6 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     slotX: number,
     slotY: number
   ) => {
-    console.log("=== MOVE TO INVENTORY ===");
-    console.log("Item ID:", islandItemId);
-    console.log("Target slot:", { slotX, slotY });
-
     try {
       // Optimistic update - move to inventory immediately
       setIslandItems((prevItems) =>
@@ -318,15 +311,6 @@ export function useIslandItems(profileId?: string, islandId?: string) {
       }
 
       const responseData = await response.json();
-      console.log("Move to inventory API response:", responseData);
-      console.log("Response item coords:", {
-        grid_x: responseData.grid_x,
-        grid_y: responseData.grid_y,
-        grid_z: responseData.grid_z,
-        island_id: responseData.island_id,
-        pos_x: responseData.pos_x,
-        pos_y: responseData.pos_y,
-      });
 
       // Update local state with the API response data directly
       // This is more reliable than refetching which might get stale data
@@ -348,12 +332,31 @@ export function useIslandItems(profileId?: string, islandId?: string) {
         )
       );
 
-      console.log("Item updated successfully in local state");
       return true;
     } catch (err) {
       console.error("Failed to move item to inventory:", err);
       // Refetch to restore correct state on error
       await fetchIslandItems();
+      return false;
+    }
+  };
+
+  const updateIslandName = async (id: string, title: string) => {
+    try {
+      const response = await fetch(`/api/island-items/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update island");
+      }
+
+      await fetchIslandItems();
+      return true;
+    } catch (err) {
+      console.error("Failed to update island:", err);
       return false;
     }
   };
@@ -373,5 +376,6 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     deleteItem,
     removeItemFromIsland,
     moveToInventory,
+    updateIslandName,
   };
 }
