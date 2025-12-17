@@ -143,7 +143,7 @@ export default function TerrainBlock({ name }: { name: string }) {
 
   // Define geometry variations - rough blocks have slightly irregular dimensions
   const geometry = useMemo(() => {
-    const baseSize = [1.2, 1, 1.2];
+    const baseSize = [1.21, 1.01, 1.21];
 
     switch (name) {
       case "Stone":
