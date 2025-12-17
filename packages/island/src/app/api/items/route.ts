@@ -1,10 +1,50 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient();
 
+    // Extract query parameter from URL
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    // Handle single item request (when ?id=xxx is present)
+    if (id) {
+      const { data: item, error } = await supabase
+        .from("item")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Supabase error:", error);
+        return NextResponse.json(
+          { error: "Failed to fetch item" },
+          { status: 500 }
+        );
+      }
+
+      if (!item) {
+        return NextResponse.json({ error: "Item not found" }, { status: 404 });
+      }
+
+      // Process single item
+      let imageCoverUrl = null;
+      if (item.image_cover_path) {
+        const { data } = supabase.storage
+          .from("items")
+          .getPublicUrl(item.image_cover_path);
+        imageCoverUrl = data?.publicUrl || null;
+      }
+
+      return NextResponse.json({
+        ...item,
+        image_cover_url: imageCoverUrl,
+      });
+    }
+
+    // Handle multiple items request (no ?id parameter)
     const { data: items, error } = await supabase
       .from("item")
       .select("*")
@@ -18,12 +58,9 @@ export async function GET() {
       );
     }
 
-    // Enhance items with resolved image URLs from storage
-    // This prevents client-side storage requests and improves performance
-    const itemsWithImages = items.map((item) => {
+    // Process multiple items
+    const itemsWithImages = (items || []).map((item) => {
       let imageCoverUrl = null;
-
-      // Get public URL for cover image if path exists
       if (item.image_cover_path) {
         const { data } = supabase.storage
           .from("items")

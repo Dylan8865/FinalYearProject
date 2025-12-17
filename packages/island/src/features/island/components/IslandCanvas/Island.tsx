@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useMemo, useRef, useState, useEffect, JSX } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Line } from "@react-three/drei";
+import ManaAura from "./ManaAura";
+import IslandTooltip from "./IslandTooltip";
 
 const THEME = {
   primary: "#C3B091",
@@ -29,9 +31,17 @@ const THEME = {
 
 interface IslandBaseProps {
   gridSize?: number;
+  onPointerEnter?: () => void;
+  onPointerLeave?: () => void;
+  onClick?: (e: any) => void;
 }
 
-const IslandBase = ({ gridSize = 5 }: IslandBaseProps) => {
+const IslandBase = ({
+  gridSize = 5,
+  onPointerEnter,
+  onPointerLeave,
+  onClick,
+}: IslandBaseProps) => {
   const radius = (gridSize * 1.2) / 2;
   const height = 4;
   const [randomValues, setRandomValues] = useState<
@@ -96,6 +106,9 @@ const IslandBase = ({ gridSize = 5 }: IslandBaseProps) => {
       rotation={[Math.PI, 0, 0]}
       castShadow
       receiveShadow
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
+      onClick={onClick}
     >
       <meshStandardMaterial
         color={THEME.darkRock}
@@ -379,7 +392,12 @@ const GridPlatform = ({
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                console.log("Cell clicked:", cellId, "isDragging:", isDraggingItem);
+                console.log(
+                  "Cell clicked:",
+                  cellId,
+                  "isDragging:",
+                  isDraggingItem
+                );
 
                 if (isDraggingItem && onCellDrop) {
                   console.log("Calling onCellDrop for cell:", cellId);
@@ -448,6 +466,17 @@ interface IslandProps {
   isDraggingItem?: boolean;
   onCellDrop?: (cellId: string, x: number, z: number) => void;
   placedObjects?: Record<string, PlacedObject>;
+  // Mana-related props
+  islandId?: string;
+  islandName?: string;
+  islandLevel?: number;
+  manaRate?: number;
+  accumulatedMana?: number;
+  itemCount?: number;
+  onIslandHover?: (isHovered: boolean) => void;
+  onIslandClick?: () => void;
+  isHovered?: boolean;
+  showManaAura?: boolean;
 }
 
 const Island = ({
@@ -457,8 +486,24 @@ const Island = ({
   isDraggingItem = false,
   onCellDrop,
   placedObjects = {},
+  islandId,
+  islandName = "My Island",
+  islandLevel = 1,
+  manaRate = 9,
+  accumulatedMana = 0,
+  itemCount = 0,
+  onIslandHover,
+  onIslandClick,
+  isHovered = false,
+  showManaAura = true,
 }: IslandProps) => {
   const groupRef = useRef<THREE.Group>(null);
+
+  // Track if tooltip itself is being hovered (to keep it visible)
+  const [isTooltipHovered, setIsTooltipHovered] = useState(false);
+
+  // Track if tooltip was opened via click (for mobile/tablet)
+  const [isClickedOpen, setIsClickedOpen] = useState(false);
 
   useFrame((state) => {
     if (groupRef.current && animate) {
@@ -467,14 +512,72 @@ const Island = ({
     }
   });
 
+  // Determine if tooltip should be visible
+  // Show if: (hovered OR tooltip itself is hovered OR clicked open) AND not dragging
+  const shouldShowTooltip =
+    (isHovered || isTooltipHovered || isClickedOpen) && !isDraggingItem;
+
+  // Handle island base click - toggle tooltip on mobile, collect mana on desktop
+  const handleIslandBaseClick = (e: any) => {
+    if (isDraggingItem) return;
+    e.stopPropagation();
+
+    // Toggle tooltip visibility (for mobile/tablet)
+    if (!isHovered && !isTooltipHovered) {
+      // Not hovering, so this is likely a touch/click on mobile
+      setIsClickedOpen((prev) => !prev);
+    }
+    // Don't auto-collect on click - let user use the collect button in tooltip
+  };
+
+  // Handle closing the tooltip (via close button)
+  const handleCloseTooltip = () => {
+    setIsClickedOpen(false);
+    setIsTooltipHovered(false);
+  };
+
   return (
     <group ref={groupRef} position={position}>
-      <IslandBase gridSize={gridSize} />
+      {/* Island base handles hover/click for showing tooltip and collecting mana */}
+      <IslandBase
+        gridSize={gridSize}
+        onPointerEnter={() => onIslandHover?.(true)}
+        onPointerLeave={() => {
+          onIslandHover?.(false);
+          // Small delay before hiding to allow moving to tooltip
+          // The isTooltipHovered state will keep it open if user moves to tooltip
+        }}
+        onClick={handleIslandBaseClick}
+      />
       <GrassBase gridSize={gridSize} />
+
+      {/* Mana Aura Effect */}
+      {showManaAura && (
+        <ManaAura
+          accumulatedMana={accumulatedMana}
+          manaRate={manaRate}
+          radius={(gridSize * 1.2) / 2}
+          visible={accumulatedMana > 0}
+        />
+      )}
+
+      {/* Island Tooltip on Hover or Click */}
+      <IslandTooltip
+        islandName={islandName}
+        islandLevel={islandLevel}
+        manaRate={manaRate}
+        accumulatedMana={accumulatedMana}
+        itemCount={itemCount}
+        visible={shouldShowTooltip}
+        onCollectClick={onIslandClick}
+        onTooltipHover={setIsTooltipHovered}
+        onClose={isClickedOpen ? handleCloseTooltip : undefined}
+      />
+
       <GridPlatform
         gridSize={gridSize}
-        islandLevel={1}
-        onCellClick={() => { }}
+        islandLevel={islandLevel}
+        onCellClick={() => {}}
         placedObjects={placedObjects}
         waterCells={[]}
         isDraggingItem={isDraggingItem}

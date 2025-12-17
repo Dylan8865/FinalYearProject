@@ -20,30 +20,30 @@ const StatusButton = ({
   return (
     <div
       className={`${
-        orientation == "right" && "scale-x-[-1]"
-      } relative flex justify-center items-center text-white pointer-events-auto`}
+        orientation == "right" && "md:scale-x-[-1]"
+      } pointer-events-auto relative flex select-none items-center justify-center text-white`}
     >
       <div
         className={`${
-          orientation == "right" && "scale-x-[-1]"
-        } ${bgColor} border-4 text-2xl border-black flex justify-center items-center w-10 h-10`}
+          orientation == "right" && "md:scale-x-[-1]"
+        } ${bgColor} flex h-8 w-8 items-center justify-center border-4 border-black text-2xl md:h-10 md:w-10`}
       >
         {icon}
       </div>
       <div
         className={`${
           orientation == "right"
-            ? "scale-x-[-1] justify-end border-l-4"
+            ? "border-r-4 md:scale-x-[-1] md:justify-end md:border-l-4 md:border-r-0"
             : "border-r-4"
-        } border-y-4 border-black bg-[#333333] w-48 h-8 px-3 flex items-center`}
+        } flex h-6 w-40 items-center border-y-4 border-black bg-[#333333] px-3 text-xs md:h-8 md:text-base lg:w-48`}
       >
         {data}
       </div>
       {btnIcon && (
         <button
           className={`${
-            orientation == "right" && "scale-x-[-1]"
-          } absolute right-0 border-black border-4 w-10 h-8 flex items-center justify-center bg-[#1a1a1a]`}
+            orientation == "right" && "md:scale-x-[-1]"
+          } absolute right-0 flex h-6 w-8 items-center justify-center border-4 border-black bg-[#1a1a1a] md:h-8 md:w-10`}
           onClick={onClick}
         >
           {btnIcon}
