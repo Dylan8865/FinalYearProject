@@ -9,7 +9,7 @@ interface PageControlsProps {
 
 const PageControls = ({ onClick, onExpand }: PageControlsProps) => {
   return (
-    <div className="flex h-full items-start justify-start gap-3 p-3 text-base md:text-xs">
+    <div className="flex items-start justify-start gap-3 p-3 text-base md:text-xs">
       <button
         className="flex items-center justify-center text-white"
         onClick={onClick}

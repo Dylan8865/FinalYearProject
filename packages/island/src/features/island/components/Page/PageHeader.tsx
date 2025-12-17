@@ -8,7 +8,7 @@ interface PageHeaderProps {
 
 const PageHeader = ({ islandItem }: PageHeaderProps) => {
   return (
-    <div className="absolute top-10 w-full space-y-4 text-white md:top-9">
+    <div className="w-full space-y-4 border-b text-white">
       {islandItem?.cover_image ? (
         <div className="relative h-[200px] w-full">
           <Image

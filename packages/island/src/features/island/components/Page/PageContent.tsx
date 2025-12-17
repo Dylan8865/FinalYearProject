@@ -28,7 +28,7 @@ const PageContent = ({
   onAddBlock,
 }: PageContentProps) => {
   return (
-    <div className="w-full">
+    <div className="w-full border">
       <PageHeader islandItem={islandItem} />
       <PageBody
         itemData={itemData}

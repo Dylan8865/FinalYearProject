@@ -1,11 +1,11 @@
 "use client";
 
 import PageControls from "./PageControls";
-import { useEffect, useMemo, useCallback } from "react";
+import PageHeader from "./PageHeader";
+import { useEffect, useMemo } from "react";
 import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
 import { useItemData } from "../../hooks/useItemData";
-import { BlockType, BlockProperties } from "@/types/types";
-import PageContent from "./PageContent";
+import { BlockEditorContainer } from "../block-system";
 
 interface SidebarPageProps {
   isOpen?: boolean;
@@ -42,102 +42,17 @@ const SidebarPage = ({
     console.log("itemData", itemData);
   }, [itemData]);
 
-  // Handle block updates
-  const handleUpdateBlock = useCallback(
-    async (id: string, content: any, properties?: BlockProperties) => {
-      try {
-        const response = await fetch("/api/item-data", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id,
-            content,
-            properties,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to update block");
-        }
-
-        // Optimistically update the UI
-        refetch();
-      } catch (error) {
-        console.error("Error updating block:", error);
-      }
-    },
-    [refetch]
-  );
-
-  // Handle block deletion
-  const handleDeleteBlock = useCallback(
-    async (id: string) => {
-      try {
-        const response = await fetch(`/api/item-data?id=${id}`, {
-          method: "DELETE",
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to delete block");
-        }
-
-        // Optimistically update the UI
-        refetch();
-      } catch (error) {
-        console.error("Error deleting block:", error);
-      }
-    },
-    [refetch]
-  );
-
-  // Handle adding new blocks
-  const handleAddBlock = useCallback(
-    async (afterId: string, type: BlockType) => {
-      if (!islandItem?.id) return;
-
-      try {
-        // Find the order_index of the block after which we're inserting
-        const afterBlock = itemData?.find((block) => block.id === afterId);
-        const newOrderIndex = afterBlock
-          ? (afterBlock.order_index || 0) + 1
-          : itemData?.length || 0;
-
-        const response = await fetch("/api/item-data", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            island_item_id: islandItem.id,
-            type,
-            content: "",
-            properties: {},
-            order_index: newOrderIndex,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to add block");
-        }
-
-        // Optimistically update the UI
-        refetch();
-      } catch (error) {
-        console.error("Error adding block:", error);
-      }
-    },
-    [islandItem, itemData, refetch]
-  );
-
   if (loading) {
     return (
       <div
         className="absolute right-0 top-0 z-50 flex h-full w-4/5 items-center justify-center bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
-        <div className="text-gray-400">Loading...</div>
+        {/* Loading skeleton */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-600 border-t-blue-500" />
+          <div className="text-sm text-gray-500">Loading blocks...</div>
+        </div>
       </div>
     );
   }
@@ -145,10 +60,31 @@ const SidebarPage = ({
   if (error) {
     return (
       <div
-        className="absolute right-0 top-0 z-50 flex h-full w-4/5 items-center justify-center bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
+        className="absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col items-center justify-center bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
-        <div className="text-red-400">Error: {error}</div>
+        <div className="flex flex-col items-center gap-3">
+          <svg
+            className="h-8 w-8 text-red-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+          <div className="text-red-400">Error: {error}</div>
+          <button
+            onClick={refetch}
+            className="mt-2 rounded-md bg-gray-800 px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700"
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }
@@ -159,13 +95,18 @@ const SidebarPage = ({
       style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
     >
       <PageControls onClick={onClick} onExpand={onExpand} />
-      <PageContent
-        islandItem={islandItem}
-        itemData={itemData}
-        onUpdateBlock={handleUpdateBlock}
-        onDeleteBlock={handleDeleteBlock}
-        onAddBlock={handleAddBlock}
-      />
+
+      {/* Page Header */}
+      <PageHeader islandItem={islandItem} />
+
+      {/* Block Editor */}
+      {islandItem && (
+        <BlockEditorContainer
+          islandItemId={islandItem.id}
+          initialBlocks={itemData || []}
+          onRefetch={refetch}
+        />
+      )}
     </div>
   );
 };
