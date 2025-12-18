@@ -32,6 +32,7 @@ export async function signInWithOAuth(
   }
 
   if (data.url) {
+    console.log("Supabase OAuth URL:", data.url);
     redirect(data.url);
   }
 
