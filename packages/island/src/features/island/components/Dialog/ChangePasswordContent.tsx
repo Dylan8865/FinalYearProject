@@ -67,13 +67,12 @@ const ChangePasswordContent = ({
   };
 
   return (
-    <div className="flex w-full items-center justify-center p-4">
+    <div className="flex h-full w-full items-center justify-center p-4">
       <form className="flex w-[300px] flex-col gap-6" onSubmit={handleSubmit}>
         <div className="text-center">
-          <h2 className="text-lg font-bold text-white">Change Password</h2>
-          <p className="text-xs text-gray-400">
-            Enter your new password below.
-          </p>
+          <h2 className="text-lg font-bold text-white">
+            Enter your new password below
+          </h2>
         </div>
 
         <div className="space-y-4">
