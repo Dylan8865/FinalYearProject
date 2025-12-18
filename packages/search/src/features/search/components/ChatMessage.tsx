@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import React from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Message, SearchSource } from "./SearchPage";
 import { useTheme } from "../context/ThemeContext";
 
@@ -280,21 +283,118 @@ export default function ChatMessage({ message, onRelatedTopicClick, onFeedback, 
             : `${assistantBg} ${assistantText}`
         }`}
       >
-        <div className="text-base leading-relaxed">
-          {message.content.split("\n").map((line, i) => (
-            <p key={i} className="mb-2.5 last:mb-0">
-              {line.split(/(\*\*.*?\*\*)|(_.*?_)/).map((part, j) => {
-                if (!part) return null;
-                if (part.startsWith("**") && part.endsWith("**")) {
-                  return <strong key={j} className="font-semibold">{part.slice(2, -2)}</strong>;
+        <div className={`prose ${isDark ? 'prose-invert' : ''} max-w-none text-base leading-relaxed`}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              // Headings - larger font
+              h1: ({ children }) => <h1 className="text-3xl font-bold mb-4 mt-6">{children}</h1>,
+              h2: ({ children }) => <h2 className="text-2xl font-bold mb-3 mt-5">{children}</h2>,
+              h3: ({ children }) => <h3 className="text-xl font-bold mb-2 mt-4">{children}</h3>,
+              
+              // Paragraphs - handle bold with colon
+              p: ({ children }) => {
+                // Check if paragraph contains bold text with colon
+                const childArray = React.Children.toArray(children);
+                const hasFormattedLabel = childArray.some((child: any) => {
+                  if (child?.type === 'strong') {
+                    const text = typeof child.props?.children === 'string' ? child.props.children : '';
+                    return text.includes(':');
+                  }
+                  return false;
+                });
+
+                if (hasFormattedLabel) {
+                  return (
+                    <div className="mb-3 last:mb-0">
+                      {React.Children.map(children, (child: any, index: number) => {
+                        if (child?.type === 'strong') {
+                          const text = typeof child.props?.children === 'string' ? child.props.children : child.props?.children;
+                          if (typeof text === 'string' && text.includes(':')) {
+                            return <div key={index} className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{text}</div>;
+                          }
+                          return <strong key={index} className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{child.props?.children}</strong>;
+                        }
+                        if (typeof child === 'string' && child.trim()) {
+                          return <div key={index}>{child}</div>;
+                        }
+                        return child;
+                      })}
+                    </div>
+                  );
                 }
-                if (part.startsWith("_") && part.endsWith("_")) {
-                  return <em key={j} className="text-sm opacity-75">{part.slice(1, -1)}</em>;
+                
+                return <p className="mb-3 last:mb-0">{children}</p>;
+              },
+              
+              // Lists - with bullets but compact (no blank lines)
+              ul: ({ children }) => <ul className="list-disc ml-6 mb-3">{children}</ul>,
+              ol: ({ children }) => <ol className="list-decimal ml-6 mb-3">{children}</ol>,
+              li: ({ children }) => {
+                // Check if list item starts with bold text containing colon (these are subtitles, not regular list items)
+                const childArray = React.Children.toArray(children);
+                const firstChild = childArray[0];
+                
+                if (firstChild && typeof firstChild === 'object' && 'type' in firstChild && firstChild.type === 'strong') {
+                  const strongChild = firstChild as any;
+                  const text = typeof strongChild.props?.children === 'string' ? strongChild.props.children : '';
+                  if (text.includes(':')) {
+                    // This is a subtitle/label, render without bullet
+                    return (
+                      <div className="mb-2 -ml-6">
+                        <div className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {text}
+                        </div>
+                        <div className="ml-0">
+                          {childArray.slice(1)}
+                        </div>
+                      </div>
+                    );
+                  }
                 }
-                return part;
-              })}
-            </p>
-          ))}
+                
+                // Regular list item with bullet
+                return <li className="mb-0">{children}</li>;
+              },
+              
+              // Code blocks
+              code: ({ inline, children, ...props }: any) => 
+                inline ? (
+                  <code className={`rounded px-1.5 py-0.5 text-sm font-mono ${isDark ? 'bg-gray-700 text-teal-400' : 'bg-gray-100 text-teal-600'}`} {...props}>
+                    {children}
+                  </code>
+                ) : (
+                  <code className={`block rounded-lg p-4 my-3 text-sm font-mono overflow-x-auto ${isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`} {...props}>
+                    {children}
+                  </code>
+                ),
+              
+              // Blockquotes
+              blockquote: ({ children }) => (
+                <blockquote className={`border-l-4 pl-4 italic my-3 ${isDark ? 'border-teal-500 text-gray-400' : 'border-teal-600 text-gray-600'}`}>
+                  {children}
+                </blockquote>
+              ),
+              
+              // Links
+              a: ({ children, href }) => (
+                <a href={href} target="_blank" rel="noopener noreferrer" className="text-teal-500 hover:text-teal-400 underline">
+                  {children}
+                </a>
+              ),
+              
+              // Strong/Bold - more visible
+              strong: ({ children }) => <strong className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{children}</strong>,
+              
+              // Emphasis/Italic
+              em: ({ children }) => <em className="italic">{children}</em>,
+              
+              // Horizontal rule
+              hr: () => <hr className={`my-4 ${isDark ? 'border-gray-700' : 'border-gray-300'}`} />,
+            }}
+          >
+            {message.content}
+          </ReactMarkdown>
         </div>
 
         {/* Sources Section */}
