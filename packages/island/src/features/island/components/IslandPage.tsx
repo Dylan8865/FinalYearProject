@@ -28,6 +28,7 @@ import {
 import AddIslandContent from "./Dialog/AddIslandContent";
 import EditIslandContent from "./Dialog/EditIslandContent";
 import IslandIcon from "@/icons/IslandIcon";
+import ChangeUsernameContent from "./Dialog/ChangeUsernameContent";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -59,6 +60,15 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const [profile, setProfile] = useState(initialProfile);
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error, refetch, upgradeIsland } = useIslands();
+
+  // Sync profile from server updates (e.g. username change)
+  useEffect(() => {
+    setProfile((prev) => ({
+      ...prev,
+      name: initialProfile.name,
+      email: initialProfile.email,
+    }));
+  }, [initialProfile.name, initialProfile.email]);
 
   // Sync no_of_islands with the actual islands list
   useEffect(() => {
@@ -100,6 +110,13 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     genre: string;
     theme: string;
   } | null>(null);
+
+  const handleOptimisticProfileUpdate = (newName: string) => {
+    setProfile((prev) => ({
+      ...prev,
+      name: newName,
+    }));
+  };
 
   const handleEditIsland = (
     id: string,
@@ -1058,7 +1075,11 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <ProfileContent userName={profile.name} userEmail={profile.email} />
+          <ProfileContent
+            userName={profile.name}
+            userEmail={profile.email}
+            setIsDialogOpen={setIsDialogOpen}
+          />
         </Dialog>
       )}
 
@@ -1136,6 +1157,21 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
             setIsDialogOpen={setIsDialogOpen}
             island={editingIsland}
             onIslandUpdated={refetch}
+          />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "change-username" && (
+        <Dialog
+          title="Change Username"
+          icon={<UserIcon />}
+          iconStyle="bg-[#6d3f33] text-white text-2xl"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <ChangeUsernameContent
+            setIsDialogOpen={setIsDialogOpen}
+            onOptimisticUpdate={handleOptimisticProfileUpdate}
           />
         </Dialog>
       )}

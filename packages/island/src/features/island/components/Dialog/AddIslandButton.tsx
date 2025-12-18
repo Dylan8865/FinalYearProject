@@ -5,6 +5,7 @@ interface AddIslandButtonProps {
   children: React.ReactNode;
   color: string;
   width?: string;
+  disabled?: boolean;
 }
 
 const AddIslandButton = ({
@@ -12,6 +13,7 @@ const AddIslandButton = ({
   children,
   color,
   width,
+  disabled,
 }: AddIslandButtonProps) => {
   const [hovered, setHovered] = useState(false);
 
@@ -33,15 +35,22 @@ const AddIslandButton = ({
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       style={{
         width,
-        backgroundColor: hovered ? darkenColor(color, 30) : color,
+        backgroundColor: disabled
+          ? "#4a4a4a" // disabled gray
+          : hovered
+            ? darkenColor(color, 30)
+            : color,
         borderRadius: "0.375rem",
         padding: "0.75rem 0.75rem",
-        color: "white",
+        color: disabled ? "#888" : "white",
         fontSize: "0.875rem",
         fontWeight: 500,
         transition: "background-color 0.2s",
+        opacity: disabled ? 0.7 : 1,
+        cursor: disabled ? "not-allowed" : "pointer",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

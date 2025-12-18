@@ -12,15 +12,24 @@ import DeleteAccountContent from "./DeleteAccountContent";
 interface ProfileContentProps {
   userName: string;
   userEmail: string;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const ProfileContent = ({ userName, userEmail }: ProfileContentProps) => {
+const ProfileContent = ({
+  userName,
+  userEmail,
+  setIsDialogOpen,
+}: ProfileContentProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   return (
     <>
       <div className="space-y-4">
-        <EditButton fieldName="Username:" fieldValue={userName} />
+        <EditButton
+          fieldName="Username:"
+          fieldValue={userName}
+          onClick={() => setIsDialogOpen("change-username")}
+        />
         <EditButton fieldName="Email:" fieldValue={userEmail} />
         <SettingButton
           fieldName="Settings"
