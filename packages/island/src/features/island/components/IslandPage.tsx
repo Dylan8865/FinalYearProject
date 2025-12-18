@@ -57,7 +57,18 @@ interface PlacedObject {
 const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const [profile, setProfile] = useState(initialProfile);
   const [isDialogOpen, setIsDialogOpen] = useState("");
-  const { islands, loading, error } = useIslands();
+  const { islands, loading, error, refetch } = useIslands();
+
+  // Sync no_of_islands with the actual islands list
+  useEffect(() => {
+    if (!loading && islands) {
+      setProfile((prev) => ({
+        ...prev,
+        no_of_islands: islands.length,
+      }));
+    }
+  }, [islands, loading]);
+
   const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(
     null
   ); // Currently selected placed item ID
@@ -1032,7 +1043,10 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           size="medium"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <AddIslandContent setIsDialogOpen={setIsDialogOpen} />
+          <AddIslandContent
+            setIsDialogOpen={setIsDialogOpen}
+            onIslandAdded={refetch}
+          />
         </Dialog>
       )}
 

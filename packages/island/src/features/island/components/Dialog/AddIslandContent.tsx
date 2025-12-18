@@ -9,11 +9,15 @@ export interface Option {
   value: string;
 }
 
-interface setIsDialogOpenProps {
+interface AddIslandContentProps {
   setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
+  onIslandAdded: () => void;
 }
 
-const AddIslandContent = ({ setIsDialogOpen }: setIsDialogOpenProps) => {
+const AddIslandContent = ({
+  setIsDialogOpen,
+  onIslandAdded,
+}: AddIslandContentProps) => {
   const [value, setValue] = useState<{
     name: string;
     genre: string;
@@ -63,6 +67,7 @@ const AddIslandContent = ({ setIsDialogOpen }: setIsDialogOpenProps) => {
     createIsland(value.name, value.genre, value.theme!.value).then(
       (response) => {
         if (response) {
+          onIslandAdded();
           setIsDialogOpen("");
         }
       }
