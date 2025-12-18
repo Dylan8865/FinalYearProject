@@ -2,6 +2,7 @@ import ExpandIcon from "@/icons/ExpandIcon";
 import LoadingIcon from "@/icons/LoadingIcon";
 import RightArrowIcon from "@/icons/RightArrowIcon";
 import React, { Dispatch, SetStateAction } from "react";
+import { TiArrowMinimise } from "react-icons/ti";
 
 interface PageControlsProps {
   onClick?: () => void;
@@ -19,7 +20,7 @@ const PageControls = ({
   saveError,
 }: PageControlsProps) => {
   return (
-    <div className="flex items-center justify-between">
+    <div className="sticky top-0 z-50 flex w-full items-center justify-between bg-[#191919]">
       <div className="flex items-start justify-start gap-3 p-3 text-base md:text-xs">
         <button
           className="flex items-center justify-center text-white"
@@ -34,7 +35,11 @@ const PageControls = ({
           className="flex items-center justify-center text-white"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <ExpandIcon />
+          {isExpanded ? (
+            <TiArrowMinimise className="text-base" />
+          ) : (
+            <ExpandIcon />
+          )}
         </button>
       </div>
       <div className="flex items-center justify-center overflow-hidden pr-2 text-white/50">

@@ -42,19 +42,19 @@ const SidebarPage = ({
   if (loading) {
     return (
       <div
-        className="absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col items-center justify-center bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
+        className="absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
-        <div className="absolute left-0 top-0">
-          <PageControls
-            onClick={onClick}
-            isExpanded={isExpanded}
-            setIsExpanded={setIsExpanded}
-            isSaving={isSaving}
-            saveError={saveError}
-          />
+        <PageControls
+          onClick={onClick}
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+          isSaving={isSaving}
+          saveError={saveError}
+        />
+        <div className="flex flex-1 items-center justify-center">
+          <LoadingScreen width="w-full" height="h-full" />
         </div>
-        <LoadingScreen width="w-full" height="h-full" />
       </div>
     );
   }
@@ -62,20 +62,18 @@ const SidebarPage = ({
   if (error) {
     return (
       <div
-        className="absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col items-center justify-center bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
+        className="absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
-        <div className="absolute left-0 top-0">
-          <PageControls
-            onClick={onClick}
-            isExpanded={isExpanded}
-            setIsExpanded={setIsExpanded}
-            isSaving={isSaving}
-            saveError={saveError}
-          />
-        </div>
+        <PageControls
+          onClick={onClick}
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+          isSaving={isSaving}
+          saveError={saveError}
+        />
 
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
           <svg
             className="h-8 w-8 text-red-400"
             fill="none"
@@ -103,7 +101,7 @@ const SidebarPage = ({
 
   return (
     <div
-      className={`${isExpanded ? "w-full" : "w-4/5 md:w-[34dvw]"} absolute right-0 top-0 z-50 h-full overflow-y-auto bg-[#191919] pb-96 transition-all duration-300 ease-in-out`}
+      className={`${isExpanded ? "w-full" : "w-4/5 md:w-[34dvw]"} absolute right-0 top-0 z-50 flex h-full flex-col items-center justify-center overflow-y-auto bg-[#191919] pb-96 transition-all duration-300 ease-in-out`}
       style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
     >
       <PageControls
@@ -123,7 +121,7 @@ const SidebarPage = ({
       />
 
       {/* Block Editor */}
-      <div className="px-4">
+      <div className="max-w-4/5 px-4 md:max-w-[34dvw]">
         {islandItem && (
           <BlockEditorContainer
             islandItemId={islandItem.id}
