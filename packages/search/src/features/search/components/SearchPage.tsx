@@ -128,12 +128,21 @@ export default function SearchPage({ user }: SearchPageProps) {
 
     // Call search API
     try {
+      const searchPayload = { 
+        query: content,
+        chatId: conversation.id,
+        userId: user?.id,
+        promptOrder: conversation.messages.length
+      };
+      
+      console.log("Sending search request:", searchPayload);
+      
       const response = await fetch("/api/search", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query: content }),
+        body: JSON.stringify(searchPayload),
       });
 
       const data = await response.json();

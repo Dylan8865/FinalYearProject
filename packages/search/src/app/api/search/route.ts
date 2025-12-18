@@ -5,6 +5,19 @@ import { generateAnswer, generateRelatedTopicsAI } from "@/lib/gemini";
 // Types for search results
 interface KnowledgeEntry {
   id: string;
+  content: {
+    url?: string;
+    title?: string;
+    description?: string;
+  };
+  type: string;
+  valid: boolean;
+  created_at: string;
+  order_index: number;
+}
+
+interface CachedAnswer {
+  id: string;
   input_text: string;
   result_text: string;
   count: number;
@@ -170,7 +183,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { query } = body;
+    const { query, chatId, userId, promptOrder } = body;
 
     if (!query || typeof query !== "string") {
       return NextResponse.json<SearchResponse>({
@@ -183,7 +196,7 @@ export async function POST(request: Request) {
       });
     }
 
-    return handleSearch(query.trim());
+    return handleSearch(query.trim(), chatId, userId, promptOrder);
   } catch {
     return NextResponse.json<SearchResponse>({
       success: false,
@@ -196,17 +209,52 @@ export async function POST(request: Request) {
   }
 }
 
-async function handleSearch(query: string): Promise<NextResponse<SearchResponse>> {
+async function handleSearch(
+  query: string,
+  chatId?: string,
+  userId?: string,
+  promptOrder?: number
+): Promise<NextResponse<SearchResponse>> {
   try {
     const supabase = await createClient();
 
-    // Search in analysis-cache table
-    // Using text search on input_text and result_text columns
-    const { data: entries, error } = await supabase
+    // Step 1: Check analysis-cache for similar queries (cached answers)
+    const { data: cachedAnswers } = await supabase
       .from("analysis-cache")
       .select("id, input_text, result_text, count, created_at")
-      .or(`input_text.ilike.%${query}%,result_text.ilike.%${query}%`)
-      .limit(20);
+      .ilike("input_text", `%${query}%`)
+      .order("count", { ascending: false })
+      .limit(1);
+
+    // If we have a cached answer with high confidence, use it
+    if (cachedAnswers && cachedAnswers.length > 0 && cachedAnswers[0].count > 2) {
+      const cached = cachedAnswers[0];
+      
+      // Increment count (Fibonacci-based update logic can be added here)
+      await supabase
+        .from("analysis-cache")
+        .update({ count: cached.count + 1 })
+        .eq("id", cached.id);
+
+      const relatedTopics = await generateRelatedTopicsAI(query);
+      
+      return NextResponse.json<SearchResponse>({
+        success: true,
+        query,
+        answer: cached.result_text,
+        results: [],
+        hasResults: true,
+        relatedTopics: relatedTopics.length > 0 ? relatedTopics : undefined,
+      });
+    }
+
+    // Step 2: Search in item-data table for actual knowledge
+    const { data: entries, error } = await supabase
+      .from("item-data")
+      .select("id, content, created_at, type, valid, order_index")
+      .eq("valid", true)
+      .order("order_index", { ascending: true })
+      .limit(100);
 
     if (error) {
       console.error("Supabase search error:", error);
@@ -245,22 +293,47 @@ async function handleSearch(query: string): Promise<NextResponse<SearchResponse>
     // Process and rank results
     const searchResults: SearchResult[] = entries
       .map((entry: KnowledgeEntry) => {
-        const content = entry.result_text || entry.input_text || "";
-        const relevanceScore = calculateRelevanceScore(query, content);
-        const validityScore = 70; // Default validity score (can be enhanced with actual data)
+        const title = entry.content?.title || "";
+        const description = entry.content?.description || "";
+        const url = entry.content?.url || "";
+        const searchText = `${title} ${description} ${url}`.toLowerCase();
+        
+        // Calculate relevance score with keyword matching
+        const queryLower = query.toLowerCase();
+        const queryWords = queryLower.split(/[\s:,.-]+/).filter(w => w.length > 2);
+        
+        // Check if query matches (full phrase or significant word overlap)
+        let matchScore = 0;
+        if (searchText.includes(queryLower)) {
+          matchScore = 100; // Exact phrase match
+        } else {
+          // Count matching words
+          const matchingWords = queryWords.filter(word => searchText.includes(word));
+          matchScore = queryWords.length > 0 ? (matchingWords.length / queryWords.length) * 100 : 0;
+        }
+        
+        // Skip entries with very low relevance
+        if (matchScore < 20) {
+          return null;
+        }
+        
+        const content = description || title;
+        const relevanceScore = matchScore;
+        const validityScore = entry.valid ? 85 : 50;
         const recencyScore = calculateRecencyScore(entry.created_at);
         const totalScore = calculateTotalScore(relevanceScore, validityScore, recencyScore);
 
         return {
           id: entry.id,
           content,
-          source: entry.input_text?.slice(0, 50) || "Knowledge Entry",
+          source: title || "Knowledge Entry",
           validityScore,
           recencyScore,
           relevanceScore,
           totalScore,
         };
       })
+      .filter((result): result is SearchResult => result !== null)
       // Filter by minimum validity (60%)
       .filter((result: SearchResult) => result.validityScore >= 60)
       // Sort by total score descending
@@ -296,6 +369,73 @@ async function handleSearch(query: string): Promise<NextResponse<SearchResponse>
     // Generate related topics using AI
     const aiTopics = await generateRelatedTopicsAI(query, context);
     const relatedTopics = aiTopics.length > 0 ? aiTopics : generateRelatedTopics(query, searchResults);
+
+    // Cache the answer in analysis-cache for future similar queries
+    try {
+      await supabase
+        .from("analysis-cache")
+        .insert({
+          input_text: query,
+          result_text: answer,
+          count: 1,
+        });
+    } catch {
+      // Ignore cache errors, don't fail the request
+    }
+
+    // Save search history to database if chatId is provided
+    console.log("Attempting to save search history:", { chatId, userId, hasAnswer: !!answer });
+    
+    if (chatId && userId) {
+      try {
+        // First, ensure chat exists
+        const { data: existingChat, error: chatFetchError } = await supabase
+          .from("chat")
+          .select("id")
+          .eq("id", chatId)
+          .single();
+
+        if (chatFetchError && chatFetchError.code !== 'PGRST116') {
+          console.error("Error checking existing chat:", chatFetchError);
+        }
+
+        if (!existingChat) {
+          // Create chat if it doesn't exist
+          console.log("Creating new chat:", chatId);
+          const { error: chatInsertError } = await supabase.from("chat").insert({
+            id: chatId,
+            title: query.slice(0, 50),
+            profile_id: userId,
+          });
+          
+          if (chatInsertError) {
+            console.error("Error creating chat:", chatInsertError);
+          } else {
+            console.log("Chat created successfully");
+          }
+        }
+
+        // Save search history
+        console.log("Inserting search history:", { chatId, promptOrder });
+        const { data: historyData, error: historyError } = await supabase.from("search-history").insert({
+          prompt_text: query,
+          result_text: answer,
+          prompt_order: promptOrder || 0,
+          chat_id: chatId,
+        });
+        
+        if (historyError) {
+          console.error("Error saving search history:", historyError);
+        } else {
+          console.log("Search history saved successfully:", historyData);
+        }
+      } catch (error) {
+        console.error("Failed to save search history (caught exception):", error);
+        // Don't fail the request if history saving fails
+      }
+    } else {
+      console.log("Skipping search history save - missing chatId or userId:", { chatId, userId });
+    }
 
     return NextResponse.json<SearchResponse>({
       success: true,
