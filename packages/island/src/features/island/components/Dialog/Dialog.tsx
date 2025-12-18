@@ -24,7 +24,7 @@ const Dialog = ({
   setIsDialogOpen,
 }: DialogProps) => {
   return (
-    <div className="relative flex h-[100dvh] w-[100dvw] items-center justify-center bg-black bg-opacity-25">
+    <div className="relative z-20 flex h-[100dvh] w-[100dvw] items-center justify-center bg-black bg-opacity-25">
       <div
         className={`${
           size == "medium"

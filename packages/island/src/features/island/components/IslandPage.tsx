@@ -36,6 +36,7 @@ import {
   ToastProvider,
   useToast,
 } from "@/features/island/contexts/ToastContext";
+import LoadingScreen from "./Shared/LoadingScreen";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -1020,11 +1021,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   );
 
   if (loading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
-        <div className="text-2xl text-white">Loading islands...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (error) {

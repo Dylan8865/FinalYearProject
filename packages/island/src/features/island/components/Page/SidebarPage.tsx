@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
 import { useItemData } from "../../hooks/useItemData";
 import { BlockEditorContainer } from "../NotionBlock";
+import LoadingScreen from "../Shared/LoadingScreen";
 
 interface SidebarPageProps {
   isOpen?: boolean;
@@ -41,14 +42,19 @@ const SidebarPage = ({
   if (loading) {
     return (
       <div
-        className="absolute right-0 top-0 z-50 flex h-full w-4/5 items-center justify-center bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
+        className="absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col items-center justify-center bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
-        {/* Loading skeleton */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-600 border-t-blue-500" />
-          <div className="text-sm text-gray-500">Loading blocks...</div>
+        <div className="absolute left-0 top-0">
+          <PageControls
+            onClick={onClick}
+            isExpanded={isExpanded}
+            setIsExpanded={setIsExpanded}
+            isSaving={isSaving}
+            saveError={saveError}
+          />
         </div>
+        <LoadingScreen width="w-full" height="h-full" />
       </div>
     );
   }
@@ -59,6 +65,16 @@ const SidebarPage = ({
         className="absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col items-center justify-center bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
+        <div className="absolute left-0 top-0">
+          <PageControls
+            onClick={onClick}
+            isExpanded={isExpanded}
+            setIsExpanded={setIsExpanded}
+            isSaving={isSaving}
+            saveError={saveError}
+          />
+        </div>
+
         <div className="flex flex-col items-center gap-3">
           <svg
             className="h-8 w-8 text-red-400"

@@ -15,6 +15,7 @@ import Button from "./Button";
 import Image from "next/image";
 import SlotTooltip from "./SlotTooltip";
 import { useToast } from "@/features/island/contexts/ToastContext";
+import LoadingScreen from "../Shared/LoadingScreen";
 
 interface StoreRowProps {
   items: ItemType[];
@@ -127,7 +128,7 @@ const StoreContent = ({ profile, onUpdateMana }: StoreContentProps) => {
   };
 
   if (itemsLoading) {
-    return <div className="text-center">Loading items...</div>;
+    return <LoadingScreen width="w-full" height="h-full" bgColor="inherit" />;
   }
 
   return (
