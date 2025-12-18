@@ -5,12 +5,14 @@ interface LoadingScreenProps {
   width?: string;
   height?: string;
   bgColor?: string;
+  content?: string;
 }
 
 const LoadingScreen = ({
   width = "w-screen",
   height = "h-screen",
   bgColor = "bg-[#1e1e20]",
+  content = "Loading...",
 }: LoadingScreenProps) => {
   return (
     <div
@@ -18,7 +20,7 @@ const LoadingScreen = ({
     >
       <div className="flex flex-col items-center space-y-4">
         <IslandIcon className="h-12 w-12 animate-pulse text-white" />
-        <p className="text-sm text-white">Loading...</p>
+        <p className="text-sm text-white">{content}</p>
       </div>
     </div>
   );
