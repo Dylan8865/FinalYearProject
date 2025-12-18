@@ -60,6 +60,35 @@ export function useIslands() {
     }
   };
 
+  const updateIsland = async (
+    id: string,
+    updates: {
+      name?: string;
+      genre?: string;
+      theme?: string;
+    }
+  ) => {
+    try {
+      const response = await fetch("/api/islands", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, ...updates }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update island");
+      }
+
+      await fetchIslands();
+      return true;
+    } catch (err) {
+      console.error("Failed to update island:", err);
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchIslands();
   }, []);
@@ -70,5 +99,6 @@ export function useIslands() {
     error,
     refetch: fetchIslands,
     createIsland,
+    updateIsland,
   };
 }

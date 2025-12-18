@@ -15,6 +15,7 @@ interface IslandTooltipProps {
   itemCount: number;
   visible: boolean;
   onCollectClick?: () => void;
+  onEditClick?: () => void;
   onTooltipHover?: (isHovered: boolean) => void;
   onClose?: () => void;
 }
@@ -43,6 +44,7 @@ const IslandTooltip = ({
   itemCount,
   visible,
   onCollectClick,
+  onEditClick,
   onTooltipHover,
   onClose,
 }: IslandTooltipProps) => {
@@ -290,6 +292,43 @@ const IslandTooltip = ({
           >
             <ManaIcon />
             <span>Collect</span>
+          </button>
+        )}
+
+        {/* Edit Button */}
+        {onEditClick && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditClick();
+            }}
+            style={{
+              width: "100%",
+              marginTop: "8px",
+              padding: "6px 16px",
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              borderRadius: "8px",
+              color: "#e5e7eb",
+              fontWeight: "500",
+              fontSize: "12px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+              e.currentTarget.style.color = "white";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+              e.currentTarget.style.color = "#e5e7eb";
+            }}
+          >
+            <span>Edit Island</span>
           </button>
         )}
       </div>

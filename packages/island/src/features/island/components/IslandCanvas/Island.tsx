@@ -477,6 +477,7 @@ interface IslandProps {
   itemCount?: number;
   onIslandHover?: (isHovered: boolean) => void;
   onIslandClick?: () => void;
+  onEditIsland?: () => void;
   isHovered?: boolean;
   showManaAura?: boolean;
 }
@@ -498,6 +499,7 @@ const Island = ({
   itemCount = 0,
   onIslandHover,
   onIslandClick,
+  onEditIsland,
   isHovered = false,
   showManaAura = true,
 }: IslandProps) => {
@@ -576,6 +578,7 @@ const Island = ({
         itemCount={itemCount}
         visible={shouldShowTooltip}
         onCollectClick={onIslandClick}
+        onEditClick={onEditIsland}
         onTooltipHover={setIsTooltipHovered}
         onClose={isClickedOpen ? handleCloseTooltip : undefined}
       />

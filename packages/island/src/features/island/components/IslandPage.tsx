@@ -26,6 +26,7 @@ import {
   MAX_ACCUMULATION_TIME,
 } from "@/utils/manaCalculations";
 import AddIslandContent from "./Dialog/AddIslandContent";
+import EditIslandContent from "./Dialog/EditIslandContent";
 import IslandIcon from "@/icons/IslandIcon";
 
 interface IslandPageProps {
@@ -90,11 +91,30 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   } | null>(null);
 
   // Removal confirmation dialog
+  // Removal confirmation dialog
   const [sidebarContentPage, setSidebarContentPage] = useState<{
     open: boolean;
     itemId: string;
     itemName: string;
   } | null>(null);
+
+  // Editing island state
+  const [editingIsland, setEditingIsland] = useState<{
+    id: string;
+    name: string;
+    genre: string;
+    theme: string;
+  } | null>(null);
+
+  const handleEditIsland = (
+    id: string,
+    name: string,
+    genre: string,
+    theme: string
+  ) => {
+    setEditingIsland({ id, name, genre, theme });
+    setIsDialogOpen("edit-island");
+  };
 
   // Mana system state - simplified
   interface IslandManaState {
@@ -941,6 +961,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           onOffscreenIslandsChange={handleOffscreenIslandsChange}
           islandManaStates={islandManaStates}
           onIslandClick={handleIslandClick}
+          onEditIsland={handleEditIsland}
         />
       </div>
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-10">
@@ -1046,6 +1067,22 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           <AddIslandContent
             setIsDialogOpen={setIsDialogOpen}
             onIslandAdded={refetch}
+          />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "edit-island" && editingIsland && (
+        <Dialog
+          title="Edit Island"
+          icon={<IslandIcon />}
+          iconStyle="bg-[#5a706b] text-white text-2xl"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <EditIslandContent
+            setIsDialogOpen={setIsDialogOpen}
+            island={editingIsland}
+            onIslandUpdated={refetch}
           />
         </Dialog>
       )}
