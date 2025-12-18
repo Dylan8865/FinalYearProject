@@ -6,32 +6,46 @@ const AddIslandInput = ({
   placeholder,
   color,
   width,
+  value,
+  handleChange,
+  name,
+  error,
 }: {
   id: string;
   type: string;
   placeholder: string;
   color: string;
   width: string;
+  value: string;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  name: string;
+  error: string;
 }) => {
-  const [value, setValue] = useState<string>("");
   const [focused, setFocused] = useState(false);
 
   return (
     <div className="relative" style={{ width }}>
       <input
         id={id}
+        name={name}
         type={type}
         placeholder={placeholder}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => handleChange(e)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         className="peer w-full rounded-md border border-gray-300 bg-transparent px-3 py-3 text-sm outline-none transition-all"
         style={{
           borderColor: focused ? color : "#d1d5db", // gray-300
-          boxShadow: focused ? `0 0 0 2px ${color}70` : undefined, // ring effect
+          boxShadow: error
+            ? `0 0 0 2px #ef4444`
+            : focused
+              ? `0 0 0 2px ${color}70`
+              : undefined, // ring effect
         }}
       />
+
+      {error && <p className="pt-1 text-xs text-red-500">{error}</p>}
 
       <label
         htmlFor={id}

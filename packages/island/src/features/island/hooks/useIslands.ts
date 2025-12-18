@@ -35,8 +35,9 @@ export function useIslands() {
 
   const createIsland = async (
     name: string,
-    level: number = 1,
-    theme: string = "grass"
+    genre: string,
+    theme: string,
+    level: number = 1
   ) => {
     try {
       const response = await fetch("/api/islands", {
@@ -44,7 +45,7 @@ export function useIslands() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, level, theme }),
+        body: JSON.stringify({ name, genre, theme, level }),
       });
 
       if (!response.ok) {

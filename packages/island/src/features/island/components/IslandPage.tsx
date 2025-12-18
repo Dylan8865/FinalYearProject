@@ -1032,7 +1032,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           size="medium"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <AddIslandContent />
+          <AddIslandContent setIsDialogOpen={setIsDialogOpen} />
         </Dialog>
       )}
 

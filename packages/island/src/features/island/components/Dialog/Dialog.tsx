@@ -28,9 +28,9 @@ const Dialog = ({
       <div
         className={`${
           size == "medium"
-            ? "h-[400px] w-[400px] md:h-[500px] md:w-[500px]" // medium
+            ? "h-[500px] w-[400px] md:h-[500px] md:w-[500px]" // medium
             : size == "large"
-              ? "h-[400px] w-[400px] md:h-[500px] md:w-[1000px]" // large
+              ? "h-[500px] w-[400px] md:h-[500px] md:w-[1000px]" // large
               : "h-[300px] w-[300px]" // small
         } relative ${borderColor} select-none border-4`}
       >

@@ -1,10 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import DownArrowIcon from "@/icons/DownArrowIcon";
-
-interface Option {
-  label: string;
-  value: string;
-}
+import { Option } from "./AddIslandContent";
 
 interface AddIslandSelectProps {
   id: string;
@@ -12,6 +8,9 @@ interface AddIslandSelectProps {
   placeholder: string;
   color: string;
   width: string;
+  value: Option | null;
+  handleChange: (option: Option) => void;
+  error: string;
 }
 
 const AddIslandSelect = ({
@@ -20,9 +19,11 @@ const AddIslandSelect = ({
   placeholder,
   color,
   width,
+  value,
+  handleChange,
+  error,
 }: AddIslandSelectProps) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState<Option | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on click outside
@@ -51,7 +52,11 @@ const AddIslandSelect = ({
         className="flex w-full items-center justify-between rounded-md border bg-transparent px-3 py-3 text-sm transition-all"
         style={{
           borderColor: open ? color : "#d1d5db",
-          boxShadow: open ? `0 0 0 2px ${color}33` : undefined,
+          boxShadow: error
+            ? `0 0 0 2px #ef4444`
+            : open
+              ? `0 0 0 2px ${color}33`
+              : undefined,
         }}
       >
         <span className={value ? "" : "text-gray-400"}>
@@ -61,6 +66,8 @@ const AddIslandSelect = ({
           className={`transition-transform ${open ? "rotate-180" : "rotate-0"}`}
         />
       </div>
+
+      {error && <p className="pt-1 text-xs text-red-500">{error}</p>}
 
       {/* Floating label */}
       <label
@@ -79,7 +86,7 @@ const AddIslandSelect = ({
             <div
               key={opt.value}
               onClick={() => {
-                setValue(opt);
+                handleChange(opt);
                 setOpen(false);
               }}
               className={`px-3 py-2 hover:bg-gray-700 ${
