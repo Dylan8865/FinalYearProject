@@ -36,6 +36,7 @@ const ProfileContent = ({
           icon={<LockIcon />}
           title="Change Password"
           color="gray"
+          onClick={() => setIsDialogOpen("change-password")}
         />
         <SettingButton
           icon={<LoginIcon />}

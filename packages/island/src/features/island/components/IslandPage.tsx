@@ -29,6 +29,8 @@ import AddIslandContent from "./Dialog/AddIslandContent";
 import EditIslandContent from "./Dialog/EditIslandContent";
 import IslandIcon from "@/icons/IslandIcon";
 import ChangeUsernameContent from "./Dialog/ChangeUsernameContent";
+import LockIcon from "@/icons/LockIcon";
+import ChangePasswordContent from "./Dialog/ChangePasswordContent";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -1173,6 +1175,18 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
             setIsDialogOpen={setIsDialogOpen}
             onOptimisticUpdate={handleOptimisticProfileUpdate}
           />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "change-password" && (
+        <Dialog
+          title="Change Password"
+          icon={<LockIcon />}
+          iconStyle="bg-[#6d3f33] text-white text-2xl"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <ChangePasswordContent setIsDialogOpen={setIsDialogOpen} />
         </Dialog>
       )}
 
