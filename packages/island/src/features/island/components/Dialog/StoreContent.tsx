@@ -14,6 +14,7 @@ import ExclaimationIcon from "@/icons/ExclaimationIcon";
 import Button from "./Button";
 import Image from "next/image";
 import SlotTooltip from "./SlotTooltip";
+import { useToast } from "@/features/island/contexts/ToastContext";
 
 interface StoreRowProps {
   items: ItemType[];
@@ -100,12 +101,13 @@ const StoreContent = ({ profile, onUpdateMana }: StoreContentProps) => {
   const { purchaseItem } = useIslandItemsContext();
   const [selectedItem, setSelectedItem] = useState<ItemType | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const { showToast } = useToast();
 
   const handlePurchase = async (itemId: string) => {
     setIsPurchasing(true);
 
     if (selectedItem && selectedItem.mana_required > profile.mana) {
-      alert("Not enough mana");
+      showToast("Not enough mana", "error");
       setIsPurchasing(false);
       return;
     }
@@ -113,12 +115,12 @@ const StoreContent = ({ profile, onUpdateMana }: StoreContentProps) => {
     const manaCost = selectedItem?.mana_required || 0;
     const result = await purchaseItem(itemId, profile.id, manaCost);
     if (result.success) {
-      alert("Item purchased successfully!");
+      showToast("Item purchased successfully!", "success");
       if (result.newMana !== undefined) {
         onUpdateMana(result.newMana);
       }
     } else {
-      alert("Failed to purchase item");
+      showToast("Failed to purchase item", "error");
     }
     setIsPurchasing(false);
     setSelectedItem(null);

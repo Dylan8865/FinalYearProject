@@ -32,6 +32,10 @@ import ChangeUsernameContent from "./Dialog/ChangeUsernameContent";
 import LockIcon from "@/icons/LockIcon";
 import ChangePasswordContent from "./Dialog/ChangePasswordContent";
 import AchievementContent from "./Dialog/AchievementContent";
+import {
+  ToastProvider,
+  useToast,
+} from "@/features/island/contexts/ToastContext";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -63,6 +67,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const [profile, setProfile] = useState(initialProfile);
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error, refetch, upgradeIsland } = useIslands();
+  const { showToast } = useToast();
 
   // Calculate total level dynamically from islands
   const totalLevel = islands
@@ -170,10 +175,13 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         mana: prev.mana - cost,
       }));
 
-      alert(`Island upgraded to Level ${newLevel}!`);
+      showToast(`Island upgraded to Level ${newLevel}!`, "success");
     } else {
       console.error("Island upgrade failed");
-      alert("Failed to upgrade island. Please check your connection.");
+      showToast(
+        "Failed to upgrade island. Please check your connection.",
+        "error"
+      );
     }
   };
 
@@ -281,8 +289,9 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       // Check if there are blocks above - if so, prevent dialog
       if (islandId && hasBlockAbove(islandId, cellId, y)) {
         console.log("Cannot interact with block that has items above it");
-        alert(
-          "Cannot interact with this block - remove blocks above it first!"
+        showToast(
+          "Cannot interact with this block - remove blocks above it first!",
+          "error"
         );
         return;
       }
@@ -321,8 +330,9 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         }
       } else if (clickedType !== "terrain") {
         console.log("Cannot place on non-terrain blocks");
-        alert(
-          "Items can only be placed on terrain blocks, not on decorative or functional items."
+        showToast(
+          "Items can only be placed on terrain blocks, not on decorative or functional items.",
+          "error"
         );
       }
     }
@@ -345,7 +355,10 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     // Only allow selecting if this is the top block (no blocks above it)
     if (islandId && hasBlockAbove(islandId, cellId, y)) {
       console.log("Cannot select block with items above it");
-      alert("Cannot move this block - remove blocks above it first!");
+      showToast(
+        "Cannot move this block - remove blocks above it first!",
+        "error"
+      );
       return;
     }
 
@@ -645,8 +658,9 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       console.log(
         "Invalid position - blocks can only be placed on ground or on terrain blocks!"
       );
-      alert(
-        "Invalid placement: Blocks can only be placed on the ground or on top of terrain blocks."
+      showToast(
+        "Invalid placement: Blocks can only be placed on the ground or on top of terrain blocks.",
+        "error"
       );
       setSelectedPlacedItem(null);
       return;
@@ -1215,7 +1229,9 @@ const IslandPage = ({ profile }: IslandPageProps) => {
   // Don't pass islandId here - we need ALL items, not just placed ones
   return (
     <IslandItemsProvider profileId={profile.id}>
-      <IslandPageContent profile={profile} />
+      <ToastProvider>
+        <IslandPageContent profile={profile} />
+      </ToastProvider>
     </IslandItemsProvider>
   );
 };
