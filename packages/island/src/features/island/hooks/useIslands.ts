@@ -66,6 +66,7 @@ export function useIslands() {
       name?: string;
       genre?: string;
       theme?: string;
+      level?: number;
     }
   ) => {
     try {
@@ -85,6 +86,31 @@ export function useIslands() {
       return true;
     } catch (err) {
       console.error("Failed to update island:", err);
+      return false;
+    }
+  };
+
+  const upgradeIsland = async (id: string, level: number, cost: number) => {
+    try {
+      const response = await fetch("/api/islands/upgrade", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, level, cost }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || "Failed to upgrade island");
+      }
+
+      await fetchIslands();
+      return true;
+    } catch (err) {
+      console.error("Failed to upgrade island:", err);
       return false;
     }
   };
@@ -118,6 +144,7 @@ export function useIslands() {
     refetch: fetchIslands,
     createIsland,
     updateIsland,
+    upgradeIsland,
     deleteIsland,
   };
 }

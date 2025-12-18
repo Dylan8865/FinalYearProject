@@ -58,7 +58,7 @@ interface PlacedObject {
 const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const [profile, setProfile] = useState(initialProfile);
   const [isDialogOpen, setIsDialogOpen] = useState("");
-  const { islands, loading, error, refetch } = useIslands();
+  const { islands, loading, error, refetch, upgradeIsland } = useIslands();
 
   // Sync no_of_islands with the actual islands list
   useEffect(() => {
@@ -91,7 +91,6 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   } | null>(null);
 
   // Removal confirmation dialog
-  // Removal confirmation dialog
   const [sidebarContentPage, setSidebarContentPage] = useState<{
     open: boolean;
     itemId: string;
@@ -114,6 +113,46 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   ) => {
     setEditingIsland({ id, name, genre, theme });
     setIsDialogOpen("edit-island");
+  };
+
+  const handleUpgradeIsland = async (id: string) => {
+    // 1. Find current island level to determine cost
+    const island = islands.find((i) => i.id === id);
+    if (!island) return;
+
+    const currentLevel = island.level || 1;
+    if (currentLevel >= 3) return;
+
+    // Costs must match UI: Lv 1->2 = 10M, Lv 2->3 = 100M
+    const upgrades = {
+      1: 1,
+      2: 100_000_000,
+    };
+    const cost = upgrades[currentLevel as 1 | 2];
+    const newLevel = currentLevel + 1;
+
+    console.log(
+      `Attempting upgrade for island ${id} to level ${newLevel} for ${cost} mana`
+    );
+
+    // 2. Call upgrade function
+    const success = await upgradeIsland(id, newLevel, cost);
+
+    if (success) {
+      console.log("Island upgrade successful!");
+      // 3. Update local profile mana immediately (optimistic update could be done, but refetch handles it mostly)
+      // Since refetch is called inside useIslands, islands will update.
+      // We also need to update profile mana in UI.
+      setProfile((prev) => ({
+        ...prev,
+        mana: prev.mana - cost,
+      }));
+
+      alert(`Island upgraded to Level ${newLevel}!`);
+    } else {
+      console.error("Island upgrade failed");
+      alert("Failed to upgrade island. Please check your connection.");
+    }
   };
 
   // Mana system state - simplified
@@ -962,8 +1001,12 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           islandManaStates={islandManaStates}
           onIslandClick={handleIslandClick}
           onEditIsland={handleEditIsland}
+          onUpgradeIsland={handleUpgradeIsland}
+          userMana={profile.mana}
         />
       </div>
+
+      {/* 2D UI Overlays */}
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-10">
         <div className="pointer-events-auto">
           <StatusBar setIsDialogOpen={setIsDialogOpen} profile={profile} />

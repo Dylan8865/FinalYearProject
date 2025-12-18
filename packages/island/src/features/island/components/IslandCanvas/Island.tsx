@@ -478,6 +478,8 @@ interface IslandProps {
   onIslandHover?: (isHovered: boolean) => void;
   onIslandClick?: () => void;
   onEditIsland?: () => void;
+  onUpgradeIsland?: () => void;
+  userMana?: number;
   isHovered?: boolean;
   showManaAura?: boolean;
 }
@@ -500,6 +502,8 @@ const Island = ({
   onIslandHover,
   onIslandClick,
   onEditIsland,
+  onUpgradeIsland,
+  userMana = 0,
   isHovered = false,
   showManaAura = true,
 }: IslandProps) => {
@@ -579,6 +583,8 @@ const Island = ({
         visible={shouldShowTooltip}
         onCollectClick={onIslandClick}
         onEditClick={onEditIsland}
+        onUpgradeClick={onUpgradeIsland}
+        userMana={userMana}
         onTooltipHover={setIsTooltipHovered}
         onClose={isClickedOpen ? handleCloseTooltip : undefined}
       />
