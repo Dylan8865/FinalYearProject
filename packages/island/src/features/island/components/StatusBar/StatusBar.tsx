@@ -1,11 +1,11 @@
 import React from "react";
 import StatusButton from "./StatusButton";
-import UserIcon from "@/features/shared/icons/UserIcon";
-import TrophyIcon from "@/features/shared/icons/TrophyIcon";
-import MenuIcon from "@/features/shared/icons/MenuIcon";
-import ManaIcon from "@/features/shared/icons/ManaIcon";
-import IslandIcon from "@/features/shared/icons/IslandIcon";
-import PlusIcon from "@/features/shared/icons/PlusIcon";
+import UserIcon from "@/icons/UserIcon";
+import TrophyIcon from "@/icons/TrophyIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import ManaIcon from "@/icons/ManaIcon";
+import IslandIcon from "@/icons/IslandIcon";
+import PlusIcon from "@/icons/PlusIcon";
 import { ProfileType } from "@/types/types";
 
 interface StatusBarProps {
@@ -15,7 +15,7 @@ interface StatusBarProps {
 
 const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
   return (
-    <div className="pointer-events-none flex justify-between p-4">
+    <div className="pointer-events-none flex flex-col items-start gap-2 p-4 md:flex-row md:justify-between md:gap-0">
       <div className="space-y-2">
         <StatusButton
           icon={<UserIcon />}
@@ -47,11 +47,11 @@ const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
           bgColor="bg-[#5a706b]"
           orientation="right"
           btnIcon={<PlusIcon />}
-          onClick={() => {}}
+          onClick={() => setIsDialogOpen("island")}
         />
       </div>
     </div>
   );
 };
 
-export default StatusBar;
+export default React.memo(StatusBar);

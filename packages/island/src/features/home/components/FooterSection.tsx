@@ -1,5 +1,4 @@
-
-import IslandIcon from "@/features/shared/icons/IslandIcon";
+import IslandIcon from "@/icons/IslandIcon";
 import React from "react";
 
 const FooterSection = () => {

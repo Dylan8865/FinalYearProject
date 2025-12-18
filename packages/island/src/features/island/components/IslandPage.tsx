@@ -1,29 +1,42 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import StatusBar from "@/features/island/components/StatusBar/StatusBar";
 import InventoryBar from "@/features/island/components/InventoryBar/InventoryBar";
 import IslandCanvas from "@/features/island/components/IslandCanvas/IslandCanvas";
 import Dialog from "@/features/island/components/Dialog/Dialog";
-import UserIcon from "@/features/shared/icons/UserIcon";
-import TrophyIcon from "@/features/shared/icons/TrophyIcon";
+import UserIcon from "@/icons/UserIcon";
+import TrophyIcon from "@/icons/TrophyIcon";
 import { useIslands } from "@/features/island/hooks/useIslands";
-import MenuIcon from "@/features/shared/icons/MenuIcon";
-import StoreIcon from "@/features/shared/icons/StoreIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import StoreIcon from "@/icons/StoreIcon";
 import StoreContent from "@/features/island/components/Dialog/StoreContent";
 import InventoryContent from "@/features/island/components/Dialog/InventoryContent";
 import { ProfileType } from "@/types/types";
 import ProfileContent from "./Dialog/ProfileContent";
 import { IslandItemsProvider } from "@/features/island/contexts/IslandItemsContext";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
-import { useGLTF } from "@react-three/drei";
-import * as THREE from "three";
-import TerrainBlock from "./Block/TerrainBlocks";
-import PlacedBlock from "./Block/PlacedBlock";
+import PlacedBlock from "./IslandBlock/PlacedBlock";
 import SidebarPage from "./Page/SidebarPage";
 import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
 import { type OffscreenIsland } from "./IslandCanvas/IslandIndicators";
-import RefreshIcon from "@/features/shared/icons/RefreshIcon";
+import RefreshIcon from "@/icons/RefreshIcon";
+import {
+  calculateIslandTotalManaRate,
+  MAX_ACCUMULATION_TIME,
+} from "@/utils/manaCalculations";
+import AddIslandContent from "./Dialog/AddIslandContent";
+import EditIslandContent from "./Dialog/EditIslandContent";
+import IslandIcon from "@/icons/IslandIcon";
+import ChangeUsernameContent from "./Dialog/ChangeUsernameContent";
+import LockIcon from "@/icons/LockIcon";
+import ChangePasswordContent from "./Dialog/ChangePasswordContent";
+import AchievementContent from "./Dialog/AchievementContent";
+import {
+  ToastProvider,
+  useToast,
+} from "@/features/island/contexts/ToastContext";
+import LoadingScreen from "./Shared/LoadingScreen";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -50,37 +63,46 @@ interface PlacedObject {
   node: React.ReactNode;
   islandId?: string;
 }
-/**
- * IslandPageContent Component
- *
- * Main component that manages the island view and item placement functionality.
- *
- * Features:
- * - Displays the 3D island with placed items
- * - Handles drag-and-drop from inventory to island
- * - Manages dialogs for profile, store, and inventory
- * - Tracks placed objects and their positions
- *
- * State Management:
- * - draggedItem: Currently dragged item from inventory
- * - placedObjects: Map of placed items by position key (cellId-y)
- * - isDialogOpen: Currently open dialog name
- */
-const IslandPageContent = ({ profile }: IslandPageProps) => {
+
+const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
+  const [profile, setProfile] = useState(initialProfile);
   const [isDialogOpen, setIsDialogOpen] = useState("");
-  const { islands, loading, error } = useIslands();
+  const { islands, loading, error, refetch, upgradeIsland } = useIslands();
+  const { showToast } = useToast();
+
+  // Calculate total level dynamically from islands
+  const totalLevel = islands
+    ? islands.reduce((acc, island) => acc + (island.level || 0), 0)
+    : initialProfile.level;
+
+  // Sync profile from server updates (e.g. username change) and dynamic level
+  useEffect(() => {
+    setProfile((prev) => ({
+      ...prev,
+      name: initialProfile.name,
+      email: initialProfile.email,
+    }));
+  }, [initialProfile.name, initialProfile.email]);
+
+  // Sync no_of_islands and level with the actual islands list
+  useEffect(() => {
+    if (!loading && islands) {
+      setProfile((prev) => ({
+        ...prev,
+        no_of_islands: islands.length,
+        level: totalLevel, // Update level based on islands calculation
+      }));
+    }
+  }, [islands, loading, totalLevel]);
+
   const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(
     null
   ); // Currently selected placed item ID
   const [placedObjects, setPlacedObjects] = useState<
     Record<string, PlacedObject>
   >({});
-  const {
-    islandItems,
-    placeItemOnIsland,
-    removeItemFromIsland,
-    moveToInventory,
-  } = useIslandItemsContext();
+  const { islandItems, placeItemOnIsland, moveToInventory } =
+    useIslandItemsContext();
 
   // Functional item dialog
   const [functionalItemDialog, setFunctionalItemDialog] = useState<{
@@ -96,16 +118,98 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     itemName: string;
   } | null>(null);
 
+  // Editing island state
+  const [editingIsland, setEditingIsland] = useState<{
+    id: string;
+    name: string;
+    genre: string;
+    theme: string;
+  } | null>(null);
+
+  const handleOptimisticProfileUpdate = (newName: string) => {
+    setProfile((prev) => ({
+      ...prev,
+      name: newName,
+    }));
+  };
+
+  const handleEditIsland = (
+    id: string,
+    name: string,
+    genre: string,
+    theme: string
+  ) => {
+    setEditingIsland({ id, name, genre, theme });
+    setIsDialogOpen("edit-island");
+  };
+
+  const handleUpgradeIsland = async (id: string) => {
+    // 1. Find current island level to determine cost
+    const island = islands.find((i) => i.id === id);
+    if (!island) return;
+
+    const currentLevel = island.level || 1;
+    if (currentLevel >= 3) return;
+
+    // Costs must match UI: Lv 1->2 = 10M, Lv 2->3 = 100M
+    const upgrades = {
+      1: 10_000_000,
+      2: 100_000_000,
+    };
+    const cost = upgrades[currentLevel as 1 | 2];
+    const newLevel = currentLevel + 1;
+
+    console.log(
+      `Attempting upgrade for island ${id} to level ${newLevel} for ${cost} mana`
+    );
+
+    // 2. Call upgrade function
+    const success = await upgradeIsland(id, newLevel, cost);
+
+    if (success) {
+      console.log("Island upgrade successful!");
+      // 3. Update local profile mana immediately (optimistic update could be done, but refetch handles it mostly)
+      // Since refetch is called inside useIslands, islands will update.
+      // We also need to update profile mana in UI.
+      setProfile((prev) => ({
+        ...prev,
+        mana: prev.mana - cost,
+      }));
+
+      showToast(`Island upgraded to Level ${newLevel}!`, "success");
+    } else {
+      console.error("Island upgrade failed");
+      showToast(
+        "Failed to upgrade island. Please check your connection.",
+        "error"
+      );
+    }
+  };
+
+  // Mana system state - simplified
+  interface IslandManaState {
+    manaRate: number;
+    accumulatedMana: number;
+  }
+  const [islandManaStates, setIslandManaStates] = useState<
+    Record<string, IslandManaState>
+  >({});
+  const [manaPopup, setManaPopup] = useState<{
+    visible: boolean;
+    amount: number;
+  }>({ visible: false, amount: 0 });
+
   /**
    * Get the next available Y position (vertical stacking) for a given grid cell
    * Items can be stacked vertically on the same grid cell
    *
+   * @param islandId - ID of the island
    * @param cellId - Grid cell identifier (format: "row-col")
    * @returns Next available Y position for stacking
    */
-  const getNextYPosition = (cellId: string): number => {
+  const getNextYPosition = (islandId: string, cellId: string): number => {
     let y = 0;
-    while (placedObjects[`${cellId}-${y}`]) {
+    while (placedObjects[`${islandId}-${cellId}-${y}`]) {
       y++;
     }
     return y;
@@ -115,15 +219,20 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
    * Check if a position is valid for placing an item
    * Items must be placed on ground level (y=0) or on top of a terrain block
    *
+   * @param islandId - ID of the island
    * @param cellId - Grid cell identifier
    * @param y - Y position to check
    * @returns true if position is valid
    */
-  const isValidPosition = (cellId: string, y: number): boolean => {
+  const isValidPosition = (
+    islandId: string,
+    cellId: string,
+    y: number
+  ): boolean => {
     if (y === 0) return true; // Ground level is always valid
 
     // Check if there's an item below
-    const itemBelow = placedObjects[`${cellId}-${y - 1}`];
+    const itemBelow = placedObjects[`${islandId}-${cellId}-${y - 1}`];
     if (!itemBelow) return false; // No support below
 
     // Only allow placement on top of terrain blocks
@@ -134,12 +243,17 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
    * Check if there's a block stacked above this position
    * Used to prevent moving/removing blocks that support other blocks
    *
+   * @param islandId - ID of the island
    * @param cellId - Grid cell identifier
    * @param y - Y position to check
    * @returns true if there's a block above
    */
-  const hasBlockAbove = (cellId: string, y: number): boolean => {
-    return !!placedObjects[`${cellId}-${y + 1}`];
+  const hasBlockAbove = (
+    islandId: string,
+    cellId: string,
+    y: number
+  ): boolean => {
+    return !!placedObjects[`${islandId}-${cellId}-${y + 1}`];
   };
 
   /**
@@ -174,10 +288,11 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     // Single-click: Open dialog (if no item selected for placement)
     if (!selectedPlacedItem || selectedPlacedItem === clickedItemId) {
       // Check if there are blocks above - if so, prevent dialog
-      if (hasBlockAbove(cellId, y)) {
+      if (islandId && hasBlockAbove(islandId, cellId, y)) {
         console.log("Cannot interact with block that has items above it");
-        alert(
-          "Cannot interact with this block - remove blocks above it first!"
+        showToast(
+          "Cannot interact with this block - remove blocks above it first!",
+          "error"
         );
         return;
       }
@@ -216,8 +331,9 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         }
       } else if (clickedType !== "terrain") {
         console.log("Cannot place on non-terrain blocks");
-        alert(
-          "Items can only be placed on terrain blocks, not on decorative or functional items."
+        showToast(
+          "Items can only be placed on terrain blocks, not on decorative or functional items.",
+          "error"
         );
       }
     }
@@ -231,15 +347,19 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     type: string,
     name: string,
     cellId: string,
-    y: number
+    y: number,
+    islandId?: string
   ) => {
     console.log("Placed block double-clicked:", { itemId, type, name });
 
     // Double-click: Select for moving
     // Only allow selecting if this is the top block (no blocks above it)
-    if (hasBlockAbove(cellId, y)) {
+    if (islandId && hasBlockAbove(islandId, cellId, y)) {
       console.log("Cannot select block with items above it");
-      alert("Cannot move this block - remove blocks above it first!");
+      showToast(
+        "Cannot move this block - remove blocks above it first!",
+        "error"
+      );
       return;
     }
 
@@ -255,6 +375,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     itemId: string,
     itemName: string,
     itemType: "terrain" | "decorative" | "functional",
+    itemManaRate: number,
     modelUrl: string | undefined,
     cellId: string,
     y: number,
@@ -267,6 +388,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         itemId={itemId}
         itemName={itemName}
         itemType={itemType}
+        itemManaRate={itemManaRate}
         modelUrl={modelUrl}
         isSelected={selectedPlacedItem === itemId}
         onClick={(clickedItemId, clickedType, clickedName) =>
@@ -287,7 +409,8 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
             clickedType,
             clickedName,
             cellId,
-            y
+            y,
+            islandId
           )
         }
       />
@@ -357,7 +480,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
 
       // Create cell ID (format: "row-col" where row=gridZ, col=gridX)
       const cellId = `${islandItem.grid_z}-${islandItem.grid_x}`;
-      const positionKey = `${cellId}-${y}`;
+      const positionKey = `${island.id}-${cellId}-${y}`;
 
       const { modelUrl, itemType, itemName } = getItemMetadata(islandItem);
 
@@ -366,6 +489,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         islandItem.id, // Use UNIQUE island_item.id
         itemName,
         itemType,
+        islandItem.item?.mana_rate ?? 0,
         modelUrl,
         cellId,
         y,
@@ -529,14 +653,15 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       });
     }
 
-    const y = getNextYPosition(cellId);
+    const y = getNextYPosition(islandId, cellId);
 
-    if (!isValidPosition(cellId, y)) {
+    if (!isValidPosition(islandId, cellId, y)) {
       console.log(
         "Invalid position - blocks can only be placed on ground or on terrain blocks!"
       );
-      alert(
-        "Invalid placement: Blocks can only be placed on the ground or on top of terrain blocks."
+      showToast(
+        "Invalid placement: Blocks can only be placed on the ground or on top of terrain blocks.",
+        "error"
       );
       setSelectedPlacedItem(null);
       return;
@@ -560,14 +685,15 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       hasModelUrl: !!modelUrl,
     });
 
-    const positionKey = `${cellId}-${y}`;
+    const positionKey = `${islandId}-${cellId}-${y}`;
 
     // Check if this item is already placed somewhere (moving it)
     const oldPositionKey =
       selectedItem.grid_x !== null &&
       selectedItem.grid_y !== null &&
-      selectedItem.grid_z !== null
-        ? `${selectedItem.grid_z}-${selectedItem.grid_x}-${selectedItem.grid_y}`
+      selectedItem.grid_z !== null &&
+      selectedItem.island_id
+        ? `${selectedItem.island_id}-${selectedItem.grid_z}-${selectedItem.grid_x}-${selectedItem.grid_y}`
         : null;
 
     console.log("Old position key:", oldPositionKey);
@@ -578,6 +704,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       selectedItem.id,
       itemName,
       itemType,
+      selectedItem.item?.mana_rate ?? 0,
       modelUrl,
       cellId,
       y,
@@ -649,7 +776,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     setSelectedPlacedItem(null);
   };
 
-  // reset camera button
+  // reset camera button initialisation
   const controlsRef = useRef<CameraControlsHandle>(null);
   const [isCameraAtDefault, setIsCameraAtDefault] = useState(true);
   const [offscreenIslands, setOffscreenIslands] = useState<OffscreenIsland[]>(
@@ -678,12 +805,227 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
     console.log("Placed objects updated:", placedObjects);
   }, [placedObjects]);
 
-  if (loading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
-        <div className="text-2xl text-white">Loading islands...</div>
-      </div>
-    );
+  // Sync accumulated mana to database
+  const syncManaToDb = useCallback(
+    async (islandId: string, accumulatedMana: number) => {
+      try {
+        await fetch("/api/islands", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: islandId,
+            accumulated_mana: Math.floor(accumulatedMana),
+            last_updated_at: new Date().toISOString(),
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to sync mana to DB:", err);
+      }
+    },
+    []
+  );
+
+  // Initialize mana states for islands
+  useEffect(() => {
+    if (!islands || islands.length === 0) return;
+
+    setIslandManaStates((prev) => {
+      const newStates = { ...prev };
+      const now = new Date();
+
+      islands.forEach((island) => {
+        if (!newStates[island.id]) {
+          // Get placed items for this island
+          const islandPlacedItems = islandItems.filter(
+            (item) => item.island_id === island.id && item.grid_x !== null
+          );
+          const manaRate = calculateIslandTotalManaRate(
+            { id: island.id, level: island.level || 1 },
+            islandPlacedItems
+          );
+
+          // Get stored accumulated mana from DB
+          const storedMana = Number(island.accumulated_mana || 0);
+
+          // Calculate offline bonus since last update
+          let offlineBonus = 0;
+          if (island.last_updated_at) {
+            const lastUpdate = new Date(island.last_updated_at);
+            const elapsedSeconds = Math.max(
+              0,
+              (now.getTime() - lastUpdate.getTime()) / 1000
+            );
+            const cappedSeconds = Math.min(
+              elapsedSeconds,
+              MAX_ACCUMULATION_TIME
+            );
+            offlineBonus = Math.floor(manaRate * cappedSeconds);
+          }
+
+          const totalMana = storedMana + offlineBonus;
+
+          console.log(`Island ${island.id} mana init:`, {
+            storedMana,
+            offlineBonus,
+            totalMana,
+            manaRate,
+          });
+
+          newStates[island.id] = {
+            manaRate,
+            accumulatedMana: totalMana,
+          };
+        }
+      });
+      return newStates;
+    });
+  }, [islands, islandItems]);
+
+  // Update mana rates when placed items change
+  useEffect(() => {
+    if (!islands || islands.length === 0) return;
+
+    setIslandManaStates((prev) => {
+      const newStates = { ...prev };
+      islands.forEach((island) => {
+        const islandPlacedItems = islandItems.filter(
+          (item) => item.island_id === island.id && item.grid_x !== null
+        );
+        const manaRate = calculateIslandTotalManaRate(
+          { id: island.id, level: island.level || 1 },
+          islandPlacedItems
+        );
+        if (newStates[island.id]) {
+          newStates[island.id] = {
+            ...newStates[island.id],
+            manaRate,
+          };
+        }
+      });
+      return newStates;
+    });
+  }, [islandItems, islands]);
+
+  // Increment mana every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIslandManaStates((prev) => {
+        if (Object.keys(prev).length === 0) return prev;
+
+        const updated: Record<string, IslandManaState> = {};
+        Object.entries(prev).forEach(([islandId, state]) => {
+          updated[islandId] = {
+            ...state,
+            accumulatedMana: state.accumulatedMana + state.manaRate,
+          };
+        });
+        return updated;
+      });
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sync to database every minute (more frequent to prevent data loss)
+  useEffect(() => {
+    const syncInterval = setInterval(() => {
+      Object.entries(islandManaStates).forEach(([islandId, state]) => {
+        // Only sync if value has changed significantly or enough time passed
+        // For now, just sync if > 0 to be safe
+        if (state.accumulatedMana > 1000) {
+          syncManaToDb(islandId, state.accumulatedMana);
+        }
+      });
+    }, 60000);
+
+    return () => clearInterval(syncInterval);
+  }, [islandManaStates, syncManaToDb]);
+
+  // Sync on window unload/refresh
+  useEffect(() => {
+    const handleUnload = () => {
+      Object.entries(islandManaStates).forEach(([islandId, state]) => {
+        if (state.accumulatedMana > 0) {
+          // Use fetch with keepalive for reliable send on unload
+          fetch("/api/islands", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: islandId,
+              accumulated_mana: Math.floor(state.accumulatedMana),
+              last_updated_at: new Date().toISOString(),
+            }),
+            keepalive: true,
+          });
+        }
+      });
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, [islandManaStates]);
+
+  // Handle mana collection from island click
+  const handleIslandClick = useCallback(
+    async (islandId: string) => {
+      const state = islandManaStates[islandId];
+      if (!state || state.accumulatedMana < 1) {
+        console.log("No mana to collect");
+        return true;
+      }
+
+      const manaToCollect = Math.floor(state.accumulatedMana);
+
+      try {
+        const response = await fetch("/api/islands/collect-mana", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            island_id: islandId,
+            mana_to_collect: manaToCollect,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to collect mana");
+        }
+
+        const data = await response.json();
+
+        // Show collection popup
+        setManaPopup({ visible: true, amount: data.collected }); // TODO: change to tooltip
+
+        // Update profile mana
+        setProfile((prev) => ({ ...prev, mana: data.new_mana }));
+
+        // Reset island mana state after collection
+        setIslandManaStates((prev) => ({
+          ...prev,
+          [islandId]: {
+            ...prev[islandId],
+            accumulatedMana: 0,
+          },
+        }));
+
+        // Also sync the reset to DB
+        syncManaToDb(islandId, 0);
+
+        console.log(`Collected ${data.collected} mana from island ${islandId}`);
+        return true;
+      } catch (err) {
+        console.error("Failed to collect mana:", err);
+        return true;
+      }
+    },
+    [islandManaStates, syncManaToDb]
+  );
+
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  if (loading || isSigningOut) {
+    return <LoadingScreen />;
   }
 
   if (error) {
@@ -695,7 +1037,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+    <div className="relative h-[100dvh] w-screen max-w-[100dvw] overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
       <div className="absolute inset-0 z-0">
         <IslandCanvas
           islands={islands}
@@ -707,8 +1049,15 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           onCameraChanged={handleCameraChanged}
           offscreenIslands={offscreenIslands}
           onOffscreenIslandsChange={handleOffscreenIslandsChange}
+          islandManaStates={islandManaStates}
+          onIslandClick={handleIslandClick}
+          onEditIsland={handleEditIsland}
+          onUpgradeIsland={handleUpgradeIsland}
+          userMana={profile.mana}
         />
       </div>
+
+      {/* 2D UI Overlays */}
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-10">
         <div className="pointer-events-auto">
           <StatusBar setIsDialogOpen={setIsDialogOpen} profile={profile} />
@@ -736,7 +1085,7 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
       {!isCameraAtDefault && (
         <button
           onClick={resetCamera}
-          className="animate-fade-in pointer-events-auto absolute bottom-6 right-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180"
+          className="animate-fade-in pointer-events-auto absolute right-6 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180 md:bottom-6 md:left-6 md:right-auto md:top-auto"
         >
           <RefreshIcon />
         </button>
@@ -750,7 +1099,12 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <ProfileContent userName={profile.name} userEmail={profile.email} />
+          <ProfileContent
+            userName={profile.name}
+            userEmail={profile.email}
+            setIsDialogOpen={setIsDialogOpen}
+            setIsSigningOut={setIsSigningOut}
+          />
         </Dialog>
       )}
 
@@ -758,11 +1112,11 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
         <Dialog
           iconStyle="bg-[#68a5ad] text-white"
           icon={<TrophyIcon />}
-          title="Level"
+          title="Achievements"
           className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <div>Level information here</div>
+          <AchievementContent islands={islands} islandItems={islandItems} />
         </Dialog>
       )}
 
@@ -791,7 +1145,71 @@ const IslandPageContent = ({ profile }: IslandPageProps) => {
           size="large"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <StoreContent userId={profile.id} />
+          <StoreContent
+            profile={profile}
+            onUpdateMana={(newMana) =>
+              setProfile((prev) => ({ ...prev, mana: newMana }))
+            }
+          />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "island" && (
+        <Dialog
+          iconStyle="bg-[#5a706b] text-white text-2xl"
+          icon={<IslandIcon />}
+          title="Add Island"
+          className="flex items-center justify-center"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <AddIslandContent
+            setIsDialogOpen={setIsDialogOpen}
+            onIslandAdded={refetch}
+          />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "edit-island" && editingIsland && (
+        <Dialog
+          title="Edit Island"
+          icon={<IslandIcon />}
+          iconStyle="bg-[#5a706b] text-white text-2xl"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <EditIslandContent
+            setIsDialogOpen={setIsDialogOpen}
+            island={editingIsland}
+            onIslandUpdated={refetch}
+          />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "change-username" && (
+        <Dialog
+          title="Change Username"
+          icon={<UserIcon />}
+          iconStyle="bg-[#6d3f33] text-white text-2xl"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <ChangeUsernameContent
+            setIsDialogOpen={setIsDialogOpen}
+            onOptimisticUpdate={handleOptimisticProfileUpdate}
+          />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "change-password" && (
+        <Dialog
+          title="Change Password"
+          icon={<LockIcon />}
+          iconStyle="bg-[#6d3f33] text-white text-2xl"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <ChangePasswordContent setIsDialogOpen={setIsDialogOpen} />
         </Dialog>
       )}
 
@@ -813,7 +1231,9 @@ const IslandPage = ({ profile }: IslandPageProps) => {
   // Don't pass islandId here - we need ALL items, not just placed ones
   return (
     <IslandItemsProvider profileId={profile.id}>
-      <IslandPageContent profile={profile} />
+      <ToastProvider>
+        <IslandPageContent profile={profile} />
+      </ToastProvider>
     </IslandItemsProvider>
   );
 };

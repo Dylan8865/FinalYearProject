@@ -3,17 +3,25 @@ import React from "react";
 interface EditButtonProps {
   fieldName: string;
   fieldValue: string;
+  onClick?: () => void;
 }
 
-const EditButton = ({ fieldName, fieldValue }: EditButtonProps) => {
+const EditButton = ({ fieldName, fieldValue, onClick }: EditButtonProps) => {
   return (
-    <div className="flex gap-4 justify-between">
+    <div className="flex w-80 justify-between md:w-auto md:gap-4">
       <div className="flex items-center">{fieldName}</div>
-      <div className="border-4 flex w-80 h-10 justify-between">
-        <div className="flex items-center ps-4">{fieldValue}</div>
-        <button className="bg-[#e5e7eb] text-black font-semibold flex justify-center items-center w-10 ps-1">
-          Edit
-        </button>
+      <div className="flex h-8 w-60 justify-between border-4 md:h-10 md:w-80">
+        <div className="flex items-center ps-4 text-xs md:text-sm">
+          {fieldValue}
+        </div>
+        {onClick && (
+          <button
+            onClick={onClick}
+            className="flex w-10 items-center justify-center bg-[#e5e7eb] ps-1 text-xs font-semibold text-black md:text-sm"
+          >
+            Edit
+          </button>
+        )}
       </div>
     </div>
   );

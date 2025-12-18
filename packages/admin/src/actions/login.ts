@@ -46,7 +46,21 @@ export async function login(formData: FormData) {
     return { error: "Invalid email or password" };
   }
 
-  // Step 4: User is authenticated and is an admin
+  // Step 4: Update last login time
+  const now = new Date().toISOString().replace('T', ' ').replace('Z', '');
+  const { error: updateError } = await supabase
+    .from("profile")
+    .update({ last_login_time: now })
+    .eq("id", authData.user.id);
+
+  if (updateError) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Failed to update last login time:", updateError);
+    }
+    // Don't fail the login for this, just log it
+  }
+
+  // Step 5: User is authenticated and is an admin
   revalidatePath("/", "layout");
   return { error: null };
 }

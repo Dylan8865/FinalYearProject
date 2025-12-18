@@ -40,13 +40,13 @@ export default function DashboardCards({ stats }: DashboardCardsProps) {
           >
             <SubCard
               title="Functional Items"
-              description="Items capable of generating O2"
+              description="Items capable of generating mana"
               count={stats.shop.functional}
               onClick={() => router.push("/shop?filter=functional")}
             />
             <SubCard
               title="Decorative Items"
-              description="Items incapable of generating O2"
+              description="Items incapable of generating mana"
               count={stats.shop.decorative}
               onClick={() => router.push("/shop?filter=decorative")}
             />

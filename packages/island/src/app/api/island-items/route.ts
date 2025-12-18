@@ -124,7 +124,10 @@ export async function POST(request: Request) {
     }
 
     const targetPosition = getNextAvailablePosition(inventoryPosition);
-    console.log(`New item ${body.item_id} - next available position:`, targetPosition);
+    console.log(
+      `New item ${body.item_id} - next available position:`,
+      targetPosition
+    );
 
     const { data: islandItem, error } = await supabase
       .from("island-item")
@@ -185,11 +188,11 @@ export async function PUT(request: Request) {
       grid_z: body.grid_z,
       island_id: body.island_id,
     };
-    
+
     // Handle pos_x/pos_y - they should be null when placing on island
     if (body.pos_x !== undefined) updateData.pos_x = body.pos_x;
     else updateData.pos_x = null;
-    
+
     if (body.pos_y !== undefined) updateData.pos_y = body.pos_y;
     else updateData.pos_y = null;
 
@@ -295,7 +298,7 @@ export async function PATCH(request: Request) {
       pos_x,
       pos_y,
     };
-    
+
     // If grid coordinates are explicitly provided (even as null), include them
     if (island_id !== undefined) updateData.island_id = island_id;
     if (grid_x !== undefined) updateData.grid_x = grid_x;

@@ -6,12 +6,17 @@ import { login, oAuthLogin } from "@/actions/login";
 import WILogo from "@/features/login/icons/WILogo";
 import GoogleLogo from "@/features/login/icons/GoogleLogo";
 
-const LoginPage = () => {
+const LoginPage = ({ error: serverError }: { error?: string }) => {
   const searchParams = useSearchParams();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(serverError || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (serverError) {
+      setError(serverError);
+      return;
+    }
+
     const errorParam = searchParams.get("error");
     const typeParam = searchParams.get("type");
     
@@ -22,7 +27,7 @@ const LoginPage = () => {
     } else if (errorParam === "profile_not_found") {
       setError("Profile not found in database. Contact administrator.");
     }
-  }, [searchParams]);
+  }, [searchParams, serverError]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

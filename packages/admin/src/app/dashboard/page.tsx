@@ -1,47 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import DashboardHeader from "@/features/dashboard/DashboardHeader";
+import { requireAdmin } from "@/lib/auth/session";
+import DashboardHeader from "@/features/header/AdminHeader";
 import DashboardCards from "@/features/dashboard/DashboardCards";
 
 export default async function DashboardPage() {
+  // Single line replaces all auth checks + adds 30min timeout
+  const { user, profile } = await requireAdmin();
+  
   const supabase = await createClient();
 
-  // Step 1: Check if user is authenticated (use getUser() instead of getSession())
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    redirect("/login");
-  }
-
-  // Step 2: Check if user is admin
-  const { data: profile } = await supabase
-    .from("profile")
-    .select("type, name")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile || profile.type !== "admin") {
-    await supabase.auth.signOut();
-    redirect("/login?error=not_admin");
-  }
-
-  // Step 3: Fetch stats from database
+  // Fetch stats from database
   // Shop Management counts
   const { count: functionalItems } = await supabase
-    .from("items")
+    .from("item")
     .select("*", { count: "exact", head: true })
     .eq("type", "functional");
 
   const { count: decorativeItems } = await supabase
-    .from("items")
+    .from("item")
     .select("*", { count: "exact", head: true })
     .eq("type", "decorative");
 
   const { count: terrainItems } = await supabase
-    .from("items")
+    .from("item")
     .select("*", { count: "exact", head: true })
     .eq("type", "terrain");
 
@@ -71,13 +52,12 @@ export default async function DashboardPage() {
   const { count: islandUsers } = await supabase
     .from("profile")
     .select("*", { count: "exact", head: true })
-    .eq("type", "user");
+    .eq("type", "island");
 
-  const { count: totalUsers } = await supabase
+  const { count: nonIslandUsers } = await supabase
     .from("profile")
-    .select("*", { count: "exact", head: true });
-
-  const nonIslandUsers = (totalUsers || 0) - (islandUsers || 0) - (adminUsers || 0);
+    .select("*", { count: "exact", head: true })
+    .eq("type", "non-island");
 
   const stats = {
     shop: {

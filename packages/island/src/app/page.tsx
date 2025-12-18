@@ -6,7 +6,7 @@ import CloudsBg from "@/features/home/components/Background/CloudsBg";
 import HeroSection from "@/features/home/components/HeroSection";
 import FeatureSection from "@/features/home/components/FeatureSection";
 import HowItWorksSection from "@/features/home/components/HowItWorksSection";
-import CTASection from "@/features/home/components/CTASection";
+import CtaSection from "@/features/home/components/CtaSection";
 import FooterSection from "@/features/home/components/FooterSection";
 
 const Home = async () => {
@@ -21,7 +21,7 @@ const Home = async () => {
   }
 
   return (
-    <div className="relative flex h-screen w-screen flex-col overflow-y-auto overflow-x-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+    <div className="relative h-screen w-full flex-col overflow-x-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
       {/* bg */}
       <IslandsBg />
       <CloudsBg />
@@ -30,8 +30,9 @@ const Home = async () => {
       <HeroSection />
       <FeatureSection />
       <HowItWorksSection />
-      <CTASection />
+      <CtaSection />
       <FooterSection />
+      <div className="h-[50px] bg-[#d9d9d9]"></div>
     </div>
   );
 };

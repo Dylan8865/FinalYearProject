@@ -1,7 +1,7 @@
-import IslandIcon from "@/features/shared/icons/IslandIcon";
-import LoginIcon from "@/features/shared/icons/LoginIcon";
-import ScrollDownIcon from "@/features/shared/icons/ScrollDownIcon";
-import UserIcon from "@/features/shared/icons/UserIcon";
+import IslandIcon from "@/icons/IslandIcon";
+import LoginIcon from "@/icons/LoginIcon";
+import ScrollDownIcon from "@/icons/ScrollDownIcon";
+import UserIcon from "@/icons/UserIcon";
 import Link from "next/link";
 import React from "react";
 
@@ -21,13 +21,13 @@ const HeroSection = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-6">
+      <div className="flex flex-col gap-6 md:flex-row">
         <Link href="/login">
           <button className="group flex h-14 w-52 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,0.3)] transition hover:scale-105 hover:shadow-[6px_6px_0_0_rgba(0,0,0,0.3)]">
             <div className="flex h-full w-16 items-center justify-center bg-[#6d3f33] text-2xl text-white transition group-hover:bg-[#8a5544]">
               <LoginIcon />
             </div>
-            <div className="flex w-full items-center justify-center border-s-4 border-black bg-[#d9d9d9] font-bold text-black transition group-hover:bg-[#e5e7eb]">
+            <div className="flex h-full w-full items-center justify-center border-s-4 border-black bg-[#d9d9d9] font-bold text-black transition group-hover:bg-[#e5e7eb]">
               Login
             </div>
           </button>
@@ -38,7 +38,7 @@ const HeroSection = () => {
             <div className="flex h-full w-16 items-center justify-center bg-[#68a5ad] text-2xl text-white transition group-hover:bg-[#7fb9c2]">
               <UserIcon />
             </div>
-            <div className="flex w-full items-center justify-center border-s-4 border-black bg-[#d9d9d9] font-bold text-black transition group-hover:bg-[#e5e7eb]">
+            <div className="flex h-full w-full items-center justify-center border-s-4 border-black bg-[#d9d9d9] font-bold text-black transition group-hover:bg-[#e5e7eb]">
               Register
             </div>
           </button>
