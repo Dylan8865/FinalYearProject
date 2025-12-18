@@ -3,9 +3,12 @@
 import { Html } from "@react-three/drei";
 import ManaIcon from "@/icons/ManaIcon";
 import CloseIcon from "@/icons/CloseIcon";
+import { toCapitalise } from "@/lib/capitalise";
 
 interface IslandTooltipProps {
   islandName: string;
+  islandGenre: string;
+  islandTheme: string;
   islandLevel: number;
   manaRate: number;
   accumulatedMana: number;
@@ -32,6 +35,8 @@ interface IslandTooltipProps {
  */
 const IslandTooltip = ({
   islandName,
+  islandGenre,
+  islandTheme,
   islandLevel,
   manaRate,
   accumulatedMana,
@@ -140,6 +145,38 @@ const IslandTooltip = ({
 
         {/* Stats */}
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          {/* Island's genre */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span style={{ color: "#9ca3af", fontSize: "12px" }}>Genre</span>
+            <span
+              style={{ color: "#fff", fontWeight: "400", fontSize: "13px" }}
+            >
+              {toCapitalise(islandGenre)}
+            </span>
+          </div>
+
+          {/* Island's theme */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span style={{ color: "#9ca3af", fontSize: "12px" }}>Theme</span>
+            <span
+              style={{ color: "#fff", fontWeight: "400", fontSize: "13px" }}
+            >
+              {toCapitalise(islandTheme)}
+            </span>
+          </div>
+
           {/* Mana Rate */}
           <div
             style={{

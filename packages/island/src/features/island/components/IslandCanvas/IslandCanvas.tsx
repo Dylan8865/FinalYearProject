@@ -12,6 +12,8 @@ import {
 
 export interface IslandData {
   id: string;
+  genre: string;
+  theme: string;
   position: [number, number, number];
   gridSize: number;
   name?: string;
@@ -98,6 +100,8 @@ const IslandCanvas = ({
               // Mana-related props
               islandId={island.id}
               islandName={island.name || "My Island"}
+              islandGenre={island.genre}
+              islandTheme={island.theme}
               islandLevel={island.level || 1}
               manaRate={manaState.manaRate}
               accumulatedMana={manaState.accumulatedMana}

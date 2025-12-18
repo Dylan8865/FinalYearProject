@@ -469,6 +469,8 @@ interface IslandProps {
   // Mana-related props
   islandId?: string;
   islandName?: string;
+  islandGenre?: string;
+  islandTheme?: string;
   islandLevel?: number;
   manaRate?: number;
   accumulatedMana?: number;
@@ -488,6 +490,8 @@ const Island = ({
   placedObjects = {},
   islandId,
   islandName = "My Island",
+  islandGenre = "",
+  islandTheme = "",
   islandLevel = 1,
   manaRate = 9,
   accumulatedMana = 0,
@@ -564,6 +568,8 @@ const Island = ({
       {/* Island Tooltip on Hover or Click */}
       <IslandTooltip
         islandName={islandName}
+        islandGenre={islandGenre}
+        islandTheme={islandTheme}
         islandLevel={islandLevel}
         manaRate={manaRate}
         accumulatedMana={accumulatedMana}
