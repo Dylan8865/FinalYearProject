@@ -971,7 +971,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       const state = islandManaStates[islandId];
       if (!state || state.accumulatedMana < 1) {
         console.log("No mana to collect");
-        return;
+        return true;
       }
 
       const manaToCollect = Math.floor(state.accumulatedMana);
@@ -1013,14 +1013,18 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         syncManaToDb(islandId, 0);
 
         console.log(`Collected ${data.collected} mana from island ${islandId}`);
+        return true;
       } catch (err) {
         console.error("Failed to collect mana:", err);
+        return true;
       }
     },
     [islandManaStates, syncManaToDb]
   );
 
-  if (loading) {
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  if (loading || isSigningOut) {
     return <LoadingScreen />;
   }
 
@@ -1099,6 +1103,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
             userName={profile.name}
             userEmail={profile.email}
             setIsDialogOpen={setIsDialogOpen}
+            setIsSigningOut={setIsSigningOut}
           />
         </Dialog>
       )}

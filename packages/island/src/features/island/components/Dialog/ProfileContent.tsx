@@ -13,12 +13,14 @@ interface ProfileContentProps {
   userName: string;
   userEmail: string;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
+  setIsSigningOut: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ProfileContent = ({
   userName,
   userEmail,
   setIsDialogOpen,
+  setIsSigningOut,
 }: ProfileContentProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -42,7 +44,10 @@ const ProfileContent = ({
           icon={<LoginIcon />}
           title="Log Out"
           color="gray"
-          onClick={signOut}
+          onClick={() => {
+            setIsSigningOut(true);
+            signOut();
+          }}
         />
         <SettingButton
           icon={<WarningIcon />}

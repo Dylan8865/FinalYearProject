@@ -31,7 +31,7 @@ const ChangeUsernameContent = ({
 
     // Optimistic Update
     onOptimisticUpdate?.(username);
-    setIsDialogOpen?.("");
+    setIsDialogOpen?.("profile");
 
     // Background Update
     updateProfile({ name: username }).catch((err) => {

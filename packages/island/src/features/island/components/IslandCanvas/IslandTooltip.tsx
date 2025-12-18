@@ -4,6 +4,7 @@ import { Html } from "@react-three/drei";
 import ManaIcon from "@/icons/ManaIcon";
 import CloseIcon from "@/icons/CloseIcon";
 import { toCapitalise } from "@/lib/capitalise";
+import { useState } from "react";
 
 interface IslandTooltipProps {
   islandName: string;
@@ -55,6 +56,8 @@ const IslandTooltip = ({
   if (!visible) return null;
 
   const isCollectionLocked = accumulatedMana < 1000;
+
+  const [isCollecting, setIsCollecting] = useState(false);
 
   return (
     <Html
@@ -265,17 +268,22 @@ const IslandTooltip = ({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onCollectClick && onCollectClick();
+              setIsCollecting(true);
+              const success = onCollectClick && onCollectClick();
+              if (success) {
+                setIsCollecting(false);
+              }
             }}
-            /* ... existing styles ... */
             style={{
               width: "100%",
               marginTop: "12px",
               padding: "8px 16px",
-              background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+              background: isCollecting
+                ? "#8B4513"
+                : "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
               border: "none",
               borderRadius: "8px",
-              color: "#8B4513",
+              color: isCollecting ? "#fff" : "#8B4513",
               fontWeight: "bold",
               fontSize: "14px",
               cursor: "pointer",
@@ -292,7 +300,7 @@ const IslandTooltip = ({
             onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
           >
             <ManaIcon />
-            <span>Collect</span>
+            <span>{isCollecting ? "Collecting..." : "Collect"}</span>
           </button>
         )}
 

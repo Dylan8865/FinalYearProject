@@ -55,7 +55,7 @@ const AchievementContent = ({
           </div>
         </div>
         <div
-          className="cursor-pointer text-xl text-gray-400 hover:text-white"
+          className="mt-2 cursor-pointer text-xl text-gray-400 hover:text-white"
           onClick={(e) => {
             e.stopPropagation();
             setShowLevelInfo(!showLevelInfo);
@@ -67,13 +67,10 @@ const AchievementContent = ({
         {/* Tooltip for Level Info */}
         {showLevelInfo && (
           <div className="absolute right-0 top-full z-10 mt-2 w-64 rounded-md border border-gray-600 bg-[#2a2a2a] p-3 text-xs text-gray-300 shadow-xl">
-            <p className="mb-1 font-semibold text-white">How Level Works:</p>
-            <p>
-              Your global level is the sum of all your island levels. Upgrade
-              your islands to increase your total level!
-            </p>
-            <p className="mt-2 italic text-gray-400">
-              Example: Island A (Lvl 1) + Island B (Lvl 2) = Global Level 3
+            <p className="mb-1 font-semibold text-white">How Levels Work</p>
+            <p>Your global level is the total of all island levels.</p>
+            <p className="mt-1 italic text-gray-400">
+              Example: Lvl 1 + Lvl 2 = Lvl 3
             </p>
           </div>
         )}
