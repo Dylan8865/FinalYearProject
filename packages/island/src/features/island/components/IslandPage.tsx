@@ -21,11 +21,12 @@ import SidebarPage from "./Page/SidebarPage";
 import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
 import { type OffscreenIsland } from "./IslandCanvas/IslandIndicators";
 import RefreshIcon from "@/icons/RefreshIcon";
-import ManaCollectionPopup from "@/features/island/components/IslandCanvas/ManaCollectionPopup";
 import {
   calculateIslandTotalManaRate,
   MAX_ACCUMULATION_TIME,
 } from "@/utils/manaCalculations";
+import AddIslandContent from "./Dialog/AddIslandContent";
+import IslandIcon from "@/icons/IslandIcon";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -1022,6 +1023,19 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         </Dialog>
       )}
 
+      {isDialogOpen === "island" && (
+        <Dialog
+          iconStyle="bg-[#5a706b] text-white text-2xl"
+          icon={<IslandIcon />}
+          title="Add Island"
+          className="flex items-center justify-center"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <AddIslandContent />
+        </Dialog>
+      )}
+
       {/* Sidebar Content */}
       <SidebarPage
         isOpen={sidebarContentPage?.open}
@@ -1030,13 +1044,6 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         onClick={() =>
           setSidebarContentPage({ open: false, itemId: "", itemName: "" })
         }
-      />
-
-      {/* Mana Collection Popup */}
-      <ManaCollectionPopup
-        amount={manaPopup.amount}
-        visible={manaPopup.visible}
-        onComplete={() => setManaPopup({ visible: false, amount: 0 })}
       />
     </div>
   );
