@@ -209,6 +209,69 @@ export async function POST(request: Request) {
   }
 }
 
+// Helper function to save search history
+async function saveSearchHistory(
+  supabase: any,
+  query: string,
+  answer: string,
+  chatId?: string,
+  userId?: string,
+  promptOrder?: number
+) {
+  console.log("Attempting to save search history:", { chatId, userId, hasAnswer: !!answer });
+  
+  if (!chatId || !userId) {
+    console.log("Skipping search history save - missing chatId or userId:", { chatId, userId });
+    return;
+  }
+
+  try {
+    // First, ensure chat exists
+    const { data: existingChat, error: chatFetchError } = await supabase
+      .from("chat")
+      .select("id")
+      .eq("id", chatId)
+      .single();
+
+    if (chatFetchError && chatFetchError.code !== 'PGRST116') {
+      console.error("Error checking existing chat:", chatFetchError);
+    }
+
+    if (!existingChat) {
+      // Create chat if it doesn't exist
+      console.log("Creating new chat:", chatId);
+      const { error: chatInsertError } = await supabase.from("chat").insert({
+        id: chatId,
+        title: query.slice(0, 50),
+        profile_id: userId,
+      });
+      
+      if (chatInsertError) {
+        console.error("Error creating chat:", chatInsertError);
+      } else {
+        console.log("Chat created successfully");
+      }
+    }
+
+    // Save search history
+    console.log("Inserting search history:", { chatId, promptOrder });
+    const { data: historyData, error: historyError } = await supabase.from("search-history").insert({
+      prompt_text: query,
+      result_text: answer,
+      prompt_order: promptOrder || 0,
+      chat_id: chatId,
+    });
+    
+    if (historyError) {
+      console.error("Error saving search history:", historyError);
+    } else {
+      console.log("Search history saved successfully:", historyData);
+    }
+  } catch (error) {
+    console.error("Failed to save search history (caught exception):", error);
+  }
+}
+
 async function handleSearch(
   query: string,
   chatId?: string,
@@ -238,6 +301,9 @@ async function handleSearch(
 
       const relatedTopics = await generateRelatedTopicsAI(query);
       
+      // Save search history for cached answer
+      await saveSearchHistory(supabase, query, cached.result_text, chatId, userId, promptOrder);
+      
       return NextResponse.json<SearchResponse>({
         success: true,
         query,
@@ -261,12 +327,16 @@ async function handleSearch(
       // Even if DB fails, try to answer with AI
       const aiAnswer = await generateAnswer({ query });
       const aiTopics = await generateRelatedTopicsAI(query);
+      const answer = aiAnswer || "I encountered an issue searching the knowledge base, but I can still help. " + 
+        "Could you please rephrase your question or try again?";
+      
+      // Save search history even on DB error
+      await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
         query,
-        answer: aiAnswer || "I encountered an issue searching the knowledge base, but I can still help. " + 
-          "Could you please rephrase your question or try again?",
+        answer,
         results: [],
         hasResults: false,
         relatedTopics: aiTopics.length > 0 ? aiTopics : undefined,
@@ -278,11 +348,15 @@ async function handleSearch(
       // No results found - Use AI to generate a helpful response anyway
       const aiAnswer = await generateAnswer({ query });
       const aiTopics = await generateRelatedTopicsAI(query);
+      const answer = aiAnswer || "I couldn't find any knowledge matching your query in our repository. However, I can try to help based on general knowledge.";
+      
+      // Save search history for no results
+      await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
         query,
-        answer: aiAnswer || "I couldn't find any knowledge matching your query in our repository. However, I can try to help based on general knowledge.",
+        answer,
         results: [],
         hasResults: false,
         relatedTopics: aiTopics.length > 0 ? aiTopics : undefined,
@@ -343,11 +417,15 @@ async function handleSearch(
       // No validated results - Use AI to generate response
       const aiAnswer = await generateAnswer({ query });
       const aiTopics = await generateRelatedTopicsAI(query);
+      const answer = aiAnswer || "I couldn't find any validated knowledge matching your query.";
+      
+      // Save search history for no validated results
+      await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
         query,
-        answer: aiAnswer || "I couldn't find any validated knowledge matching your query.",
+        answer,
         results: [],
         hasResults: false,
         relatedTopics: aiTopics.length > 0 ? aiTopics : undefined,
@@ -383,59 +461,8 @@ async function handleSearch(
       // Ignore cache errors, don't fail the request
     }
 
-    // Save search history to database if chatId is provided
-    console.log("Attempting to save search history:", { chatId, userId, hasAnswer: !!answer });
-    
-    if (chatId && userId) {
-      try {
-        // First, ensure chat exists
-        const { data: existingChat, error: chatFetchError } = await supabase
-          .from("chat")
-          .select("id")
-          .eq("id", chatId)
-          .single();
-
-        if (chatFetchError && chatFetchError.code !== 'PGRST116') {
-          console.error("Error checking existing chat:", chatFetchError);
-        }
-
-        if (!existingChat) {
-          // Create chat if it doesn't exist
-          console.log("Creating new chat:", chatId);
-          const { error: chatInsertError } = await supabase.from("chat").insert({
-            id: chatId,
-            title: query.slice(0, 50),
-            profile_id: userId,
-          });
-          
-          if (chatInsertError) {
-            console.error("Error creating chat:", chatInsertError);
-          } else {
-            console.log("Chat created successfully");
-          }
-        }
-
-        // Save search history
-        console.log("Inserting search history:", { chatId, promptOrder });
-        const { data: historyData, error: historyError } = await supabase.from("search-history").insert({
-          prompt_text: query,
-          result_text: answer,
-          prompt_order: promptOrder || 0,
-          chat_id: chatId,
-        });
-        
-        if (historyError) {
-          console.error("Error saving search history:", historyError);
-        } else {
-          console.log("Search history saved successfully:", historyData);
-        }
-      } catch (error) {
-        console.error("Failed to save search history (caught exception):", error);
-        // Don't fail the request if history saving fails
-      }
-    } else {
-      console.log("Skipping search history save - missing chatId or userId:", { chatId, userId });
-    }
+    // Save search history for successful search
+    await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
 
     return NextResponse.json<SearchResponse>({
       success: true,
@@ -450,8 +477,12 @@ async function handleSearch(
     
     // Try AI as fallback even on error
     try {
+      const supabase = await createClient();
       const aiAnswer = await generateAnswer({ query });
       if (aiAnswer) {
+        // Save search history for error fallback
+        await saveSearchHistory(supabase, query, aiAnswer, chatId, userId, promptOrder);
+        
         return NextResponse.json<SearchResponse>({
           success: true,
           query,

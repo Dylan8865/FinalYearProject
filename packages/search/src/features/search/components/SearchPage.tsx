@@ -64,6 +64,67 @@ export default function SearchPage({ user }: SearchPageProps) {
     scrollToBottom();
   }, [activeConversation?.messages]);
 
+  // Load saved chats from database on mount
+  useEffect(() => {
+    const loadSavedChats = async () => {
+      if (!user?.id) return;
+
+      try {
+        const response = await fetch(`/api/chat?profileId=${user.id}`);
+        const data = await response.json();
+
+        if (data.success && data.chats) {
+          // Load each chat with its messages
+          const loadedConversations = await Promise.all(
+            data.chats.map(async (chat: { id: string; title: string; created_at: string }) => {
+              const historyResponse = await fetch(`/api/history?chatId=${chat.id}`);
+              const historyData = await historyResponse.json();
+
+              const messages: Message[] = [];
+              
+              if (historyData.success && historyData.history) {
+                historyData.history.forEach((entry: { 
+                  prompt_text: string; 
+                  result_text: string; 
+                  created_at: string;
+                }) => {
+                  // Add user message
+                  messages.push({
+                    id: crypto.randomUUID(),
+                    role: "user",
+                    content: entry.prompt_text,
+                    timestamp: new Date(entry.created_at),
+                  });
+                  
+                  // Add assistant message
+                  messages.push({
+                    id: crypto.randomUUID(),
+                    role: "assistant",
+                    content: entry.result_text,
+                    timestamp: new Date(entry.created_at),
+                  });
+                });
+              }
+
+              return {
+                id: chat.id,
+                title: chat.title,
+                messages,
+                createdAt: new Date(chat.created_at),
+              };
+            })
+          );
+
+          setConversations(loadedConversations);
+        }
+      } catch (error) {
+        console.error("Error loading saved chats:", error);
+      }
+    };
+
+    loadSavedChats();
+  }, [user?.id]);
+
   const handleNewChat = () => {
     setActiveConversation(null);
   };
@@ -223,10 +284,40 @@ export default function SearchPage({ user }: SearchPageProps) {
     setActiveConversation(conversation);
   };
 
-  const handleDeleteConversation = (id: string) => {
-    setConversations((prev) => prev.filter((c) => c.id !== id));
-    if (activeConversation?.id === id) {
-      setActiveConversation(null);
+  const handleDeleteConversation = async (id: string) => {
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this conversation? All search history will be lost and cannot be recovered."
+    );
+    
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      console.log("Deleting conversation:", id);
+      
+      // Call API to delete from database
+      const response = await fetch(`/api/chat?chatId=${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+      console.log("Delete response:", data);
+
+      if (data.success) {
+        // Remove from local state
+        setConversations((prev) => prev.filter((c) => c.id !== id));
+        if (activeConversation?.id === id) {
+          setActiveConversation(null);
+        }
+      } else {
+        console.error("Delete failed:", data.error);
+        alert(`Failed to delete conversation: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      alert("An error occurred while deleting the conversation.");
     }
   };
 

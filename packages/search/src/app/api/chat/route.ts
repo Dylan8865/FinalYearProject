@@ -110,6 +110,8 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const chatId = searchParams.get("chatId");
 
+    console.log("DELETE request for chatId:", chatId);
+
     if (!chatId) {
       return NextResponse.json({
         success: false,
@@ -119,34 +121,48 @@ export async function DELETE(request: Request) {
 
     const supabase = await createClient();
 
+    // Check authentication
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log("Authenticated user:", user?.id);
+
     // First delete all search history for this chat
-    await supabase
+    console.log("Deleting search history for chat:", chatId);
+    const { error: historyError } = await supabase
       .from("search-history")
       .delete()
       .eq("chat_id", chatId);
 
+    if (historyError) {
+      console.error("Error deleting search history:", historyError);
+    }
+
     // Then delete the chat
-    const { error } = await supabase
+    console.log("Deleting chat:", chatId);
+    const { error, data } = await supabase
       .from("chat")
       .delete()
-      .eq("id", chatId);
+      .eq("id", chatId)
+      .select();
+
+    console.log("Delete result:", { error, data });
 
     if (error) {
       console.error("Error deleting chat:", error);
       return NextResponse.json({
         success: false,
-        error: "Failed to delete chat",
+        error: error.message || "Failed to delete chat",
       });
     }
 
     return NextResponse.json({
       success: true,
+      message: "Chat deleted successfully",
     });
   } catch (error) {
     console.error("Chat DELETE error:", error);
     return NextResponse.json({
       success: false,
-      error: "An unexpected error occurred",
+      error: error instanceof Error ? error.message : "An unexpected error occurred",
     });
   }
 }
