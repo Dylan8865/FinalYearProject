@@ -38,7 +38,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#1E1E20] p-0 sm:bg-[#18181A]">
+    <div className="flex h-[100dvh] items-center justify-center bg-[#1E1E20] p-0 sm:bg-[#18181A]">
       <div className="-ms-overflow-style-none scrollbar-none max-h-screen w-full max-w-md overflow-auto border-none bg-[#1E1E20] p-4 sm:rounded-lg sm:border sm:border-[#3B3B3B] sm:p-6 sm:shadow-md [&::-webkit-scrollbar]:hidden">
         <div className="mb-6 text-left">
           <Link href="/">

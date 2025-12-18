@@ -12,6 +12,8 @@ import {
 
 export interface IslandData {
   id: string;
+  genre: string;
+  theme: string;
   position: [number, number, number];
   gridSize: number;
   name?: string;
@@ -42,7 +44,15 @@ interface IslandCanvasProps {
   onOffscreenIslandsChange?: (islands: OffscreenIsland[]) => void;
   // Mana-related props
   islandManaStates?: Record<string, IslandManaState>;
+  userMana?: number;
   onIslandClick?: (islandId: string) => void;
+  onEditIsland?: (
+    id: string,
+    name: string,
+    genre: string,
+    theme: string
+  ) => void;
+  onUpgradeIsland?: (id: string) => void;
 }
 
 const IslandCanvas = ({
@@ -56,7 +66,10 @@ const IslandCanvas = ({
   offscreenIslands = [],
   onOffscreenIslandsChange,
   islandManaStates = {},
+  userMana = 0,
   onIslandClick,
+  onEditIsland,
+  onUpgradeIsland,
 }: IslandCanvasProps) => {
   const defaultCameraPos: [number, number, number] = [10, 15, 5];
   const defaultTarget: [number, number, number] = [0, 0, 0];
@@ -98,6 +111,8 @@ const IslandCanvas = ({
               // Mana-related props
               islandId={island.id}
               islandName={island.name || "My Island"}
+              islandGenre={island.genre}
+              islandTheme={island.theme}
               islandLevel={island.level || 1}
               manaRate={manaState.manaRate}
               accumulatedMana={manaState.accumulatedMana}
@@ -109,6 +124,18 @@ const IslandCanvas = ({
               onIslandClick={() => {
                 onIslandClick?.(island.id);
               }}
+              onEditIsland={() => {
+                onEditIsland?.(
+                  island.id,
+                  island.name || "My Island",
+                  island.genre,
+                  island.theme
+                );
+              }}
+              onUpgradeIsland={() => {
+                onUpgradeIsland?.(island.id);
+              }}
+              userMana={userMana}
               showManaAura={islandManaStates[island.id]?.accumulatedMana > 1000}
             />
           );

@@ -3,9 +3,10 @@ import React from "react";
 interface EditButtonProps {
   fieldName: string;
   fieldValue: string;
+  onClick?: () => void;
 }
 
-const EditButton = ({ fieldName, fieldValue }: EditButtonProps) => {
+const EditButton = ({ fieldName, fieldValue, onClick }: EditButtonProps) => {
   return (
     <div className="flex w-80 justify-between md:w-auto md:gap-4">
       <div className="flex items-center">{fieldName}</div>
@@ -13,9 +14,14 @@ const EditButton = ({ fieldName, fieldValue }: EditButtonProps) => {
         <div className="flex items-center ps-4 text-xs md:text-sm">
           {fieldValue}
         </div>
-        <button className="flex w-10 items-center justify-center bg-[#e5e7eb] ps-1 text-xs font-semibold text-black md:text-sm">
-          Edit
-        </button>
+        {onClick && (
+          <button
+            onClick={onClick}
+            className="flex w-10 items-center justify-center bg-[#e5e7eb] ps-1 text-xs font-semibold text-black md:text-sm"
+          >
+            Edit
+          </button>
+        )}
       </div>
     </div>
   );

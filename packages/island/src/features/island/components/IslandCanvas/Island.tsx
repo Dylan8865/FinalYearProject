@@ -469,12 +469,17 @@ interface IslandProps {
   // Mana-related props
   islandId?: string;
   islandName?: string;
+  islandGenre?: string;
+  islandTheme?: string;
   islandLevel?: number;
   manaRate?: number;
   accumulatedMana?: number;
   itemCount?: number;
   onIslandHover?: (isHovered: boolean) => void;
   onIslandClick?: () => void;
+  onEditIsland?: () => void;
+  onUpgradeIsland?: () => void;
+  userMana?: number;
   isHovered?: boolean;
   showManaAura?: boolean;
 }
@@ -488,12 +493,17 @@ const Island = ({
   placedObjects = {},
   islandId,
   islandName = "My Island",
+  islandGenre = "",
+  islandTheme = "",
   islandLevel = 1,
   manaRate = 9,
   accumulatedMana = 0,
   itemCount = 0,
   onIslandHover,
   onIslandClick,
+  onEditIsland,
+  onUpgradeIsland,
+  userMana = 0,
   isHovered = false,
   showManaAura = true,
 }: IslandProps) => {
@@ -564,12 +574,17 @@ const Island = ({
       {/* Island Tooltip on Hover or Click */}
       <IslandTooltip
         islandName={islandName}
+        islandGenre={islandGenre}
+        islandTheme={islandTheme}
         islandLevel={islandLevel}
         manaRate={manaRate}
         accumulatedMana={accumulatedMana}
         itemCount={itemCount}
         visible={shouldShowTooltip}
         onCollectClick={onIslandClick}
+        onEditClick={onEditIsland}
+        onUpgradeClick={onUpgradeIsland}
+        userMana={userMana}
         onTooltipHover={setIsTooltipHovered}
         onClose={isClickedOpen ? handleCloseTooltip : undefined}
       />

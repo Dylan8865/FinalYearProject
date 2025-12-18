@@ -47,7 +47,7 @@ const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
           bgColor="bg-[#5a706b]"
           orientation="right"
           btnIcon={<PlusIcon />}
-          onClick={() => {}}
+          onClick={() => setIsDialogOpen("island")}
         />
       </div>
     </div>

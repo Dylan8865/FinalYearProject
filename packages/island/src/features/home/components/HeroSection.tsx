@@ -27,7 +27,7 @@ const HeroSection = () => {
             <div className="flex h-full w-16 items-center justify-center bg-[#6d3f33] text-2xl text-white transition group-hover:bg-[#8a5544]">
               <LoginIcon />
             </div>
-            <div className="flex w-full items-center justify-center border-s-4 border-black bg-[#d9d9d9] font-bold text-black transition group-hover:bg-[#e5e7eb]">
+            <div className="flex h-full w-full items-center justify-center border-s-4 border-black bg-[#d9d9d9] font-bold text-black transition group-hover:bg-[#e5e7eb]">
               Login
             </div>
           </button>
@@ -38,7 +38,7 @@ const HeroSection = () => {
             <div className="flex h-full w-16 items-center justify-center bg-[#68a5ad] text-2xl text-white transition group-hover:bg-[#7fb9c2]">
               <UserIcon />
             </div>
-            <div className="flex w-full items-center justify-center border-s-4 border-black bg-[#d9d9d9] font-bold text-black transition group-hover:bg-[#e5e7eb]">
+            <div className="flex h-full w-full items-center justify-center border-s-4 border-black bg-[#d9d9d9] font-bold text-black transition group-hover:bg-[#e5e7eb]">
               Register
             </div>
           </button>

@@ -35,8 +35,9 @@ export function useIslands() {
 
   const createIsland = async (
     name: string,
-    level: number = 1,
-    theme: string = "grass"
+    genre: string,
+    theme: string,
+    level: number = 1
   ) => {
     try {
       const response = await fetch("/api/islands", {
@@ -44,7 +45,7 @@ export function useIslands() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, level, theme }),
+        body: JSON.stringify({ name, genre, theme, level }),
       });
 
       if (!response.ok) {
@@ -59,6 +60,79 @@ export function useIslands() {
     }
   };
 
+  const updateIsland = async (
+    id: string,
+    updates: {
+      name?: string;
+      genre?: string;
+      theme?: string;
+      level?: number;
+    }
+  ) => {
+    try {
+      const response = await fetch("/api/islands", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, ...updates }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update island");
+      }
+
+      await fetchIslands();
+      return true;
+    } catch (err) {
+      console.error("Failed to update island:", err);
+      return false;
+    }
+  };
+
+  const upgradeIsland = async (id: string, level: number, cost: number) => {
+    try {
+      const response = await fetch("/api/islands/upgrade", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, level, cost }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || "Failed to upgrade island");
+      }
+
+      await fetchIslands();
+      return true;
+    } catch (err) {
+      console.error("Failed to upgrade island:", err);
+      return false;
+    }
+  };
+
+  const deleteIsland = async (id: string) => {
+    try {
+      const response = await fetch(`/api/islands?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete island");
+      }
+
+      await fetchIslands();
+      return true;
+    } catch (err) {
+      console.error("Failed to delete island:", err);
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchIslands();
   }, []);
@@ -69,5 +143,8 @@ export function useIslands() {
     error,
     refetch: fetchIslands,
     createIsland,
+    updateIsland,
+    upgradeIsland,
+    deleteIsland,
   };
 }

@@ -97,12 +97,8 @@ const InventoryContent = ({
   const [showTooltip, setShowTooltip] = useState<IslandItemType | null>();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  if (loading) {
-    return <div className="text-center">Loading inventory...</div>;
-  }
-
   return (
-    <div className="relative h-[300px] overflow-y-scroll md:h-fit md:overflow-visible">
+    <div className="relative h-[400px] overflow-y-scroll md:h-fit md:overflow-visible">
       <div className="grid grid-cols-5 gap-4 md:grid-cols-10">
         {Array.from({ length: 5 }).map((_, row) =>
           Array.from({ length: 10 }).map((_, col) => {
@@ -148,7 +144,7 @@ const InventoryContent = ({
         )}
       </div>
       <div
-        className={`fixed bottom-[293px] right-[33px] cursor-pointer text-3xl transition-colors hover:scale-110 active:scale-95 md:absolute md:bottom-[-5px] md:right-[-65px] ${selectedId ? "animate-pulse text-red-500" : "text-gray-400"}`}
+        className={`fixed bottom-[240px] right-[33px] cursor-pointer text-3xl transition-colors hover:scale-110 active:scale-95 md:absolute md:bottom-[-5px] md:right-[-65px] ${selectedId ? "animate-pulse text-red-500" : "text-gray-400"}`}
         onClick={handleTrashClick}
       >
         <TrashIcon />

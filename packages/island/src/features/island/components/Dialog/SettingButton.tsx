@@ -35,7 +35,7 @@ const SettingButton = ({
             color == "gray"
               ? "bg-[#d9d9d9] text-black"
               : "bg-[#800000] text-white"
-          } flex w-full items-center justify-center border-s-4 border-black font-semibold`}
+          } flex h-full w-full items-center justify-center border-s-4 border-black font-semibold`}
         >
           {title}
         </div>

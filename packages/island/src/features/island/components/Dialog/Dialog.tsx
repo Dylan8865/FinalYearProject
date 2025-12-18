@@ -24,13 +24,13 @@ const Dialog = ({
   setIsDialogOpen,
 }: DialogProps) => {
   return (
-    <div className="z-90 relative flex h-screen w-screen items-center justify-center bg-black bg-opacity-25">
+    <div className="relative z-20 flex h-[100dvh] w-[100dvw] items-center justify-center bg-black bg-opacity-25">
       <div
         className={`${
           size == "medium"
-            ? "h-[400px] w-[400px] md:h-[500px] md:w-[500px]" // medium
+            ? "h-[500px] w-[400px] md:h-[500px] md:w-[500px]" // medium
             : size == "large"
-              ? "h-[400px] w-[400px] md:h-[500px] md:w-[1000px]" // large
+              ? "h-[500px] w-[400px] md:h-[500px] md:w-[1000px]" // large
               : "h-[300px] w-[300px]" // small
         } relative ${borderColor} select-none border-4`}
       >
