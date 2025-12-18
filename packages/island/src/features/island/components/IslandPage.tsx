@@ -996,7 +996,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   }
 
   return (
-    <div className="relative h-screen w-screen max-w-[100dvw] overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+    <div className="relative h-[100dvh] w-screen max-w-[100dvw] overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
       <div className="absolute inset-0 z-0">
         <IslandCanvas
           islands={islands}

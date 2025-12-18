@@ -46,29 +46,11 @@ const InventoryBar = ({
   const { islandItems, updateItemPosition } = useIslandItemsContext();
 
   const handleSlotClick = async (index: number) => {
-    console.log("=== INVENTORY BAR SLOT CLICKED ===");
-    console.log("Slot index:", index);
-    console.log("Selected item ID:", selectedPlacedItem);
-
     // If no item selected, do nothing
     if (!selectedPlacedItem) return;
 
     // Find the currently selected item in the inventory data to check its location
     const draggedItem = islandItems.find((i) => i.id === selectedPlacedItem);
-    console.log("Dragged item found:", draggedItem);
-    console.log(
-      "Dragged item location:",
-      draggedItem
-        ? {
-            pos_x: draggedItem.pos_x,
-            pos_y: draggedItem.pos_y,
-            grid_x: draggedItem.grid_x,
-            grid_y: draggedItem.grid_y,
-            grid_z: draggedItem.grid_z,
-            island_id: draggedItem.island_id,
-          }
-        : "not found"
-    );
 
     // Check if the selected item is currently on the island grid (has grid coordinates)
     const isOnIsland =
@@ -79,9 +61,6 @@ const InventoryBar = ({
 
     if (isOnIsland) {
       // Item is on island - delegate to parent's onSlotClick to move it to inventory
-      console.log(
-        "Item is on island, calling onSlotClick to move to inventory"
-      );
       onSlotClick?.(index, 0);
       return;
     }
@@ -98,7 +77,6 @@ const InventoryBar = ({
           return;
         }
         // Swap
-        console.log("Swapping items");
         await updateItemPosition(selectedPlacedItem, index, 0);
         await updateItemPosition(
           targetItem.id,
@@ -107,7 +85,6 @@ const InventoryBar = ({
         );
       } else {
         // Move to empty
-        console.log("Moving to empty slot");
         await updateItemPosition(selectedPlacedItem, index, 0);
       }
       setSelectedPlacedItem(null);
