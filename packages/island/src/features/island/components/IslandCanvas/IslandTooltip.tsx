@@ -297,7 +297,6 @@ const IslandTooltip = ({
         )}
 
         {/* Upgrade Button */}
-        {/* Upgrade Button */}
         {(() => {
           const upgrades = {
             1: 10_000_000,

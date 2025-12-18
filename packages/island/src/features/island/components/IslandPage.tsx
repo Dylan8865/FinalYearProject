@@ -76,12 +76,8 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const [placedObjects, setPlacedObjects] = useState<
     Record<string, PlacedObject>
   >({});
-  const {
-    islandItems,
-    placeItemOnIsland,
-    removeItemFromIsland,
-    moveToInventory,
-  } = useIslandItemsContext();
+  const { islandItems, placeItemOnIsland, moveToInventory } =
+    useIslandItemsContext();
 
   // Functional item dialog
   const [functionalItemDialog, setFunctionalItemDialog] = useState<{
@@ -172,12 +168,13 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
    * Get the next available Y position (vertical stacking) for a given grid cell
    * Items can be stacked vertically on the same grid cell
    *
+   * @param islandId - ID of the island
    * @param cellId - Grid cell identifier (format: "row-col")
    * @returns Next available Y position for stacking
    */
-  const getNextYPosition = (cellId: string): number => {
+  const getNextYPosition = (islandId: string, cellId: string): number => {
     let y = 0;
-    while (placedObjects[`${cellId}-${y}`]) {
+    while (placedObjects[`${islandId}-${cellId}-${y}`]) {
       y++;
     }
     return y;
@@ -187,15 +184,20 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
    * Check if a position is valid for placing an item
    * Items must be placed on ground level (y=0) or on top of a terrain block
    *
+   * @param islandId - ID of the island
    * @param cellId - Grid cell identifier
    * @param y - Y position to check
    * @returns true if position is valid
    */
-  const isValidPosition = (cellId: string, y: number): boolean => {
+  const isValidPosition = (
+    islandId: string,
+    cellId: string,
+    y: number
+  ): boolean => {
     if (y === 0) return true; // Ground level is always valid
 
     // Check if there's an item below
-    const itemBelow = placedObjects[`${cellId}-${y - 1}`];
+    const itemBelow = placedObjects[`${islandId}-${cellId}-${y - 1}`];
     if (!itemBelow) return false; // No support below
 
     // Only allow placement on top of terrain blocks
@@ -206,12 +208,17 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
    * Check if there's a block stacked above this position
    * Used to prevent moving/removing blocks that support other blocks
    *
+   * @param islandId - ID of the island
    * @param cellId - Grid cell identifier
    * @param y - Y position to check
    * @returns true if there's a block above
    */
-  const hasBlockAbove = (cellId: string, y: number): boolean => {
-    return !!placedObjects[`${cellId}-${y + 1}`];
+  const hasBlockAbove = (
+    islandId: string,
+    cellId: string,
+    y: number
+  ): boolean => {
+    return !!placedObjects[`${islandId}-${cellId}-${y + 1}`];
   };
 
   /**
@@ -246,7 +253,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     // Single-click: Open dialog (if no item selected for placement)
     if (!selectedPlacedItem || selectedPlacedItem === clickedItemId) {
       // Check if there are blocks above - if so, prevent dialog
-      if (hasBlockAbove(cellId, y)) {
+      if (islandId && hasBlockAbove(islandId, cellId, y)) {
         console.log("Cannot interact with block that has items above it");
         alert(
           "Cannot interact with this block - remove blocks above it first!"
@@ -303,13 +310,14 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     type: string,
     name: string,
     cellId: string,
-    y: number
+    y: number,
+    islandId?: string
   ) => {
     console.log("Placed block double-clicked:", { itemId, type, name });
 
     // Double-click: Select for moving
     // Only allow selecting if this is the top block (no blocks above it)
-    if (hasBlockAbove(cellId, y)) {
+    if (islandId && hasBlockAbove(islandId, cellId, y)) {
       console.log("Cannot select block with items above it");
       alert("Cannot move this block - remove blocks above it first!");
       return;
@@ -361,7 +369,8 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
             clickedType,
             clickedName,
             cellId,
-            y
+            y,
+            islandId
           )
         }
       />
@@ -431,7 +440,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
 
       // Create cell ID (format: "row-col" where row=gridZ, col=gridX)
       const cellId = `${islandItem.grid_z}-${islandItem.grid_x}`;
-      const positionKey = `${cellId}-${y}`;
+      const positionKey = `${island.id}-${cellId}-${y}`;
 
       const { modelUrl, itemType, itemName } = getItemMetadata(islandItem);
 
@@ -604,9 +613,9 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       });
     }
 
-    const y = getNextYPosition(cellId);
+    const y = getNextYPosition(islandId, cellId);
 
-    if (!isValidPosition(cellId, y)) {
+    if (!isValidPosition(islandId, cellId, y)) {
       console.log(
         "Invalid position - blocks can only be placed on ground or on terrain blocks!"
       );
@@ -635,14 +644,15 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       hasModelUrl: !!modelUrl,
     });
 
-    const positionKey = `${cellId}-${y}`;
+    const positionKey = `${islandId}-${cellId}-${y}`;
 
     // Check if this item is already placed somewhere (moving it)
     const oldPositionKey =
       selectedItem.grid_x !== null &&
       selectedItem.grid_y !== null &&
-      selectedItem.grid_z !== null
-        ? `${selectedItem.grid_z}-${selectedItem.grid_x}-${selectedItem.grid_y}`
+      selectedItem.grid_z !== null &&
+      selectedItem.island_id
+        ? `${selectedItem.island_id}-${selectedItem.grid_z}-${selectedItem.grid_x}-${selectedItem.grid_y}`
         : null;
 
     console.log("Old position key:", oldPositionKey);
