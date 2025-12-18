@@ -386,21 +386,32 @@ export const useBlockEditor = ({
       }));
 
       try {
-        await Promise.all([
-          fetch("/api/item-data", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, order_index: blockAbove.order_index }),
-          }),
-          fetch("/api/item-data", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: blockAbove.id,
-              order_index: block.order_index,
-            }),
-          }),
-        ]);
+        const updatePromises = [];
+
+        if (!id.startsWith("temp-")) {
+          updatePromises.push(
+            fetch("/api/item-data", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id, order_index: blockAbove.order_index }),
+            })
+          );
+        }
+
+        if (!blockAbove.id.startsWith("temp-")) {
+          updatePromises.push(
+            fetch("/api/item-data", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: blockAbove.id,
+                order_index: block.order_index,
+              }),
+            })
+          );
+        }
+
+        await Promise.all(updatePromises);
       } catch (error) {
         // Rollback
         setState((prev) => ({
@@ -439,21 +450,32 @@ export const useBlockEditor = ({
       }));
 
       try {
-        await Promise.all([
-          fetch("/api/item-data", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, order_index: blockBelow.order_index }),
-          }),
-          fetch("/api/item-data", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: blockBelow.id,
-              order_index: block.order_index,
-            }),
-          }),
-        ]);
+        const updatePromises = [];
+
+        if (!id.startsWith("temp-")) {
+          updatePromises.push(
+            fetch("/api/item-data", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id, order_index: blockBelow.order_index }),
+            })
+          );
+        }
+
+        if (!blockBelow.id.startsWith("temp-")) {
+          updatePromises.push(
+            fetch("/api/item-data", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: blockBelow.id,
+                order_index: block.order_index,
+              }),
+            })
+          );
+        }
+
+        await Promise.all(updatePromises);
       } catch (error) {
         // Rollback
         setState((prev) => ({
@@ -511,13 +533,15 @@ export const useBlockEditor = ({
       // Save all order changes
       try {
         await Promise.all(
-          updatedBlocks.map((block, index) =>
-            fetch("/api/item-data", {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id: block.id, order_index: index }),
-            })
-          )
+          updatedBlocks
+            .filter((block) => !block.id.startsWith("temp-"))
+            .map((block, index) =>
+              fetch("/api/item-data", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: block.id, order_index: index }),
+              })
+            )
         );
       } catch (error) {
         // Rollback
