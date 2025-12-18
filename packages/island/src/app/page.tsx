@@ -21,7 +21,7 @@ const Home = async () => {
   }
 
   return (
-    <div className="relative flex h-screen w-screen flex-col overflow-y-auto overflow-x-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+    <div className="relative h-screen w-full flex-col overflow-x-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
       {/* bg */}
       <IslandsBg />
       <CloudsBg />
@@ -32,6 +32,7 @@ const Home = async () => {
       <HowItWorksSection />
       <CtaSection />
       <FooterSection />
+      <div className="h-[50px] bg-[#d9d9d9]"></div>
     </div>
   );
 };

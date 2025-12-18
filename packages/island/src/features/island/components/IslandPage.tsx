@@ -28,6 +28,15 @@ import {
 import AddIslandContent from "./Dialog/AddIslandContent";
 import EditIslandContent from "./Dialog/EditIslandContent";
 import IslandIcon from "@/icons/IslandIcon";
+import ChangeUsernameContent from "./Dialog/ChangeUsernameContent";
+import LockIcon from "@/icons/LockIcon";
+import ChangePasswordContent from "./Dialog/ChangePasswordContent";
+import AchievementContent from "./Dialog/AchievementContent";
+import {
+  ToastProvider,
+  useToast,
+} from "@/features/island/contexts/ToastContext";
+import LoadingScreen from "./Shared/LoadingScreen";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -59,16 +68,32 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const [profile, setProfile] = useState(initialProfile);
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error, refetch, upgradeIsland } = useIslands();
+  const { showToast } = useToast();
 
-  // Sync no_of_islands with the actual islands list
+  // Calculate total level dynamically from islands
+  const totalLevel = islands
+    ? islands.reduce((acc, island) => acc + (island.level || 0), 0)
+    : initialProfile.level;
+
+  // Sync profile from server updates (e.g. username change) and dynamic level
+  useEffect(() => {
+    setProfile((prev) => ({
+      ...prev,
+      name: initialProfile.name,
+      email: initialProfile.email,
+    }));
+  }, [initialProfile.name, initialProfile.email]);
+
+  // Sync no_of_islands and level with the actual islands list
   useEffect(() => {
     if (!loading && islands) {
       setProfile((prev) => ({
         ...prev,
         no_of_islands: islands.length,
+        level: totalLevel, // Update level based on islands calculation
       }));
     }
-  }, [islands, loading]);
+  }, [islands, loading, totalLevel]);
 
   const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(
     null
@@ -100,6 +125,13 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     genre: string;
     theme: string;
   } | null>(null);
+
+  const handleOptimisticProfileUpdate = (newName: string) => {
+    setProfile((prev) => ({
+      ...prev,
+      name: newName,
+    }));
+  };
 
   const handleEditIsland = (
     id: string,
@@ -144,10 +176,13 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         mana: prev.mana - cost,
       }));
 
-      alert(`Island upgraded to Level ${newLevel}!`);
+      showToast(`Island upgraded to Level ${newLevel}!`, "success");
     } else {
       console.error("Island upgrade failed");
-      alert("Failed to upgrade island. Please check your connection.");
+      showToast(
+        "Failed to upgrade island. Please check your connection.",
+        "error"
+      );
     }
   };
 
@@ -255,8 +290,9 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       // Check if there are blocks above - if so, prevent dialog
       if (islandId && hasBlockAbove(islandId, cellId, y)) {
         console.log("Cannot interact with block that has items above it");
-        alert(
-          "Cannot interact with this block - remove blocks above it first!"
+        showToast(
+          "Cannot interact with this block - remove blocks above it first!",
+          "error"
         );
         return;
       }
@@ -295,8 +331,9 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         }
       } else if (clickedType !== "terrain") {
         console.log("Cannot place on non-terrain blocks");
-        alert(
-          "Items can only be placed on terrain blocks, not on decorative or functional items."
+        showToast(
+          "Items can only be placed on terrain blocks, not on decorative or functional items.",
+          "error"
         );
       }
     }
@@ -319,7 +356,10 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     // Only allow selecting if this is the top block (no blocks above it)
     if (islandId && hasBlockAbove(islandId, cellId, y)) {
       console.log("Cannot select block with items above it");
-      alert("Cannot move this block - remove blocks above it first!");
+      showToast(
+        "Cannot move this block - remove blocks above it first!",
+        "error"
+      );
       return;
     }
 
@@ -619,8 +659,9 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       console.log(
         "Invalid position - blocks can only be placed on ground or on terrain blocks!"
       );
-      alert(
-        "Invalid placement: Blocks can only be placed on the ground or on top of terrain blocks."
+      showToast(
+        "Invalid placement: Blocks can only be placed on the ground or on top of terrain blocks.",
+        "error"
       );
       setSelectedPlacedItem(null);
       return;
@@ -930,7 +971,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       const state = islandManaStates[islandId];
       if (!state || state.accumulatedMana < 1) {
         console.log("No mana to collect");
-        return;
+        return true;
       }
 
       const manaToCollect = Math.floor(state.accumulatedMana);
@@ -972,19 +1013,19 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         syncManaToDb(islandId, 0);
 
         console.log(`Collected ${data.collected} mana from island ${islandId}`);
+        return true;
       } catch (err) {
         console.error("Failed to collect mana:", err);
+        return true;
       }
     },
     [islandManaStates, syncManaToDb]
   );
 
-  if (loading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
-        <div className="text-2xl text-white">Loading islands...</div>
-      </div>
-    );
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  if (loading || isSigningOut) {
+    return <LoadingScreen />;
   }
 
   if (error) {
@@ -996,7 +1037,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   }
 
   return (
-    <div className="relative h-screen w-screen max-w-[100dvw] overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
+    <div className="relative h-[100dvh] w-screen max-w-[100dvw] overflow-hidden bg-gradient-to-b from-[#72b9e3] from-[37%] to-[#ffffff] to-[100%]">
       <div className="absolute inset-0 z-0">
         <IslandCanvas
           islands={islands}
@@ -1058,7 +1099,12 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <ProfileContent userName={profile.name} userEmail={profile.email} />
+          <ProfileContent
+            userName={profile.name}
+            userEmail={profile.email}
+            setIsDialogOpen={setIsDialogOpen}
+            setIsSigningOut={setIsSigningOut}
+          />
         </Dialog>
       )}
 
@@ -1066,11 +1112,11 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         <Dialog
           iconStyle="bg-[#68a5ad] text-white"
           icon={<TrophyIcon />}
-          title="Level"
+          title="Achievements"
           className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <div>Level information here</div>
+          <AchievementContent islands={islands} islandItems={islandItems} />
         </Dialog>
       )}
 
@@ -1140,6 +1186,33 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         </Dialog>
       )}
 
+      {isDialogOpen === "change-username" && (
+        <Dialog
+          title="Change Username"
+          icon={<UserIcon />}
+          iconStyle="bg-[#6d3f33] text-white text-2xl"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <ChangeUsernameContent
+            setIsDialogOpen={setIsDialogOpen}
+            onOptimisticUpdate={handleOptimisticProfileUpdate}
+          />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "change-password" && (
+        <Dialog
+          title="Change Password"
+          icon={<LockIcon />}
+          iconStyle="bg-[#6d3f33] text-white text-2xl"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <ChangePasswordContent setIsDialogOpen={setIsDialogOpen} />
+        </Dialog>
+      )}
+
       {/* Sidebar Content */}
       <SidebarPage
         isOpen={sidebarContentPage?.open}
@@ -1158,7 +1231,9 @@ const IslandPage = ({ profile }: IslandPageProps) => {
   // Don't pass islandId here - we need ALL items, not just placed ones
   return (
     <IslandItemsProvider profileId={profile.id}>
-      <IslandPageContent profile={profile} />
+      <ToastProvider>
+        <IslandPageContent profile={profile} />
+      </ToastProvider>
     </IslandItemsProvider>
   );
 };

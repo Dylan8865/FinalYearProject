@@ -15,13 +15,13 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
+    // Prevent updating id if passed in body
     const { id, ...updates } = body;
 
     const { data: profile, error } = await supabase
       .from("profile")
       .update(updates)
-      .eq("id", id)
-      .eq("user_id", user.id)
+      .eq("id", user.id)
       .select()
       .single();
 

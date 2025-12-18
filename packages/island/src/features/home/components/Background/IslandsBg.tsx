@@ -49,7 +49,7 @@ const Island4 = () => {
 
 const IslandsBg = () => {
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden opacity-40">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-40">
       <Island1 />
       <Island2 />
       <Island3 />

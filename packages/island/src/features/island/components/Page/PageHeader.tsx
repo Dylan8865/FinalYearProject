@@ -9,12 +9,14 @@ import Image from "next/image";
 import { useIslandItems } from "../../hooks/useIslandItems";
 
 interface PageHeaderProps {
+  isExpanded: boolean;
   islandItem: IslandItemType | null;
   setIsSaving: Dispatch<SetStateAction<boolean>>;
   setSaveError: Dispatch<SetStateAction<string | null>>;
 }
 
 const PageHeader = ({
+  isExpanded,
   islandItem,
   setIsSaving,
   setSaveError,
@@ -68,7 +70,9 @@ const PageHeader = ({
   return (
     <div className="w-full space-y-4 text-white">
       {islandItem?.cover_image ? (
-        <div className="relative h-[200px] w-full">
+        <div
+          className={`${isExpanded ? "h-[300px]" : "h-[200px]"} relative w-full transition-all duration-300 ease-in-out`}
+        >
           <Image
             src={islandItem.cover_image}
             alt={islandItem.title || ""}
@@ -77,7 +81,9 @@ const PageHeader = ({
           />
         </div>
       ) : (
-        <div className="h-[200px] w-full bg-gray-700" />
+        <div
+          className={`${isExpanded ? "h-[300px]" : "h-[200px]"} w-full bg-gray-700 transition-all duration-300 ease-in-out`}
+        />
       )}
 
       <div className="px-6">

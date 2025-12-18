@@ -97,10 +97,6 @@ const InventoryContent = ({
   const [showTooltip, setShowTooltip] = useState<IslandItemType | null>();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  if (loading) {
-    return <div className="text-center">Loading inventory...</div>;
-  }
-
   return (
     <div className="relative h-[400px] overflow-y-scroll md:h-fit md:overflow-visible">
       <div className="grid grid-cols-5 gap-4 md:grid-cols-10">
