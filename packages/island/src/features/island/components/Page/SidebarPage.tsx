@@ -118,6 +118,7 @@ const SidebarPage = ({
             islandItemId={islandItem.id}
             initialBlocks={itemData || []}
             onRefetch={refetch}
+            onSavingChange={setIsSaving}
           />
         )}
       </div>

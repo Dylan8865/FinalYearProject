@@ -17,6 +17,7 @@ interface BlockEditorContainerProps {
   islandItemId: string;
   initialBlocks: ItemDataType[];
   onRefetch?: () => void;
+  onSavingChange?: (isSaving: boolean) => void;
 }
 
 /**
@@ -33,6 +34,7 @@ const BlockEditorContainer = ({
   islandItemId,
   initialBlocks,
   onRefetch,
+  onSavingChange,
 }: BlockEditorContainerProps) => {
   // Slash command menu state
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
@@ -69,6 +71,11 @@ const BlockEditorContainer = ({
       // setTimeout(() => setToast(null), 2000);
     },
   });
+
+  // Sync saving state with parent
+  useEffect(() => {
+    onSavingChange?.(blockEditor.isSaving);
+  }, [blockEditor.isSaving, onSavingChange]);
 
   // Initialize focus manager
   const focusManager = useFocusManager({
@@ -296,13 +303,7 @@ const BlockEditorContainer = ({
 
   return (
     <div ref={containerRef} className="relative px-16 py-4">
-      {/* Saving indicator */}
-      {blockEditor.isSaving && (
-        <div className="absolute right-4 top-2 flex items-center gap-2 text-xs text-gray-500">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500" />
-          Saving...
-        </div>
-      )}
+      {/* Saving indicator removed - handled by parent */}
 
       {/* Block list */}
       <div className="space-y-0.5">

@@ -21,11 +21,13 @@ import SidebarPage from "./Page/SidebarPage";
 import { CameraControlsHandle } from "./IslandCanvas/CameraControls";
 import { type OffscreenIsland } from "./IslandCanvas/IslandIndicators";
 import RefreshIcon from "@/icons/RefreshIcon";
-import ManaCollectionPopup from "@/features/island/components/IslandCanvas/ManaCollectionPopup";
 import {
   calculateIslandTotalManaRate,
   MAX_ACCUMULATION_TIME,
 } from "@/utils/manaCalculations";
+import AddIslandContent from "./Dialog/AddIslandContent";
+import EditIslandContent from "./Dialog/EditIslandContent";
+import IslandIcon from "@/icons/IslandIcon";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -56,19 +58,26 @@ interface PlacedObject {
 const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const [profile, setProfile] = useState(initialProfile);
   const [isDialogOpen, setIsDialogOpen] = useState("");
-  const { islands, loading, error } = useIslands();
+  const { islands, loading, error, refetch, upgradeIsland } = useIslands();
+
+  // Sync no_of_islands with the actual islands list
+  useEffect(() => {
+    if (!loading && islands) {
+      setProfile((prev) => ({
+        ...prev,
+        no_of_islands: islands.length,
+      }));
+    }
+  }, [islands, loading]);
+
   const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(
     null
   ); // Currently selected placed item ID
   const [placedObjects, setPlacedObjects] = useState<
     Record<string, PlacedObject>
   >({});
-  const {
-    islandItems,
-    placeItemOnIsland,
-    removeItemFromIsland,
-    moveToInventory,
-  } = useIslandItemsContext();
+  const { islandItems, placeItemOnIsland, moveToInventory } =
+    useIslandItemsContext();
 
   // Functional item dialog
   const [functionalItemDialog, setFunctionalItemDialog] = useState<{
@@ -83,6 +92,64 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     itemId: string;
     itemName: string;
   } | null>(null);
+
+  // Editing island state
+  const [editingIsland, setEditingIsland] = useState<{
+    id: string;
+    name: string;
+    genre: string;
+    theme: string;
+  } | null>(null);
+
+  const handleEditIsland = (
+    id: string,
+    name: string,
+    genre: string,
+    theme: string
+  ) => {
+    setEditingIsland({ id, name, genre, theme });
+    setIsDialogOpen("edit-island");
+  };
+
+  const handleUpgradeIsland = async (id: string) => {
+    // 1. Find current island level to determine cost
+    const island = islands.find((i) => i.id === id);
+    if (!island) return;
+
+    const currentLevel = island.level || 1;
+    if (currentLevel >= 3) return;
+
+    // Costs must match UI: Lv 1->2 = 10M, Lv 2->3 = 100M
+    const upgrades = {
+      1: 10_000_000,
+      2: 100_000_000,
+    };
+    const cost = upgrades[currentLevel as 1 | 2];
+    const newLevel = currentLevel + 1;
+
+    console.log(
+      `Attempting upgrade for island ${id} to level ${newLevel} for ${cost} mana`
+    );
+
+    // 2. Call upgrade function
+    const success = await upgradeIsland(id, newLevel, cost);
+
+    if (success) {
+      console.log("Island upgrade successful!");
+      // 3. Update local profile mana immediately (optimistic update could be done, but refetch handles it mostly)
+      // Since refetch is called inside useIslands, islands will update.
+      // We also need to update profile mana in UI.
+      setProfile((prev) => ({
+        ...prev,
+        mana: prev.mana - cost,
+      }));
+
+      alert(`Island upgraded to Level ${newLevel}!`);
+    } else {
+      console.error("Island upgrade failed");
+      alert("Failed to upgrade island. Please check your connection.");
+    }
+  };
 
   // Mana system state - simplified
   interface IslandManaState {
@@ -101,12 +168,13 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
    * Get the next available Y position (vertical stacking) for a given grid cell
    * Items can be stacked vertically on the same grid cell
    *
+   * @param islandId - ID of the island
    * @param cellId - Grid cell identifier (format: "row-col")
    * @returns Next available Y position for stacking
    */
-  const getNextYPosition = (cellId: string): number => {
+  const getNextYPosition = (islandId: string, cellId: string): number => {
     let y = 0;
-    while (placedObjects[`${cellId}-${y}`]) {
+    while (placedObjects[`${islandId}-${cellId}-${y}`]) {
       y++;
     }
     return y;
@@ -116,15 +184,20 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
    * Check if a position is valid for placing an item
    * Items must be placed on ground level (y=0) or on top of a terrain block
    *
+   * @param islandId - ID of the island
    * @param cellId - Grid cell identifier
    * @param y - Y position to check
    * @returns true if position is valid
    */
-  const isValidPosition = (cellId: string, y: number): boolean => {
+  const isValidPosition = (
+    islandId: string,
+    cellId: string,
+    y: number
+  ): boolean => {
     if (y === 0) return true; // Ground level is always valid
 
     // Check if there's an item below
-    const itemBelow = placedObjects[`${cellId}-${y - 1}`];
+    const itemBelow = placedObjects[`${islandId}-${cellId}-${y - 1}`];
     if (!itemBelow) return false; // No support below
 
     // Only allow placement on top of terrain blocks
@@ -135,12 +208,17 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
    * Check if there's a block stacked above this position
    * Used to prevent moving/removing blocks that support other blocks
    *
+   * @param islandId - ID of the island
    * @param cellId - Grid cell identifier
    * @param y - Y position to check
    * @returns true if there's a block above
    */
-  const hasBlockAbove = (cellId: string, y: number): boolean => {
-    return !!placedObjects[`${cellId}-${y + 1}`];
+  const hasBlockAbove = (
+    islandId: string,
+    cellId: string,
+    y: number
+  ): boolean => {
+    return !!placedObjects[`${islandId}-${cellId}-${y + 1}`];
   };
 
   /**
@@ -175,7 +253,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     // Single-click: Open dialog (if no item selected for placement)
     if (!selectedPlacedItem || selectedPlacedItem === clickedItemId) {
       // Check if there are blocks above - if so, prevent dialog
-      if (hasBlockAbove(cellId, y)) {
+      if (islandId && hasBlockAbove(islandId, cellId, y)) {
         console.log("Cannot interact with block that has items above it");
         alert(
           "Cannot interact with this block - remove blocks above it first!"
@@ -232,13 +310,14 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     type: string,
     name: string,
     cellId: string,
-    y: number
+    y: number,
+    islandId?: string
   ) => {
     console.log("Placed block double-clicked:", { itemId, type, name });
 
     // Double-click: Select for moving
     // Only allow selecting if this is the top block (no blocks above it)
-    if (hasBlockAbove(cellId, y)) {
+    if (islandId && hasBlockAbove(islandId, cellId, y)) {
       console.log("Cannot select block with items above it");
       alert("Cannot move this block - remove blocks above it first!");
       return;
@@ -290,7 +369,8 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
             clickedType,
             clickedName,
             cellId,
-            y
+            y,
+            islandId
           )
         }
       />
@@ -360,7 +440,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
 
       // Create cell ID (format: "row-col" where row=gridZ, col=gridX)
       const cellId = `${islandItem.grid_z}-${islandItem.grid_x}`;
-      const positionKey = `${cellId}-${y}`;
+      const positionKey = `${island.id}-${cellId}-${y}`;
 
       const { modelUrl, itemType, itemName } = getItemMetadata(islandItem);
 
@@ -533,9 +613,9 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       });
     }
 
-    const y = getNextYPosition(cellId);
+    const y = getNextYPosition(islandId, cellId);
 
-    if (!isValidPosition(cellId, y)) {
+    if (!isValidPosition(islandId, cellId, y)) {
       console.log(
         "Invalid position - blocks can only be placed on ground or on terrain blocks!"
       );
@@ -564,14 +644,15 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       hasModelUrl: !!modelUrl,
     });
 
-    const positionKey = `${cellId}-${y}`;
+    const positionKey = `${islandId}-${cellId}-${y}`;
 
     // Check if this item is already placed somewhere (moving it)
     const oldPositionKey =
       selectedItem.grid_x !== null &&
       selectedItem.grid_y !== null &&
-      selectedItem.grid_z !== null
-        ? `${selectedItem.grid_z}-${selectedItem.grid_x}-${selectedItem.grid_y}`
+      selectedItem.grid_z !== null &&
+      selectedItem.island_id
+        ? `${selectedItem.island_id}-${selectedItem.grid_z}-${selectedItem.grid_x}-${selectedItem.grid_y}`
         : null;
 
     console.log("Old position key:", oldPositionKey);
@@ -929,8 +1010,13 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           onOffscreenIslandsChange={handleOffscreenIslandsChange}
           islandManaStates={islandManaStates}
           onIslandClick={handleIslandClick}
+          onEditIsland={handleEditIsland}
+          onUpgradeIsland={handleUpgradeIsland}
+          userMana={profile.mana}
         />
       </div>
+
+      {/* 2D UI Overlays */}
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-10">
         <div className="pointer-events-auto">
           <StatusBar setIsDialogOpen={setIsDialogOpen} profile={profile} />
@@ -1022,6 +1108,38 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         </Dialog>
       )}
 
+      {isDialogOpen === "island" && (
+        <Dialog
+          iconStyle="bg-[#5a706b] text-white text-2xl"
+          icon={<IslandIcon />}
+          title="Add Island"
+          className="flex items-center justify-center"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <AddIslandContent
+            setIsDialogOpen={setIsDialogOpen}
+            onIslandAdded={refetch}
+          />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "edit-island" && editingIsland && (
+        <Dialog
+          title="Edit Island"
+          icon={<IslandIcon />}
+          iconStyle="bg-[#5a706b] text-white text-2xl"
+          size="medium"
+          setIsDialogOpen={setIsDialogOpen}
+        >
+          <EditIslandContent
+            setIsDialogOpen={setIsDialogOpen}
+            island={editingIsland}
+            onIslandUpdated={refetch}
+          />
+        </Dialog>
+      )}
+
       {/* Sidebar Content */}
       <SidebarPage
         isOpen={sidebarContentPage?.open}
@@ -1030,13 +1148,6 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         onClick={() =>
           setSidebarContentPage({ open: false, itemId: "", itemName: "" })
         }
-      />
-
-      {/* Mana Collection Popup */}
-      <ManaCollectionPopup
-        amount={manaPopup.amount}
-        visible={manaPopup.visible}
-        onComplete={() => setManaPopup({ visible: false, amount: 0 })}
       />
     </div>
   );

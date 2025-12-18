@@ -3,15 +3,21 @@
 import { Html } from "@react-three/drei";
 import ManaIcon from "@/icons/ManaIcon";
 import CloseIcon from "@/icons/CloseIcon";
+import { toCapitalise } from "@/lib/capitalise";
 
 interface IslandTooltipProps {
   islandName: string;
+  islandGenre: string;
+  islandTheme: string;
   islandLevel: number;
   manaRate: number;
   accumulatedMana: number;
   itemCount: number;
   visible: boolean;
   onCollectClick?: () => void;
+  onEditClick?: () => void;
+  onUpgradeClick?: () => void;
+  userMana?: number;
   onTooltipHover?: (isHovered: boolean) => void;
   onClose?: () => void;
 }
@@ -32,16 +38,23 @@ interface IslandTooltipProps {
  */
 const IslandTooltip = ({
   islandName,
+  islandGenre,
+  islandTheme,
   islandLevel,
   manaRate,
   accumulatedMana,
   itemCount,
   visible,
   onCollectClick,
+  onEditClick,
+  onUpgradeClick,
+  userMana = 0,
   onTooltipHover,
   onClose,
 }: IslandTooltipProps) => {
   if (!visible) return null;
+
+  const isCollectionLocked = accumulatedMana < 1000;
 
   return (
     <Html
@@ -134,12 +147,44 @@ const IslandTooltip = ({
               fontWeight: "600",
             }}
           >
-            Lv. {islandLevel}
+            {islandLevel == 3 ? `Max Lv. ${islandLevel}` : `Lv. ${islandLevel}`}
           </span>
         </div>
 
         {/* Stats */}
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          {/* Island's genre */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span style={{ color: "#9ca3af", fontSize: "12px" }}>Genre</span>
+            <span
+              style={{ color: "#fff", fontWeight: "400", fontSize: "13px" }}
+            >
+              {toCapitalise(islandGenre)}
+            </span>
+          </div>
+
+          {/* Island's theme */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span style={{ color: "#9ca3af", fontSize: "12px" }}>Theme</span>
+            <span
+              style={{ color: "#fff", fontWeight: "400", fontSize: "13px" }}
+            >
+              {toCapitalise(islandTheme)}
+            </span>
+          </div>
+
           {/* Mana Rate */}
           <div
             style={{
@@ -216,43 +261,166 @@ const IslandTooltip = ({
         </div>
 
         {/* Collect Button */}
-        {accumulatedMana >= 1000 && onCollectClick && (
+        {!isCollectionLocked && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onCollectClick();
+              onCollectClick && onCollectClick();
             }}
+            /* ... existing styles ... */
             style={{
               width: "100%",
               marginTop: "12px",
               padding: "8px 16px",
-              background: "linear-gradient(135deg, #10b981, #059669)",
+              background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
               border: "none",
               borderRadius: "8px",
-              color: "white",
-              fontWeight: "600",
-              fontSize: "13px",
+              color: "#8B4513",
+              fontWeight: "bold",
+              fontSize: "14px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              boxShadow: "0 4px 12px rgba(255, 215, 0, 0.3)",
+              transition: "transform 0.1s ease",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "scale(1.05)")
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          >
+            <ManaIcon />
+            <span>Collect</span>
+          </button>
+        )}
+
+        {/* Upgrade Button */}
+        {(() => {
+          const upgrades = {
+            1: 10_000_000,
+            2: 100_000_000,
+          };
+          const nextLevel = (islandLevel + 1) as 2 | 3;
+          const cost = upgrades[islandLevel as 1 | 2];
+
+          if (!cost || islandLevel >= 3) return null;
+
+          const canAfford = userMana >= cost;
+          const missingMana = cost - userMana;
+
+          return (
+            <div className="group relative w-full">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (canAfford && onUpgradeClick) {
+                    onUpgradeClick();
+                  }
+                }}
+                disabled={!canAfford}
+                style={{
+                  width: "100%",
+                  marginTop: "8px",
+                  padding: "6px 16px",
+                  background: canAfford
+                    ? "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
+                    : "rgba(255, 255, 255, 0.05)",
+                  border: canAfford
+                    ? "none"
+                    : "1px solid rgba(255, 255, 255, 0.1)",
+                  borderRadius: "8px",
+                  color: canAfford ? "#064e3b" : "#6b7280",
+                  fontWeight: "bold",
+                  fontSize: "12px",
+                  cursor: canAfford ? "pointer" : "not-allowed",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  boxShadow: canAfford
+                    ? "0 4px 12px rgba(74, 222, 128, 0.3)"
+                    : "none",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  if (canAfford)
+                    e.currentTarget.style.transform = "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  if (canAfford) e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                <span>Upgrade (Lv {nextLevel})</span>
+              </button>
+
+              {/* Cost Tooltip */}
+              <div
+                className="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden w-max -translate-x-1/2 rounded bg-black/90 p-2 text-xs text-white opacity-0 shadow-lg group-hover:block group-hover:opacity-100"
+                style={{
+                  zIndex: 1000, // Ensure it's on top of other elements
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+              >
+                <div className="flex flex-col items-center gap-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-400">Cost:</span>
+                    <span className="font-bold text-[#fbbf24]">
+                      {new Intl.NumberFormat("en").format(cost)}
+                    </span>
+                    <ManaIcon width={10} height={10} />
+                  </div>
+                  {!canAfford && (
+                    <div className="flex items-center gap-1 text-[10px] text-red-400">
+                      <span>Missing:</span>
+                      <span>
+                        {new Intl.NumberFormat("en").format(missingMana)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {/* Tooltip Arrow */}
+                <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-b border-r border-[rgba(255,255,255,0.1)] bg-black/90"></div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Edit Button */}
+        {onEditClick && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditClick();
+            }}
+            style={{
+              width: "100%",
+              marginTop: "8px",
+              padding: "6px 16px",
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              borderRadius: "8px",
+              color: "#e5e7eb",
+              fontWeight: "500",
+              fontSize: "12px",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: "6px",
               transition: "all 0.2s ease",
-              boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.02)";
-              e.currentTarget.style.boxShadow =
-                "0 6px 16px rgba(16, 185, 129, 0.4)";
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+              e.currentTarget.style.color = "white";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(16, 185, 129, 0.3)";
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+              e.currentTarget.style.color = "#e5e7eb";
             }}
           >
-            <ManaIcon />
-            <span>Collect</span>
+            <span>Edit Island</span>
           </button>
         )}
       </div>
