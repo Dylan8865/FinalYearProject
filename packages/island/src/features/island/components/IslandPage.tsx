@@ -125,7 +125,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
 
     // Costs must match UI: Lv 1->2 = 10M, Lv 2->3 = 100M
     const upgrades = {
-      1: 1,
+      1: 10_000_000,
       2: 100_000_000,
     };
     const cost = upgrades[currentLevel as 1 | 2];

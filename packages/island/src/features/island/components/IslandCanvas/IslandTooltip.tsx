@@ -300,7 +300,7 @@ const IslandTooltip = ({
         {/* Upgrade Button */}
         {(() => {
           const upgrades = {
-            1: 1,
+            1: 10_000_000,
             2: 100_000_000,
           };
           const nextLevel = (islandLevel + 1) as 2 | 3;
