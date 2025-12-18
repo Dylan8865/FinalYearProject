@@ -89,6 +89,24 @@ export function useIslands() {
     }
   };
 
+  const deleteIsland = async (id: string) => {
+    try {
+      const response = await fetch(`/api/islands?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete island");
+      }
+
+      await fetchIslands();
+      return true;
+    } catch (err) {
+      console.error("Failed to delete island:", err);
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchIslands();
   }, []);
@@ -100,5 +118,6 @@ export function useIslands() {
     refetch: fetchIslands,
     createIsland,
     updateIsland,
+    deleteIsland,
   };
 }

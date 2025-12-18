@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AddIslandInput from "./AddIslandInput";
 import AddIslandSelect from "./AdIslandSelect";
 import AddIslandButton from "./AddIslandButton";
+import Button from "./Button";
 import { useIslands } from "../../hooks/useIslands";
 
 export interface Option {
@@ -25,6 +26,10 @@ const EditIslandContent = ({
   island,
   onIslandUpdated,
 }: EditIslandContentProps) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const [value, setValue] = useState<{
     name: string;
     genre: string;
@@ -61,7 +66,7 @@ const EditIslandContent = ({
     setErrors({ ...errors, theme: "" });
   };
 
-  const { updateIsland } = useIslands();
+  const { updateIsland, deleteIsland } = useIslands();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +93,82 @@ const EditIslandContent = ({
       }
     });
   };
+
+  const handleDelete = async () => {
+    if (confirmText !== "DELETE") {
+      setDeleteError('Please type "DELETE" to confirm');
+      return;
+    }
+
+    const success = await deleteIsland(island.id);
+    if (success) {
+      onIslandUpdated();
+      setIsDialogOpen("");
+    } else {
+      setDeleteError("Failed to delete island");
+    }
+  };
+
+  if (isDeleting) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center p-4">
+        <div className="w-full space-y-6">
+          <div className="space-y-3 rounded border-2 border-[#5a1a1a] bg-[#2d0a0a]/40 p-4">
+            <p className="text-center font-bold text-[#ff6b6b]">
+              This action cannot be undone!
+            </p>
+            <p className="text-center text-sm text-[#b8b8b8]">
+              This will permanently delete:
+            </p>
+            <ul className="space-y-1 text-center text-sm text-[#b8b8b8]">
+              <li>• Island "{island.name}"</li>
+              <li>• All items on this island</li>
+            </ul>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-center text-sm text-white">
+              Type <span className="font-bold text-[#ff6b6b]">DELETE</span> to
+              confirm:
+            </label>
+            <input
+              type="text"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              className="w-full border-2 border-[#5a1a1a] bg-[#1a0a0a] p-3 text-center text-white placeholder-[#5a3a3a] focus:border-[#8B0000] focus:outline-none"
+              placeholder="DELETE"
+            />
+          </div>
+
+          {deleteError && (
+            <div className="rounded border border-[#5a1a1a] bg-[#2d0a0a]/40 p-3 text-center text-sm text-[#ff6b6b]">
+              {deleteError}
+            </div>
+          )}
+
+          <div className="flex justify-center gap-4">
+            <Button
+              className="cursor-pointer border border-transparent bg-[#4a4a4a] transition hover:border-[#5a5a5a]"
+              onClick={() => setIsDeleting(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className={`border border-[#5a1a1a] transition ${
+                confirmText !== "DELETE"
+                  ? "cursor-not-allowed bg-[#4a1a1a] opacity-50"
+                  : "cursor-pointer bg-[#8B0000] hover:border-[#a00000]"
+              }`}
+              onClick={handleDelete}
+              disabled={confirmText !== "DELETE"}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full w-full items-center justify-center gap-4">
@@ -134,6 +215,14 @@ const EditIslandContent = ({
         <AddIslandButton color="#8cada5" width="100%">
           Save Changes
         </AddIslandButton>
+
+        <button
+          type="button"
+          onClick={() => setIsDeleting(true)}
+          className="rounded-md border border-[#5a1a1a] p-3 text-sm font-semibold text-red-500 hover:border-[#a00000] hover:text-red-400 hover:underline"
+        >
+          Delete Island
+        </button>
       </form>
     </div>
   );
