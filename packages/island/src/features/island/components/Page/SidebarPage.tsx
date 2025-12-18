@@ -2,7 +2,7 @@
 
 import PageControls from "./PageControls";
 import PageHeader from "./PageHeader";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
 import { useItemData } from "../../hooks/useItemData";
 import { BlockEditorContainer } from "../NotionBlock";
@@ -13,10 +13,6 @@ interface SidebarPageProps {
   itemName?: string;
   onClick?: () => void;
 }
-
-const onExpand = () => {
-  console.log("handle onExpand"); // TODO: implement onExpand
-};
 
 const SidebarPage = ({
   isOpen,
@@ -38,12 +34,9 @@ const SidebarPage = ({
     refetch,
   } = useItemData(islandItem?.id);
 
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-
-  useEffect(() => {
-    console.log("itemData", itemData);
-  }, [itemData]);
 
   if (loading) {
     return (
@@ -94,18 +87,20 @@ const SidebarPage = ({
 
   return (
     <div
-      className="absolute right-0 top-0 z-50 h-full w-4/5 overflow-y-auto bg-[#191919] pb-96 transition-transform duration-300 md:w-[34dvw]"
+      className={`${isExpanded ? "w-full" : "w-4/5 md:w-[34dvw]"} absolute right-0 top-0 z-50 h-full overflow-y-auto bg-[#191919] pb-96 transition-all duration-300 ease-in-out`}
       style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
     >
       <PageControls
         onClick={onClick}
-        onExpand={onExpand}
+        isExpanded={isExpanded}
+        setIsExpanded={setIsExpanded}
         isSaving={isSaving}
         saveError={saveError}
       />
 
       {/* Page Header */}
       <PageHeader
+        isExpanded={isExpanded}
         islandItem={islandItem}
         setIsSaving={setIsSaving}
         setSaveError={setSaveError}

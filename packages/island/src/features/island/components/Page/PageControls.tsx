@@ -1,18 +1,20 @@
 import ExpandIcon from "@/icons/ExpandIcon";
 import LoadingIcon from "@/icons/LoadingIcon";
 import RightArrowIcon from "@/icons/RightArrowIcon";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
 interface PageControlsProps {
   onClick?: () => void;
-  onExpand?: () => void;
+  isExpanded: boolean;
+  setIsExpanded: Dispatch<SetStateAction<boolean>>;
   isSaving?: boolean;
   saveError?: string | null;
 }
 
 const PageControls = ({
   onClick,
-  onExpand,
+  isExpanded,
+  setIsExpanded,
   isSaving,
   saveError,
 }: PageControlsProps) => {
@@ -21,13 +23,16 @@ const PageControls = ({
       <div className="flex items-start justify-start gap-3 p-3 text-base md:text-xs">
         <button
           className="flex items-center justify-center text-white"
-          onClick={onClick}
+          onClick={() => {
+            setIsExpanded(false);
+            onClick?.();
+          }}
         >
           <RightArrowIcon />
         </button>
         <button
           className="flex items-center justify-center text-white"
-          onClick={onExpand}
+          onClick={() => setIsExpanded(!isExpanded)}
         >
           <ExpandIcon />
         </button>
