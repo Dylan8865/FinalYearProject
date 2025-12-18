@@ -31,6 +31,7 @@ import IslandIcon from "@/icons/IslandIcon";
 import ChangeUsernameContent from "./Dialog/ChangeUsernameContent";
 import LockIcon from "@/icons/LockIcon";
 import ChangePasswordContent from "./Dialog/ChangePasswordContent";
+import AchievementContent from "./Dialog/AchievementContent";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -63,7 +64,12 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState("");
   const { islands, loading, error, refetch, upgradeIsland } = useIslands();
 
-  // Sync profile from server updates (e.g. username change)
+  // Calculate total level dynamically from islands
+  const totalLevel = islands
+    ? islands.reduce((acc, island) => acc + (island.level || 0), 0)
+    : initialProfile.level;
+
+  // Sync profile from server updates (e.g. username change) and dynamic level
   useEffect(() => {
     setProfile((prev) => ({
       ...prev,
@@ -72,15 +78,16 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     }));
   }, [initialProfile.name, initialProfile.email]);
 
-  // Sync no_of_islands with the actual islands list
+  // Sync no_of_islands and level with the actual islands list
   useEffect(() => {
     if (!loading && islands) {
       setProfile((prev) => ({
         ...prev,
         no_of_islands: islands.length,
+        level: totalLevel, // Update level based on islands calculation
       }));
     }
-  }, [islands, loading]);
+  }, [islands, loading, totalLevel]);
 
   const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(
     null
@@ -1089,11 +1096,11 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         <Dialog
           iconStyle="bg-[#68a5ad] text-white"
           icon={<TrophyIcon />}
-          title="Level"
+          title="Achievements"
           className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <div>Level information here</div>
+          <AchievementContent islands={islands} islandItems={islandItems} />
         </Dialog>
       )}
 
