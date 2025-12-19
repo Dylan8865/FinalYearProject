@@ -1,106 +1,114 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import ExploreCard from "./ExploreCard";
 
-type World = {
-  id: string;
-  title: string;
-  description: string;
-};
-
-const ExploreClient = ({ worlds }: { worlds: World[] }) => {
+const ExploreClient = () => {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const filteredWorlds = useMemo(() => {
-    const q = search.toLowerCase();
-    return worlds.filter(
-      (w) =>
-        w.title.toLowerCase().includes(q) ||
-        w.description?.toLowerCase().includes(q)
-    );
-  }, [search, worlds]);
+  // debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // fetch results
+  useEffect(() => {
+    const fetchResults = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `/api/search?q=${encodeURIComponent(debouncedSearch)}`
+        );
+        const json = await res.json();
+        setResults(json.data || []);
+      } catch (e) {
+        console.error("Search failed", e);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (debouncedSearch.trim()) fetchResults();
+    else setResults([]);
+  }, [debouncedSearch]);
 
   return (
     <>
-      {/* Search bar（UI 完全一样） */}
-      <div className="max-w-3xl mb-6">
-        <div className="relative">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="opacity-60"
-            >
-              <path
-                d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M21 21l-4.35-4.35"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-            </svg>
-          </div>
-
+      {/* Search Bar + Filters */}
+      <div className="flex items-center mb-6 gap-4">
+        <div className="relative flex-1 max-w-2xl">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+            🔍
+          </span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search for knowledge"
-            className="w-full bg-white/6 border border-white/8 rounded-full py-3 pl-12 pr-4 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-white/10"
+            className="w-full rounded-full bg-white/5 border border-white/10 py-3 pl-12 pr-4 text-sm text-gray-300 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-white/10"
           />
+        </div>
+
+        {/* Category / Sort (占位，逻辑未启用) */}
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm text-gray-300 opacity-60 cursor-not-allowed"
+            title="Coming soon"
+          >
+            ⛃ Category Filter
+          </button>
+
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm text-gray-300 opacity-60 cursor-not-allowed"
+            title="Coming soon"
+          >
+            ⇅ Sort By
+          </button>
         </div>
       </div>
 
-      {/* Filter & Sort（仍然只是 UI） */}
-      <div className="flex gap-4 mb-6">
-        <button className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/8 rounded-full hover:bg-white/10">
-          <svg width="14" height="14" viewBox="0 0 24 24" className="opacity-80">
-            <path
-              d="M4 6h16M7 12h10M10 18h4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          Category Filter
-        </button>
-
-        <button className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/8 rounded-full hover:bg-white/10">
-          <svg width="14" height="14" viewBox="0 0 24 24" className="opacity-80">
-            <path
-              d="M12 5v14M5 12h14"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          Sort By
-        </button>
-      </div>
-
-      {/* Section Title */}
-      <h2 className="text-lg font-semibold mb-4">Recently added</h2>
-
-      {/* Card Grid（唯一改变：filteredWorlds） */}
-      <div className="grid grid-cols-4 gap-6">
-        {filteredWorlds.map((world) => (
-          <ExploreCard
-            key={world.id}
-            id={world.id}
-            title={world.title}
-            description={world.description}
-          />
-        ))}
-      </div>
-
-      {filteredWorlds.length === 0 && (
-        <p className="text-gray-400 mt-10">No results found.</p>
+      {/* Loading */}
+      {loading && (
+        <div className="mb-6 text-sm text-gray-400 animate-pulse">
+          Searching knowledge base…
+        </div>
       )}
+
+      {/* Results */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {results.length > 0 ? (
+          results.map((item) => (
+            <ExploreCard
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              description={item.content}
+              lastUpdatedBy={
+                item.updated_at
+                  ? new Date(item.updated_at).toLocaleDateString()
+                  : "No data"
+              }
+            />
+          ))
+        ) : (
+          !loading && (
+            <div className="col-span-full text-center text-gray-400 py-12">
+              <p className="text-sm">No results found</p>
+              <p className="text-xs mt-1 opacity-70">
+                Try different keywords or explore new topics
+              </p>
+            </div>
+          )
+        )}
+      </div>
     </>
   );
 };
