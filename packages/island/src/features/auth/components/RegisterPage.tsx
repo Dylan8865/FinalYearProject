@@ -35,6 +35,7 @@ const RegisterPage = () => {
       const result = await register(formData);
 
       if (result?.error) {
+        alert(result.error);
         setError(result.error);
       }
     });
@@ -47,6 +48,7 @@ const RegisterPage = () => {
     startTransition(async () => {
       const result = await signInWithOAuth(provider);
       if (result?.error) {
+        alert(result.error);
         setError(result.error);
       }
     });
