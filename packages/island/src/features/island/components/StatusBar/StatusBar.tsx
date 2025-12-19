@@ -7,6 +7,7 @@ import ManaIcon from "@/icons/ManaIcon";
 import IslandIcon from "@/icons/IslandIcon";
 import PlusIcon from "@/icons/PlusIcon";
 import { ProfileType } from "@/types/types";
+import { useToast } from "../../contexts/ToastContext";
 
 interface StatusBarProps {
   setIsDialogOpen: (value: string) => void;
@@ -14,6 +15,8 @@ interface StatusBarProps {
 }
 
 const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
+  const { showToast } = useToast();
+
   return (
     <div className="pointer-events-none flex flex-col items-start gap-2 p-4 md:flex-row md:justify-between md:gap-0">
       <div className="space-y-2">
@@ -37,17 +40,21 @@ const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
       <div className="space-y-2">
         <StatusButton
           icon={<ManaIcon />}
-          data={new Intl.NumberFormat("en").format(profile.mana)}
+          data={profile.mana.toLocaleString()}
           bgColor="bg-[#cfa272]"
           orientation="right"
         />
         <StatusButton
           icon={<IslandIcon />}
-          data={profile.no_of_islands}
+          data={profile.no_of_islands.toLocaleString()}
           bgColor="bg-[#5a706b]"
           orientation="right"
           btnIcon={<PlusIcon />}
-          onClick={() => setIsDialogOpen("island")}
+          onClick={() => {
+            if (profile.mana < 1_000_000) {
+              showToast("Insufficient mana (1,000,000 required)", "error");
+            } else setIsDialogOpen("island");
+          }}
         />
       </div>
     </div>

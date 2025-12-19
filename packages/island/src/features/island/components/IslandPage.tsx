@@ -1166,6 +1166,10 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           <AddIslandContent
             setIsDialogOpen={setIsDialogOpen}
             onIslandAdded={refetch}
+            mana={profile.mana}
+            onUpdateMana={(newMana) =>
+              setProfile((prev) => ({ ...prev, mana: newMana }))
+            }
           />
         </Dialog>
       )}
@@ -1182,6 +1186,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
             setIsDialogOpen={setIsDialogOpen}
             island={editingIsland}
             onIslandUpdated={refetch}
+            noOfIslands={profile.no_of_islands}
           />
         </Dialog>
       )}

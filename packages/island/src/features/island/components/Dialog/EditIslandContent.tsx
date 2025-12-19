@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import AddIslandInput from "./AddIslandInput";
-import AddIslandSelect from "./AdIslandSelect";
+import AddIslandSelect from "./AddIslandSelect";
 import AddIslandButton from "./AddIslandButton";
 import Button from "./Button";
 import { useIslands } from "../../hooks/useIslands";
@@ -19,16 +19,19 @@ interface EditIslandContentProps {
     theme: string;
   };
   onIslandUpdated: () => void;
+  noOfIslands: number;
 }
 
 const EditIslandContent = ({
   setIsDialogOpen,
   island,
   onIslandUpdated,
+  noOfIslands,
 }: EditIslandContentProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [disabled, setDisabled] = useState(false);
 
   const [value, setValue] = useState<{
     name: string;
@@ -100,6 +103,7 @@ const EditIslandContent = ({
       return;
     }
 
+    setDisabled(true);
     const success = await deleteIsland(island.id);
     if (success) {
       onIslandUpdated();
@@ -107,6 +111,7 @@ const EditIslandContent = ({
     } else {
       setDeleteError("Failed to delete island");
     }
+    setDisabled(false);
   };
 
   if (isDeleting) {
@@ -216,13 +221,15 @@ const EditIslandContent = ({
           Save Changes
         </AddIslandButton>
 
-        <button
-          type="button"
-          onClick={() => setIsDeleting(true)}
-          className="rounded-md border border-[#5a1a1a] p-3 text-sm font-semibold text-red-500 hover:border-[#a00000] hover:text-red-400 hover:underline"
-        >
-          Delete Island
-        </button>
+        {noOfIslands > 1 && (
+          <button
+            type="button"
+            onClick={() => setIsDeleting(true)}
+            className="rounded-md border border-[#5a1a1a] p-3 text-sm font-semibold text-red-500 hover:border-[#a00000] hover:text-red-400 hover:underline"
+          >
+            Delete Island
+          </button>
+        )}
       </form>
     </div>
   );
