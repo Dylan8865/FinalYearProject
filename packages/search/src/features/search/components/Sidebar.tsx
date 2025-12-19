@@ -13,6 +13,10 @@ interface SidebarProps {
   onSelectConversation: (conversation: Conversation) => void;
   onDeleteConversation: (id: string) => void;
   isLoggedIn: boolean;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  isSearchActive: boolean;
+  onToggleSearch: () => void;
 }
 
 export default function Sidebar({
@@ -24,6 +28,10 @@ export default function Sidebar({
   onSelectConversation,
   onDeleteConversation,
   isLoggedIn,
+  searchQuery,
+  onSearchChange,
+  isSearchActive,
+  onToggleSearch,
 }: SidebarProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -133,7 +141,8 @@ export default function Sidebar({
 
         {/* Search Chats */}
         <button
-          className={`flex items-center gap-4 rounded-lg px-4 py-3 text-base ${mutedTextColor} ${hoverBg}`}
+          onClick={onToggleSearch}
+          className={`flex items-center gap-4 rounded-lg px-4 py-3 text-base ${isSearchActive ? textColor : mutedTextColor} ${hoverBg}`}
           title="Search chats"
         >
           <svg
@@ -151,6 +160,36 @@ export default function Sidebar({
           </svg>
           {isOpen && <span>Search chats</span>}
         </button>
+
+        {/* Search Input - Only show when expanded and search is active */}
+        {isOpen && isSearchActive && (
+          <div className="px-2">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className={`w-full rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                  isDark
+                    ? "bg-gray-800 text-white placeholder-gray-500"
+                    : "bg-white text-gray-900 placeholder-gray-400 border border-gray-300"
+                }`}
+                autoFocus
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => onSearchChange("")}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${mutedTextColor} hover:${textColor}`}
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Library */}
         <button

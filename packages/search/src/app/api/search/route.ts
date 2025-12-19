@@ -11,7 +11,7 @@ interface KnowledgeEntry {
     description?: string;
   };
   type: string;
-  valid: boolean;
+  validity: number;
   created_at: string;
   order_index: number;
 }
@@ -317,8 +317,8 @@ async function handleSearch(
     // Step 2: Search in item-data table for actual knowledge
     const { data: entries, error } = await supabase
       .from("item-data")
-      .select("id, content, created_at, type, valid, order_index")
-      .eq("valid", true)
+      .select("id, content, created_at, type, validity, order_index")
+      .gte("validity", 60)
       .order("order_index", { ascending: true })
       .limit(100);
 
@@ -393,7 +393,7 @@ async function handleSearch(
         
         const content = description || title;
         const relevanceScore = matchScore;
-        const validityScore = entry.valid ? 85 : 50;
+        const validityScore = entry.validity || 0; // Use numeric validity (0-100)
         const recencyScore = calculateRecencyScore(entry.created_at);
         const totalScore = calculateTotalScore(relevanceScore, validityScore, recencyScore);
 
@@ -408,8 +408,7 @@ async function handleSearch(
         };
       })
       .filter((result): result is SearchResult => result !== null)
-      // Filter by minimum validity (60%)
-      .filter((result: SearchResult) => result.validityScore >= 60)
+      // Results are already filtered by validity >= 60 in the database query
       // Sort by total score descending
       .sort((a: SearchResult, b: SearchResult) => b.totalScore - a.totalScore);
 

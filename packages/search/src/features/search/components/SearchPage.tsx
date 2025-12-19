@@ -46,6 +46,8 @@ export default function SearchPage({ user }: SearchPageProps) {
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Theme-based colors
@@ -218,9 +220,9 @@ export default function SearchPage({ user }: SearchPageProps) {
         assistantContent = data.answer || "I couldn't find any knowledge matching your query.";
         
         if (data.suggestions && data.suggestions.length > 0) {
-          assistantContent += "\n\n**Suggestions:**\n";
+          assistantContent += "\n\n---\n\n**Suggestions(If didn't find what you were looking for):**\n\n";
           data.suggestions.forEach((suggestion: string) => {
-            assistantContent += `• ${suggestion}\n`;
+            assistantContent += `- ${suggestion}\n`;
           });
           assistantContent += "\nYou can also try browsing the Knowledge Repository or contribute your own knowledge (if registered).";
         }
@@ -376,18 +378,44 @@ export default function SearchPage({ user }: SearchPageProps) {
     }
   };
 
+  // Filter conversations based on search query
+  const filteredConversations = searchQuery.trim()
+    ? conversations.filter((conv) => {
+        const query = searchQuery.toLowerCase();
+        // Search in conversation title
+        if (conv.title.toLowerCase().includes(query)) {
+          return true;
+        }
+        // Search in message content
+        return conv.messages.some((msg) =>
+          msg.content.toLowerCase().includes(query)
+        );
+      })
+    : conversations;
+
+  const handleToggleSearch = () => {
+    setIsSearchActive(!isSearchActive);
+    if (isSearchActive) {
+      setSearchQuery(""); // Clear search when closing
+    }
+  };
+
   return (
     <div className={`flex h-screen ${bgColor} transition-colors duration-300`}>
       {/* Sidebar */}
       <Sidebar
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        conversations={user ? conversations : []}
+        conversations={user ? filteredConversations : []}
         activeConversation={activeConversation}
         onNewChat={handleNewChat}
         onSelectConversation={handleSelectConversation}
         onDeleteConversation={handleDeleteConversation}
         isLoggedIn={!!user}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        isSearchActive={isSearchActive}
+        onToggleSearch={handleToggleSearch}
       />
 
       {/* Main Content */}
