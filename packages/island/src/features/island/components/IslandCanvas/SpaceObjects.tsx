@@ -177,8 +177,18 @@ const Stars = () => {
 };
 
 const SpaceObjects = () => {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      // Anchor the group to the camera position
+      // This makes the objects appear infinitely far away as they move with the camera
+      groupRef.current.position.copy(state.camera.position);
+    }
+  });
+
   return (
-    <group>
+    <group ref={groupRef}>
       {/* Background Stars */}
       <Stars />
 
