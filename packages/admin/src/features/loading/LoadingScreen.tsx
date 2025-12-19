@@ -1,4 +1,4 @@
-import WILogo from "@/features/login/icons/WILogo";
+import WILogo from "@/features/login/icons/IslandIcon";
 
 export default function LoadingScreen() {
   return (
