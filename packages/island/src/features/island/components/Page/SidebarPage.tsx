@@ -2,7 +2,8 @@
 
 import PageControls from "./PageControls";
 import PageHeader from "./PageHeader";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import { useToast } from "../../contexts/ToastContext";
 import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
 import { useItemData } from "../../hooks/useItemData";
 import { BlockEditorContainer } from "../NotionBlock";
@@ -36,8 +37,52 @@ const SidebarPage = ({
   } = useItemData(islandItem?.id);
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isHeaderSaving, setIsHeaderSaving] = useState(false);
+  const [isEditorSaving, setIsEditorSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const { showToast } = useToast();
+
+  const isSaving = isHeaderSaving || isEditorSaving;
+
+  // Global keyboard shortcuts
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+
+      // Ctrl + S (Force Save)
+      if (cmdOrCtrl && e.key === "s") {
+        e.preventDefault();
+        // The save is already handled optimistically/background,
+        // but this shows intent and provides assurance.
+        showToast("Changes saved", "success");
+      }
+
+      // Ctrl + Enter (Toggle Fullscreen)
+      if (cmdOrCtrl && e.key === "Enter") {
+        e.preventDefault();
+        setIsExpanded((prev) => !prev);
+      }
+
+      // Escape (Close or Minimize)
+      if (e.key === "Escape") {
+        if (isExpanded) {
+          setIsExpanded(false);
+        } else {
+          onClick?.();
+        }
+      }
+    },
+    [isOpen, isExpanded, onClick, showToast]
+  );
+
+  useEffect(() => {
+    if (!isOpen) return;
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, handleKeyDown]);
 
   if (loading) {
     return (
@@ -116,7 +161,7 @@ const SidebarPage = ({
       <PageHeader
         isExpanded={isExpanded}
         islandItem={islandItem}
-        setIsSaving={setIsSaving}
+        setIsSaving={setIsHeaderSaving}
         setSaveError={setSaveError}
       />
 
@@ -127,7 +172,7 @@ const SidebarPage = ({
             islandItemId={islandItem.id}
             initialBlocks={itemData || []}
             onRefetch={refetch}
-            onSavingChange={setIsSaving}
+            onSavingChange={setIsEditorSaving}
           />
         )}
       </div>

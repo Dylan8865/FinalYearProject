@@ -49,7 +49,7 @@ const PageControls = ({
             <p className="text-[10px]">Saving...</p>
           </div>
         )}
-        {!saveError && <p className="text-red-500">{saveError}</p>}
+        {saveError && <p className="text-red-500">{saveError}</p>}
       </div>
     </div>
   );

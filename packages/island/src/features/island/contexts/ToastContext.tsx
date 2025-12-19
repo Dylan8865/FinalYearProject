@@ -20,7 +20,13 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
   const showToast = useCallback((message: string, type: ToastType = "info") => {
     const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => {
+      const next = [...prev, { id, message, type }];
+      if (next.length > 3) {
+        return next.slice(1); // Keep the most recent 3
+      }
+      return next;
+    });
   }, []);
 
   const removeToast = useCallback((id: string) => {

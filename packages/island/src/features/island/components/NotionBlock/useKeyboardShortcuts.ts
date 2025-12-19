@@ -49,6 +49,8 @@ export const useKeyboardShortcuts = ({
     setFocusedBlockId,
     focusNextBlock,
     focusPreviousBlock,
+    undo,
+    redo,
   } = blockEditor;
 
   const {
@@ -295,6 +297,22 @@ export const useKeyboardShortcuts = ({
 
         case "/":
           handleSlash(event, focusedBlockId);
+          break;
+
+        case "z":
+        case "Z":
+          if (cmdOrCtrl) {
+            event.preventDefault();
+            undo();
+          }
+          break;
+
+        case "y":
+        case "Y":
+          if (cmdOrCtrl) {
+            event.preventDefault();
+            redo();
+          }
           break;
 
         case "Escape":
