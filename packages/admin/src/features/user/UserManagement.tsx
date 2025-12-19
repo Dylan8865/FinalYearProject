@@ -261,7 +261,7 @@ export default function UserManagement({ users }: UserManagementProps) {
                       onClick={() => handleSort("mana")}
                       className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
                     >
-                      O2{getSortIcon("mana")}
+                      Mana{getSortIcon("mana")}
                     </th>
                     <th
                       onClick={() => handleSort("level")}
