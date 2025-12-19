@@ -3,6 +3,8 @@
 import { Canvas } from "@react-three/fiber";
 import React, { useState } from "react";
 import Island from "./Island";
+import Clouds from "./Clouds";
+import SpaceObjects from "./SpaceObjects";
 import CameraControls, { type CameraControlsHandle } from "./CameraControls";
 import {
   IslandIndicatorTracker,
@@ -78,14 +80,20 @@ const IslandCanvas = ({
   const [hoveredIslandId, setHoveredIslandId] = useState<string | null>(null);
 
   return (
-    <div className="relative h-full w-full">
+    <div
+      className="relative h-full w-full"
+      style={{
+        background:
+          "linear-gradient(to bottom, #1a365d 0%, #87CEEB 50%, #f0f9ff 100%)",
+      }}
+    >
       <Canvas shadows camera={{ position: defaultCameraPos, fov: 50 }}>
         {/* lights + environment */}
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[10, 15, 5]} intensity={1.2} castShadow />
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[40, 60, 20]} intensity={1.5} castShadow />
         <hemisphereLight args={["#87CEEB", "#A8A060", 0.6]} />
-
-        {/* islands */}
+        <Clouds />
+        <SpaceObjects />
         {islands.map((island) => {
           const islandPlacedObjects = Object.entries(placedObjects)
             .filter(([_, obj]) => obj.islandId === island.id)
@@ -157,6 +165,8 @@ const IslandCanvas = ({
           defaultTarget={defaultTarget}
           onCameraChanged={onCameraChanged}
         />
+
+        <Clouds />
 
         <fog attach="fog" args={["#B0E0E6", 15, 50]} />
       </Canvas>
