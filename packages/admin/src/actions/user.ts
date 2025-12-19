@@ -5,6 +5,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 interface UpdateUserData {
+  name: string;
   mana: number;
   level: number;
   type: string;
@@ -27,10 +28,16 @@ export async function updateUser(userId: string, data: UpdateUserData) {
     throw new Error("Not authorized");
   }
 
+  // Validate name
+  if (!data.name || !data.name.trim()) {
+    throw new Error("Username is required");
+  }
+
   // Update user
   const { error } = await supabase
     .from("profile")
     .update({
+      name: data.name.trim(),
       mana: data.mana,
       level: data.level,
       type: data.type,
