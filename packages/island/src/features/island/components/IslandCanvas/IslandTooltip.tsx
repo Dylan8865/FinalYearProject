@@ -81,7 +81,9 @@ const IslandTooltip = ({
           boxShadow:
             "0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.2)",
           border: "1px solid rgba(139, 92, 246, 0.3)",
-          minWidth: "180px",
+          minWidth: "200px",
+          maxWidth: "320px",
+          width: "max-content",
           backdropFilter: "blur(8px)",
           position: "relative",
         }}
@@ -138,7 +140,11 @@ const IslandTooltip = ({
             paddingRight: onClose ? "20px" : "0",
           }}
         >
-          <span style={{ fontWeight: "600", fontSize: "16px" }}>
+          <span
+            className="mr-4 flex-1 truncate"
+            title={islandName || "My Island"}
+            style={{ fontWeight: "600", fontSize: "16px" }}
+          >
             {islandName || "My Island"}
           </span>
           <span
@@ -166,6 +172,8 @@ const IslandTooltip = ({
           >
             <span style={{ color: "#9ca3af", fontSize: "12px" }}>Genre</span>
             <span
+              className="ml-4 flex-1 truncate text-right"
+              title={toCapitalise(islandGenre)}
               style={{ color: "#fff", fontWeight: "400", fontSize: "13px" }}
             >
               {toCapitalise(islandGenre)}
@@ -182,6 +190,8 @@ const IslandTooltip = ({
           >
             <span style={{ color: "#9ca3af", fontSize: "12px" }}>Theme</span>
             <span
+              className="ml-4 flex-1 truncate text-right"
+              title={toCapitalise(islandTheme)}
               style={{ color: "#fff", fontWeight: "400", fontSize: "13px" }}
             >
               {toCapitalise(islandTheme)}
