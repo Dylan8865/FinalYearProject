@@ -143,6 +143,47 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     setIsDialogOpen("edit-island");
   };
 
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing
+      if (
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement ||
+        (document.activeElement instanceof HTMLElement &&
+          document.activeElement.isContentEditable)
+      ) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+
+      if (key === "s") {
+        // Only open if nothing else is open to avoid conflicts
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("store");
+        }
+      } else if (key === "i") {
+        // Only open if nothing else is open to avoid conflicts
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("inventory");
+        }
+      } else if (key === "escape") {
+        // Close standard dialogs
+        if (isDialogOpen) {
+          setIsDialogOpen("");
+        }
+        // Close sidebar
+        if (sidebarContentPage?.open) {
+          setSidebarContentPage({ open: false, itemId: "", itemName: "" });
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isDialogOpen, sidebarContentPage]);
+
   const handleUpgradeIsland = async (id: string) => {
     // 1. Find current island level to determine cost
     const island = islands.find((i) => i.id === id);
