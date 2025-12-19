@@ -36,8 +36,11 @@ const SidebarPage = ({
   } = useItemData(islandItem?.id);
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isHeaderSaving, setIsHeaderSaving] = useState(false);
+  const [isEditorSaving, setIsEditorSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  const isSaving = isHeaderSaving || isEditorSaving;
 
   if (loading) {
     return (
@@ -116,7 +119,7 @@ const SidebarPage = ({
       <PageHeader
         isExpanded={isExpanded}
         islandItem={islandItem}
-        setIsSaving={setIsSaving}
+        setIsSaving={setIsHeaderSaving}
         setSaveError={setSaveError}
       />
 
@@ -127,7 +130,7 @@ const SidebarPage = ({
             islandItemId={islandItem.id}
             initialBlocks={itemData || []}
             onRefetch={refetch}
-            onSavingChange={setIsSaving}
+            onSavingChange={setIsEditorSaving}
           />
         )}
       </div>

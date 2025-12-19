@@ -12,6 +12,7 @@ import BlockRenderer from "./BlockRenderer";
 import BlockWrapper from "./BlockWrapper";
 import BlockMenu from "./BlockMenu";
 import { useBlockEditor, useFocusManager, useKeyboardShortcuts } from ".";
+import { useToast } from "../../contexts/ToastContext";
 
 interface BlockEditorContainerProps {
   islandItemId: string;
@@ -47,14 +48,9 @@ const BlockEditorContainer = ({
   const [dragOverBlockId, setDragOverBlockId] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState<"before" | "after">("after");
 
-  // Toast state (for error/success messages)
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
-
   // Container ref for positioning
   const containerRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
 
   // Initialize block editor hook
   const blockEditor = useBlockEditor({
@@ -62,13 +58,10 @@ const BlockEditorContainer = ({
     initialBlocks,
     debounceMs: 500,
     onError: (error) => {
-      setToast({ message: error.message, type: "error" });
-      setTimeout(() => setToast(null), 3000);
+      // Logic handled internally by useBlockEditor calling showToast
     },
     onSuccess: (message) => {
-      // Optional: show subtle success feedback
-      // setToast({ message, type: "success" });
-      // setTimeout(() => setToast(null), 2000);
+      // Logic handled internally by useBlockEditor calling showToast
     },
   });
 
@@ -284,19 +277,6 @@ const BlockEditorContainer = ({
           onClose={() => setSlashMenuOpen(false)}
           filterText={slashFilterText}
         />
-
-        {/* Toast notifications */}
-        {toast && (
-          <div
-            className={`fixed bottom-4 right-4 rounded-lg px-4 py-2 shadow-lg ${
-              toast.type === "error"
-                ? "bg-red-600 text-white"
-                : "bg-green-600 text-white"
-            }`}
-          >
-            {toast.message}
-          </div>
-        )}
       </div>
     );
   }
@@ -346,19 +326,6 @@ const BlockEditorContainer = ({
         onClose={() => setSlashMenuOpen(false)}
         filterText={slashFilterText}
       />
-
-      {/* Toast notifications */}
-      {toast && (
-        <div
-          className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-2 shadow-lg ${
-            toast.type === "error"
-              ? "bg-red-600 text-white"
-              : "bg-green-600 text-white"
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
     </div>
   );
 };
