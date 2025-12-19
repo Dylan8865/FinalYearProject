@@ -40,10 +40,10 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
     }
   };
 
-  // Handle level input with max 20 validation
+  // Handle level input with max int2 validation
   const handleLevelChange = (value: string) => {
     const numValue = parseInt(value) || 0;
-    if (numValue <= 20) {
+    if (numValue <= 32767) {
       setLevel(value);
     }
   };
@@ -243,7 +243,7 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
 
             {/* Level */}
             <div>
-              <label className="text-gray-400 text-xs mb-2 block">Level (Max: 20)</label>
+              <label className="text-gray-400 text-xs mb-2 block">Level (Max: 32767)</label>
               <input
                 type="number"
                 value={level}
@@ -251,7 +251,7 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
                 className="w-full bg-[#1E1E1E] text-white px-4 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
                 placeholder={user.level?.toString() || "0"}
                 min="0"
-                max="20"
+                max="32767"
               />
             </div>
 
