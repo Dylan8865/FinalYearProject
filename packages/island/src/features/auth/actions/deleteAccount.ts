@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { createAdminClient } from "@/lib/supabase/admin-client";
 
 export async function deleteAccount() {
   const supabase = await createClient();
@@ -38,6 +39,17 @@ export async function deleteAccount() {
     if (profileError) {
       console.error("Profile deletion error:", profileError);
       return { error: "Failed to delete profile" };
+    }
+
+    // Delete from auth.users using service role key
+    const adminClient = createAdminClient();
+
+    const { error: deleteError } = await adminClient.auth.admin.deleteUser(
+      user.id
+    );
+    if (deleteError) {
+      console.error("Auth deletion error:", deleteError);
+      return { error: "Failed to delete auth account" };
     }
 
     // Sign out the user
