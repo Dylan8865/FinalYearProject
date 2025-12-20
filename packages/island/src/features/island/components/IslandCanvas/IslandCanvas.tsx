@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Island from "./Island";
 import Clouds from "./Clouds";
 import SpaceObjects from "./SpaceObjects";
@@ -11,6 +11,7 @@ import {
   IslandIndicatorsOverlay,
   type OffscreenIsland,
 } from "./IslandIndicators";
+import Whales from "./Whales";
 
 export interface IslandData {
   id: string;
@@ -92,62 +93,67 @@ const IslandCanvas = ({
         <ambientLight intensity={0.5} />
         <directionalLight position={[40, 60, 20]} intensity={1.5} castShadow />
         <hemisphereLight args={["#87CEEB", "#A8A060", 0.6]} />
-        <Clouds />
-        <SpaceObjects />
-        {islands.map((island) => {
-          const islandPlacedObjects = Object.entries(placedObjects)
-            .filter(([_, obj]) => obj.islandId === island.id)
-            .reduce((acc, [key, obj]) => ({ ...acc, [key]: obj }), {});
+        <Suspense fallback={null}>
+          <Clouds />
+          <SpaceObjects />
+          <Whales islands={islands} />
+          {islands.map((island) => {
+            const islandPlacedObjects = Object.entries(placedObjects)
+              .filter(([_, obj]) => obj.islandId === island.id)
+              .reduce((acc, [key, obj]) => ({ ...acc, [key]: obj }), {});
 
-          const itemCount = Object.keys(islandPlacedObjects).length;
-          const manaState = islandManaStates[island.id] || {
-            manaRate: 9,
-            accumulatedMana: 0,
-          };
+            const itemCount = Object.keys(islandPlacedObjects).length;
+            const manaState = islandManaStates[island.id] || {
+              manaRate: 9,
+              accumulatedMana: 0,
+            };
 
-          return (
-            <Island
-              key={island.id}
-              gridSize={island.gridSize}
-              position={island.position}
-              animate={true}
-              isDraggingItem={isDraggingItem}
-              onCellDrop={(cellId, x, z) => {
-                onCellDrop?.(island.id, cellId, x, z);
-              }}
-              placedObjects={islandPlacedObjects}
-              // Mana-related props
-              islandId={island.id}
-              islandName={island.name || "My Island"}
-              islandGenre={island.genre}
-              islandTheme={island.theme}
-              islandLevel={island.level || 1}
-              manaRate={manaState.manaRate}
-              accumulatedMana={manaState.accumulatedMana}
-              itemCount={itemCount}
-              isHovered={hoveredIslandId === island.id}
-              onIslandHover={(isHovered) => {
-                setHoveredIslandId(isHovered ? island.id : null);
-              }}
-              onIslandClick={() => {
-                onIslandClick?.(island.id);
-              }}
-              onEditIsland={() => {
-                onEditIsland?.(
-                  island.id,
-                  island.name || "My Island",
-                  island.genre,
-                  island.theme
-                );
-              }}
-              onUpgradeIsland={() => {
-                onUpgradeIsland?.(island.id);
-              }}
-              userMana={userMana}
-              showManaAura={islandManaStates[island.id]?.accumulatedMana > 1000}
-            />
-          );
-        })}
+            return (
+              <Island
+                key={island.id}
+                gridSize={island.gridSize}
+                position={island.position}
+                animate={true}
+                isDraggingItem={isDraggingItem}
+                onCellDrop={(cellId, x, z) => {
+                  onCellDrop?.(island.id, cellId, x, z);
+                }}
+                placedObjects={islandPlacedObjects}
+                // Mana-related props
+                islandId={island.id}
+                islandName={island.name || "My Island"}
+                islandGenre={island.genre}
+                islandTheme={island.theme}
+                islandLevel={island.level || 1}
+                manaRate={manaState.manaRate}
+                accumulatedMana={manaState.accumulatedMana}
+                itemCount={itemCount}
+                isHovered={hoveredIslandId === island.id}
+                onIslandHover={(isHovered) => {
+                  setHoveredIslandId(isHovered ? island.id : null);
+                }}
+                onIslandClick={() => {
+                  onIslandClick?.(island.id);
+                }}
+                onEditIsland={() => {
+                  onEditIsland?.(
+                    island.id,
+                    island.name || "My Island",
+                    island.genre,
+                    island.theme
+                  );
+                }}
+                onUpgradeIsland={() => {
+                  onUpgradeIsland?.(island.id);
+                }}
+                userMana={userMana}
+                showManaAura={
+                  islandManaStates[island.id]?.accumulatedMana > 1000
+                }
+              />
+            );
+          })}
+        </Suspense>
 
         {/* Track off-screen islands */}
         {onOffscreenIslandsChange && (
