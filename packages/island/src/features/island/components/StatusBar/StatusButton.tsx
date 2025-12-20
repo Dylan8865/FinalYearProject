@@ -37,7 +37,7 @@ const StatusButton = ({
             : "border-r-4"
         } flex h-6 w-40 items-center border-y-4 border-black bg-[#333333] px-3 text-xs md:h-8 md:text-base lg:w-48`}
       >
-        {data}
+        <span className="w-28 truncate md:w-32">{data}</span>
       </div>
       {btnIcon && (
         <button
