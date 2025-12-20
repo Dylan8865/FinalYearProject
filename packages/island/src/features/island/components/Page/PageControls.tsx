@@ -10,6 +10,8 @@ interface PageControlsProps {
   setIsExpanded: Dispatch<SetStateAction<boolean>>;
   isSaving?: boolean;
   saveError?: string | null;
+  status?: "unverified" | "pending" | "declined" | "verified";
+  onStatusClick?: () => void;
 }
 
 const PageControls = ({
@@ -18,10 +20,38 @@ const PageControls = ({
   setIsExpanded,
   isSaving,
   saveError,
+  status = "unverified",
+  onStatusClick,
 }: PageControlsProps) => {
+  // Status color mapping
+  const statusConfig = {
+    unverified: {
+      color: "bg-gray-600",
+      text: "Unverified",
+      textColor: "text-gray-300",
+    },
+    pending: {
+      color: "bg-yellow-500",
+      text: "Pending",
+      textColor: "text-yellow-100",
+    },
+    declined: {
+      color: "bg-red-500",
+      text: "Declined",
+      textColor: "text-red-100",
+    },
+    verified: {
+      color: "bg-green-500",
+      text: "Verified",
+      textColor: "text-green-100",
+    },
+  };
+
+  const config = statusConfig[status] || statusConfig.unverified;
+
   return (
     <div className="sticky top-0 z-50 flex w-full items-center justify-between bg-[#191919]">
-      <div className="flex items-start justify-start gap-3 p-3 text-base md:text-xs">
+      <div className="flex items-center justify-start gap-3 p-3 text-base md:text-xs">
         <button
           className="flex items-center justify-center text-white"
           onClick={() => {
@@ -40,6 +70,14 @@ const PageControls = ({
           ) : (
             <ExpandIcon />
           )}
+        </button>
+        <button
+          className="flex h-[16px] items-center gap-1.5 rounded bg-gray-800 px-2 text-[10px] leading-none hover:bg-gray-700"
+          onClick={onStatusClick}
+          title="View validation details"
+        >
+          <div className={`h-1.5 w-1.5 rounded-full ${config.color}`} />
+          <span className={config.textColor}>{config.text}</span>
         </button>
       </div>
       <div className="flex items-center justify-center overflow-hidden pr-2 text-white/50">

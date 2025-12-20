@@ -95,6 +95,23 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     }
   }, [islands, loading, totalLevel]);
 
+  // Background validation processing (for development)
+  useEffect(() => {
+    // Poll the validation endpoint every 30 seconds
+    const interval = setInterval(async () => {
+      try {
+        await fetch("/api/process-validations", {
+          method: "POST",
+        });
+      } catch (error) {
+        // Silently fail - this is just background processing
+        console.error("Background validation processing error:", error);
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   const [selectedPlacedItem, setSelectedPlacedItem] = useState<string | null>(
     null
   ); // Currently selected placed item ID

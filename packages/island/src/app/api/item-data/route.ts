@@ -69,7 +69,6 @@ export async function POST(request: Request) {
         properties: properties || null,
         parent_id: parent_id || null,
         order_index: order_index || 0,
-        valid: true,
       })
       .select()
       .single();
@@ -103,7 +102,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
 
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (type !== undefined) updateData.type = type;
     if (content !== undefined) updateData.content = content;
     if (properties !== undefined) updateData.properties = properties;

@@ -166,3 +166,30 @@ body {
     animation-delay: 1s;
   }
 }
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1E1E1E;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3B3B3B;
+  border-radius: 10px;
+  border: 2px solid #1E1E1E;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4B4B4B;
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3B3B3B #1E1E1E;
+}

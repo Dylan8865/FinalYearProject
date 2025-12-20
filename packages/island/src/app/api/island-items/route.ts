@@ -7,8 +7,53 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const profileId = searchParams.get("profile_id");
     const islandId = searchParams.get("island_id");
+    const id = searchParams.get("id");
 
     let query = supabase.from("island-item").select("*, item(*), island(*)");
+
+    if (id) {
+      query = query.eq("id", id).single();
+      const { data: islandItem, error } = await query;
+
+      if (error) {
+        console.error("Supabase error:", error);
+        return NextResponse.json(
+          { error: "Failed to fetch island item" },
+          { status: 500 }
+        );
+      }
+
+      // Enhance item with resolved image URLs
+      if (islandItem?.item) {
+        let imageCoverUrl = null;
+        let modelUrl = null;
+
+        if (islandItem.item.image_cover_path) {
+          const { data } = supabase.storage
+            .from("items")
+            .getPublicUrl(islandItem.item.image_cover_path);
+          imageCoverUrl = data?.publicUrl || null;
+        }
+
+        if (islandItem.item.model_path) {
+          const { data } = supabase.storage
+            .from("items")
+            .getPublicUrl(islandItem.item.model_path);
+          modelUrl = data?.publicUrl || null;
+        }
+
+        return NextResponse.json({
+          ...islandItem,
+          item: {
+            ...islandItem.item,
+            imageCoverUrl,
+            modelUrl,
+          },
+        });
+      }
+
+      return NextResponse.json(islandItem);
+    }
 
     if (profileId) {
       query = query.eq("profile_id", profileId);
