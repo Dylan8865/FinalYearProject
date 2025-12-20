@@ -2,6 +2,7 @@
 
 import PageControls from "./PageControls";
 import PageHeader from "./PageHeader";
+import ValidationDetailsPopup from "./ValidationDetailsPopup";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useToast } from "../../contexts/ToastContext";
 import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
@@ -19,7 +20,7 @@ interface SidebarPageProps {
 const SidebarPage = ({
   isOpen,
   itemId,
-  itemName,
+  itemName: _itemName,
   onClick,
 }: SidebarPageProps) => {
   const { islandItems } = useIslandItemsContext();
@@ -40,9 +41,108 @@ const SidebarPage = ({
   const [isHeaderSaving, setIsHeaderSaving] = useState(false);
   const [isEditorSaving, setIsEditorSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<"unverified" | "pending" | "declined" | "verified">("unverified");
   const { showToast } = useToast();
 
   const isSaving = isHeaderSaving || isEditorSaving;
+
+  // Fetch current validation status when opening popup
+  const fetchCurrentStatus = useCallback(async () => {
+    if (!islandItem?.id) return;
+    try {
+      const response = await fetch(`/api/island-items?id=${islandItem.id}`);
+      const data = await response.json();
+      console.log("Fetched island item data:", data);
+      const item = Array.isArray(data) ? data[0] : data;
+      console.log("Status:", item.status);
+      setCurrentStatus((item.status || "unverified") as "unverified" | "pending" | "declined" | "verified");
+    } catch (error) {
+      console.error("Failed to fetch validation status:", error);
+    }
+  }, [islandItem?.id]);
+
+  // Update status when island item changes
+  useEffect(() => {
+    if (islandItem?.id) {
+      fetchCurrentStatus();
+    }
+  }, [islandItem?.id, fetchCurrentStatus]);
+
+  // Handle publish - queue validation after ensuring saves are complete
+  const handlePublish = useCallback(async () => {
+    if (!islandItem?.id) return;
+
+    // Check if currently saving
+    if (isSaving) {
+      showToast("Please wait for current changes to save", "info");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/validate-item", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ islandItemId: islandItem.id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to publish");
+      }
+
+      showToast(
+        "Published! Your content is queued for validation.",
+        "success"
+      );
+      setIsPopupOpen(false); // Close popup after successful publish
+    } catch (error) {
+      console.error("Publish error:", error);
+      showToast(
+        error instanceof Error
+          ? error.message
+          : "Failed to publish. Ensure your item has a title and content.",
+        "error"
+      );
+    }
+  }, [islandItem?.id, isSaving, showToast]);
+
+  // Handle appeal - set status back to pending
+  const handleAppeal = useCallback(async () => {
+    if (!islandItem?.id) return;
+
+    try {
+      const response = await fetch(`/api/island-items`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: islandItem.id,
+          status: "pending",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit appeal");
+      }
+
+      showToast("Appeal submitted! Your content will be reviewed.", "success");
+      setIsPopupOpen(false); // Close popup after successful appeal
+      
+      // Refresh status
+      fetchCurrentStatus();
+    } catch (error) {
+      console.error("Appeal error:", error);
+      showToast(
+        error instanceof Error ? error.message : "Failed to submit appeal",
+        "error"
+      );
+    }
+  }, [islandItem?.id, showToast, fetchCurrentStatus]);
 
   // Global keyboard shortcuts
   const handleKeyDown = useCallback(
@@ -96,6 +196,11 @@ const SidebarPage = ({
           setIsExpanded={setIsExpanded}
           isSaving={isSaving}
           saveError={saveError}
+          status={currentStatus}
+          onStatusClick={() => {
+            fetchCurrentStatus();
+            setIsPopupOpen(true);
+          }}
         />
         <div className="flex flex-1 items-center justify-center">
           <LoadingScreen width="w-full" height="h-full" />
@@ -116,6 +221,11 @@ const SidebarPage = ({
           setIsExpanded={setIsExpanded}
           isSaving={isSaving}
           saveError={saveError}
+          status={currentStatus}
+          onStatusClick={() => {
+            fetchCurrentStatus();
+            setIsPopupOpen(true);
+          }}
         />
 
         <div className="flex flex-1 flex-col items-center justify-center gap-3">
@@ -146,7 +256,7 @@ const SidebarPage = ({
 
   return (
     <div
-      className={`${isExpanded ? "w-full" : "w-4/5 md:w-[34dvw]"} absolute right-0 top-0 z-50 flex h-full flex-col items-center justify-center overflow-y-auto bg-[#191919] pb-96 transition-all duration-300 ease-in-out`}
+      className={`${isExpanded ? "w-full" : "w-4/5 md:w-[34dvw]"} absolute right-0 top-0 z-50 flex h-full flex-col bg-[#191919] transition-all duration-300 ease-in-out`}
       style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
     >
       <PageControls
@@ -155,26 +265,44 @@ const SidebarPage = ({
         setIsExpanded={setIsExpanded}
         isSaving={isSaving}
         saveError={saveError}
+        status={currentStatus}
+        onStatusClick={() => {
+          fetchCurrentStatus();
+          setIsPopupOpen(true);
+        }}
       />
 
-      {/* Page Header */}
-      <PageHeader
-        isExpanded={isExpanded}
-        islandItem={islandItem}
-        setIsSaving={setIsHeaderSaving}
-        setSaveError={setSaveError}
+      {/* Validation Details Popup */}
+      <ValidationDetailsPopup
+        isOpen={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+        islandItemId={islandItem?.id || ""}
+        status={currentStatus}
+        onPublish={handlePublish}
+        onAppeal={handleAppeal}
       />
 
-      {/* Block Editor */}
-      <div className="max-w-4/5 px-4 md:max-w-[34dvw]">
-        {islandItem && (
-          <BlockEditorContainer
-            islandItemId={islandItem.id}
-            initialBlocks={itemData || []}
-            onRefetch={refetch}
-            onSavingChange={setIsEditorSaving}
-          />
-        )}
+      {/* Scrollable Content Container */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Page Header */}
+        <PageHeader
+          isExpanded={isExpanded}
+          islandItem={islandItem}
+          setIsSaving={setIsHeaderSaving}
+          setSaveError={setSaveError}
+        />
+
+        {/* Block Editor */}
+        <div className="max-w-4/5 px-4 pb-96 md:max-w-[34dvw]">
+          {islandItem && (
+            <BlockEditorContainer
+              islandItemId={islandItem.id}
+              initialBlocks={itemData || []}
+              onRefetch={refetch}
+              onSavingChange={setIsEditorSaving}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

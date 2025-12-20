@@ -71,7 +71,7 @@ const PageHeader = ({
     <div className="flex w-full flex-col items-center justify-center space-y-8 text-white">
       {islandItem?.cover_image ? (
         <div
-          className={`${isExpanded ? "h-[1000px]" : "h-[800px]"} relative w-full transition-all duration-300 ease-in-out`}
+          className={`${isExpanded ? "h-[300px]" : "h-[200px]"} relative w-full transition-all duration-300 ease-in-out`}
         >
           <Image
             src={islandItem.cover_image}
@@ -82,7 +82,7 @@ const PageHeader = ({
         </div>
       ) : (
         <div
-          className={`${isExpanded ? "h-[1000px]" : "h-[800px]"} w-full bg-gray-700 transition-all duration-300 ease-in-out`}
+          className={`${isExpanded ? "h-[300px]" : "h-[200px]"} w-full bg-gray-700 transition-all duration-300 ease-in-out`}
         />
       )}
 
@@ -99,7 +99,7 @@ const PageHeader = ({
               e.preventDefault();
             }
           }}
-          className="min-h-[1.5em] cursor-text truncate text-5xl font-bold outline-none empty:before:text-gray-500 empty:before:content-[attr(data-placeholder)]"
+          className="min-h-[1.5em] cursor-text break-words text-2xl font-bold outline-none empty:before:text-gray-500 empty:before:content-[attr(data-placeholder)] md:text-3xl lg:text-4xl"
           data-placeholder="Untitled"
         />
       </div>

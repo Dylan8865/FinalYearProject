@@ -49,6 +49,9 @@ export interface IslandItemType {
   pos_x: number | null;
   pos_y: number | null;
   profile_id: string;
+  status?: "unverified" | "pending" | "declined" | "verified";
+  validity?: number | null;
+  comment?: string | null;
   item?: ItemType;
   island?: IslandType;
 }
