@@ -173,14 +173,16 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         return;
       }
 
+      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
       const key = e.key.toLowerCase();
 
-      if (key === "s") {
+      if (key === "s" && !cmdOrCtrl) {
         // Only open if nothing else is open to avoid conflicts
         if (!isDialogOpen && !sidebarContentPage?.open) {
           setIsDialogOpen("store");
         }
-      } else if (key === "i") {
+      } else if (key === "i" && !cmdOrCtrl) {
         // Only open if nothing else is open to avoid conflicts
         if (!isDialogOpen && !sidebarContentPage?.open) {
           setIsDialogOpen("inventory");
@@ -189,10 +191,6 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         // Close standard dialogs
         if (isDialogOpen) {
           setIsDialogOpen("");
-        }
-        // Close sidebar
-        if (sidebarContentPage?.open) {
-          setSidebarContentPage({ open: false, itemId: "", itemName: "" });
         }
       }
     };

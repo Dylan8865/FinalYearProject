@@ -143,6 +143,12 @@ const SidebarPage = ({
       );
     }
   }, [islandItem?.id, showToast, fetchCurrentStatus]);
+  // Reset expansion state when page is opened
+  useEffect(() => {
+    if (isOpen) {
+      setIsExpanded(false);
+    }
+  }, [isOpen]);
 
   // Global keyboard shortcuts
   const handleKeyDown = useCallback(
@@ -155,18 +161,16 @@ const SidebarPage = ({
       // Ctrl + S (Force Save)
       if (cmdOrCtrl && e.key === "s") {
         e.preventDefault();
-        // The save is already handled optimistically/background,
-        // but this shows intent and provides assurance.
         showToast("Changes saved", "success");
       }
 
-      // Ctrl + Enter (Toggle Fullscreen)
+      // Ctrl + Enter (Maximize)
       if (cmdOrCtrl && e.key === "Enter") {
         e.preventDefault();
-        setIsExpanded((prev) => !prev);
+        setIsExpanded(true);
       }
 
-      // Escape (Close or Minimize)
+      // Escape (Minimize or Close)
       if (e.key === "Escape") {
         if (isExpanded) {
           setIsExpanded(false);

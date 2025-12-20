@@ -44,7 +44,7 @@ const Toast = ({ message, type, onClose, duration = 3000 }: ToastProps) => {
 
   return (
     <div
-      className={`pointer-events-auto mb-2 flex min-w-[300px] items-center justify-between rounded-lg border px-4 py-3 text-white shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out ${bgColors[type]} ${
+      className={`pointer-events-auto mb-2 flex min-w-[300px] select-none items-center justify-between rounded-lg border px-4 py-3 text-white shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out ${bgColors[type]} ${
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}
       role="alert"

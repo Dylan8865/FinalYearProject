@@ -249,6 +249,9 @@ importers:
       three:
         specifier: ^0.181.1
         version: 0.181.2
+      three-stdlib:
+        specifier: ^2.36.1
+        version: 2.36.1(three@0.181.2)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.3
