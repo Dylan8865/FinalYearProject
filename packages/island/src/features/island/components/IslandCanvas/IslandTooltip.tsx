@@ -68,6 +68,7 @@ const IslandTooltip = ({
       style={{ pointerEvents: "auto" }}
     >
       <div
+        className="select-none"
         onMouseEnter={() => onTooltipHover?.(true)}
         onMouseLeave={() => onTooltipHover?.(false)}
         style={{

@@ -3,7 +3,7 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useGLTF, useAnimations } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 
 const MODEL_PATH = "/models/humpback_whale.glb";
@@ -40,17 +40,21 @@ const playWhaleSound = (frequency = 150) => {
 };
 
 interface WhaleProps {
+  id: number;
   position: [number, number, number];
   scale: number;
   speed: number;
   islandAvoidanceData: { position: [number, number, number]; radius: number }[];
+  otherWhalesRefs: React.MutableRefObject<Record<number, THREE.Vector3>>;
 }
 
 const WhaleInstance = ({
+  id,
   position,
   scale,
   speed,
   islandAvoidanceData,
+  otherWhalesRefs,
 }: WhaleProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const currentPos = useRef(new THREE.Vector3(...position));
@@ -72,64 +76,111 @@ const WhaleInstance = ({
     return clone;
   }, [scene]);
 
-  // Target the cloned scene directly for animations
-  const { actions, names } = useAnimations(animations, clonedScene);
-
-  // Movement state
-  const velocity = useRef(
-    new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5)
-      .normalize()
-      .multiplyScalar(0.05)
+  // Use a manual mixer
+  const mixer = useMemo(
+    () => new THREE.AnimationMixer(clonedScene),
+    [clonedScene]
   );
-  const angle = useRef(Math.random() * Math.PI * 2);
 
   useEffect(() => {
-    if (names.length > 0) {
-      console.log("🐳 Whale Animations Detected:", names);
-      // Play all animations by default, or just the first if it's the main loop
-      names.forEach((name) => {
-        const action = actions[name];
-        if (action) {
-          action.reset().fadeIn(0.5).play();
-          action.setEffectiveTimeScale(0.3); // Slow motion swim
-        }
+    if (animations && animations.length > 0) {
+      animations.forEach((clip) => {
+        const action = mixer.clipAction(clip);
+        action.play();
+        action.setEffectiveTimeScale(0.4);
       });
-    } else {
-      console.warn(
-        "❌ No animations found in humpback_whale.glb. Ensure the file has animations."
-      );
     }
-  }, [actions, names]);
+    return () => {
+      mixer.stopAllAction();
+    };
+  }, [mixer, animations]);
+
+  // --- UNIQUE BRAIN STATE PER WHALE ---
+  // We use separate phases and frequencies so they don't oscillate at the same time
+  const phaseX = useRef(Math.random() * Math.PI * 2);
+  const phaseY = useRef(Math.random() * Math.PI * 2);
+  const phaseZ = useRef(Math.random() * Math.PI * 2);
+
+  const freqX = useRef(0.05 + Math.random() * 0.05);
+  const freqY = useRef(0.03 + Math.random() * 0.04);
+  const freqZ = useRef(0.05 + Math.random() * 0.05);
+
+  const velocity = useRef(
+    new THREE.Vector3(
+      (Math.random() - 0.5) * 0.1,
+      (Math.random() - 0.5) * 0.1,
+      (Math.random() - 0.5) * 0.1
+    )
+  );
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
-    const time = state.clock.getElapsedTime();
+    // Update Animation
+    mixer.update(delta);
 
-    // 1. Random Movement logic (Wandering)
-    angle.current += delta * 0.05; // Even slower turn
-    const wanderX = Math.cos(angle.current) * 0.01;
-    const wanderZ = Math.sin(angle.current) * 0.01;
+    // Update shared position for social awareness
+    otherWhalesRefs.current[id] = currentPos.current;
 
-    velocity.current.x += wanderX;
-    velocity.current.z += wanderZ;
-    velocity.current.y += Math.sin(time * 0.1) * 0.0005;
+    /** 1. UNIQUE 3D WANDERING (De-synchronized)
+     * We increment each phase by its own random frequency.
+     * This ensures one whale might be turning left while another dives,
+     * and they will never "sync up" over time.
+     */
+    phaseX.current += delta * freqX.current;
+    phaseY.current += delta * freqY.current;
+    phaseZ.current += delta * freqZ.current;
 
-    // 2. Island Avoidance
+    // Add gentle steering forces
+    velocity.current.x += Math.sin(phaseX.current) * 0.008;
+    velocity.current.y += Math.sin(phaseY.current) * 0.006;
+    velocity.current.z += Math.cos(phaseZ.current) * 0.008;
+
+    /** 2. ISLAND AVOIDANCE
+     * Steer away from islands to prevent clipping
+     */
     islandAvoidanceData.forEach((island) => {
       const islandPos = new THREE.Vector3(...island.position);
       const dist = currentPos.current.distanceTo(islandPos);
-      const safeDist = island.radius + 40;
+      const safeDist = island.radius + 50;
 
       if (dist < safeDist) {
         const pushDir = currentPos.current.clone().sub(islandPos).normalize();
         const force = (safeDist - dist) / safeDist;
-        velocity.current.add(pushDir.multiplyScalar(force * 0.05));
+        velocity.current.add(pushDir.multiplyScalar(force * 0.15));
       }
     });
 
-    // Extremely slow speed for giants
-    const maxSpeedLimit = speed * 0.5; // speed prop is very low
+    /** 3. SOCIAL INTERACTION (Enhanced Attraction)
+     * We've increased the attraction weight (0.015) so they actually try to meet.
+     */
+    Object.entries(otherWhalesRefs.current).forEach(
+      ([otherIdStr, otherPos]) => {
+        const otherIdNum = parseInt(otherIdStr);
+        if (otherIdNum === id) return;
+
+        const dist = currentPos.current.distanceTo(otherPos);
+
+        // Separation: Give each other room
+        if (dist < 60) {
+          const avoidDir = currentPos.current.clone().sub(otherPos).normalize();
+          velocity.current.add(avoidDir.multiplyScalar(0.04));
+        }
+
+        // Cohesion: Drift towards friends if they are moderately nearby
+        if (dist > 80 && dist < 300) {
+          const attractDir = otherPos
+            .clone()
+            .sub(currentPos.current)
+            .normalize();
+          // Weight is now higher to encourage social clusters
+          velocity.current.add(attractDir.multiplyScalar(0.015));
+        }
+      }
+    );
+
+    // Clamp speed to keep movement majestic and slow
+    const maxSpeedLimit = 0.1;
     if (velocity.current.length() > maxSpeedLimit) {
       velocity.current.setLength(maxSpeedLimit);
     }
@@ -138,24 +189,32 @@ const WhaleInstance = ({
     }
 
     // Apply movement
-    currentPos.current.add(velocity.current.clone().multiplyScalar(delta * 20));
+    currentPos.current.add(velocity.current.clone().multiplyScalar(delta * 25));
 
-    // Bounds wrapping
-    const worldSize = 500;
-    if (currentPos.current.x > worldSize) currentPos.current.x = -worldSize;
-    if (currentPos.current.x < -worldSize) currentPos.current.x = worldSize;
-    if (currentPos.current.z > worldSize) currentPos.current.z = -worldSize;
-    if (currentPos.current.z < -worldSize) currentPos.current.z = worldSize;
-    if (currentPos.current.y > 180) currentPos.current.y = 180;
-    if (currentPos.current.y < 20) currentPos.current.y = 20;
+    /** 4. INFINITE 3D VIEWPORT BUBBLE (Focusing on the user)
+     */
+    const camPos = state.camera.position;
+    const BOUNDS = 900;
+
+    if (currentPos.current.x > camPos.x + BOUNDS)
+      currentPos.current.x -= BOUNDS * 2;
+    if (currentPos.current.x < camPos.x - BOUNDS)
+      currentPos.current.x += BOUNDS * 2;
+    if (currentPos.current.z > camPos.z + BOUNDS)
+      currentPos.current.z -= BOUNDS * 2;
+    if (currentPos.current.z < camPos.z - BOUNDS)
+      currentPos.current.z += BOUNDS * 2;
+    if (currentPos.current.y > camPos.y + BOUNDS)
+      currentPos.current.y -= BOUNDS * 2;
+    if (currentPos.current.y < camPos.y - BOUNDS)
+      currentPos.current.y += BOUNDS * 2;
 
     groupRef.current.position.copy(currentPos.current);
 
-    // 3. Look towards movement direction
+    /** 5. SMOOTH 3D ROTATION
+     */
     if (velocity.current.lengthSq() > 0.0001) {
       const targetLookAt = currentPos.current.clone().add(velocity.current);
-
-      // Smoothly slerp the rotation for majestic turns
       const currentQuat = groupRef.current.quaternion.clone();
       groupRef.current.lookAt(targetLookAt);
       const targetQuat = groupRef.current.quaternion.clone();
@@ -172,14 +231,14 @@ const WhaleInstance = ({
       onPointerLeave={() => setIsHovered(false)}
       onClick={(e) => {
         e.stopPropagation();
-        playWhaleSound(60 + Math.random() * 30);
+        playWhaleSound(50 + Math.random() * 30);
       }}
     >
       <group rotation={[0, 0, 0]}>
         <primitive object={clonedScene} />
       </group>
 
-      {/* Interaction hit box (invisible) since we disabled frustum culling */}
+      {/* Interaction hit box */}
       <mesh visible={false}>
         <boxGeometry args={[4, 2, 8]} />
         <meshBasicMaterial transparent opacity={0} />
@@ -193,6 +252,8 @@ interface WhalesProps {
 }
 
 const Whales = ({ islands = [] }: WhalesProps) => {
+  const otherWhalesRefs = useRef<Record<number, THREE.Vector3>>({});
+
   const islandAvoidanceData = useMemo(() => {
     return islands.map((i) => ({
       position: i.position,
@@ -201,25 +262,27 @@ const Whales = ({ islands = [] }: WhalesProps) => {
   }, [islands]);
 
   const whaleData = useMemo(() => {
-    const numWhales = 2;
+    const numWhales = 4;
     return Array.from({ length: numWhales }).map((_, i) => ({
+      id: i,
       position: [
-        (Math.random() - 0.5) * 800,
-        60 + Math.random() * 80,
-        (Math.random() - 0.5) * 800,
+        (Math.random() - 0.5) * 1200,
+        (Math.random() - 0.5) * 400,
+        (Math.random() - 0.5) * 1200,
       ] as [number, number, number],
-      scale: 15 + Math.random() * 10, // Gigantic
-      speed: 0.1, // Single slow speed constant
+      scale: 15 + Math.random() * 12,
+      speed: 0.1,
     }));
   }, []);
 
   return (
     <group>
-      {whaleData.map((data, i) => (
+      {whaleData.map((data) => (
         <WhaleInstance
-          key={i}
+          key={data.id}
           {...data}
           islandAvoidanceData={islandAvoidanceData}
+          otherWhalesRefs={otherWhalesRefs}
         />
       ))}
     </group>
