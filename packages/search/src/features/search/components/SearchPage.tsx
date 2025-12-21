@@ -84,28 +84,35 @@ export default function SearchPage({ user }: SearchPageProps) {
               const historyResponse = await fetch(`/api/history?chatId=${chat.id}`);
               const historyData = await historyResponse.json();
 
+              // Fetch feedback for this chat
+              const feedbackResponse = await fetch(`/api/feedback/messages?chatId=${chat.id}&profileId=${user.id}`);
+              const feedbackData = await feedbackResponse.json();
+              const feedbackMap = feedbackData.success ? feedbackData.feedback : {};
+
               const messages: Message[] = [];
               
               if (historyData.success && historyData.history) {
                 historyData.history.forEach((entry: { 
+                  id: string;
                   prompt_text: string; 
                   result_text: string; 
                   created_at: string;
                 }) => {
-                  // Add user message
+                  // Add user message - use history ID + 'user' suffix
                   messages.push({
-                    id: crypto.randomUUID(),
+                    id: `${entry.id}-user`,
                     role: "user",
                     content: entry.prompt_text,
                     timestamp: new Date(entry.created_at),
                   });
                   
-                  // Add assistant message
+                  // Add assistant message - use history ID as message ID for feedback matching
                   messages.push({
-                    id: crypto.randomUUID(),
+                    id: entry.id,
                     role: "assistant",
                     content: entry.result_text,
                     timestamp: new Date(entry.created_at),
+                    feedback: feedbackMap[entry.id] || null,
                   });
                 });
               }
@@ -121,6 +128,19 @@ export default function SearchPage({ user }: SearchPageProps) {
           );
 
           setConversations(loadedConversations);
+
+          // Check if there's a chatId in URL query params (from analytics revisit)
+          const urlParams = new URLSearchParams(window.location.search);
+          const chatIdFromUrl = urlParams.get('chatId');
+          
+          if (chatIdFromUrl) {
+            const chatToOpen = loadedConversations.find(c => c.id === chatIdFromUrl);
+            if (chatToOpen) {
+              setActiveConversation(chatToOpen);
+            }
+            // Clear the URL parameter
+            window.history.replaceState({}, '', '/search');
+          }
         }
       } catch (error) {
         console.error("Error loading saved chats:", error);
@@ -243,8 +263,11 @@ export default function SearchPage({ user }: SearchPageProps) {
         createdAt: result.created_at || new Date().toISOString(),
       })) || [];
 
+      // Use historyId from API response if available, otherwise generate UUID
+      const messageId = data.historyId || crypto.randomUUID();
+
       const assistantMessage: Message = {
-        id: crypto.randomUUID(),
+        id: messageId,
         role: "assistant",
         content: assistantContent,
         timestamp: new Date(),
@@ -390,28 +413,31 @@ export default function SearchPage({ user }: SearchPageProps) {
     }
   };
 
-  // Handle report submission
-  const handleReport = async (messageId: string, reason: string, details?: string) => {
+  // Handle canceling feedback
+  const handleCancelFeedback = async (messageId: string) => {
     try {
-      const response = await fetch("/api/report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messageId,
-          chatId: activeConversation?.id,
-          reason,
-          details,
-          profileId: user?.id,
-        }),
+      console.log(`[Cancel Feedback] Calling DELETE for messageId: ${messageId}, profileId: ${user?.id}`);
+      
+      const response = await fetch(`/api/feedback?messageId=${messageId}&profileId=${user?.id}`, {
+        method: "DELETE",
       });
 
-      const data = await response.json();
-      if (data.success) {
-        // Could show a toast notification here
-        console.log("Report submitted successfully");
+      const result = await response.json();
+      console.log(`[Cancel Feedback] DELETE response:`, result);
+
+      // Update message feedback state locally
+      if (activeConversation) {
+        const updatedMessages = activeConversation.messages.map((msg) =>
+          msg.id === messageId ? { ...msg, feedback: null } : msg
+        );
+        const updatedConversation = { ...activeConversation, messages: updatedMessages };
+        setActiveConversation(updatedConversation);
+        setConversations((prev) =>
+          prev.map((c) => (c.id === activeConversation.id ? updatedConversation : c))
+        );
       }
     } catch (error) {
-      console.error("Error submitting report:", error);
+      console.error("Error canceling feedback:", error);
     }
   };
 
@@ -550,7 +576,7 @@ export default function SearchPage({ user }: SearchPageProps) {
                   message={message} 
                   onRelatedTopicClick={handleSendMessage}
                   onFeedback={handleFeedback}
-                  onReport={handleReport}
+                  onCancelFeedback={handleCancelFeedback}
                 />
               ))}
               <div ref={messagesEndRef} />

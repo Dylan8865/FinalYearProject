@@ -6,7 +6,6 @@ interface FeedbackRequest {
   messageId: string;
   chatId?: string;
   feedbackType: "positive" | "negative";
-  comment?: string;
   profileId?: string;
 }
 
@@ -20,7 +19,7 @@ interface FeedbackResponse {
 export async function POST(request: Request) {
   try {
     const body: FeedbackRequest = await request.json();
-    const { messageId, chatId, feedbackType, comment, profileId } = body;
+    const { messageId, chatId, feedbackType, profileId } = body;
 
     if (!messageId || !feedbackType) {
       return NextResponse.json<FeedbackResponse>({
@@ -31,24 +30,37 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
-    // Store feedback in the favourite table (repurposed for feedback)
-    // Using content field to store feedback data as JSON
-    const feedbackData = {
-      type: "feedback",
-      messageId,
-      chatId,
-      feedbackType,
-      comment: comment || null,
-      timestamp: new Date().toISOString(),
-    };
+    // Check if feedback already exists for this message and profile
+    const { data: existingFeedback } = await supabase
+      .from("feedback")
+      .select("id")
+      .eq("message_id", messageId)
+      .eq("profile_id", profileId || null)
+      .single();
 
-    const { error } = await supabase
-      .from("favourite")
-      .insert({
-        profile_id: profileId || null,
-        content: JSON.stringify(feedbackData),
-        base_weight: feedbackType === "positive" ? 1 : -1,
-      });
+    let error;
+
+    if (existingFeedback) {
+      // Update existing feedback
+      const result = await supabase
+        .from("feedback")
+        .update({
+          feedback_type: feedbackType,
+        })
+        .eq("id", existingFeedback.id);
+      error = result.error;
+    } else {
+      // Insert new feedback
+      const result = await supabase
+        .from("feedback")
+        .insert({
+          profile_id: profileId || null,
+          chat_id: chatId || null,
+          message_id: messageId,
+          feedback_type: feedbackType,
+        });
+      error = result.error;
+    }
 
     if (error) {
       console.error("Error storing feedback:", error);
@@ -64,6 +76,61 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Feedback POST error:", error);
+    return NextResponse.json<FeedbackResponse>({
+      success: false,
+      error: "An unexpected error occurred",
+    });
+  }
+}
+
+// DELETE - Remove feedback for a message
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const messageId = searchParams.get("messageId");
+    const profileId = searchParams.get("profileId");
+
+    if (!messageId || !profileId) {
+      return NextResponse.json<FeedbackResponse>({
+        success: false,
+        error: "Message ID and Profile ID are required",
+      });
+    }
+
+    const supabase = await createClient();
+
+    console.log(`[Feedback DELETE] Attempting to delete:`, {
+      messageId,
+      profileId,
+    });
+
+    // Delete feedback for this message and profile
+    const { data, error } = await supabase
+      .from("feedback")
+      .delete()
+      .eq("message_id", messageId)
+      .eq("profile_id", profileId)
+      .select();
+
+    console.log(`[Feedback DELETE] Result:`, {
+      deletedRows: data?.length || 0,
+      error: error?.message || null,
+    });
+
+    if (error) {
+      console.error("Error deleting feedback:", error);
+      return NextResponse.json<FeedbackResponse>({
+        success: false,
+        error: "Failed to remove feedback",
+      });
+    }
+
+    return NextResponse.json<FeedbackResponse>({
+      success: true,
+      message: "Feedback removed",
+    });
+  } catch (error) {
+    console.error("Feedback DELETE error:", error);
     return NextResponse.json<FeedbackResponse>({
       success: false,
       error: "An unexpected error occurred",

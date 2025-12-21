@@ -43,6 +43,7 @@ interface SearchResponse {
   suggestions?: string[];
   relatedTopics?: string[];
   error?: string;
+  historyId?: string;
 }
 
 // Calculate recency score (0-100) based on created_at
@@ -217,12 +218,12 @@ async function saveSearchHistory(
   chatId?: string,
   userId?: string,
   promptOrder?: number
-) {
+): Promise<string | null> {
   console.log("Attempting to save search history:", { chatId, userId, hasAnswer: !!answer });
   
   if (!chatId || !userId) {
     console.log("Skipping search history save - missing chatId or userId:", { chatId, userId });
-    return;
+    return null;
   }
 
   try {
@@ -255,20 +256,27 @@ async function saveSearchHistory(
 
     // Save search history
     console.log("Inserting search history:", { chatId, promptOrder });
-    const { data: historyData, error: historyError } = await supabase.from("search-history").insert({
-      prompt_text: query,
-      result_text: answer,
-      prompt_order: promptOrder || 0,
-      chat_id: chatId,
-    });
+    const { data: historyData, error: historyError } = await supabase
+      .from("search-history")
+      .insert({
+        prompt_text: query,
+        result_text: answer,
+        prompt_order: promptOrder || 0,
+        chat_id: chatId,
+      })
+      .select("id")
+      .single();
     
     if (historyError) {
       console.error("Error saving search history:", historyError);
+      return null;
     } else {
       console.log("Search history saved successfully:", historyData);
+      return historyData?.id || null;
     }
   } catch (error) {
     console.error("Failed to save search history (caught exception):", error);
+    return null;
   }
 }
 
@@ -302,7 +310,7 @@ async function handleSearch(
       const relatedTopics = await generateRelatedTopicsAI(query);
       
       // Save search history for cached answer
-      await saveSearchHistory(supabase, query, cached.result_text, chatId, userId, promptOrder);
+      const historyId = await saveSearchHistory(supabase, query, cached.result_text, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
@@ -311,6 +319,7 @@ async function handleSearch(
         results: [],
         hasResults: true,
         relatedTopics: relatedTopics.length > 0 ? relatedTopics : undefined,
+        historyId: historyId || undefined,
       });
     }
 
@@ -331,7 +340,7 @@ async function handleSearch(
         "Could you please rephrase your question or try again?";
       
       // Save search history even on DB error
-      await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
+      const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
@@ -341,6 +350,7 @@ async function handleSearch(
         hasResults: false,
         relatedTopics: aiTopics.length > 0 ? aiTopics : undefined,
         suggestions: generateSuggestions(query),
+        historyId: historyId || undefined,
       });
     }
 
@@ -351,7 +361,7 @@ async function handleSearch(
       const answer = aiAnswer || "I couldn't find any knowledge matching your query in our repository. However, I can try to help based on general knowledge.";
       
       // Save search history for no results
-      await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
+      const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
@@ -361,6 +371,7 @@ async function handleSearch(
         hasResults: false,
         relatedTopics: aiTopics.length > 0 ? aiTopics : undefined,
         suggestions: generateSuggestions(query),
+        historyId: historyId || undefined,
       });
     }
 
@@ -419,7 +430,7 @@ async function handleSearch(
       const answer = aiAnswer || "I couldn't find any validated knowledge matching your query.";
       
       // Save search history for no validated results
-      await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
+      const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
@@ -429,6 +440,7 @@ async function handleSearch(
         hasResults: false,
         relatedTopics: aiTopics.length > 0 ? aiTopics : undefined,
         suggestions: generateSuggestions(query),
+        historyId: historyId || undefined,
       });
     }
 
@@ -461,7 +473,7 @@ async function handleSearch(
     }
 
     // Save search history for successful search
-    await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
+    const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
 
     return NextResponse.json<SearchResponse>({
       success: true,
@@ -470,6 +482,7 @@ async function handleSearch(
       results: searchResults,
       hasResults: true,
       relatedTopics,
+      historyId: historyId || undefined,
     });
   } catch (error) {
     console.error("Search error:", error);
@@ -480,7 +493,7 @@ async function handleSearch(
       const aiAnswer = await generateAnswer({ query });
       if (aiAnswer) {
         // Save search history for error fallback
-        await saveSearchHistory(supabase, query, aiAnswer, chatId, userId, promptOrder);
+        const historyId = await saveSearchHistory(supabase, query, aiAnswer, chatId, userId, promptOrder);
         
         return NextResponse.json<SearchResponse>({
           success: true,
@@ -489,6 +502,7 @@ async function handleSearch(
           results: [],
           hasResults: false,
           suggestions: generateSuggestions(query),
+          historyId: historyId || undefined,
         });
       }
     } catch {
