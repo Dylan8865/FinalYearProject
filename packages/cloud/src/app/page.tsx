@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import IslandIcon from "@/icons/IslandIcon";
@@ -65,9 +65,60 @@ export default function Cloud() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Fetch topics from database
-  const { words, loading, error } = useTopics();
+  const { topics, words, loading, error, refetch } = useTopics();
+
+  // Auto-process item-data records when cache is empty
+  useEffect(() => {
+    const autoProcess = async () => {
+      // Only run if not already processing and cache appears empty/small
+      if (isProcessing || loading || words.length > 10) return;
+
+      console.log('🤖 Auto-processing: Checking for unprocessed data...');
+      setIsProcessing(true);
+
+      try {
+        let offset = 0;
+        let hasMore = true;
+
+        while (hasMore) {
+          const response = await fetch('/api/batch-process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ limit: 5, offset }),
+          });
+
+          if (!response.ok) break;
+
+          const data = await response.json();
+          console.log(`✅ Processed batch: ${data.successful} successful, ${data.errors} errors`);
+
+          hasMore = data.hasMore;
+          offset = data.nextOffset;
+
+          // Refresh topics after each batch
+          if (refetch) refetch();
+
+          // Wait 3 seconds between batches (rate limiting)
+          if (hasMore) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          }
+        }
+
+        console.log('🎉 Auto-processing completed!');
+      } catch (error) {
+        console.error('❌ Auto-processing error:', error);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    // Run auto-process after initial load
+    const timer = setTimeout(autoProcess, 2000);
+    return () => clearTimeout(timer);
+  }, [loading, words.length, isProcessing, refetch]);
 
   // Use database words if available, otherwise fallback
   const cloudWords = words.length > 0 ? words : FALLBACK_WORDS;
@@ -80,7 +131,18 @@ export default function Cloud() {
     : cloudWords;
 
   const handleWordClick = (word: string) => {
-    router.push(`/explore?q=${encodeURIComponent(word)}`);
+    console.log('🎯 Word clicked:', word);
+    
+    // Find the topic details
+    const topic = topics.find(t => t.text === word);
+    
+    if (topic) {
+      // Navigate to knowledge graph with selected topic
+      router.push(`/knowledge-graph?topic=${encodeURIComponent(topic.id)}`);
+    } else {
+      // Fallback: navigate to knowledge graph without selection
+      router.push('/knowledge-graph');
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -95,6 +157,14 @@ export default function Cloud() {
 
   return (
     <div className="relative w-screen h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+      {/* Auto-Processing Status Indicator */}
+      {isProcessing && (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-30 bg-blue-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+          <span className="text-sm font-medium">Processing topics with AI...</span>
+        </div>
+      )}
+
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
         <div className="flex items-center gap-8">

@@ -3,17 +3,20 @@
 import { useState, useEffect, useCallback } from "react";
 import { CloudWord3D } from "../components/TagCanvas3D";
 
-// Type for the database topic
+// Type for AI-extracted topic from item-data
 export interface CloudTopic {
   id: string;
   text: string;
   weight: number;
-  category: string | null;
-  trending: boolean;
-  created_at: string;
-  updated_at: string;
+  category: string;
 }
 
+/**
+ * useTopics Hook
+ * 
+ * Fetches AI-extracted topics from item-data table (via /api/topics)
+ * Data flow: item-data (Supabase) → AI Processing (Gemini) → CloudPage (Frontend)
+ */
 export function useTopics() {
   const [topics, setTopics] = useState<CloudTopic[]>([]);
   const [words, setWords] = useState<CloudWord3D[]>([]);
@@ -49,84 +52,11 @@ export function useTopics() {
     }
   }, []);
 
-  const createTopic = useCallback(
-    async (newTopic: { text: string; weight?: number; category?: string; trending?: boolean }) => {
-      try {
-        const response = await fetch("/api/topics", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newTopic),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to create topic");
-        }
-
-        const created = await response.json();
-        await fetchTopics(); // Refresh the list
-        return created;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        setError(errorMessage);
-        throw err;
-      }
-    },
-    [fetchTopics]
-  );
-
-  const updateTopic = useCallback(
-    async (id: string, updates: Partial<CloudTopic>) => {
-      try {
-        const response = await fetch("/api/topics", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, ...updates }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to update topic");
-        }
-
-        const updated = await response.json();
-        await fetchTopics(); // Refresh the list
-        return updated;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        setError(errorMessage);
-        throw err;
-      }
-    },
-    [fetchTopics]
-  );
-
-  const deleteTopic = useCallback(
-    async (id: string) => {
-      try {
-        const response = await fetch(`/api/topics?id=${id}`, {
-          method: "DELETE",
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to delete topic");
-        }
-
-        await fetchTopics(); // Refresh the list
-        return true;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        setError(errorMessage);
-        throw err;
-      }
-    },
-    [fetchTopics]
-  );
-
-  // Increment click count (for tracking popular topics)
+  // Track topic clicks (local only, no database)
   const incrementClickCount = useCallback(
-    async (id: string) => {
+    (id: string) => {
       const topic = topics.find((t) => t.id === id);
       if (topic) {
-        // You could add a click_count column and update it here
         console.log(`Topic "${topic.text}" clicked`);
       }
     },
@@ -138,14 +68,11 @@ export function useTopics() {
   }, [fetchTopics]);
 
   return {
-    topics,        // Raw database topics
+    topics,        // AI-extracted topics from item-data
     words,         // Transformed for TagCanvas3D
     loading,
     error,
     refetch: fetchTopics,
-    createTopic,
-    updateTopic,
-    deleteTopic,
     incrementClickCount,
   };
 }

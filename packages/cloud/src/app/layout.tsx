@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,7 +14,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head />
       <body className="antialiased m-0 p-0">
+        {/* TagCanvas library from official source */}
+        <Script
+          src="https://www.goat1000.com/tagcanvas.min.js"
+          strategy="beforeInteractive"
+        />
         {children}
       </body>
     </html>

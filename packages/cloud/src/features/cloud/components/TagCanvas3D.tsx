@@ -121,11 +121,12 @@ const defaultOptions: TagCanvasOptions = {
   pinchZoom: true,
   shuffleTags: true,
   shape: "sphere",
-  noSelect: true,
+  noSelect: false, // CHANGED: Allow clicking on tags
   freezeActive: true,
   activeCursor: "pointer",
   outlineMethod: "outline",
   dragControl: true,
+  clickToFront: 500, // ADDED: Bring clicked tags to front
 };
 
 /**
@@ -158,27 +159,12 @@ export default function TagCanvas3D({
     [onWordClick]
   );
 
-  // Load TagCanvas script
+  // Wait for TagCanvas to be available (loaded from layout.tsx)
   useEffect(() => {
-    const loadTagCanvas = async () => {
-      // Check if TagCanvas is already loaded
-      if (window.TagCanvas) {
-        return;
-      }
-
-      // Create script element
-      const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/tagcanvas@2.11.20230810/tagcanvas.min.js";
-      script.async = true;
-
-      return new Promise<void>((resolve, reject) => {
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error("Failed to load TagCanvas"));
-        document.head.appendChild(script);
-      });
-    };
-
-    loadTagCanvas().catch(console.error);
+    // TagCanvas is loaded in layout.tsx, just wait for it
+    if (!window.TagCanvas) {
+      console.warn("TagCanvas not loaded yet, waiting...");
+    }
   }, []);
 
   // Initialize TagCanvas
