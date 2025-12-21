@@ -2,59 +2,50 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-import IslandIcon from "@/icons/IslandIcon";
-import { useTopics } from "@/features/cloud/hooks/useTopics";
 
-// Dynamically import TagCanvas3D to avoid SSR issues
-const TagCanvas3D = dynamic(
-  () => import("@/features/cloud/components/TagCanvas3D"),
-  { ssr: false }
-);
-
-// Fallback data when database is unavailable (weight: 1-100 scale)
-const FALLBACK_WORDS = [
-  { text: "React", weight: 85 },
-  { text: "TypeScript", weight: 80 },
-  { text: "Next.js", weight: 75 },
-  { text: "Tailwind", weight: 78 },
-  { text: "JavaScript", weight: 95 },
-  { text: "Node.js", weight: 70 },
-  { text: "Python", weight: 88 },
-  { text: "Database", weight: 55 },
-  { text: "API", weight: 60 },
-  { text: "CSS", weight: 65 },
-  { text: "HTML", weight: 58 },
-  { text: "Git", weight: 50 },
-  { text: "Docker", weight: 72 },
-  { text: "Kubernetes", weight: 68 },
-  { text: "AWS", weight: 75 },
-  { text: "Azure", weight: 70 },
-  { text: "GraphQL", weight: 62 },
-  { text: "REST", weight: 55 },
-  { text: "MongoDB", weight: 65 },
-  { text: "PostgreSQL", weight: 68 },
-  { text: "Redis", weight: 48 },
-  { text: "Testing", weight: 52 },
-  { text: "CI/CD", weight: 58 },
-  { text: "Agile", weight: 45 },
-  { text: "DevOps", weight: 72 },
-  { text: "Microservices", weight: 65 },
-  { text: "Serverless", weight: 60 },
-  { text: "WebSocket", weight: 52 },
-  { text: "OAuth", weight: 48 },
-  { text: "JWT", weight: 45 },
-  { text: "Webpack", weight: 55 },
-  { text: "Vite", weight: 62 },
-  { text: "Redux", weight: 65 },
-  { text: "Three.js", weight: 70 },
-  { text: "WebGL", weight: 65 },
-  { text: "AI", weight: 92 },
-  { text: "Machine Learning", weight: 78 },
-  { text: "Blockchain", weight: 68 },
-  { text: "Web3", weight: 72 },
-  { text: "Cloud", weight: 82 },
-  { text: "Security", weight: 70 },
+// Word cloud data with different sizes and positions
+const CLOUD_WORDS = [
+  { text: "React", size: 64, x: 20, y: 30, weight: 700 },
+  { text: "TypeScript", size: 56, x: 60, y: 25, weight: 600 },
+  { text: "Next.js", size: 48, x: 35, y: 50, weight: 500 },
+  { text: "Tailwind", size: 52, x: 75, y: 45, weight: 600 },
+  { text: "JavaScript", size: 72, x: 45, y: 15, weight: 800 },
+  { text: "Node.js", size: 44, x: 15, y: 65, weight: 500 },
+  { text: "Python", size: 60, x: 80, y: 70, weight: 700 },
+  { text: "Database", size: 40, x: 25, y: 80, weight: 400 },
+  { text: "API", size: 36, x: 65, y: 60, weight: 400 },
+  { text: "CSS", size: 42, x: 50, y: 75, weight: 450 },
+  { text: "HTML", size: 38, x: 10, y: 45, weight: 400 },
+  { text: "Git", size: 34, x: 55, y: 40, weight: 350 },
+  { text: "Docker", size: 46, x: 85, y: 35, weight: 500 },
+  { text: "Kubernetes", size: 40, x: 30, y: 20, weight: 450 },
+  { text: "AWS", size: 50, x: 70, y: 55, weight: 550 },
+  { text: "Azure", size: 44, x: 40, y: 70, weight: 500 },
+  { text: "GraphQL", size: 38, x: 90, y: 50, weight: 400 },
+  { text: "REST", size: 36, x: 20, y: 55, weight: 350 },
+  { text: "MongoDB", size: 42, x: 60, y: 80, weight: 450 },
+  { text: "PostgreSQL", size: 40, x: 75, y: 20, weight: 450 },
+  { text: "Redis", size: 32, x: 50, y: 35, weight: 300 },
+  { text: "Testing", size: 36, x: 15, y: 25, weight: 350 },
+  { text: "CI/CD", size: 34, x: 85, y: 60, weight: 350 },
+  { text: "Agile", size: 32, x: 35, y: 85, weight: 300 },
+  { text: "DevOps", size: 44, x: 65, y: 15, weight: 500 },
+  { text: "Microservices", size: 40, x: 25, y: 40, weight: 450 },
+  { text: "Serverless", size: 38, x: 80, y: 80, weight: 400 },
+  { text: "WebSocket", size: 34, x: 45, y: 60, weight: 350 },
+  { text: "OAuth", size: 32, x: 55, y: 85, weight: 300 },
+  { text: "JWT", size: 30, x: 10, y: 70, weight: 300 },
+  { text: "Webpack", size: 36, x: 70, y: 40, weight: 350 },
+  { text: "Vite", size: 38, x: 90, y: 25, weight: 400 },
+  { text: "Redux", size: 40, x: 30, y: 60, weight: 450 },
+  { text: "Three.js", size: 46, x: 50, y: 50, weight: 500 },
+  { text: "WebGL", size: 42, x: 15, y: 15, weight: 450 },
+  { text: "AI", size: 68, x: 40, y: 35, weight: 750 },
+  { text: "Machine Learning", size: 48, x: 75, y: 65, weight: 550 },
+  { text: "Blockchain", size: 44, x: 20, y: 75, weight: 500 },
+  { text: "Web3", size: 50, x: 85, y: 15, weight: 550 },
+  { text: "Cloud", size: 54, x: 60, y: 70, weight: 600 },
+  { text: "Security", size: 46, x: 35, y: 25, weight: 500 },
 ];
 
 /**
@@ -131,18 +122,11 @@ export default function Cloud() {
     : cloudWords;
 
   const handleWordClick = (word: string) => {
-    console.log('🎯 Word clicked:', word);
-    
-    // Find the topic details
-    const topic = topics.find(t => t.text === word);
-    
-    if (topic) {
-      // Navigate to knowledge graph with selected topic
-      router.push(`/knowledge-graph?topic=${encodeURIComponent(topic.id)}`);
-    } else {
-      // Fallback: navigate to knowledge graph without selection
-      router.push('/knowledge-graph');
-    }
+    setClickedWord(word);
+    setTimeout(() => {
+      // Navigate to search app
+      window.location.href = `http://localhost:3005?q=${encodeURIComponent(word)}`;
+    }, 200);
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -177,8 +161,8 @@ export default function Cloud() {
           </button>
 
           <nav className="flex gap-6">
-            <button
-              onClick={() => router.push("/")}
+            <a
+              href="http://localhost:3003"
               className="text-gray-400 hover:text-white transition-colors"
             >
               Search

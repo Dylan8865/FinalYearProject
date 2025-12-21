@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import IslandIcon from "@/icons/IslandIcon";
+import IslandIcon from "@/features/island/icons/IslandIcon";
 
 // Mock content data - will be replaced with database
 const MOCK_CONTENT = [
@@ -119,7 +119,7 @@ export default function Explore() {
 
           <nav className="flex gap-6">
             <button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/home")}
               className="text-gray-400 hover:text-white transition-colors"
             >
               Search
