@@ -7,6 +7,9 @@ interface StatusButtonProps {
   orientation?: "left" | "right";
   btnIcon?: React.ReactNode;
   onClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  onMouseMove?: (e: React.MouseEvent) => void;
 }
 
 const StatusButton = ({
@@ -16,6 +19,9 @@ const StatusButton = ({
   orientation,
   btnIcon,
   onClick,
+  onMouseEnter,
+  onMouseLeave,
+  onMouseMove,
 }: StatusButtonProps) => {
   return (
     <div
@@ -45,6 +51,9 @@ const StatusButton = ({
             orientation == "right" && "md:scale-x-[-1]"
           } absolute right-0 flex h-6 w-8 items-center justify-center border-4 border-black bg-[#1a1a1a] md:h-8 md:w-10`}
           onClick={onClick}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          onMouseMove={onMouseMove}
         >
           {btnIcon}
         </button>

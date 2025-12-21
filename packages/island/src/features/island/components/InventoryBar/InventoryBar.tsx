@@ -112,7 +112,8 @@ const InventoryBar = ({
     });
   }, [islandItems]);
 
-  const [showTooltip, setShowTooltip] = useState<ItemType | null>(null);
+  const [showItemTooltip, setShowItemTooltip] = useState<ItemType | null>(null);
+  const [showMenuTooltip, setShowMenuTooltip] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   return (
@@ -163,8 +164,10 @@ const InventoryBar = ({
                     onSlotClick(index, 0);
                   }
                 }}
-                onMouseEnter={() => setShowTooltip(islandItem?.item || null)}
-                onMouseLeave={() => setShowTooltip(null)}
+                onMouseEnter={() =>
+                  setShowItemTooltip(islandItem?.item || null)
+                }
+                onMouseLeave={() => setShowItemTooltip(null)}
                 onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
               >
                 {islandItem && islandItem.item?.image_cover_url ? (
@@ -186,27 +189,50 @@ const InventoryBar = ({
               <InventoryButton
                 className="bg-[#dcd1c1] hover:bg-[#aaa194]"
                 onClick={() => setIsDialogOpen("inventory")}
+                onMouseEnter={() => setShowMenuTooltip("I / i")}
+                onMouseLeave={() => setShowMenuTooltip(null)}
+                onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
               >
                 <MenuIcon />
               </InventoryButton>
               <InventoryButton
                 className="bg-[#dcd1c1] text-2xl hover:bg-[#aaa194]"
                 onClick={() => setIsDialogOpen("store")}
+                onMouseEnter={() => setShowMenuTooltip("S / s")}
+                onMouseLeave={() => setShowMenuTooltip(null)}
+                onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
               >
                 <StoreIcon />
+              </InventoryButton>
+              <InventoryButton
+                className="hidden bg-[#dcd1c1] hover:bg-[#aaa194] md:flex"
+                onClick={() => setIsDialogOpen("tutorial")}
+                onMouseEnter={() => setShowMenuTooltip("H / h")}
+                onMouseLeave={() => setShowMenuTooltip(null)}
+                onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
+              >
+                <QuestionIcon />
               </InventoryButton>
             </div>
           </div>
         </div>
       </div>
-      {showTooltip && (
+      {showItemTooltip && (
         <SlotTooltip
-          title={showTooltip.name || ""}
+          title={showItemTooltip.name || ""}
           description={[
-            `Type: ${toCapitalise(showTooltip.type ?? "")}`,
-            `Mana Rate: ${showTooltip.mana_rate}/m`,
+            `Type: ${toCapitalise(showItemTooltip.type ?? "")}`,
+            `Mana Rate: ${showItemTooltip.mana_rate}/m`,
             "Click To Move",
           ]}
+          x={mousePos.x}
+          y={mousePos.y - 100}
+        />
+      )}
+      {showMenuTooltip && (
+        <SlotTooltip
+          title={showMenuTooltip}
+          description={["Shortcut Key"]}
           x={mousePos.x}
           y={mousePos.y - 100}
         />

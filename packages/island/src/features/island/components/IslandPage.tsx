@@ -37,6 +37,8 @@ import {
   useToast,
 } from "@/features/island/contexts/ToastContext";
 import LoadingScreen from "./Shared/LoadingScreen";
+import TutorialContent from "./Dialog/TutorialContent";
+import QuestionIcon from "@/icons/QuestionIcon";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -94,6 +96,22 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       }));
     }
   }, [islands, loading, totalLevel]);
+
+  // Handle first-time tutorial
+  useEffect(() => {
+    // We use localStorage to track if the user has seen the tutorial on this device
+    // and check the profile's created_at to see if they are a "recently registered" user.
+    const tutorialSeen = localStorage.getItem("tutorial_seen");
+
+    // Default to showing tutorial if never seen before on this device
+    if (!tutorialSeen) {
+      setIsDialogOpen("tutorial");
+      // Note: We don't set 'tutorial_seen' to 'true' here yet,
+      // let the user handle it or set it on close.
+      // But setting it now is easier for "first time appear".
+      localStorage.setItem("tutorial_seen", "true");
+    }
+  }, []);
 
   // Background validation processing (for development)
   useEffect(() => {
@@ -178,17 +196,30 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       const key = e.key.toLowerCase();
 
       if (key === "s" && !cmdOrCtrl) {
-        // Only open if nothing else is open to avoid conflicts
         if (!isDialogOpen && !sidebarContentPage?.open) {
           setIsDialogOpen("store");
         }
       } else if (key === "i" && !cmdOrCtrl) {
-        // Only open if nothing else is open to avoid conflicts
         if (!isDialogOpen && !sidebarContentPage?.open) {
           setIsDialogOpen("inventory");
         }
+      } else if (key === "h" && !cmdOrCtrl) {
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("tutorial");
+        }
+      } else if (key === "p" && !cmdOrCtrl) {
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("profile");
+        }
+      } else if (key === "l" && !cmdOrCtrl) {
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("level");
+        }
+      } else if (key === "a" && !cmdOrCtrl) {
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("island");
+        }
       } else if (key === "escape") {
-        // Close standard dialogs
         if (isDialogOpen) {
           setIsDialogOpen("");
         }
@@ -1147,6 +1178,14 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         </button>
       )}
 
+      {/* Floating Help button for mobile only */}
+      <button
+        onClick={() => setIsDialogOpen("tutorial")}
+        className="animate-fade-in pointer-events-auto absolute right-16 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:scale-110 md:hidden"
+      >
+        <QuestionIcon />
+      </button>
+
       {isDialogOpen === "profile" && (
         <Dialog
           iconStyle="bg-[#6d3f33] text-white"
@@ -1271,6 +1310,18 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           setIsDialogOpen={setIsDialogOpen}
         >
           <ChangePasswordContent setIsDialogOpen={setIsDialogOpen} />
+        </Dialog>
+      )}
+
+      {isDialogOpen === "tutorial" && (
+        <Dialog
+          iconStyle="bg-[#dcd1c1] text-black"
+          icon={<QuestionIcon />}
+          title="How to Play"
+          setIsDialogOpen={setIsDialogOpen}
+          size="medium"
+        >
+          <TutorialContent onClose={() => setIsDialogOpen("")} />
         </Dialog>
       )}
 
