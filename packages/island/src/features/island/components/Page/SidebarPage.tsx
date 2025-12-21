@@ -260,7 +260,11 @@ const SidebarPage = ({
             }}
           />
           <div className="flex flex-1 items-center justify-center">
-            <LoadingScreen width="w-full" height="h-full" />
+            <LoadingScreen
+              width="w-full"
+              height="h-full"
+              bgColor="transparent"
+            />
           </div>
         </div>
       </>

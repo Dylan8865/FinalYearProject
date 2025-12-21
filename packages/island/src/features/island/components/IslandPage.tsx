@@ -1110,6 +1110,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   );
 
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [themeColour, setThemeColour] = useState("dark");
 
   if (loading || isSigningOut) {
     return <LoadingScreen />;
@@ -1199,6 +1200,8 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
             userEmail={profile.email}
             setIsDialogOpen={setIsDialogOpen}
             setIsSigningOut={setIsSigningOut}
+            themeColour={themeColour}
+            setThemeColour={setThemeColour}
           />
         </Dialog>
       )}

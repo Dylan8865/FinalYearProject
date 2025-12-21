@@ -8,12 +8,15 @@ import LoginIcon from "@/icons/LoginIcon";
 import WarningIcon from "@/icons/WarningIcon";
 import { signOut } from "@/features/auth/actions/logout";
 import DeleteAccountContent from "./DeleteAccountContent";
+import { MoonIcon, SunIcon } from "lucide-react";
 
 interface ProfileContentProps {
   userName: string;
   userEmail: string;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
   setIsSigningOut: React.Dispatch<React.SetStateAction<boolean>>;
+  themeColour: string;
+  setThemeColour: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const ProfileContent = ({
@@ -21,6 +24,8 @@ const ProfileContent = ({
   userEmail,
   setIsDialogOpen,
   setIsSigningOut,
+  themeColour,
+  setThemeColour,
 }: ProfileContentProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -35,6 +40,14 @@ const ProfileContent = ({
         <EditButton fieldName="Email:" fieldValue={userEmail} />
         <SettingButton
           fieldName="Settings"
+          icon={themeColour === "dark" ? <SunIcon /> : <MoonIcon />}
+          title={themeColour === "dark" ? "Light Mode" : "Dark Mode"}
+          color="gray"
+          onClick={() => {
+            setThemeColour(themeColour === "dark" ? "light" : "dark");
+          }}
+        />
+        <SettingButton
           icon={<LockIcon />}
           title="Change Password"
           color="gray"
