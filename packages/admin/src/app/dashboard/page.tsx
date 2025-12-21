@@ -28,20 +28,19 @@ export default async function DashboardPage() {
 
   // Knowledge-base Moderation counts
   const { count: pendingKnowledge } = await supabase
-    .from("knowledge_base")
+    .from("island-item")
     .select("*", { count: "exact", head: true })
-    .gte("accuracy", 0.55)
-    .lte("accuracy", 0.59);
+    .eq("status", "pending");
 
   const { count: declinedKnowledge } = await supabase
-    .from("knowledge_base")
+    .from("island-item")
     .select("*", { count: "exact", head: true })
-    .lte("accuracy", 0.54);
+    .eq("status", "declined");
 
   const { count: verifiedKnowledge } = await supabase
-    .from("knowledge_base")
+    .from("island-item")
     .select("*", { count: "exact", head: true })
-    .gte("accuracy", 0.60);
+    .eq("status", "verified");
 
   // User Management counts
   const { count: adminUsers } = await supabase
@@ -64,16 +63,19 @@ export default async function DashboardPage() {
       functional: functionalItems || 0,
       decorative: decorativeItems || 0,
       terrain: terrainItems || 0,
+      total: (functionalItems || 0) + (decorativeItems || 0) + (terrainItems || 0),
     },
     knowledge: {
       pending: pendingKnowledge || 0,
       declined: declinedKnowledge || 0,
       verified: verifiedKnowledge || 0,
+      total: (pendingKnowledge || 0) + (declinedKnowledge || 0) + (verifiedKnowledge || 0),
     },
     users: {
       admin: adminUsers || 0,
       island: islandUsers || 0,
       nonIsland: nonIslandUsers || 0,
+      total: (adminUsers || 0) + (islandUsers || 0) + (nonIslandUsers || 0),
     },
   };
 

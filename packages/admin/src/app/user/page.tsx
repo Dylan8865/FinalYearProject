@@ -19,10 +19,37 @@ export default async function UserPage() {
     }
   }
 
+  // Fetch stats
+  const { count: totalUsers } = await supabase
+    .from("profile")
+    .select("*", { count: "exact", head: true });
+
+  const { count: adminUsers } = await supabase
+    .from("profile")
+    .select("*", { count: "exact", head: true })
+    .eq("type", "admin");
+
+  const { count: islandUsers } = await supabase
+    .from("profile")
+    .select("*", { count: "exact", head: true })
+    .eq("type", "island");
+
+  const { count: nonIslandUsers } = await supabase
+    .from("profile")
+    .select("*", { count: "exact", head: true })
+    .eq("type", "non-island");
+
+  const stats = {
+    total: totalUsers || 0,
+    admin: adminUsers || 0,
+    island: islandUsers || 0,
+    nonIsland: nonIslandUsers || 0,
+  };
+
   return (
     <div className="min-h-screen bg-[#1E1E1E]">
       <AdminHeader username={profile.name || "Admin"} />
-      <UserManagement users={users || []} />
+      <UserManagement users={users || []} stats={stats} />
     </div>
   );
 }

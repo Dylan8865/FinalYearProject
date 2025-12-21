@@ -3,41 +3,45 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { formatDate } from "@/lib/utils/formatters";
-import UserEditModal from "./UserEditPopup";
-import CreateAccountModal from "./CreateAccountPopup";
+import KnowledgeDetailView from "./KnowledgeDetailView";
 
-interface User {
+interface IslandItem {
   id: string;
-  name: string | null;
-  email: string | null;
   created_at: string;
-  last_login_time: string | null;
-  mana: number | null;
-  level: number | null;
-  type: string | null;
-}
-
-interface UserManagementProps {
-  users: User[];
-  stats?: {
-    total: number;
-    admin: number;
-    island: number;
-    nonIsland: number;
+  title: string | null;
+  image_cover_path: string | null;
+  status: string | null;
+  validity: number | null;
+  validation_status: string | null;
+  comment: string | null;
+  admin_comment: string | null;
+  profile?: {
+    name: string | null;
+    email: string | null;
   };
 }
 
-type SortColumn = "name" | "created_at" | "email" | "last_login_time" | "mana" | "level" | "type";
+interface KnowledgeManagementProps {
+  items: IslandItem[];
+  stats?: {
+    total: number;
+    verified: number;
+    pending: number;
+    declined: number;
+    unverified: number;
+  };
+}
+
+type SortColumn = "title" | "created_at" | "status" | "validity" | "username";
 type SortOrder = "none" | "asc" | "desc";
 
-export default function UserManagement({ users, stats }: UserManagementProps) {
+export default function KnowledgeManagement({ items, stats }: KnowledgeManagementProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showFilter, setShowFilter] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -45,13 +49,21 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isErrorAnimatingOut, setIsErrorAnimatingOut] = useState(false);
   const [isSuccessAnimatingOut, setIsSuccessAnimatingOut] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<IslandItem | null>(null);
 
   // Initialize filter from URL parameter
   useEffect(() => {
     const filterParam = searchParams.get("filter");
     if (filterParam) {
-      setFilterType(filterParam);
+      setFilterStatus(filterParam);
+    }
+    // Open detail if id param is provided
+    const idParam = searchParams.get("id");
+    if (idParam && !selectedItem) {
+      const itemMatch = items.find((it) => it.id === idParam);
+      if (itemMatch) {
+        setSelectedItem(itemMatch);
+      }
     }
   }, [searchParams]);
 
@@ -83,41 +95,42 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
     }
   }, [successMessage, isSuccessAnimatingOut]);
 
-  // Filter users based on search and filter
-  const filteredUsers = users.filter((user) => {
+  // Filter items based on search and filter
+  const filteredItems = items.filter((item) => {
     const matchesSearch =
       !searchQuery ||
-      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.id.toLowerCase().includes(searchQuery.toLowerCase());
+      item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.profile?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.profile?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.id.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesFilter =
-      filterType === "all" ||
-      user.type === filterType;
+      filterStatus === "all" ||
+      item.status === filterStatus;
 
     return matchesSearch && matchesFilter;
   });
 
-  // Sort users
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
+  // Sort items
+  const sortedItems = [...filteredItems].sort((a, b) => {
     if (!sortColumn || sortOrder === "none") return 0;
 
     let comparison = 0;
     switch (sortColumn) {
       case "created_at":
-      case "last_login_time":
-        const dateA = a[sortColumn] ? new Date(a[sortColumn]!).getTime() : 0;
-        const dateB = b[sortColumn] ? new Date(b[sortColumn]!).getTime() : 0;
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
         comparison = dateA - dateB;
         break;
-      case "name":
-      case "email":
-      case "type":
+      case "title":
+      case "status":
         comparison = (a[sortColumn] || "").localeCompare(b[sortColumn] || "");
         break;
-      case "level":
-      case "mana":
-        comparison = (a[sortColumn] || 0) - (b[sortColumn] || 0);
+      case "validity":
+        comparison = (a.validity || 0) - (b.validity || 0);
+        break;
+      case "username":
+        comparison = (a.profile?.name || "").localeCompare(b.profile?.name || "");
         break;
     }
 
@@ -125,10 +138,10 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
   });
 
   // Pagination
-  const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedUsers = sortedUsers.slice(startIndex, endIndex);
+  const paginatedItems = sortedItems.slice(startIndex, endIndex);
 
   // Handle sort column click
   const handleSort = (column: SortColumn) => {
@@ -153,6 +166,22 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
     return sortOrder === "asc" ? " ▲" : " ▼";
   };
 
+
+  const getStatusColor = (status: string | null) => {
+    switch (status) {
+      case "verified":
+        return "bg-green-500/20 text-green-300";
+      case "pending":
+        return "bg-yellow-500/20 text-yellow-300";
+      case "declined":
+        return "bg-red-500/20 text-red-300";
+      case "unverified":
+        return "bg-gray-500/20 text-gray-300";
+      default:
+        return "bg-gray-500/20 text-gray-300";
+    }
+  };
+
   return (
     <>
       <div className="pl-8 pr-8 pt-2">
@@ -169,36 +198,39 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
                   &lt;
                 </button>
                 <div>
-                  <h2 className="text-white text-xl font-semibold">User Management</h2>
+                  <h2 className="text-white text-xl font-semibold">Knowledge-base Management</h2>
                 </div>
               </div>
               <button
-                onClick={() => setShowCreateModal(true)}
+                onClick={() => router.push("/knowledge/validation-logs")}
                 className="bg-[#6D3F33] hover:bg-[#7B4A3A] text-white px-4 py-1 rounded transition-colors flex items-center gap-2"
               >
-                <span className="text-lg">+</span>
-                <span>Create Account</span>
+                <span>View Validation Logs</span>
               </button>
             </div>
 
             {/* Stats Cards - Single Compact Row */}
             {stats && (
-              <div className="grid grid-cols-4 gap-3 mb-4">
+              <div className="grid grid-cols-5 gap-3 mb-4">
                 <div className="bg-[#282828] rounded-lg p-2 border border-[#3B3B3B]">
-                  <div className="text-gray-400 text-[10px] mb-0.5">Total Users</div>
+                  <div className="text-gray-400 text-[10px] mb-0.5">Total Items</div>
                   <div className="text-white text-lg font-bold">{stats.total}</div>
                 </div>
                 <div className="bg-[#282828] rounded-lg p-2 border border-[#3B3B3B]">
-                  <div className="text-gray-400 text-[10px] mb-0.5">Admin</div>
-                  <div className="text-red-300 text-lg font-bold">{stats.admin}</div>
+                  <div className="text-gray-400 text-[10px] mb-0.5">Unverified</div>
+                  <div className="text-gray-300 text-lg font-bold">{stats.unverified}</div>
                 </div>
                 <div className="bg-[#282828] rounded-lg p-2 border border-[#3B3B3B]">
-                  <div className="text-gray-400 text-[10px] mb-0.5">Island Users</div>
-                  <div className="text-blue-300 text-lg font-bold">{stats.island}</div>
+                  <div className="text-gray-400 text-[10px] mb-0.5">Verified</div>
+                  <div className="text-green-300 text-lg font-bold">{stats.verified}</div>
                 </div>
                 <div className="bg-[#282828] rounded-lg p-2 border border-[#3B3B3B]">
-                  <div className="text-gray-400 text-[10px] mb-0.5">Non-Island Users</div>
-                  <div className="text-gray-300 text-lg font-bold">{stats.nonIsland}</div>
+                  <div className="text-gray-400 text-[10px] mb-0.5">Pending</div>
+                  <div className="text-yellow-300 text-lg font-bold">{stats.pending}</div>
+                </div>
+                <div className="bg-[#282828] rounded-lg p-2 border border-[#3B3B3B]">
+                  <div className="text-gray-400 text-[10px] mb-0.5">Declined</div>
+                  <div className="text-red-300 text-lg font-bold">{stats.declined}</div>
                 </div>
               </div>
             )}
@@ -207,7 +239,7 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
             <div className="flex gap-4 mb-4">
               <input
                 type="text"
-                placeholder="Search for users"
+                placeholder="Search for knowledge items"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -226,107 +258,104 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
                 {/* Filter Dropdown */}
                 {showFilter && (
                   <div className="absolute top-10 right-0 bg-[#282828] border border-[#3B3B3B] rounded-lg p-4 min-w-[200px] z-10">
-                    <h4 className="text-white text-sm font-semibold mb-2">Filter by Type</h4>
+                    <h4 className="text-white text-sm font-semibold mb-2">Filter by Status</h4>
                     <select
-                      value={filterType}
+                      value={filterStatus}
                       onChange={(e) => {
-                        setFilterType(e.target.value);
+                        setFilterStatus(e.target.value);
                         setCurrentPage(1);
                         setShowFilter(false);
                       }}
                       className="w-full bg-[#1E1E1E] text-white px-3 py-1 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
                     >
-                      <option value="all">All Users</option>
-                      <option value="admin">Admin</option>
-                      <option value="island">Island</option>
-                      <option value="non-island">Non-Island</option>
+                      <option value="all">All Items</option>
+                      <option value="unverified">Unverified</option>
+                      <option value="pending">Pending</option>
+                      <option value="verified">Verified</option>
+                      <option value="declined">Declined</option>
                     </select>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* User Table */}
+            {/* Items Table */}
             <div className="flex-1 overflow-auto">
               <table className="w-full">
                 <thead className="sticky top-0 bg-[#282828] border-b border-[#3B3B3B]">
                   <tr>
                     <th
-                      onClick={() => handleSort("name")}
+                      onClick={() => handleSort("title")}
                       className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
                     >
-                      Username{getSortIcon("name")}
+                      Title{getSortIcon("title")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("username")}
+                      className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
+                    >
+                      Created By{getSortIcon("username")}
                     </th>
                     <th
                       onClick={() => handleSort("created_at")}
                       className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
                     >
-                      Creation Time{getSortIcon("created_at")}
+                      Created At{getSortIcon("created_at")}
                     </th>
                     <th
-                      onClick={() => handleSort("email")}
+                      onClick={() => handleSort("status")}
                       className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
                     >
-                      Email{getSortIcon("email")}
+                      Status{getSortIcon("status")}
                     </th>
                     <th
-                      onClick={() => handleSort("last_login_time")}
+                      onClick={() => handleSort("validity")}
                       className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
                     >
-                      Last Login{getSortIcon("last_login_time")}
-                    </th>
-                    <th
-                      onClick={() => handleSort("mana")}
-                      className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
-                    >
-                      Mana{getSortIcon("mana")}
-                    </th>
-                    <th
-                      onClick={() => handleSort("level")}
-                      className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
-                    >
-                      Level{getSortIcon("level")}
-                    </th>
-                    <th
-                      onClick={() => handleSort("type")}
-                      className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
-                    >
-                      Type{getSortIcon("type")}
+                      Validity{getSortIcon("validity")}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedUsers.map((user) => (
+                  {paginatedItems.map((item) => (
                     <tr
-                      key={user.id}
-                      onClick={() => setSelectedUser(user)}
+                      key={item.id}
+                      onClick={() => setSelectedItem(item)}
                       className="border-b border-[#3B3B3B] hover:bg-[#282828] cursor-pointer transition-colors"
                     >
-                      <td className="text-white text-sm py-3 px-4">{user.name || "N/A"}</td>
-                      <td className="text-white text-sm py-3 px-4">{formatDate(user.created_at)}</td>
-                      <td className="text-white text-sm py-3 px-4">{user.email || "N/A"}</td>
-                      <td className="text-white text-sm py-3 px-4">{formatDate(user.last_login_time, "Never")}</td>
-                      <td className="text-white text-sm py-3 px-4">{user.mana?.toLocaleString() || "0"}</td>
-                      <td className="text-white text-sm py-3 px-4">{user.level || "0"}</td>
+                      <td className="text-white text-sm py-3 px-4">{item.title || "Untitled"}</td>
+                      <td className="text-white text-sm py-3 px-4">{item.profile?.name || "Unknown"}</td>
+                      <td className="text-white text-sm py-3 px-4">{formatDate(item.created_at)}</td>
                       <td className="text-white text-sm py-3 px-4">
                         <span
-                          className={`px-2 py-1 rounded text-xs capitalize ${
-                            user.type === "admin"
-                              ? "bg-red-500/20 text-red-300"
-                              : user.type === "island"
-                              ? "bg-blue-500/20 text-blue-300"
-                              : "bg-gray-500/20 text-gray-300"
-                          }`}
+                          className={`px-2 py-1 rounded text-xs capitalize ${getStatusColor(item.status)}`}
                         >
-                          {user.type || "Unknown"}
+                          {item.status || "Unknown"}
                         </span>
+                      </td>
+                      <td className="text-white text-sm py-3 px-4">
+                        {item.validity !== null && item.validity !== undefined ? (
+                          <span
+                            className={`font-semibold ${
+                              item.validity >= 60
+                                ? "text-green-400"
+                                : item.validity >= 55
+                                ? "text-yellow-400"
+                                : "text-red-400"
+                            }`}
+                          >
+                            {item.validity.toFixed(1)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">N/A</span>
+                        )}
                       </td>
                     </tr>
                   ))}
-                  {paginatedUsers.length === 0 && (
+                  {paginatedItems.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="text-center text-gray-400 py-8">
-                        No users found
+                      <td colSpan={5} className="text-center text-gray-400 py-8">
+                        No knowledge items found
                       </td>
                     </tr>
                   )}
@@ -339,7 +368,7 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
               <div className="flex items-center justify-between pt-4 border-t border-[#3B3B3B]">
                 <div className="flex items-center gap-4">
                   <div className="text-gray-400 text-sm">
-                    Showing {startIndex + 1}-{Math.min(endIndex, sortedUsers.length)} of {sortedUsers.length} users
+                    Showing {startIndex + 1}-{Math.min(endIndex, sortedItems.length)} of {sortedItems.length} items
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="text-gray-400 text-sm">Per page:</label>
@@ -434,33 +463,25 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
         </div>
       </div>
 
-      {/* Edit Modal */}
-      {selectedUser && (
-        <UserEditModal
-          user={selectedUser}
-          onClose={() => setSelectedUser(null)}
+      {/* Detail View Sidebar */}
+      {selectedItem && (
+        <KnowledgeDetailView
+          item={selectedItem}
+          onClose={() => {
+            const from = searchParams.get("from");
+            const logId = searchParams.get("logId");
+            if (from === "logs") {
+              router.push(`/knowledge/validation-logs${logId ? `?logId=${logId}` : ""}`);
+            } else {
+              setSelectedItem(null);
+            }
+          }}
           onUpdate={() => {
-            setSelectedUser(null);
+            setSelectedItem(null);
             router.refresh();
           }}
-          onError={(message) => setErrorMessage(message)}
-          onSuccess={(message) => setSuccessMessage(message)}
-        />
-      )}
-
-      {/* Create Account Modal */}
-      {showCreateModal && (
-        <CreateAccountModal
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={() => {
-            setShowCreateModal(false);
-            setSuccessMessage("Account created successfully!");
-            router.refresh();
-          }}
-          onError={(message) => {
-            setShowCreateModal(false);
-            setErrorMessage(message);
-          }}
+          onError={(message: string) => setErrorMessage(message)}
+          onSuccess={(message: string) => setSuccessMessage(message)}
         />
       )}
 
