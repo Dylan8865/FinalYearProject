@@ -45,6 +45,9 @@ const SidebarPage = ({
   const [currentStatus, setCurrentStatus] = useState<
     "unverified" | "pending" | "declined" | "verified"
   >("unverified");
+  const [validationStatus, setValidationStatus] = useState<
+    "pending" | "completed" | "error" | null
+  >(null);
   const { showToast } = useToast();
 
   const isSaving = isHeaderSaving || isEditorSaving;
@@ -58,13 +61,24 @@ const SidebarPage = ({
       console.log("Fetched island item data:", data);
       const item = Array.isArray(data) ? data[0] : data;
       console.log("Status:", item.status);
-      setCurrentStatus(
-        (item.status || "unverified") as
-          | "unverified"
-          | "pending"
-          | "declined"
-          | "verified"
-      );
+      console.log("Validation Status:", item.validation_status);
+      
+      // Store validation_status separately
+      setValidationStatus(item.validation_status || null);
+      
+      // If validation_status is 'pending', show 'pending' regardless of status field
+      // Otherwise, show the actual status value
+      if (item.validation_status === 'pending') {
+        setCurrentStatus('pending');
+      } else {
+        setCurrentStatus(
+          (item.status || "unverified") as
+            | "unverified"
+            | "pending"
+            | "declined"
+            | "verified"
+        );
+      }
     } catch (error) {
       console.error("Failed to fetch validation status:", error);
     }
@@ -76,6 +90,22 @@ const SidebarPage = ({
       fetchCurrentStatus();
     }
   }, [islandItem?.id, fetchCurrentStatus]);
+
+  // Auto-refresh status every 3 seconds when sidebar is open
+  useEffect(() => {
+    if (!isOpen || !islandItem?.id) return;
+
+    // Initial fetch
+    fetchCurrentStatus();
+
+    // Poll for status updates every 3 seconds
+    const intervalId = setInterval(() => {
+      fetchCurrentStatus();
+    }, 3000);
+
+    // Cleanup interval on unmount or when sidebar closes
+    return () => clearInterval(intervalId);
+  }, [isOpen, islandItem?.id, fetchCurrentStatus]);
 
   // Handle publish - queue validation after ensuring saves are complete
   const handlePublish = useCallback(async () => {
@@ -103,7 +133,15 @@ const SidebarPage = ({
       }
 
       showToast("Published! Your content is queued for validation.", "success");
-      setIsPopupOpen(false); // Close popup after successful publish
+      // Keep popup open to show transition to pending state
+      // setIsPopupOpen(false); // Don't close popup - let it show the validation progress
+      
+      // Update validation_status to pending immediately for better UX
+      // Note: status remains 'unverified' until AI responds
+      setValidationStatus("pending");
+      
+      // Trigger an immediate status fetch to sync with server
+      fetchCurrentStatus();
     } catch (error) {
       console.error("Publish error:", error);
       showToast(
@@ -113,7 +151,7 @@ const SidebarPage = ({
         "error"
       );
     }
-  }, [islandItem?.id, isSaving, showToast]);
+  }, [islandItem?.id, isSaving, showToast, fetchCurrentStatus]);
 
   // Handle appeal - set status back to pending
   const handleAppeal = useCallback(async () => {
@@ -290,6 +328,7 @@ const SidebarPage = ({
         onClose={() => setIsPopupOpen(false)}
         islandItemId={islandItem?.id || ""}
         status={currentStatus}
+        validationStatus={validationStatus}
         onPublish={handlePublish}
         onAppeal={handleAppeal}
         isExpanded={isExpanded}

@@ -50,6 +50,7 @@ export interface IslandItemType {
   pos_y: number | null;
   profile_id: string;
   status?: "unverified" | "pending" | "declined" | "verified";
+  validation_status?: "pending" | "completed" | "error" | null;
   validity?: number | null;
   comment?: string | null;
   item?: ItemType;
