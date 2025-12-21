@@ -75,7 +75,7 @@ const Dialog = ({
       {showMenuTooltip && (
         <SlotTooltip
           title={"Esc"}
-          description={["Close"]}
+          description={["Shortcut Key"]}
           x={mousePos.x}
           y={mousePos.y}
         />
