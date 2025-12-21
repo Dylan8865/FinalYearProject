@@ -238,6 +238,13 @@ export async function PUT(request: Request) {
       island_id: body.island_id,
     };
 
+    // Set status to unverified when content is changed (unless explicitly setting status)
+    if (body.status === undefined) {
+      updateData.status = 'unverified';
+    } else {
+      updateData.status = body.status;
+    }
+
     // Handle pos_x/pos_y - they should be null when placing on island
     if (body.pos_x !== undefined) updateData.pos_x = body.pos_x;
     else updateData.pos_x = null;

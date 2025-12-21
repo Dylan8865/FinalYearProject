@@ -15,6 +15,7 @@ interface ValidationDetailsPopupProps {
   onClose: () => void;
   islandItemId: string;
   status: "unverified" | "pending" | "declined" | "verified";
+  validationStatus?: "pending" | "completed" | "error" | null;
   onPublish?: () => void;
   onAppeal?: () => void;
   isExpanded: boolean;
@@ -25,6 +26,7 @@ const ValidationDetailsPopup = ({
   onClose,
   islandItemId,
   status,
+  validationStatus,
   onPublish,
   onAppeal,
   isExpanded,
@@ -33,6 +35,7 @@ const ValidationDetailsPopup = ({
   const [validationData, setValidationData] = useState<{
     validity: number | null;
     comment: string | null;
+    adminComment: string | null;
     itemData: ItemDataValidation[];
   } | null>(null);
 
@@ -53,6 +56,7 @@ const ValidationDetailsPopup = ({
       setValidationData({
         validity: item.validity,
         comment: item.comment,
+        adminComment: item.admin_comment,
         itemData: itemDataList.map(
           (data: {
             id: string;
@@ -76,7 +80,7 @@ const ValidationDetailsPopup = ({
     if (isOpen && islandItemId && status !== "unverified") {
       fetchValidationData();
     }
-  }, [isOpen, islandItemId, status, fetchValidationData]);
+  }, [isOpen, islandItemId, status, validationStatus, fetchValidationData]);
 
   if (!isOpen) return null;
 
@@ -141,6 +145,157 @@ const ValidationDetailsPopup = ({
                 </ol>
               </div>
             </div>
+          ) : status === "pending" ? (
+            validationStatus === "pending" ? (
+              // AI Validation in progress
+              <div className="space-y-4">
+                <div className="rounded-lg bg-yellow-900/30 border border-yellow-600/50 p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-600">
+                      <LoadingIcon className="!h-5 !w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">
+                        AI Validation in Progress
+                      </h3>
+                      <p className="text-xs text-yellow-200">
+                        Currently queued for AI validation
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-300">
+                    Your content has been submitted and is waiting to be processed by our AI validation system. This typically takes a few moments.
+                  </p>
+                </div>
+
+                <div className="rounded-lg bg-gray-800 p-4">
+                  <h3 className="mb-3 text-sm font-semibold text-gray-300">
+                    What's happening now:
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 h-2 w-2 rounded-full bg-yellow-500"></div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Queued</p>
+                        <p className="text-xs text-gray-400">
+                          Your content is in the validation queue
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 h-2 w-2 rounded-full bg-gray-600"></div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-300">
+                          AI Analysis
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Evaluating clarity, completeness, usefulness, and authenticity
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 h-2 w-2 rounded-full bg-gray-600"></div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-300">
+                          Results
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Scores and feedback will appear here
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Moderator Review pending
+              <div className="space-y-4">
+                <div className="rounded-lg bg-yellow-900/30 border border-yellow-600/50 p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-600">
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">
+                        Awaiting Moderator Review
+                      </h3>
+                      <p className="text-xs text-yellow-200">
+                        Your content is being reviewed by our moderators
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-300">
+                    Your content has been flagged for manual review. Our moderators will assess it and make a final decision soon.
+                  </p>
+                </div>
+
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <LoadingIcon className="!h-6 !w-6" />
+                  </div>
+                ) : validationData ? (
+                  <>
+                    {/* Overall Validity */}
+                    <div className="rounded-lg bg-gray-800 p-4">
+                      <h3 className="mb-2 text-sm font-semibold text-gray-400">
+                        AI Validation Score
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`text-3xl font-bold ${
+                            (validationData.validity ?? 0) >= 60
+                              ? "text-green-500"
+                              : (validationData.validity ?? 0) >= 55
+                                ? "text-yellow-500"
+                                : "text-red-500"
+                          }`}
+                        >
+                          {validationData.validity?.toFixed(2) ?? "N/A"}
+                        </div>
+                        <div className="text-sm text-gray-400">/ 100</div>
+                      </div>
+                    </div>
+
+                    {/* AI Comment */}
+                    {validationData.comment && (
+                      <div className="rounded-lg bg-gray-800 p-4">
+                        <h3 className="mb-2 text-sm font-semibold text-gray-400">
+                          AI Feedback
+                        </h3>
+                        <p className="text-sm text-gray-300">
+                          {validationData.comment}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : null}
+
+                <div className="rounded-lg bg-gray-800 p-4">
+                  <h3 className="mb-3 text-sm font-semibold text-gray-300">
+                    Why is this being reviewed?
+                  </h3>
+                  <p className="text-sm text-gray-400 mb-3">
+                    Content may be flagged for moderator review when:
+                  </p>
+                  <ul className="space-y-2 text-sm text-gray-400">
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-500 mt-1">•</span>
+                      <span>AI validation score is borderline (55-59)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-500 mt-1">•</span>
+                      <span>Content contains sensitive or unusual topics</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-500 mt-1">•</span>
+                      <span>You appealed a previous decision</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )
           ) : loading ? (
             <div className="flex h-full items-center justify-center">
               <LoadingIcon className="!h-8 !w-8" />
@@ -167,6 +322,34 @@ const ValidationDetailsPopup = ({
                   <div className="text-sm text-gray-400">/ 100</div>
                 </div>
               </div>
+
+              {/* Admin Comment - Only show for declined and verified */}
+              {validationData.adminComment &&
+                (status === "declined" || status === "verified") && (
+                  <div className="rounded-lg bg-blue-900/30 border border-blue-600/50 p-4">
+                    <div className="flex items-start gap-2 mb-2">
+                      <svg
+                        className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      <h3 className="text-sm font-semibold text-blue-300">
+                        Moderator Comment
+                      </h3>
+                    </div>
+                    <p className="text-sm text-gray-300 pl-7">
+                      {validationData.adminComment}
+                    </p>
+                  </div>
+                )}
 
               {/* AI Comment */}
               {validationData.comment && (
