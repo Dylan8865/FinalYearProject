@@ -39,7 +39,7 @@ export interface IslandItemType {
   id: string;
   created_at: string;
   title: string | null;
-  cover_image: string | null;
+  image_cover_path: string | null;
   level: number | null;
   grid_x: number | null;
   grid_y: number | null;
@@ -68,7 +68,6 @@ export type BlockType =
   | "heading_2"
   | "heading_3"
   | "bulleted_list"
-  | "numbered_list"
   | "todo"
   | "toggle"
   | "quote"
@@ -76,13 +75,7 @@ export type BlockType =
   | "callout"
   | "code"
   | "image"
-  | "video"
-  | "audio"
-  | "file"
-  | "table"
-  | "table_row"
-  | "bookmark"
-  | "embed";
+  | "bookmark";
 
 // Properties for different block types
 export interface BlockProperties {

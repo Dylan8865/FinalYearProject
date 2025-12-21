@@ -42,7 +42,9 @@ const SidebarPage = ({
   const [isEditorSaving, setIsEditorSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState<"unverified" | "pending" | "declined" | "verified">("unverified");
+  const [currentStatus, setCurrentStatus] = useState<
+    "unverified" | "pending" | "declined" | "verified"
+  >("unverified");
   const { showToast } = useToast();
 
   const isSaving = isHeaderSaving || isEditorSaving;
@@ -56,7 +58,13 @@ const SidebarPage = ({
       console.log("Fetched island item data:", data);
       const item = Array.isArray(data) ? data[0] : data;
       console.log("Status:", item.status);
-      setCurrentStatus((item.status || "unverified") as "unverified" | "pending" | "declined" | "verified");
+      setCurrentStatus(
+        (item.status || "unverified") as
+          | "unverified"
+          | "pending"
+          | "declined"
+          | "verified"
+      );
     } catch (error) {
       console.error("Failed to fetch validation status:", error);
     }
@@ -94,10 +102,7 @@ const SidebarPage = ({
         throw new Error(data.error || "Failed to publish");
       }
 
-      showToast(
-        "Published! Your content is queued for validation.",
-        "success"
-      );
+      showToast("Published! Your content is queued for validation.", "success");
       setIsPopupOpen(false); // Close popup after successful publish
     } catch (error) {
       console.error("Publish error:", error);
@@ -132,7 +137,7 @@ const SidebarPage = ({
 
       showToast("Appeal submitted! Your content will be reviewed.", "success");
       setIsPopupOpen(false); // Close popup after successful appeal
-      
+
       // Refresh status
       fetchCurrentStatus();
     } catch (error) {
@@ -195,7 +200,7 @@ const SidebarPage = ({
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
         <PageControls
-          onClick={onClick}
+          onArrowClick={onClick}
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
           isSaving={isSaving}
@@ -220,7 +225,7 @@ const SidebarPage = ({
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
         <PageControls
-          onClick={onClick}
+          onArrowClick={onClick}
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
           isSaving={isSaving}
@@ -264,7 +269,10 @@ const SidebarPage = ({
       style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
     >
       <PageControls
-        onClick={onClick}
+        onArrowClick={() => {
+          onClick?.();
+          setIsPopupOpen(false);
+        }}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
         isSaving={isSaving}
@@ -284,10 +292,11 @@ const SidebarPage = ({
         status={currentStatus}
         onPublish={handlePublish}
         onAppeal={handleAppeal}
+        isExpanded={isExpanded}
       />
 
       {/* Scrollable Content Container */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex flex-col items-center overflow-y-scroll">
         {/* Page Header */}
         <PageHeader
           isExpanded={isExpanded}
@@ -297,7 +306,7 @@ const SidebarPage = ({
         />
 
         {/* Block Editor */}
-        <div className="max-w-4/5 px-4 pb-96 md:max-w-[34dvw]">
+        <div className="w-full px-4 pb-96 md:max-w-[34dvw]">
           {islandItem && (
             <BlockEditorContainer
               islandItemId={islandItem.id}

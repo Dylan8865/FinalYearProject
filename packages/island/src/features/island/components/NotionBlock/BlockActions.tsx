@@ -25,7 +25,6 @@ const convertibleTypes: { type: BlockType; label: string; icon: string }[] = [
   { type: "heading_2", label: "Heading 2", icon: "H2" },
   { type: "heading_3", label: "Heading 3", icon: "H3" },
   { type: "bulleted_list", label: "Bulleted List", icon: "•" },
-  { type: "numbered_list", label: "Numbered List", icon: "1." },
   { type: "todo", label: "To-do", icon: "☑" },
   { type: "quote", label: "Quote", icon: '"' },
   { type: "callout", label: "Callout", icon: "💡" },

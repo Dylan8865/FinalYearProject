@@ -4,9 +4,12 @@ import React, {
   SetStateAction,
   useRef,
   useLayoutEffect,
+  useState,
 } from "react";
 import Image from "next/image";
-import { useIslandItems } from "../../hooks/useIslandItems";
+import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
+import { ImageIcon, X, Upload } from "lucide-react";
+import { useToast } from "@/features/island/contexts/ToastContext";
 
 interface PageHeaderProps {
   isExpanded: boolean;
@@ -21,9 +24,12 @@ const PageHeader = ({
   setIsSaving,
   setSaveError,
 }: PageHeaderProps) => {
-  const { updateIslandName } = useIslandItems();
+  const { updateIslandName, uploadIslandCoverImage, removeIslandCoverImage } =
+    useIslandItemsContext();
+  const { showToast } = useToast();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const title = islandItem?.title || "";
 
   useLayoutEffect(() => {
@@ -67,23 +73,95 @@ const PageHeader = ({
     }, 1000);
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !islandItem?.id) return;
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      await uploadIslandCoverImage(islandItem.id, file);
+      showToast("Cover image updated successfully", "success");
+    } catch (err) {
+      console.error("Error uploading image:", err);
+      showToast("Failed to upload cover image", "error");
+    } finally {
+      setIsSaving(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemoveCover = async () => {
+    if (!islandItem?.id) return;
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      await removeIslandCoverImage(islandItem.id);
+      showToast("Cover image removed", "info");
+    } catch (err) {
+      console.error("Error removing cover:", err);
+      showToast("Failed to remove cover image", "error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
-    <div className="flex w-full flex-col items-center justify-center space-y-8 text-white">
-      {islandItem?.cover_image ? (
+    <div className="group relative flex w-full flex-col items-center justify-center space-y-8 text-white">
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={handleFileChange}
+      />
+
+      {islandItem?.image_cover_path ? (
         <div
           className={`${isExpanded ? "h-[300px]" : "h-[200px]"} relative w-full transition-all duration-300 ease-in-out`}
         >
           <Image
-            src={islandItem.cover_image}
+            src={islandItem.image_cover_path}
             alt={islandItem.title || ""}
             fill
             className="object-cover"
           />
+          <div className="absolute bottom-4 right-4 flex space-x-2 opacity-0 transition-opacity group-hover:opacity-100">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center space-x-2 rounded bg-black/50 px-3 py-1.5 text-sm font-medium backdrop-blur-md transition-colors hover:bg-black/70"
+            >
+              <Upload className="h-4 w-4" />
+              <span>Change cover</span>
+            </button>
+            <button
+              onClick={handleRemoveCover}
+              className="flex items-center space-x-2 rounded bg-black/50 px-3 py-1.5 text-sm font-medium backdrop-blur-md transition-colors hover:bg-black/70"
+            >
+              <X className="h-4 w-4" />
+              <span>Remove</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div
-          className={`${isExpanded ? "h-[300px]" : "h-[200px]"} w-full bg-gray-700 transition-all duration-300 ease-in-out`}
-        />
+          className={`${isExpanded ? "h-[300px]" : "h-[200px]"} relative w-full bg-gray-700 transition-all duration-300 ease-in-out`}
+        >
+          <div className="absolute bottom-4 right-4 opacity-0 transition-opacity group-hover:opacity-100">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center space-x-2 rounded bg-black/50 px-3 py-1.5 text-sm font-medium backdrop-blur-md transition-colors hover:bg-black/70"
+            >
+              <ImageIcon className="h-4 w-4" />
+              <span>Add cover</span>
+            </button>
+          </div>
+        </div>
       )}
 
       <div

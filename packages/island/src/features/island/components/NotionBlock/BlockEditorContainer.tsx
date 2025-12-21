@@ -234,6 +234,8 @@ const BlockEditorContainer = ({
             onAddBlock={(afterId, type) =>
               blockEditor.createBlock(afterId, type)
             }
+            onUploadImage={blockEditor.uploadBlockImage}
+            onRemoveImage={blockEditor.removeBlockImage}
           >
             {block.type === "toggle" ? nestedChildren : undefined}
           </BlockRenderer>

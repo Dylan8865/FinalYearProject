@@ -341,7 +341,117 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     }
   };
 
+  const uploadIslandCoverImage = async (id: string, file: File) => {
+    // Generate a local preview URL for true optimistic update
+    const previewUrl = URL.createObjectURL(file);
+
+    // Optimistically update the UI with the local preview
+    setIslandItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, image_cover_path: previewUrl } : item
+      )
+    );
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`/api/island-items/${id}/cover`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload cover image");
+      }
+
+      const { publicUrl } = await response.json();
+
+      // Update state with the actual public URL and clean up preview URL
+      setIslandItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, image_cover_path: publicUrl } : item
+        )
+      );
+
+      // Give a tiny bit of time for the image to load from the new URL before revoking the local one
+      // to avoid a flickering effect
+      setTimeout(() => URL.revokeObjectURL(previewUrl), 100);
+
+      return true;
+    } catch (err) {
+      console.error("Error uploading cover image:", err);
+      URL.revokeObjectURL(previewUrl);
+      // Revert if error
+      await fetchIslandItems();
+      throw err;
+    }
+  };
+
+  const removeIslandCoverImage = async (id: string) => {
+    // Optimistic update
+    setIslandItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, image_cover_path: null } : item
+      )
+    );
+
+    try {
+      const response = await fetch(`/api/island-items/${id}/cover`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to remove cover image");
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Error removing cover image:", err);
+      // Revert if error
+      await fetchIslandItems();
+      throw err;
+    }
+  };
+
+  const updateIslandCoverImage = async (
+    id: string,
+    coverImage: string | null
+  ) => {
+    // Optimistic update
+    setIslandItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, image_cover_path: coverImage } : item
+      )
+    );
+
+    try {
+      const response = await fetch(`/api/island-items/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_cover_path: coverImage }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update island cover image");
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Failed to update island cover image:", err);
+      await fetchIslandItems();
+      return false;
+    }
+  };
+
   const updateIslandName = async (id: string, title: string) => {
+    // Optimistic update
+    setIslandItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, title } : item))
+    );
+
     try {
       const response = await fetch(`/api/island-items/${id}`, {
         method: "PUT",
@@ -353,10 +463,10 @@ export function useIslandItems(profileId?: string, islandId?: string) {
         throw new Error("Failed to update island");
       }
 
-      await fetchIslandItems();
       return true;
     } catch (err) {
       console.error("Failed to update island:", err);
+      await fetchIslandItems();
       return false;
     }
   };
@@ -377,5 +487,8 @@ export function useIslandItems(profileId?: string, islandId?: string) {
     removeItemFromIsland,
     moveToInventory,
     updateIslandName,
+    updateIslandCoverImage,
+    uploadIslandCoverImage,
+    removeIslandCoverImage,
   };
 }

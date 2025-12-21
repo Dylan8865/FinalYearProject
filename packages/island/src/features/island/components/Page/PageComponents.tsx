@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { ItemDataType, BlockProperties, BlockType } from "@/types/types";
 import Image from "next/image";
+import { ImageIcon, X, Upload } from "lucide-react";
 
 interface BlockProps {
   block: ItemDataType;
   onUpdate?: (id: string, content: any, properties?: BlockProperties) => void;
   onDelete?: (id: string) => void;
   onAddBlock?: (afterId: string, type: BlockType) => void;
+  onUploadImage?: (id: string, file: File) => Promise<boolean>;
+  onRemoveImage?: (id: string) => Promise<boolean>;
   isEditing?: boolean;
   children?: React.ReactNode;
 }
@@ -169,29 +172,6 @@ export const BulletedListBlock = ({ block, onUpdate }: BlockProps) => {
   );
 };
 
-// Numbered List Block
-export const NumberedListBlock = ({ block, onUpdate }: BlockProps) => {
-  const number = (block.order_index || 0) + 1;
-  const textContent = typeof block.content === "string" ? block.content : "";
-
-  const handleChange = (content: string) => {
-    console.log("NumberedListBlock onChange:", { id: block.id, content });
-    onUpdate?.(block.id, content);
-  };
-
-  return (
-    <div className="group relative flex gap-2 border py-1">
-      <span className="flex-shrink-0 text-sm text-gray-400">{number}.</span>
-      <EditableContent
-        content={textContent}
-        onChange={handleChange}
-        placeholder="List item"
-        className="flex-1 text-base leading-relaxed text-gray-200"
-      />
-    </div>
-  );
-};
-
 // Todo Block
 export const TodoBlock = ({ block, onUpdate }: BlockProps) => {
   const [checked, setChecked] = useState(block.properties?.checked || false);
@@ -308,7 +288,7 @@ export const QuoteBlock = ({ block, onUpdate }: BlockProps) => {
         content={textContent}
         onChange={handleChange}
         placeholder="Quote"
-        className="text-base italic leading-relaxed text-gray-300"
+        className="text-base italic leading-relaxed text-white"
       />
     </div>
   );
@@ -319,7 +299,6 @@ export const DividerBlock = () => {
   return <hr className="my-4 border-gray-700" />;
 };
 
-// Callout Block
 // Callout Block
 export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
   const [icon, setIcon] = useState(block.properties?.icon || "💡");
@@ -475,10 +454,26 @@ export const CodeBlock = ({ block, onUpdate }: BlockProps) => {
 };
 
 // Image Block
-export const ImageBlock = ({ block, onUpdate }: BlockProps) => {
-  const [url, setUrl] = useState(block.content || block.properties?.url || "");
+export const ImageBlock = ({
+  block,
+  onUpdate,
+  onUploadImage,
+  onRemoveImage,
+}: BlockProps) => {
+  const [url, setUrl] = useState(
+    typeof block.content === "string" ? block.content : ""
+  );
   const [caption, setCaption] = useState(block.properties?.caption || "");
   const [isEditingUrl, setIsEditingUrl] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setUrl(typeof block.content === "string" ? block.content : "");
+  }, [block.content]);
+
+  useEffect(() => {
+    setCaption(block.properties?.caption || "");
+  }, [block.properties?.caption]);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
@@ -487,354 +482,137 @@ export const ImageBlock = ({ block, onUpdate }: BlockProps) => {
 
   const handleUrlBlur = () => {
     setIsEditingUrl(false);
-    console.log("ImageBlock url change:", {
-      id: block.id,
-      url,
-      caption,
-    });
     onUpdate?.(block.id, url, {
       ...block.properties,
-      url,
       caption,
     });
   };
 
   const handleCaptionChange = (newCaption: string) => {
     setCaption(newCaption);
-    console.log("ImageBlock caption change:", {
-      id: block.id,
-      caption: newCaption,
-    });
     onUpdate?.(block.id, url, {
       ...block.properties,
-      url,
       caption: newCaption,
     });
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onUploadImage) return;
+
+    try {
+      await onUploadImage(block.id, file);
+    } catch (err) {
+      console.error("Upload error:", err);
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!onRemoveImage) return;
+    try {
+      await onRemoveImage(block.id);
+    } catch (err) {
+      console.error("Remove error:", err);
+    }
+  };
+
   if (!url || isEditingUrl) {
     return (
-      <div className="my-2 rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/30 p-4">
+      <div className="group relative my-2 rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/20 p-8 transition-colors hover:border-gray-500 hover:bg-gray-800/30">
         <input
-          type="text"
-          value={url}
-          onChange={handleUrlChange}
-          onBlur={handleUrlBlur}
-          onFocus={() => setIsEditingUrl(true)}
-          placeholder="Enter image URL..."
-          className="w-full bg-transparent text-sm text-gray-200 outline-none"
-          autoFocus={isEditingUrl}
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          accept="image/*"
         />
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="flex w-full max-w-md items-center gap-2 rounded border border-gray-700 bg-gray-900/50 p-2">
+            <input
+              type="text"
+              value={url}
+              onChange={handleUrlChange}
+              onBlur={handleUrlBlur}
+              onFocus={() => setIsEditingUrl(true)}
+              onKeyDown={(e) => e.key === "Enter" && handleUrlBlur()}
+              placeholder="Paste an image link..."
+              className="flex-1 bg-transparent text-sm text-gray-200 outline-none"
+              autoFocus={isEditingUrl}
+            />
+          </div>
+          <div className="flex items-center gap-2 text-gray-500">
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Or
+            </span>
+          </div>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-gray-600"
+          >
+            <Upload className="h-4 w-4" />
+            Upload File
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="group relative my-2 border">
-      <div
-        className="relative h-64 w-full overflow-hidden rounded-lg"
-        onClick={() => setIsEditingUrl(true)}
-      >
-        <Image
-          src={url}
-          alt={caption || "Image"}
-          fill
-          className="cursor-pointer object-contain"
-        />
-      </div>
-      <EditableContent
-        content={caption}
-        onChange={handleCaptionChange}
-        placeholder="Add a caption..."
-        className="mt-2 text-center text-sm text-gray-400"
+    <div className="group relative my-4 flex flex-col items-center">
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+        accept="image/*"
       />
-    </div>
-  );
-};
-
-// Video Block
-export const VideoBlock = ({ block, onUpdate }: BlockProps) => {
-  const [url, setUrl] = useState(block.content || block.properties?.url || "");
-  const [caption, setCaption] = useState(block.properties?.caption || "");
-  const [isEditingUrl, setIsEditingUrl] = useState(false);
-
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setUrl(newUrl);
-  };
-
-  const handleUrlBlur = () => {
-    setIsEditingUrl(false);
-    console.log("VideoBlock url change:", {
-      id: block.id,
-      url,
-      caption,
-    });
-    onUpdate?.(block.id, url, {
-      ...block.properties,
-      url,
-      caption,
-    });
-  };
-
-  const handleCaptionChange = (newCaption: string) => {
-    setCaption(newCaption);
-    console.log("VideoBlock caption change:", {
-      id: block.id,
-      caption: newCaption,
-    });
-    onUpdate?.(block.id, url, {
-      ...block.properties,
-      url,
-      caption: newCaption,
-    });
-  };
-
-  if (!url || isEditingUrl) {
-    return (
-      <div className="my-2 rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/30 p-4">
-        <input
-          type="text"
-          value={url}
-          onChange={handleUrlChange}
-          onBlur={handleUrlBlur}
-          onFocus={() => setIsEditingUrl(true)}
-          placeholder="Enter video URL..."
-          className="w-full bg-transparent text-sm text-gray-200 outline-none"
-          autoFocus={isEditingUrl}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="group relative my-2 border">
-      <div onClick={() => setIsEditingUrl(true)} className="cursor-pointer">
-        <video src={url} controls className="w-full rounded-lg" />
-      </div>
-      <EditableContent
-        content={caption}
-        onChange={handleCaptionChange}
-        placeholder="Add a caption..."
-        className="mt-2 text-center text-sm text-gray-400"
-      />
-    </div>
-  );
-};
-
-// Audio Block
-export const AudioBlock = ({ block, onUpdate }: BlockProps) => {
-  const [url, setUrl] = useState(block.content || block.properties?.url || "");
-  const [caption, setCaption] = useState(block.properties?.caption || "");
-  const [isEditingUrl, setIsEditingUrl] = useState(false);
-
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setUrl(newUrl);
-  };
-
-  const handleUrlBlur = () => {
-    setIsEditingUrl(false);
-    console.log("AudioBlock url change:", {
-      id: block.id,
-      url,
-      caption,
-    });
-    onUpdate?.(block.id, url, {
-      ...block.properties,
-      url,
-      caption,
-    });
-  };
-
-  const handleCaptionChange = (newCaption: string) => {
-    setCaption(newCaption);
-    console.log("AudioBlock caption change:", {
-      id: block.id,
-      caption: newCaption,
-    });
-    onUpdate?.(block.id, url, {
-      ...block.properties,
-      url,
-      caption: newCaption,
-    });
-  };
-
-  if (!url || isEditingUrl) {
-    return (
-      <div className="my-2 rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/30 p-4">
-        <input
-          type="text"
-          value={url}
-          onChange={handleUrlChange}
-          onBlur={handleUrlBlur}
-          onFocus={() => setIsEditingUrl(true)}
-          placeholder="Enter audio URL..."
-          className="w-full bg-transparent text-sm text-gray-200 outline-none"
-          autoFocus={isEditingUrl}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="group relative my-2 border">
-      <div onClick={() => setIsEditingUrl(true)} className="cursor-pointer">
-        <audio src={url} controls className="w-full rounded-lg" />
-      </div>
-      <EditableContent
-        content={caption}
-        onChange={handleCaptionChange}
-        placeholder="Add a caption..."
-        className="mt-2 text-center text-sm text-gray-400"
-      />
-    </div>
-  );
-};
-
-// File Block
-export const FileBlock = ({ block, onUpdate }: BlockProps) => {
-  const [url, setUrl] = useState(block.content || block.properties?.url || "");
-  const [fileName, setFileName] = useState(
-    block.properties?.fileName || "Download file"
-  );
-  const [isEditingUrl, setIsEditingUrl] = useState(false);
-
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setUrl(newUrl);
-  };
-
-  const handleUrlBlur = () => {
-    setIsEditingUrl(false);
-    console.log("FileBlock url change:", {
-      id: block.id,
-      url,
-      fileName,
-    });
-    onUpdate?.(block.id, url, {
-      ...block.properties,
-      url,
-      fileName,
-    });
-  };
-
-  const handleFileNameChange = (newFileName: string) => {
-    setFileName(newFileName);
-    console.log("FileBlock fileName change:", {
-      id: block.id,
-      fileName: newFileName,
-    });
-    onUpdate?.(block.id, url, {
-      ...block.properties,
-      url,
-      fileName: newFileName,
-    });
-  };
-
-  if (!url || isEditingUrl) {
-    return (
-      <div className="my-2 rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/30 p-4">
-        <input
-          type="text"
-          value={url}
-          onChange={handleUrlChange}
-          onBlur={handleUrlBlur}
-          onFocus={() => setIsEditingUrl(true)}
-          placeholder="Enter file URL..."
-          className="w-full bg-transparent text-sm text-gray-200 outline-none"
-          autoFocus={isEditingUrl}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="group relative my-2 border">
-      <div className="flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-800/30 p-3">
-        <svg
-          className="h-6 w-6 flex-shrink-0 text-gray-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      <div className="group/img relative flex min-h-[100px] w-full items-center justify-center overflow-hidden rounded-lg bg-neutral-900/50">
+        <div className="relative flex h-full max-h-[60vh] w-full items-center justify-center">
+          <img
+            src={url}
+            alt={caption || "Image"}
+            className="h-auto max-h-[60vh] w-auto max-w-full object-contain"
           />
-        </svg>
-        <EditableContent
-          content={fileName}
-          onChange={handleFileNameChange}
-          className="flex-1 text-sm text-gray-200"
-        />
-        <a
-          href={url}
-          download
-          className="text-xs text-blue-400 hover:text-blue-300"
-          onClick={(e) => e.stopPropagation()}
-        >
-          Download
-        </a>
+        </div>
+
+        {/* Hover Controls */}
+        <div className="absolute right-3 top-3 flex items-center gap-2 opacity-0 transition-opacity group-hover/img:opacity-100">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 rounded bg-black/60 px-2 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur transition-colors hover:bg-black/80"
+            title="Change image"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Change
+          </button>
+          <button
+            onClick={() => setIsEditingUrl(true)}
+            className="flex items-center gap-1.5 rounded bg-black/60 px-2 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur transition-colors hover:bg-black/80"
+            title="Edit URL"
+          >
+            <ImageIcon className="h-3.5 w-3.5" />
+            URL
+          </button>
+          <button
+            onClick={handleRemove}
+            className="flex items-center gap-1.5 rounded bg-black/60 px-2 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur transition-colors hover:bg-black/80"
+            title="Remove image"
+          >
+            <X className="h-3.5 w-3.5" />
+            Remove
+          </button>
+        </div>
       </div>
-    </div>
-  );
-};
-
-// Table Block
-export const TableBlock = ({ block, onUpdate }: BlockProps) => {
-  const tableData =
-    typeof block.content === "object" ? block.content : { rows: [[""]] };
-  const [rows, setRows] = useState(tableData.rows || [[""]]);
-
-  const handleCellChange = (
-    rowIndex: number,
-    cellIndex: number,
-    value: string
-  ) => {
-    const newRows = [...rows];
-    newRows[rowIndex][cellIndex] = value;
-    setRows(newRows);
-    console.log("TableBlock cell change:", {
-      id: block.id,
-      rowIndex,
-      cellIndex,
-      value,
-      rows: newRows,
-    });
-    onUpdate?.(block.id, { rows: newRows });
-  };
-
-  return (
-    <div className="group relative my-2 overflow-x-auto border">
-      <table className="w-full border-collapse rounded-lg border border-gray-700">
-        <tbody>
-          {rows.map((row: string[], rowIndex: number) => (
-            <tr
-              key={rowIndex}
-              className="border-b border-gray-700 last:border-b-0"
-            >
-              {row.map((cell: string, cellIndex: number) => (
-                <td
-                  key={cellIndex}
-                  className="min-w-[100px] border-r border-gray-700 p-2 align-top last:border-r-0"
-                >
-                  <EditableContent
-                    content={cell}
-                    onChange={(val) =>
-                      handleCellChange(rowIndex, cellIndex, val)
-                    }
-                    className="text-sm text-gray-200"
-                    placeholder="Empty"
-                  />
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <EditableContent
+        content={caption}
+        onChange={handleCaptionChange}
+        placeholder="Add a caption..."
+        className="mt-3 w-full max-w-2xl text-center text-sm text-gray-500 hover:text-gray-400 focus:text-gray-300"
+      />
     </div>
   );
 };

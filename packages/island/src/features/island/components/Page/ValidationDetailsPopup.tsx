@@ -17,6 +17,7 @@ interface ValidationDetailsPopupProps {
   status: "unverified" | "pending" | "declined" | "verified";
   onPublish?: () => void;
   onAppeal?: () => void;
+  isExpanded: boolean;
 }
 
 const ValidationDetailsPopup = ({
@@ -26,6 +27,7 @@ const ValidationDetailsPopup = ({
   status,
   onPublish,
   onAppeal,
+  isExpanded,
 }: ValidationDetailsPopupProps) => {
   const [loading, setLoading] = useState(false);
   const [validationData, setValidationData] = useState<{
@@ -51,11 +53,17 @@ const ValidationDetailsPopup = ({
       setValidationData({
         validity: item.validity,
         comment: item.comment,
-        itemData: itemDataList.map((data: { id: string; validity: number | null; type: string | null }) => ({
-          id: data.id,
-          validity: data.validity,
-          type: data.type,
-        })),
+        itemData: itemDataList.map(
+          (data: {
+            id: string;
+            validity: number | null;
+            type: string | null;
+          }) => ({
+            id: data.id,
+            validity: data.validity,
+            type: data.type,
+          })
+        ),
       });
     } catch (error) {
       console.error("Failed to fetch validation data:", error);
@@ -74,9 +82,15 @@ const ValidationDetailsPopup = ({
 
   return (
     <div
-      className={`fixed top-0 z-[45] h-full w-80 bg-[#242424] shadow-2xl transition-all duration-300 ${
-        isOpen ? "right-[80%] md:right-[34dvw]" : "-right-80"
-      }`}
+      className={
+        isExpanded
+          ? "fixed bottom-1/2 right-1/2 z-50 h-fit max-h-[60dvh] w-5/6 translate-x-[50%] translate-y-[50%] overflow-y-scroll rounded-lg border border-gray-700 bg-[#242424] transition-all duration-500 md:bottom-6 md:right-6 md:w-[30dvw] md:translate-x-0 md:translate-y-0"
+          : `fixed top-1/2 z-50 h-fit max-h-[60dvh] w-80 overflow-y-scroll rounded-lg border border-gray-700 bg-[#242424] shadow-2xl transition-all duration-500 md:top-0 md:h-full md:max-h-none md:rounded-none ${
+              isOpen
+                ? "right-1/2 translate-x-[50%] translate-y-[-50%] md:right-[34dvw] md:translate-x-0 md:translate-y-0"
+                : "-right-80 rounded-lg"
+            }`
+      }
     >
       <div className="flex h-full flex-col">
         {/* Header */}
@@ -84,10 +98,7 @@ const ValidationDetailsPopup = ({
           <h2 className="text-lg font-semibold text-white">
             Validation Details
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
             <CloseIcon />
           </button>
         </div>

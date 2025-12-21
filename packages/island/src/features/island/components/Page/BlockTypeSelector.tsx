@@ -53,13 +53,6 @@ const blockTypes: BlockTypeOption[] = [
     category: "basic",
   },
   {
-    type: "numbered_list",
-    label: "Numbered List",
-    description: "Ordered list with numbers",
-    icon: "1.",
-    category: "basic",
-  },
-  {
     type: "todo",
     label: "To-do",
     description: "Track tasks with checkboxes",
@@ -110,48 +103,13 @@ const blockTypes: BlockTypeOption[] = [
     icon: "🖼️",
     category: "media",
   },
-  {
-    type: "video",
-    label: "Video",
-    description: "Embed video file",
-    icon: "🎥",
-    category: "media",
-  },
-  {
-    type: "audio",
-    label: "Audio",
-    description: "Embed audio file",
-    icon: "🎵",
-    category: "media",
-  },
-  {
-    type: "file",
-    label: "File",
-    description: "Upload any file",
-    icon: "📎",
-    category: "media",
-  },
 
   // Advanced
-  {
-    type: "table",
-    label: "Table",
-    description: "Grid of data",
-    icon: "⊞",
-    category: "advanced",
-  },
   {
     type: "bookmark",
     label: "Bookmark",
     description: "Save a web link",
     icon: "🔖",
-    category: "advanced",
-  },
-  {
-    type: "embed",
-    label: "Embed",
-    description: "Embed external content",
-    icon: "🌐",
     category: "advanced",
   },
 ];
