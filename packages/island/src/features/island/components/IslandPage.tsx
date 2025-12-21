@@ -179,6 +179,8 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     setIsDialogOpen("edit-island");
   };
 
+  const { toggleTheme } = useTheme();
+
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -194,6 +196,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
 
       const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
       const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+      const shift = e.shiftKey;
       const key = e.key.toLowerCase();
 
       if (key === "s" && !cmdOrCtrl) {
@@ -220,6 +223,8 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         if (!isDialogOpen && !sidebarContentPage?.open) {
           setIsDialogOpen("island");
         }
+      } else if (cmdOrCtrl && shift && key === "l") {
+        toggleTheme();
       } else if (key === "escape") {
         if (isDialogOpen) {
           setIsDialogOpen("");
@@ -229,7 +234,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isDialogOpen, sidebarContentPage]);
+  }, [isDialogOpen, sidebarContentPage, toggleTheme]);
 
   const handleUpgradeIsland = async (id: string) => {
     // 1. Find current island level to determine cost

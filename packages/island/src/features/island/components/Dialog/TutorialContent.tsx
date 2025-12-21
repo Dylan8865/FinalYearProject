@@ -3,6 +3,7 @@ import BlockIcon from "@/icons/BlockIcon";
 import DragIcon from "@/icons/DragIcon";
 import TrashIcon from "@/icons/TrashIcon";
 import { toCapitalise } from "@/lib/capitalise";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface Step {
   title: string;
@@ -17,6 +18,8 @@ interface TutorialContentProps {
 
 const TutorialContent = ({ onClose }: TutorialContentProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
 
   const steps: Step[] = [
     {
@@ -68,7 +71,9 @@ const TutorialContent = ({ onClose }: TutorialContentProps) => {
   ];
 
   return (
-    <div className="flex h-full flex-col text-white">
+    <div
+      className={`flex h-full flex-col ${isDark ? "text-white" : "text-black"}`}
+    >
       <div className="flex flex-1 flex-col items-center justify-center space-y-6 px-4">
         <div className="mb-4 scale-125 transform transition-all duration-500">
           {steps[currentStep].icon}
@@ -78,10 +83,14 @@ const TutorialContent = ({ onClose }: TutorialContentProps) => {
           <h2 className="text-2xl font-bold text-[#dcd1c1]">
             {steps[currentStep].title}
           </h2>
-          <p className="max-w-sm leading-relaxed text-neutral-300">
+          <p
+            className={`max-w-sm leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"}`}
+          >
             {steps[currentStep].description}
           </p>
-          <div className="inline-block rounded-full border border-white/20 bg-white/5 px-4 py-2">
+          <div
+            className={`inline-block rounded-full border ${isDark ? "border-white/20 bg-white/5" : "border-black/20 bg-black/5"} px-4 py-2`}
+          >
             <span className="font-mono text-sm uppercase tracking-wider text-[#dcd1c1]">
               {steps[currentStep].action}
             </span>
@@ -89,13 +98,19 @@ const TutorialContent = ({ onClose }: TutorialContentProps) => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center space-y-4 border-t border-white/10 py-6">
+      <div
+        className={`flex flex-col items-center space-y-4 border-t ${isDark ? "border-white/10" : "border-black/10"} py-6`}
+      >
         <div className="flex space-x-2">
           {steps.map((_, idx) => (
             <div
               key={idx}
               className={`h-1.5 w-8 rounded-full transition-all duration-300 ${
-                idx === currentStep ? "bg-[#dcd1c1]" : "bg-white/20"
+                idx === currentStep
+                  ? "bg-[#dcd1c1]"
+                  : isDark
+                    ? "bg-white/20"
+                    : "bg-black/20"
               }`}
             />
           ))}
@@ -105,10 +120,12 @@ const TutorialContent = ({ onClose }: TutorialContentProps) => {
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className={`rounded-lg border border-gray-400 px-4 py-2 transition-all duration-300 ease-in-out hover:border-white ${
+            className={`rounded-lg border px-4 py-2 transition-all duration-300 ease-in-out ${
               currentStep === 0
                 ? "invisible opacity-0"
-                : "text-gray-400 hover:text-white"
+                : isDark
+                  ? "border-gray-400 text-gray-400 hover:border-white hover:text-white"
+                  : "border-gray-500 text-gray-500 hover:border-black hover:text-black"
             }`}
           >
             Previous

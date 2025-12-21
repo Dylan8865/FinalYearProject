@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 
 type Theme = "light" | "dark";
 
@@ -17,16 +23,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [themeColour, setThemeState] = useState<Theme>("dark");
 
-  const setThemeColour = (theme: Theme) => {
+  const setThemeColour = useCallback((theme: Theme) => {
     setThemeState(theme);
     if (typeof window !== "undefined") {
       localStorage.setItem("themeColour", theme);
     }
-  };
+  }, []);
 
-  const toggleTheme = () => {
-    setThemeColour(themeColour === "dark" ? "light" : "dark");
-  };
+  const toggleTheme = useCallback(() => {
+    setThemeState((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      if (typeof window !== "undefined") {
+        localStorage.setItem("themeColour", next);
+      }
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("themeColour") as Theme;

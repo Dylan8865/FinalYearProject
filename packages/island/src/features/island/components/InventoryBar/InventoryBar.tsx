@@ -125,7 +125,7 @@ const InventoryBar = ({
     <>
       <div className="pointer-events-none z-0 flex w-screen items-center justify-center">
         <div
-          className={`pointer-events-auto z-20 flex h-full w-full items-center justify-center ${isDark ? "bg-black" : "border-t-4 border-black bg-white"} px-4 pb-4 md:h-10 md:w-fit md:pb-0`}
+          className={`pointer-events-auto z-20 flex h-full w-full items-center justify-center ${isDark ? "bg-black" : "bg-[#44474f]"} px-4 pb-4 md:h-10 md:w-fit md:pb-0`}
         >
           <div className="mt-[-24px] grid w-96 grid-cols-6 items-center justify-center gap-2 md:flex md:w-full">
             {hotbarItems.map((islandItem, index) => (

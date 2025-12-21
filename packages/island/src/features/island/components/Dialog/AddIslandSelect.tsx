@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import DownArrowIcon from "@/icons/DownArrowIcon";
 import { Option } from "./AddIslandContent";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface AddIslandSelectProps {
   id: string;
@@ -25,6 +26,8 @@ const AddIslandSelect = ({
 }: AddIslandSelectProps) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -72,7 +75,7 @@ const AddIslandSelect = ({
       {/* Floating label */}
       <label
         htmlFor={id}
-        className={`pointer-events-none absolute left-3 rounded bg-black px-1.5 transition-all ${
+        className={`pointer-events-none absolute left-3 rounded ${isDark ? "bg-black" : "bg-white"} px-1.5 transition-all ${
           value || open ? "-top-2 text-xs" : "top-3 text-sm"
         } text-gray-400`} // same gray as input
       >
@@ -81,7 +84,9 @@ const AddIslandSelect = ({
 
       {/* Dropdown options */}
       {open && (
-        <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-black shadow-lg">
+        <div
+          className={`absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 ${isDark ? "bg-black" : "bg-white"} shadow-lg`}
+        >
           {options.map((opt) => (
             <div
               key={opt.value}
@@ -89,7 +94,7 @@ const AddIslandSelect = ({
                 handleChange(opt);
                 setOpen(false);
               }}
-              className={`px-3 py-2 hover:bg-gray-700 ${
+              className={`px-3 py-2 ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"} ${
                 value?.value === opt.value ? `bg-gray-800` : ""
               }`}
             >

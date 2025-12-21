@@ -200,7 +200,9 @@ const SidebarPage = ({
       }
 
       if (e.key === "Escape") {
-        if (isExpanded) {
+        if (isPopupOpen) {
+          setIsPopupOpen(false);
+        } else if (isExpanded) {
           setIsExpanded(false);
         } else {
           onClick?.();

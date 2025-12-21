@@ -3,7 +3,7 @@ import "./globals.css";
 import "@hackernoon/pixel-icon-library/fonts/iconfont.css";
 
 export const metadata: Metadata = {
-  title: "Wisdom Island - Island",
+  title: "Wisdom Island",
   description: "Build and manage your knowledge island.",
 };
 
