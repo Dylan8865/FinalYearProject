@@ -135,33 +135,6 @@ const blockTypeOptions: BlockTypeOption[] = [
     shortcut: "/img",
     category: "media",
   },
-  {
-    type: "video",
-    label: "Video",
-    description: "Embed a video",
-    icon: "🎥",
-    keywords: ["video", "movie", "film"],
-    shortcut: "/video",
-    category: "media",
-  },
-  {
-    type: "audio",
-    label: "Audio",
-    description: "Embed audio",
-    icon: "🎵",
-    keywords: ["audio", "music", "sound"],
-    shortcut: "/audio",
-    category: "media",
-  },
-  {
-    type: "file",
-    label: "File",
-    description: "Upload or embed a file",
-    icon: "📎",
-    keywords: ["file", "attachment", "document"],
-    shortcut: "/file",
-    category: "media",
-  },
 
   // Advanced blocks
   {

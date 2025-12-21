@@ -15,9 +15,6 @@ import {
   CalloutBlock,
   CodeBlock,
   ImageBlock,
-  VideoBlock,
-  AudioBlock,
-  FileBlock,
   BookmarkBlock,
 } from "../Page/PageComponents";
 
@@ -97,15 +94,6 @@ const BlockRenderer = React.memo(
 
         case "image":
           return <ImageBlock {...commonProps} />;
-
-        case "video":
-          return <VideoBlock {...commonProps} />;
-
-        case "audio":
-          return <AudioBlock {...commonProps} />;
-
-        case "file":
-          return <FileBlock {...commonProps} />;
 
         case "bookmark":
           return <BookmarkBlock {...commonProps} />;

@@ -68,7 +68,6 @@ export type BlockType =
   | "heading_2"
   | "heading_3"
   | "bulleted_list"
-  | "numbered_list"
   | "todo"
   | "toggle"
   | "quote"
@@ -76,13 +75,7 @@ export type BlockType =
   | "callout"
   | "code"
   | "image"
-  | "video"
-  | "audio"
-  | "file"
-  | "table"
-  | "table_row"
-  | "bookmark"
-  | "embed";
+  | "bookmark";
 
 // Properties for different block types
 export interface BlockProperties {
