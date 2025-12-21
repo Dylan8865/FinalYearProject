@@ -1,136 +1,361 @@
-import { createClient } from "@/supabase/server";
-import React from "react";
+"use client";
 
-type Props = {};
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import IslandIcon from "@/features/island/icons/IslandIcon";
 
-const Home = async (props: Props) => {
+// Mock content data - will be replaced with database
+const MOCK_CONTENT = [
+  { id: 1, title: "Lorem ipsum", type: "read", duration: "2m read", category: "technology", date: "2025-11-28" },
+  { id: 2, title: "Lorem ipsum", type: "watch", duration: "2m watch", category: "design", date: "2025-11-27" },
+  { id: 3, title: "Lorem ipsum", type: "read", duration: "3m read", category: "business", date: "2025-11-26" },
+  { id: 4, title: "Lorem ipsum", type: "watch", duration: "5m watch", category: "technology", date: "2025-11-25" },
+  { id: 5, title: "Lorem ipsum", type: "read", duration: "2m read", category: "science", date: "2025-11-24" },
+  { id: 6, title: "Lorem ipsum", type: "read", duration: "4m read", category: "design", date: "2025-11-23" },
+  { id: 7, title: "Lorem ipsum", type: "watch", duration: "3m watch", category: "business", date: "2025-11-22" },
+  { id: 8, title: "Lorem ipsum", type: "read", duration: "2m read", category: "technology", date: "2025-11-21" },
+  { id: 9, title: "Lorem ipsum", type: "read", duration: "6m read", category: "science", date: "2025-11-20" },
+  { id: 10, title: "Lorem ipsum", type: "watch", duration: "4m watch", category: "design", date: "2025-11-19" },
+  { id: 11, title: "Lorem ipsum", type: "read", duration: "2m read", category: "business", date: "2025-11-18" },
+  { id: 12, title: "Lorem ipsum", type: "read", duration: "3m read", category: "technology", date: "2025-11-17" },
+];
 
-  const supabase = await createClient();
+const CATEGORIES = ["all", "technology", "design", "business", "science"];
+const SORT_OPTIONS = [
+  { value: "newest", label: "Newest First" },
+  { value: "oldest", label: "Oldest First" },
+  { value: "title-asc", label: "Title A-Z" },
+  { value: "title-desc", label: "Title Z-A" },
+  { value: "duration-asc", label: "Duration (Ascending)" },
+  { value: "duration-desc", label: "Duration (Descending)" },
+];
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+export default function Explore() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryParam = searchParams.get("q") || "";
+  
+  const [searchQuery, setSearchQuery] = useState(queryParam);
+  const [isSearching, setIsSearching] = useState(!!queryParam);
+  const [content, setContent] = useState(MOCK_CONTENT);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
 
-  const isSignedIn = !!session;
+  // Filter and sort content
+  useEffect(() => {
+    let filtered = [...MOCK_CONTENT];
+
+    // Filter by category
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((item) => item.category === selectedCategory);
+    }
+
+    // Sort content
+    switch (sortBy) {
+      case "newest":
+        filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        break;
+      case "oldest":
+        filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        break;
+      case "title-asc":
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "title-desc":
+        filtered.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case "duration-asc":
+        filtered.sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
+        break;
+      case "duration-desc":
+        filtered.sort((a, b) => parseInt(b.duration) - parseInt(a.duration));
+        break;
+    }
+
+    setContent(filtered);
+  }, [selectedCategory, sortBy]);
+
+  useEffect(() => {
+    if (queryParam) {
+      setSearchQuery(queryParam);
+      setIsSearching(true);
+      // Filter content based on search (mock filtering)
+      setContent(MOCK_CONTENT);
+    }
+  }, [queryParam]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setIsSearching(true);
+      router.push(`/explore?q=${encodeURIComponent(searchQuery)}`);
+    } else {
+      setIsSearching(false);
+      router.push("/explore");
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (!e.target.value.trim()) {
+      setIsSearching(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#141414] text-white px-8 py-8">
-      {/* Header / Navigation */}
-      <header className="flex items-center justify-between mb-10">
-        <nav className="flex gap-8 items-center text-lg">
-          <a className="hover:text-neutral-300 cursor-pointer">Search</a>
-          <a className="hover:text-neutral-300 cursor-pointer">Cloud</a>
-          {/*Explorer */}
-          <a className="font-semibold underline underline-offset-4 cursor-pointer">
-            Explorer
-          </a>
-        </nav>
+    <div className="h-screen overflow-y-auto bg-gray-900 text-white">
+      {/* Header */}
+      <header className="flex items-center justify-between px-8 py-6">
+        <div className="flex items-center gap-8">
+          {/* Island Icon - Links to Island Game Page */}
+          <button
+            onClick={() => router.push("/mike/island")}
+            className="text-white hover:text-gray-300 transition-colors"
+          >
+            <IslandIcon />
+          </button>
 
-        <div className="flex items-center gap-4">
-          {isSignedIn ? (
-            <button className="px-5 py-2 bg-white/8 border border-white/10 rounded-full">
-              Account
+          <nav className="flex gap-6">
+            <button
+              onClick={() => router.push("/home")}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              Search
             </button>
-          ) : (
-            <button className="px-5 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full">
-              Sign in
+            <button
+              onClick={() => router.push("/cloud")}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              Cloud
             </button>
-          )}
+            <button className="text-white font-medium border-b-2 border-white">
+              Explore
+            </button>
+          </nav>
         </div>
+
+        <button
+          onClick={() => router.push("/login")}
+          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+        >
+          Sign in
+        </button>
       </header>
 
-      {/* Search bar (UI only — server component can't do client interactivity) */}
-      <div className="max-w-3xl mb-6">
-        <div className="relative">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="opacity-60"
+      {/* Search and Filters */}
+      <div className="px-8 py-4">
+        <div className="flex items-center gap-4">
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="flex-1 max-w-md">
+            <div className="flex items-center bg-gray-800 rounded-lg px-4 py-3 border border-gray-700">
+              <svg
+                className="w-5 h-5 text-gray-400 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleInputChange}
+                placeholder="Search for knowledge"
+                className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none"
+              />
+            </div>
+          </form>
+
+          {/* Category Filter Button */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setShowCategoryDropdown(!showCategoryDropdown);
+                setShowSortDropdown(false);
+              }}
+              className="flex items-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
             >
-              <path
-                d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"
+              <svg
+                className="w-5 h-5"
+                fill="none"
                 stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M21 21l-4.35-4.35"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
+              </svg>
+              <span className="capitalize">
+                {selectedCategory === "all" ? "Category Filter" : selectedCategory}
+              </span>
+              <svg
+                className={`w-4 h-4 transition-transform ${showCategoryDropdown ? "rotate-180" : ""}`}
+                fill="none"
                 stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Category Dropdown */}
+            {showCategoryDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
+                {CATEGORIES.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setShowCategoryDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-3 capitalize hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                      selectedCategory === category ? "bg-gray-700 text-blue-400" : "text-white"
+                    }`}
+                  >
+                    {category === "all" ? "All Categories" : category}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          <input
-            aria-label="Search for knowledge"
-            placeholder="Search for knowledge"
-            className="w-full bg-white/6 border border-white/8 rounded-full py-3 pl-12 pr-4 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-white/10"
-          />
+          {/* Sort By Button */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setShowSortDropdown(!showSortDropdown);
+                setShowCategoryDropdown(false);
+              }}
+              className="flex items-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+                />
+              </svg>
+              <span>{SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label || "Sort By"}</span>
+              <svg
+                className={`w-4 h-4 transition-transform ${showSortDropdown ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Sort Dropdown */}
+            {showSortDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
+                {SORT_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setSortBy(option.value);
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-3 hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                      sortBy === option.value ? "bg-gray-700 text-blue-400" : "text-white"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Filter & Sort */}
-      <div className="flex gap-4 mb-6">
-        <button className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/8 rounded-full hover:bg-white/10">
-          {/* filter icon */}
-          <svg width="14" height="14" viewBox="0 0 24 24" className="opacity-80">
-            <path
-              d="M4 6h16M7 12h10M10 18h4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          Category Filter
-        </button>
-
-        <button className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/8 rounded-full hover:bg-white/10">
-          <svg width="14" height="14" viewBox="0 0 24 24" className="opacity-80">
-            <path
-              d="M12 5v14M5 12h14"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          Sort By
-        </button>
+      {/* Results Header */}
+      <div className="px-8 py-4">
+        <h2 className="text-lg font-semibold">
+          {isSearching
+            ? `${content.length} matching results`
+            : "Recently added"}
+        </h2>
       </div>
 
-      {/* Section Title */}
-      <h2 className="text-lg font-semibold mb-4">Recently added</h2>
+      {/* Content Grid */}
+      <div className="px-8 pb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {content.map((item) => (
+            <div
+              key={item.id}
+              className="group cursor-pointer"
+              onClick={() => router.push(`/explore/${item.id}`)}
+            >
+              {/* Card Image Placeholder */}
+              <div className="aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gradient-to-b from-sky-300 to-sky-400">
+                {/* Image will be loaded from database */}
+              </div>
 
-      {/* Card Grid（UI-first） */}
-      <div className="grid grid-cols-4 gap-6">
-        {Array.from({ length: 12 }).map((_, idx) => (
-          <article
-            key={idx}
-            className="rounded-xl h-40 bg-gradient-to-b from-[#8EC8FF] to-[#D8ECFF] shadow-md overflow-hidden transform-gpu transition-transform duration-200 hover:scale-105 cursor-pointer"
-            // next/link
-          >
-            <div className="flex flex-col h-full">
-              {/*  <img />） */}
-              <div className="flex-1" />
+              {/* Card Info */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-white font-medium">{item.title}</h3>
+              </div>
 
-              {/* meta */}
-              <div className="p-3 bg-white/10">
-                <p className="text-black text-sm">Lorem ipsum</p>
+              {/* Duration */}
+              <div className="flex items-center gap-2 mt-1 text-gray-400 text-sm">
+                {item.type === "read" ? (
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                )}
+                <span>{item.duration}</span>
               </div>
             </div>
-          </article>
-        ))}
+          ))}
+        </div>
       </div>
-
-      <div className="h-20" />
     </div>
   );
-};
-
-export default Home;
+}

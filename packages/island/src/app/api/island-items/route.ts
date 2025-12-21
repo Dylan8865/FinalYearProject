@@ -7,8 +7,57 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const profileId = searchParams.get("profile_id");
     const islandId = searchParams.get("island_id");
+    const id = searchParams.get("id");
 
-    let query = supabase.from("island-item").select("*, item(*), island(*)");
+    const baseQuery = supabase
+      .from("island-item")
+      .select("*, item(*), island(*)");
+
+    if (id) {
+      const { data: islandItem, error } = await baseQuery.eq("id", id).single();
+
+      if (error) {
+        console.error("Supabase error:", error);
+        return NextResponse.json(
+          { error: "Failed to fetch island item" },
+          { status: 500 }
+        );
+      }
+
+      const item = islandItem as any;
+      // Enhance item with resolved image URLs
+      if (item?.item) {
+        let imageCoverUrl = null;
+        let modelUrl = null;
+
+        if (item.item.image_cover_path) {
+          const { data } = supabase.storage
+            .from("items")
+            .getPublicUrl(item.item.image_cover_path);
+          imageCoverUrl = data?.publicUrl || null;
+        }
+
+        if (item.item.model_path) {
+          const { data } = supabase.storage
+            .from("items")
+            .getPublicUrl(item.item.model_path);
+          modelUrl = data?.publicUrl || null;
+        }
+
+        return NextResponse.json({
+          ...item,
+          item: {
+            ...item.item,
+            imageCoverUrl,
+            modelUrl,
+          },
+        });
+      }
+
+      return NextResponse.json(item);
+    }
+
+    let query = baseQuery;
 
     if (profileId) {
       query = query.eq("profile_id", profileId);
@@ -181,13 +230,20 @@ export async function PUT(request: Request) {
     // Build update object with optional pos_x/pos_y clearing
     const updateData: Record<string, any> = {
       title: body.title,
-      cover_image: body.cover_image,
+      image_cover_path: body.image_cover_path ?? body.cover_image,
       level: body.level,
       grid_x: body.grid_x,
       grid_y: body.grid_y,
       grid_z: body.grid_z,
       island_id: body.island_id,
     };
+
+    // Set status to unverified when content is changed (unless explicitly setting status)
+    if (body.status === undefined) {
+      updateData.status = 'unverified';
+    } else {
+      updateData.status = body.status;
+    }
 
     // Handle pos_x/pos_y - they should be null when placing on island
     if (body.pos_x !== undefined) updateData.pos_x = body.pos_x;

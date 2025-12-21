@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@google/genai": "^1.34.0",
     "@hackernoon/pixel-icon-library": "^1.0.6",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-tooltip": "^1.2.8",
@@ -32,7 +33,8 @@
     "react-dom": "19.2.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.181.1"
+    "three": "^0.181.1",
+    "three-stdlib": "^2.36.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",

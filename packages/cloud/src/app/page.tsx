@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // Word cloud data with different sizes and positions
@@ -48,51 +48,78 @@ const CLOUD_WORDS = [
   { text: "Security", size: 46, x: 35, y: 25, weight: 500 },
 ];
 
-// Island Icon Component
-const IslandIcon = () => (
-  <svg
-    width="32"
-    height="32"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M12 2C8 2 5 5 5 9C5 13 8 15 12 15C16 15 19 13 19 9C19 5 16 2 12 2Z"
-      fill="currentColor"
-      opacity="0.6"
-    />
-    <path
-      d="M3 18C3 18 6 16 12 16C18 16 21 18 21 18C21 20 18 22 12 22C6 22 3 20 3 18Z"
-      fill="currentColor"
-    />
-    <path d="M12 8V13M10 10L12 8L14 10" stroke="white" strokeWidth="1.5" />
-  </svg>
-);
-
 /**
- * Cloud Page - Interactive word cloud exploration
+ * Cloud Page - Interactive 3D word cloud exploration
  * Allows users to discover content by clicking on trending topics
  */
 export default function Cloud() {
   const router = useRouter();
-  const [hoveredWord, setHoveredWord] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [clickedWord, setClickedWord] = useState<string | null>(null);
   const [activeSearch, setActiveSearch] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Fetch topics from database
+  const { topics, words, loading, error, refetch } = useTopics();
+
+  // Auto-process item-data records when cache is empty
+  useEffect(() => {
+    const autoProcess = async () => {
+      // Only run if not already processing and cache appears empty/small
+      if (isProcessing || loading || words.length > 10) return;
+
+      console.log('🤖 Auto-processing: Checking for unprocessed data...');
+      setIsProcessing(true);
+
+      try {
+        let offset = 0;
+        let hasMore = true;
+
+        while (hasMore) {
+          const response = await fetch('/api/batch-process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ limit: 5, offset }),
+          });
+
+          if (!response.ok) break;
+
+          const data = await response.json();
+          console.log(`✅ Processed batch: ${data.successful} successful, ${data.errors} errors`);
+
+          hasMore = data.hasMore;
+          offset = data.nextOffset;
+
+          // Refresh topics after each batch
+          if (refetch) refetch();
+
+          // Wait 3 seconds between batches (rate limiting)
+          if (hasMore) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          }
+        }
+
+        console.log('🎉 Auto-processing completed!');
+      } catch (error) {
+        console.error('❌ Auto-processing error:', error);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    // Run auto-process after initial load
+    const timer = setTimeout(autoProcess, 2000);
+    return () => clearTimeout(timer);
+  }, [loading, words.length, isProcessing, refetch]);
+
+  // Use database words if available, otherwise fallback
+  const cloudWords = words.length > 0 ? words : FALLBACK_WORDS;
 
   // Filter words based on search query
   const filteredWords = activeSearch
-    ? CLOUD_WORDS.filter((word) =>
+    ? cloudWords.filter((word) =>
         word.text.toLowerCase().includes(activeSearch.toLowerCase())
       )
-    : CLOUD_WORDS;
-
-  // Check if a word matches the search
-  const isMatchingWord = (text: string) => {
-    if (!activeSearch) return false;
-    return text.toLowerCase().includes(activeSearch.toLowerCase());
-  };
+    : cloudWords;
 
   const handleWordClick = (word: string) => {
     setClickedWord(word);
@@ -104,7 +131,6 @@ export default function Cloud() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Apply the search filter on the cloud page
     setActiveSearch(searchQuery.trim());
   };
 
@@ -115,99 +141,96 @@ export default function Cloud() {
 
   return (
     <div className="relative w-screen h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+      {/* Auto-Processing Status Indicator */}
+      {isProcessing && (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-30 bg-blue-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+          <span className="text-sm font-medium">Processing topics with AI...</span>
+        </div>
+      )}
+
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
         <div className="flex items-center gap-8">
           {/* Island Icon - Links to Island Game Page */}
-          <a
-            href="http://localhost:3004"
+          <button
+            onClick={() => router.push("/mike/island")}
             className="text-white hover:text-gray-300 transition-colors"
           >
             <IslandIcon />
-          </a>
+          </button>
 
           <nav className="flex gap-6">
             <a
               href="http://localhost:3003"
               className="text-gray-400 hover:text-white transition-colors"
             >
-              Home
-            </a>
+              Search
+            </button>
             <button className="text-white font-medium border-b-2 border-white">
               Cloud
             </button>
-            <a
-              href="http://localhost:3005"
+            <button
+              onClick={() => router.push("/explore")}
               className="text-gray-400 hover:text-white transition-colors"
             >
-              Search
-            </a>
+              Explore
+            </button>
           </nav>
         </div>
 
-        <a
-          href="http://localhost:3001/login"
+        <button
+          onClick={() => router.push("/login")}
           className="text-white hover:text-gray-300 transition-colors"
         >
           Sign in
-        </a>
+        </button>
       </header>
 
-      {/* Word Cloud */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {CLOUD_WORDS.map((word, index) => {
-          const isHovered = hoveredWord === word.text;
-          const isClicked = clickedWord === word.text;
-          const isOtherHovered = hoveredWord && hoveredWord !== word.text;
-          const isMatching = isMatchingWord(word.text);
-          const isFiltered = activeSearch && !isMatching;
-
-          return (
-            <button
-              key={index}
-              onClick={() => handleWordClick(word.text)}
-              onMouseEnter={() => setHoveredWord(word.text)}
-              onMouseLeave={() => setHoveredWord(null)}
-              className={`absolute transition-all duration-500 ease-out hover:z-10 cursor-pointer select-none ${
-                isFiltered ? "pointer-events-none" : ""
-              }`}
-              style={{
-                left: `${word.x}%`,
-                top: `${word.y}%`,
-                fontSize: `${word.size}px`,
-                fontWeight: word.weight,
-                transform: isClicked
-                  ? "scale(0.95)"
-                  : isHovered
-                  ? "scale(1.15)"
-                  : isMatching
-                  ? "scale(1.2)"
-                  : "scale(1)",
-                color: isClicked
-                  ? "#3b82f6"
-                  : isMatching
-                  ? "#22c55e"
-                  : isHovered
-                  ? "#60a5fa"
-                  : "white",
-                opacity: isFiltered ? 0.1 : isOtherHovered ? 0.3 : 1,
-                textShadow: isMatching
-                  ? "0 0 30px rgba(34, 197, 94, 0.8), 0 0 60px rgba(34, 197, 94, 0.5)"
-                  : isHovered
-                  ? "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3)"
-                  : "none",
-                filter: isHovered || isMatching ? "brightness(1.2)" : "none",
+      {/* 3D Word Cloud */}
+      <div className="absolute inset-0 flex items-center justify-center pt-16">
+        {loading ? (
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
+            <p className="text-gray-400">Loading topics...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-yellow-400">Using offline data</p>
+            <TagCanvas3D
+              words={filteredWords}
+              width={700}
+              height={700}
+              onWordClick={handleWordClick}
+              options={{
+                textHeight: 20,
+                maxSpeed: 0.03,
+                depth: 0.75,
+                outlineColour: "transparent",
+                outlineThickness: 0,
               }}
-            >
-              {word.text}
-            </button>
-          );
-        })}
+            />
+          </div>
+        ) : (
+          <TagCanvas3D
+            words={filteredWords}
+            width={700}
+            height={700}
+            onWordClick={handleWordClick}
+            options={{
+              textHeight: 20,
+              maxSpeed: 0.03,
+              depth: 0.75,
+              outlineColour: "transparent",
+              outlineThickness: 0,
+            }}
+          />
+        )}
       </div>
 
       {/* Search Results Count */}
       {activeSearch && (
-        <div className="absolute top-24 left-1/2 transform -translate-x-1/2 text-center">
+        <div className="absolute top-24 left-1/2 transform -translate-x-1/2 text-center z-10">
           <p className="text-gray-300 text-lg">
             Found <span className="text-green-400 font-bold">{filteredWords.length}</span> matching topics for &quot;{activeSearch}&quot;
           </p>
@@ -221,7 +244,7 @@ export default function Cloud() {
       )}
 
       {/* Search Bar */}
-      <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4">
+      <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4 z-10">
         <form onSubmit={handleSearch} className="relative">
           <div className="flex items-center bg-white/10 backdrop-blur-md rounded-full border border-white/20 px-6 py-4 shadow-2xl">
             <svg
@@ -269,12 +292,10 @@ export default function Cloud() {
         </form>
       </div>
 
-      {/* Footer hint */}
-      {hoveredWord && (
-        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-gray-400 text-sm">
-          Click to explore &quot;{hoveredWord}&quot;
-        </div>
-      )}
+      {/* Instructions hint */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-gray-500 text-sm text-center">
+        <p>Drag to rotate • Click a word to explore • Scroll to zoom</p>
+      </div>
     </div>
   );
 }

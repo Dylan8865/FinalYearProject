@@ -7,16 +7,19 @@ interface Stats {
     functional: number;
     decorative: number;
     terrain: number;
+    total: number;
   };
   knowledge: {
     pending: number;
     declined: number;
     verified: number;
+    total: number;
   };
   users: {
     admin: number;
     island: number;
     nonIsland: number;
+    total: number;
   };
 }
 
@@ -26,6 +29,8 @@ interface DashboardCardsProps {
 
 export default function DashboardCards({ stats }: DashboardCardsProps) {
   const router = useRouter();
+
+  const totalShop = stats.shop.total || (stats.shop.functional + stats.shop.decorative + stats.shop.terrain);
 
   return (
     <div className="pl-8 pr-8 pt-2">
@@ -37,6 +42,7 @@ export default function DashboardCards({ stats }: DashboardCardsProps) {
             description="Manage shop items, prices, etc."
             onClick={() => router.push("/shop")}
             horizontal={false}
+            badge={totalShop > 0 ? `${totalShop} items` : undefined}
           >
             <SubCard
               title="Functional Items"
@@ -60,31 +66,35 @@ export default function DashboardCards({ stats }: DashboardCardsProps) {
         </div>
 
         {/* Knowledge-base Moderation - Top right */}
-        <MainCard
-          title="Knowledge-base Moderation"
-          description="Manage user contributed knowledge"
-          onClick={() => router.push("/knowledge")}
-          horizontal={true}
-        >
-          <SubCard
-            title="Pending"
-            description="55%-59%"
-            count={stats.knowledge.pending}
-            onClick={() => router.push("/knowledge?filter=pending")}
-          />
-          <SubCard
-            title="Declined"
-            description="≤54%"
-            count={stats.knowledge.declined}
-            onClick={() => router.push("/knowledge?filter=declined")}
-          />
-          <SubCard
-            title="Verified"
-            description="≥60%"
-            count={stats.knowledge.verified}
-            onClick={() => router.push("/knowledge?filter=verified")}
-          />
-        </MainCard>
+        <div>
+          <MainCard
+            title="Knowledge-base Moderation"
+            description="Manage user contributed knowledge"
+            onClick={() => router.push("/knowledge")}
+            horizontal={true}
+            badge={stats.knowledge.pending > 0 ? `${stats.knowledge.pending} pending` : undefined}
+            badgeColor={stats.knowledge.pending > 0 ? "bg-yellow-600" : undefined}
+          >
+            <SubCard
+              title="Pending"
+              description="55%-59%"
+              count={stats.knowledge.pending}
+              onClick={() => router.push("/knowledge?filter=pending")}
+            />
+            <SubCard
+              title="Declined"
+              description="≤54%"
+              count={stats.knowledge.declined}
+              onClick={() => router.push("/knowledge?filter=declined")}
+            />
+            <SubCard
+              title="Verified"
+              description="≥60%"
+              count={stats.knowledge.verified}
+              onClick={() => router.push("/knowledge?filter=verified")}
+            />
+          </MainCard>
+        </div>
 
         {/* User Management - Bottom right */}
         <MainCard
@@ -92,6 +102,7 @@ export default function DashboardCards({ stats }: DashboardCardsProps) {
           description="Manage registered users"
           onClick={() => router.push("/user")}
           horizontal={true}
+          badge={stats.users.total > 0 ? `${stats.users.total} users` : undefined}
         >
           <SubCard
             title="Admin"
@@ -124,9 +135,11 @@ interface MainCardProps {
   onClick: () => void;
   children: React.ReactNode;
   horizontal?: boolean;
+  badge?: string;
+  badgeColor?: string;
 }
 
-function MainCard({ title, description, onClick, children, horizontal = false }: MainCardProps) {
+function MainCard({ title, description, onClick, children, horizontal = false, badge, badgeColor = "bg-gray-600" }: MainCardProps) {
   return (
     <div
       onClick={onClick}
@@ -134,7 +147,14 @@ function MainCard({ title, description, onClick, children, horizontal = false }:
     >
       {/* Title and Description */}
       <div className="mb-4">
-        <h2 className="text-white text-xl font-semibold">{title}</h2>
+        <div className="flex items-center gap-2 mb-1">
+          <h2 className="text-white text-xl font-semibold">{title}</h2>
+          {badge && (
+            <span className={`${badgeColor} text-white text-[10px] px-2 py-0.5 rounded-full font-medium`}>
+              {badge}
+            </span>
+          )}
+        </div>
         <p className="text-white text-xs">{description}</p>
       </div>
 
@@ -163,7 +183,7 @@ function SubCard({ title, description, count, onClick }: SubCardProps) {
   return (
     <div
       onClick={(e) => {
-        e.stopPropagation(); // Prevent parent card click
+        e.stopPropagation();
         onClick(e);
       }}
       className="bg-[#333333] rounded-lg px-4 pt-3 pb-0 hover:bg-[#252525] transition-colors cursor-pointer border border-[#7B7B7B]"

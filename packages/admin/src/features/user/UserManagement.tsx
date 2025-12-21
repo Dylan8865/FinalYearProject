@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { formatDate } from "@/lib/utils/formatters";
 import UserEditModal from "./UserEditPopup";
 import CreateAccountModal from "./CreateAccountPopup";
 
@@ -18,12 +19,18 @@ interface User {
 
 interface UserManagementProps {
   users: User[];
+  stats?: {
+    total: number;
+    admin: number;
+    island: number;
+    nonIsland: number;
+  };
 }
 
 type SortColumn = "name" | "created_at" | "email" | "last_login_time" | "mana" | "level" | "type";
 type SortOrder = "none" | "asc" | "desc";
 
-export default function UserManagement({ users }: UserManagementProps) {
+export default function UserManagement({ users, stats }: UserManagementProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -146,17 +153,6 @@ export default function UserManagement({ users }: UserManagementProps) {
     return sortOrder === "asc" ? " ▲" : " ▼";
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Never";
-    return new Date(dateString).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   return (
     <>
       <div className="pl-8 pr-8 pt-2">
@@ -184,6 +180,28 @@ export default function UserManagement({ users }: UserManagementProps) {
                 <span>Create Account</span>
               </button>
             </div>
+
+            {/* Stats Cards - Single Compact Row */}
+            {stats && (
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                <div className="bg-[#282828] rounded-lg p-2 border border-[#3B3B3B]">
+                  <div className="text-gray-400 text-[10px] mb-0.5">Total Users</div>
+                  <div className="text-white text-lg font-bold">{stats.total}</div>
+                </div>
+                <div className="bg-[#282828] rounded-lg p-2 border border-[#3B3B3B]">
+                  <div className="text-gray-400 text-[10px] mb-0.5">Admin</div>
+                  <div className="text-red-300 text-lg font-bold">{stats.admin}</div>
+                </div>
+                <div className="bg-[#282828] rounded-lg p-2 border border-[#3B3B3B]">
+                  <div className="text-gray-400 text-[10px] mb-0.5">Island Users</div>
+                  <div className="text-blue-300 text-lg font-bold">{stats.island}</div>
+                </div>
+                <div className="bg-[#282828] rounded-lg p-2 border border-[#3B3B3B]">
+                  <div className="text-gray-400 text-[10px] mb-0.5">Non-Island Users</div>
+                  <div className="text-gray-300 text-lg font-bold">{stats.nonIsland}</div>
+                </div>
+              </div>
+            )}
 
             {/* Search Bar and Filter */}
             <div className="flex gap-4 mb-4">
@@ -261,7 +279,7 @@ export default function UserManagement({ users }: UserManagementProps) {
                       onClick={() => handleSort("mana")}
                       className="text-left text-white text-sm font-semibold py-3 px-4 cursor-pointer hover:bg-[#333333] transition-colors select-none"
                     >
-                      O2{getSortIcon("mana")}
+                      Mana{getSortIcon("mana")}
                     </th>
                     <th
                       onClick={() => handleSort("level")}
@@ -287,7 +305,7 @@ export default function UserManagement({ users }: UserManagementProps) {
                       <td className="text-white text-sm py-3 px-4">{user.name || "N/A"}</td>
                       <td className="text-white text-sm py-3 px-4">{formatDate(user.created_at)}</td>
                       <td className="text-white text-sm py-3 px-4">{user.email || "N/A"}</td>
-                      <td className="text-white text-sm py-3 px-4">{formatDate(user.last_login_time)}</td>
+                      <td className="text-white text-sm py-3 px-4">{formatDate(user.last_login_time, "Never")}</td>
                       <td className="text-white text-sm py-3 px-4">{user.mana?.toLocaleString() || "0"}</td>
                       <td className="text-white text-sm py-3 px-4">{user.level || "0"}</td>
                       <td className="text-white text-sm py-3 px-4">
@@ -448,7 +466,7 @@ export default function UserManagement({ users }: UserManagementProps) {
 
       {/* Error Toast */}
       {errorMessage && (
-        <div className={`fixed bottom-4 right-4 bg-[#333333] border border-red-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${isErrorAnimatingOut ? 'animate-slide-out' : 'animate-slide-in'}`}>
+        <div className={`fixed bottom-4 right-4 bg-[#333333] border-2 border-red-600 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${isErrorAnimatingOut ? 'animate-slide-out' : 'animate-slide-in'}`}>
           <div className="flex items-center gap-3">
             <div className="text-2xl flex-shrink-0 mr-2">✕</div>
             <div className="flex-1">
@@ -467,7 +485,7 @@ export default function UserManagement({ users }: UserManagementProps) {
 
       {/* Success Toast */}
       {successMessage && (
-        <div className={`fixed bottom-4 right-4 bg-[#333333] border border-green-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${isSuccessAnimatingOut ? 'animate-slide-out' : 'animate-slide-in'}`}>
+        <div className={`fixed bottom-4 right-4 bg-[#333333] border-2 border-green-600 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${isSuccessAnimatingOut ? 'animate-slide-out' : 'animate-slide-in'}`}>
           <div className="flex items-center gap-3">
             <div className="text-2xl flex-shrink-0 mr-2">✓</div>
             <div className="flex-1">

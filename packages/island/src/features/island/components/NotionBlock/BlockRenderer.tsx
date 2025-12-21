@@ -8,7 +8,6 @@ import {
   Heading2Block,
   Heading3Block,
   BulletedListBlock,
-  NumberedListBlock,
   TodoBlock,
   ToggleBlock,
   QuoteBlock,
@@ -16,10 +15,6 @@ import {
   CalloutBlock,
   CodeBlock,
   ImageBlock,
-  VideoBlock,
-  AudioBlock,
-  FileBlock,
-  TableBlock,
   BookmarkBlock,
 } from "../Page/PageComponents";
 
@@ -28,6 +23,8 @@ interface BlockRendererProps {
   onUpdate: (id: string, content: any, properties?: BlockProperties) => void;
   onDelete: (id: string) => void;
   onAddBlock: (afterId: string, type: BlockType) => void;
+  onUploadImage?: (id: string, file: File) => Promise<boolean>;
+  onRemoveImage?: (id: string) => Promise<boolean>;
   children?: React.ReactNode; // For nested blocks (toggle)
 }
 
@@ -38,7 +35,15 @@ interface BlockRendererProps {
  * Uses a switch statement for clear type mapping.
  */
 const BlockRenderer = React.memo(
-  ({ block, onUpdate, onDelete, onAddBlock, children }: BlockRendererProps) => {
+  ({
+    block,
+    onUpdate,
+    onDelete,
+    onAddBlock,
+    onUploadImage,
+    onRemoveImage,
+    children,
+  }: BlockRendererProps) => {
     const blockType = block.type as BlockType;
 
     const commonProps = {
@@ -46,6 +51,8 @@ const BlockRenderer = React.memo(
       onUpdate,
       onDelete,
       onAddBlock,
+      onUploadImage,
+      onRemoveImage,
       isEditing: false,
     };
 
@@ -67,9 +74,6 @@ const BlockRenderer = React.memo(
         case "bulleted_list":
           return <BulletedListBlock {...commonProps} />;
 
-        case "numbered_list":
-          return <NumberedListBlock {...commonProps} />;
-
         case "todo":
           return <TodoBlock {...commonProps} />;
 
@@ -90,18 +94,6 @@ const BlockRenderer = React.memo(
 
         case "image":
           return <ImageBlock {...commonProps} />;
-
-        case "video":
-          return <VideoBlock {...commonProps} />;
-
-        case "audio":
-          return <AudioBlock {...commonProps} />;
-
-        case "file":
-          return <FileBlock {...commonProps} />;
-
-        case "table":
-          return <TableBlock {...commonProps} />;
 
         case "bookmark":
           return <BookmarkBlock {...commonProps} />;

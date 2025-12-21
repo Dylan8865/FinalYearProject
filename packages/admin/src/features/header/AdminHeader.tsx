@@ -1,6 +1,6 @@
 "use client";
 
-import WILogo from "@/features/login/icons/WILogo";
+import WILogo from "@/features/login/icons/IslandIcon";
 import { useRouter } from "next/navigation";
 
 interface DashboardHeaderProps {

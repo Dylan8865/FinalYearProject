@@ -23,6 +23,7 @@ interface UserEditModalProps {
 }
 
 export default function UserEditModal({ user, onClose, onUpdate, onError, onSuccess }: UserEditModalProps) {
+  const [name, setName] = useState(user.name || "");
   const [mana, setMana] = useState(user.mana?.toString() || "0");
   const [level, setLevel] = useState(user.level?.toString() || "0");
   const [accountType, setAccountType] = useState(user.type || "island");
@@ -31,6 +32,8 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [copySuccess, setCopySuccess] = useState(false);
+  const [emailCopySuccess, setEmailCopySuccess] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   // Handle mana input with max validation
   const handleManaChange = (value: string) => {
@@ -40,10 +43,10 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
     }
   };
 
-  // Handle level input with max 20 validation
+  // Handle level input with max int2 validation
   const handleLevelChange = (value: string) => {
     const numValue = parseInt(value) || 0;
-    if (numValue <= 20) {
+    if (numValue <= 32767) {
       setLevel(value);
     }
   };
@@ -83,10 +86,29 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
     }
   };
 
+  const handleCopyEmail = async () => {
+    try {
+      if (user.email) {
+        await navigator.clipboard.writeText(user.email);
+        setEmailCopySuccess(true);
+        setTimeout(() => setEmailCopySuccess(false), 2000);
+      }
+    } catch (error) {
+      // Silent fail - clipboard API might not be available
+    }
+  };
+
   const handleSave = async () => {
+    // Validate username
+    if (!name.trim()) {
+      setNameError("Username is required");
+      return;
+    }
+    
     setIsLoading(true);
     try {
       await updateUser(user.id, {
+        name: name.trim(),
         mana: parseInt(mana) || 0,
         level: parseInt(level) || 0,
         type: accountType,
@@ -148,8 +170,14 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
   const shortUID = user.id.slice(0, 8) + "..." + user.id.slice(-8);
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-8">
-      <div className="bg-[#333333] rounded-lg border border-[#3B3B3B] w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+    <div 
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-[#333333] rounded-lg border border-[#3B3B3B] p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div className="relative pb-2">
           <button
@@ -166,8 +194,23 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
           <div className="col-span-2 space-y-4">
             {/* Username */}
             <div>
-              <label className="text-gray-400 text-xs mb-1 block">Username</label>
-              <div className="text-white text-lg font-semibold">{user.name || "N/A"}</div>
+              <label className="text-gray-400 text-xs mb-2 block">Username</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (nameError) {
+                    setNameError("");
+                  }
+                }}
+                className={`w-full bg-[#1E1E1E] text-white px-4 py-2 rounded border ${nameError ? 'border-red-500' : 'border-[#3B3B3B]'} focus:outline-none focus:border-[#7B7B7B]`}
+                placeholder="Enter username"
+                maxLength={50}
+              />
+              {nameError && (
+                <p className="text-red-400 text-xs mt-1">{nameError}</p>
+              )}
             </div>
 
             {/* UID */}
@@ -189,8 +232,18 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
             {/* Email */}
             <div>
               <label className="text-gray-400 text-xs mb-1 block">Email</label>
-              <div className="bg-[#1E1E1E] border border-[#3B3B3B] rounded px-3 py-2 text-white text-sm">
-                {user.email || "N/A"}
+              <div className="flex items-center gap-2">
+                <div className="text-white text-sm">
+                  {user.email || "N/A"}
+                </div>
+                {user.email && (
+                  <button
+                    onClick={handleCopyEmail}
+                    className="text-gray-400 hover:text-white text-xs px-2 py-0.5 rounded border border-gray-600 hover:border-gray-400 transition-colors"
+                  >
+                    {emailCopySuccess ? "Copied" : "Copy"}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -243,7 +296,7 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
 
             {/* Level */}
             <div>
-              <label className="text-gray-400 text-xs mb-2 block">Level (Max: 20)</label>
+              <label className="text-gray-400 text-xs mb-2 block">Level (Max: 32767)</label>
               <input
                 type="number"
                 value={level}
@@ -251,7 +304,7 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
                 className="w-full bg-[#1E1E1E] text-white px-4 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
                 placeholder={user.level?.toString() || "0"}
                 min="0"
-                max="20"
+                max="32767"
               />
             </div>
 

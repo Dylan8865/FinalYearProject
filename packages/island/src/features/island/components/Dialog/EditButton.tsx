@@ -11,8 +11,8 @@ const EditButton = ({ fieldName, fieldValue, onClick }: EditButtonProps) => {
     <div className="flex w-80 justify-between md:w-auto md:gap-4">
       <div className="flex items-center">{fieldName}</div>
       <div className="flex h-8 w-60 justify-between border-4 md:h-10 md:w-80">
-        <div className="flex items-center ps-4 text-xs md:text-sm">
-          {fieldValue}
+        <div className="flex w-full items-center px-4 text-xs md:text-sm">
+          <span className="truncate">{fieldValue}</span>
         </div>
         {onClick && (
           <button

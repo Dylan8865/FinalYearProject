@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import AddIslandInput from "./AddIslandInput";
-import AddIslandSelect from "./AdIslandSelect";
+import AddIslandSelect from "./AddIslandSelect";
 import AddIslandButton from "./AddIslandButton";
 import { useIslands } from "../../hooks/useIslands";
+import { useProfile } from "../../hooks/useProfile";
 
 export interface Option {
   label: string;
@@ -12,11 +13,15 @@ export interface Option {
 interface AddIslandContentProps {
   setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
   onIslandAdded: () => void;
+  mana: number;
+  onUpdateMana: (newMana: number) => void;
 }
 
 const AddIslandContent = ({
   setIsDialogOpen,
   onIslandAdded,
+  mana,
+  onUpdateMana,
 }: AddIslandContentProps) => {
   const [value, setValue] = useState<{
     name: string;
@@ -38,6 +43,8 @@ const AddIslandContent = ({
     theme: "",
   });
 
+  const [disabled, setDisabled] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue({ ...value, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
@@ -49,6 +56,7 @@ const AddIslandContent = ({
   };
 
   const { createIsland } = useIslands();
+  const { updateProfile } = useProfile();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,11 +72,16 @@ const AddIslandContent = ({
       return;
     }
 
+    setDisabled(true);
     createIsland(value.name, value.genre, value.theme!.value).then(
       (response) => {
         if (response) {
+          const newMana = mana - 1_000_000;
           onIslandAdded();
+          updateProfile({ mana: newMana });
+          onUpdateMana(newMana);
           setIsDialogOpen("");
+          setDisabled(false);
         }
       }
     );
@@ -116,7 +129,7 @@ const AddIslandContent = ({
           error={errors.theme}
         />
 
-        <AddIslandButton color="#8cada5" width="100%">
+        <AddIslandButton color="#8cada5" width="100%" disabled={disabled}>
           Add Island
         </AddIslandButton>
       </form>

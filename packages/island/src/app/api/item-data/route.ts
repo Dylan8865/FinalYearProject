@@ -69,7 +69,6 @@ export async function POST(request: Request) {
         properties: properties || null,
         parent_id: parent_id || null,
         order_index: order_index || 0,
-        valid: true,
       })
       .select()
       .single();
@@ -81,6 +80,12 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    // Set island-item status to unverified when new item-data is added
+    await supabase
+      .from("island-item")
+      .update({ status: "unverified", admin_comment: null })
+      .eq("id", island_item_id);
 
     return NextResponse.json(data);
   } catch (error) {
@@ -103,7 +108,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
 
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (type !== undefined) updateData.type = type;
     if (content !== undefined) updateData.content = content;
     if (properties !== undefined) updateData.properties = properties;
@@ -123,6 +128,14 @@ export async function PUT(request: Request) {
         { error: "Failed to update item data" },
         { status: 500 }
       );
+    }
+
+    // Set island-item status to unverified when item-data is updated
+    if (data && data.island_item_id) {
+      await supabase
+        .from("island-item")
+        .update({ status: "unverified", admin_comment: null })
+        .eq("id", data.island_item_id);
     }
 
     return NextResponse.json(data);
@@ -145,6 +158,13 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
 
+    // Get island_item_id before deleting
+    const { data: itemData } = await supabase
+      .from("item-data")
+      .select("island_item_id")
+      .eq("id", id)
+      .single();
+
     const { error } = await supabase.from("item-data").delete().eq("id", id);
 
     if (error) {
@@ -153,6 +173,14 @@ export async function DELETE(request: Request) {
         { error: "Failed to delete item data" },
         { status: 500 }
       );
+    }
+
+    // Set island-item status to unverified when item-data is deleted
+    if (itemData?.island_item_id) {
+      await supabase
+        .from("island-item")
+        .update({ status: "unverified", admin_comment: null })
+        .eq("id", itemData.island_item_id);
     }
 
     return NextResponse.json({ success: true });

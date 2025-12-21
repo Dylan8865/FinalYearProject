@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"pnpm --filter @wisdom-island/admin dev\" \"pnpm --filter @wisdom-island/cloud dev\" \"pnpm --filter @wisdom-island/home dev\" \"pnpm --filter @wisdom-island/island dev\" \"pnpm --filter @wisdom-island/search dev\"",
+    "dev": "concurrently \"pnpm --filter @wisdom-island/admin dev\" \"pnpm --filter @wisdom-island/cloud dev\" \"pnpm --filter @wisdom-island/explore dev\" \"pnpm --filter @wisdom-island/island dev\" \"pnpm --filter @wisdom-island/search dev\"",
     "build": "pnpm -r build",
-    "start": "concurrently \"pnpm --filter @wisdom-island/admin start\" \"pnpm --filter @wisdom-island/cloud start\" \"pnpm --filter @wisdom-island/home start\" \"pnpm --filter @wisdom-island/island start\" \"pnpm --filter @wisdom-island/search start\"",
+    "start": "concurrently \"pnpm --filter @wisdom-island/admin start\" \"pnpm --filter @wisdom-island/cloud start\" \"pnpm --filter @wisdom-island/explore start\" \"pnpm --filter @wisdom-island/island start\" \"pnpm --filter @wisdom-island/search start\"",
     "lint": "pnpm -r lint"
   },
   "devDependencies": {
@@ -13,9 +13,11 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@google/genai": "^1.34.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
     "leva": "^0.10.1",
+    "react-icons": "^5.5.0",
     "three": "^0.181.2"
   }
 }
