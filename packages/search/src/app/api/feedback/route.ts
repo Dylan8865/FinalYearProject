@@ -30,26 +30,55 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
+    console.log('[Feedback POST] Request:', { messageId, feedbackType, profileId });
+
     // Check if feedback already exists for this message and profile
-    const { data: existingFeedback } = await supabase
+    const { data: existingFeedback, error: fetchError } = await supabase
       .from("feedback")
-      .select("id")
+      .select("id, feedback_type")
       .eq("message_id", messageId)
       .eq("profile_id", profileId || null)
-      .single();
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    console.log('[Feedback POST] Existing feedback:', existingFeedback);
 
     let error;
 
-    if (existingFeedback) {
-      // Update existing feedback
-      const result = await supabase
-        .from("feedback")
-        .update({
-          feedback_type: feedbackType,
-        })
-        .eq("id", existingFeedback.id);
-      error = result.error;
+    if (existingFeedback && existingFeedback.length > 0) {
+      const feedback = existingFeedback[0];
+      
+      console.log('[Feedback POST] Found existing, comparing:', { 
+        existing: feedback.feedback_type, 
+        new: feedbackType 
+      });
+      
+      // Only update if feedback type is different
+      if (feedback.feedback_type !== feedbackType) {
+        console.log('[Feedback POST] Updating feedback type');
+        const result = await supabase
+          .from("feedback")
+          .update({
+            feedback_type: feedbackType,
+          })
+          .eq("id", feedback.id);
+        
+        console.log('[Feedback POST] Update result:', { 
+          error: result.error, 
+          status: result.status,
+          statusText: result.statusText 
+        });
+        
+        error = result.error;
+        
+        if (result.error) {
+          console.error('[Feedback POST] Update failed:', result.error);
+        }
+      } else {
+        console.log('[Feedback POST] Same feedback type, skipping update');
+      }
     } else {
+      console.log('[Feedback POST] Creating new feedback');
       // Insert new feedback
       const result = await supabase
         .from("feedback")

@@ -200,18 +200,6 @@ export default function SearchPage({ user }: SearchPageProps) {
     };
     setActiveConversation(withLoading);
 
-    // Log search analytics (non-blocking)
-    fetch("/api/analytics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventType: "search",
-        profileId: user?.id,
-        chatId: conversation.id,
-        query: content,
-      }),
-    }).catch(() => {}); // Ignore analytics errors
-
     // Call search API
     try {
       const searchPayload = { 
@@ -386,7 +374,9 @@ export default function SearchPage({ user }: SearchPageProps) {
   // Handle feedback submission
   const handleFeedback = async (messageId: string, type: "positive" | "negative") => {
     try {
-      await fetch("/api/feedback", {
+      console.log('[SearchPage] handleFeedback called:', { messageId, type, currentConversation: activeConversation?.id });
+      
+      const response = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -397,8 +387,12 @@ export default function SearchPage({ user }: SearchPageProps) {
         }),
       });
 
+      const result = await response.json();
+      console.log('[SearchPage] API response:', result);
+
       // Update message feedback state locally
       if (activeConversation) {
+        console.log('[SearchPage] Updating local state to:', type);
         const updatedMessages = activeConversation.messages.map((msg) =>
           msg.id === messageId ? { ...msg, feedback: type } : msg
         );
@@ -406,6 +400,9 @@ export default function SearchPage({ user }: SearchPageProps) {
         setActiveConversation(updatedConversation);
         setConversations((prev) =>
           prev.map((c) => (c.id === activeConversation.id ? updatedConversation : c))
+        );
+        console.log('[SearchPage] State updated, new feedback:', 
+          updatedMessages.find(m => m.id === messageId)?.feedback
         );
       }
     } catch (error) {
