@@ -35,6 +35,7 @@ const ValidationDetailsPopup = ({
   const [validationData, setValidationData] = useState<{
     validity: number | null;
     comment: string | null;
+    adminComment: string | null;
     itemData: ItemDataValidation[];
   } | null>(null);
 
@@ -55,6 +56,7 @@ const ValidationDetailsPopup = ({
       setValidationData({
         validity: item.validity,
         comment: item.comment,
+        adminComment: item.admin_comment,
         itemData: itemDataList.map(
           (data: {
             id: string;
@@ -78,7 +80,7 @@ const ValidationDetailsPopup = ({
     if (isOpen && islandItemId && status !== "unverified") {
       fetchValidationData();
     }
-  }, [isOpen, islandItemId, status, fetchValidationData]);
+  }, [isOpen, islandItemId, status, validationStatus, fetchValidationData]);
 
   if (!isOpen) return null;
 
@@ -320,6 +322,34 @@ const ValidationDetailsPopup = ({
                   <div className="text-sm text-gray-400">/ 100</div>
                 </div>
               </div>
+
+              {/* Admin Comment - Only show for declined and verified */}
+              {validationData.adminComment &&
+                (status === "declined" || status === "verified") && (
+                  <div className="rounded-lg bg-blue-900/30 border border-blue-600/50 p-4">
+                    <div className="flex items-start gap-2 mb-2">
+                      <svg
+                        className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      <h3 className="text-sm font-semibold text-blue-300">
+                        Moderator Comment
+                      </h3>
+                    </div>
+                    <p className="text-sm text-gray-300 pl-7">
+                      {validationData.adminComment}
+                    </p>
+                  </div>
+                )}
 
               {/* AI Comment */}
               {validationData.comment && (
