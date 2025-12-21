@@ -1218,7 +1218,17 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <AchievementContent islands={islands} islandItems={islandItems} />
+          <AchievementContent
+            islands={islands}
+            islandItems={islandItems}
+            onNavigateToIsland={(pos) => {
+              controlsRef.current?.navigateTo(
+                [pos[0] + 10, pos[1] + 15, pos[2] + 5],
+                pos
+              );
+              setIsDialogOpen("");
+            }}
+          />
         </Dialog>
       )}
 

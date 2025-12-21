@@ -9,11 +9,13 @@ import { useTheme } from "../../contexts/ThemeContext";
 interface AchievementContentProps {
   islands: IslandTypeWithPosition[];
   islandItems: IslandItemType[];
+  onNavigateToIsland?: (position: [number, number, number]) => void;
 }
 
 const AchievementContent = ({
   islands,
   islandItems,
+  onNavigateToIsland,
 }: AchievementContentProps) => {
   const [showLevelInfo, setShowLevelInfo] = useState(false);
   const { themeColour } = useTheme();
@@ -145,7 +147,12 @@ const AchievementContent = ({
             return (
               <div
                 key={island.id}
-                className={`flex items-center justify-between rounded-md ${isDark ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-black/10"} p-3 transition-colors`}
+                onClick={() =>
+                  onNavigateToIsland?.(
+                    island.position as [number, number, number]
+                  )
+                }
+                className={`flex cursor-pointer items-center justify-between rounded-md ${isDark ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-black/10"} p-3 transition-colors`}
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded bg-[#5a706b] text-white">

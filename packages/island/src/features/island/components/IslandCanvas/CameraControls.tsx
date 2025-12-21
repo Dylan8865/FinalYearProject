@@ -21,6 +21,10 @@ interface CameraControlsProps {
 
 export interface CameraControlsHandle {
   reset: () => void;
+  navigateTo: (
+    position: [number, number, number],
+    target: [number, number, number]
+  ) => void;
 }
 
 const CameraControls = forwardRef<CameraControlsHandle, CameraControlsProps>(
@@ -68,6 +72,14 @@ const CameraControls = forwardRef<CameraControlsHandle, CameraControlsProps>(
             defaultTarget[1],
             defaultTarget[2]
           );
+          setIsAnimating(true);
+        },
+        navigateTo: (
+          position: [number, number, number],
+          target: [number, number, number]
+        ) => {
+          targetPositionRef.current.set(...position);
+          targetLookAtRef.current.set(...target);
           setIsAnimating(true);
         },
       }),
