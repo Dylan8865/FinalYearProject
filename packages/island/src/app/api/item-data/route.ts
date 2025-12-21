@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     // Set island-item status to unverified when new item-data is added
     await supabase
       .from("island-item")
-      .update({ status: "unverified" })
+      .update({ status: "unverified", admin_comment: null })
       .eq("id", island_item_id);
 
     return NextResponse.json(data);
@@ -134,7 +134,7 @@ export async function PUT(request: Request) {
     if (data && data.island_item_id) {
       await supabase
         .from("island-item")
-        .update({ status: "unverified" })
+        .update({ status: "unverified", admin_comment: null })
         .eq("id", data.island_item_id);
     }
 
@@ -179,7 +179,7 @@ export async function DELETE(request: Request) {
     if (itemData?.island_item_id) {
       await supabase
         .from("island-item")
-        .update({ status: "unverified" })
+        .update({ status: "unverified", admin_comment: null })
         .eq("id", itemData.island_item_id);
     }
 

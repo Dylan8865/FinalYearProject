@@ -174,9 +174,14 @@ const SidebarPage = ({
       }
 
       showToast("Appeal submitted! Your content will be reviewed.", "success");
-      setIsPopupOpen(false); // Close popup after successful appeal
-
-      // Refresh status
+      // Keep popup open to show transition to pending moderator review state
+      // setIsPopupOpen(false); // Don't close popup - let it show the moderator review status
+      
+      // Update status to pending immediately for better UX
+      setCurrentStatus("pending");
+      setValidationStatus(null); // Clear validation_status as it's now moderator review
+      
+      // Trigger an immediate status fetch to sync with server
       fetchCurrentStatus();
     } catch (error) {
       console.error("Appeal error:", error);

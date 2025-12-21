@@ -21,9 +21,15 @@ export async function PUT(
 
     const { id } = await context.params;
 
+    // Clear admin_comment when user makes edits (it may no longer be relevant)
+    const updatesWithClearedComment = {
+      ...updates,
+      admin_comment: null,
+    };
+
     const { data: islandItem, error } = await supabase
       .from("island-item")
-      .update(updates)
+      .update(updatesWithClearedComment)
       .eq("id", id)
       .eq("profile_id", user.id)
       .select()
