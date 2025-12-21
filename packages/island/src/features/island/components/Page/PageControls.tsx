@@ -5,7 +5,7 @@ import React, { Dispatch, SetStateAction } from "react";
 import { TiArrowMinimise } from "react-icons/ti";
 
 interface PageControlsProps {
-  onClick?: () => void;
+  onArrowClick?: () => void;
   isExpanded: boolean;
   setIsExpanded: Dispatch<SetStateAction<boolean>>;
   isSaving?: boolean;
@@ -15,7 +15,7 @@ interface PageControlsProps {
 }
 
 const PageControls = ({
-  onClick,
+  onArrowClick: onClick,
   isExpanded,
   setIsExpanded,
   isSaving,
