@@ -8,7 +8,6 @@ import {
   Heading2Block,
   Heading3Block,
   BulletedListBlock,
-  NumberedListBlock,
   TodoBlock,
   ToggleBlock,
   QuoteBlock,
@@ -19,7 +18,6 @@ import {
   VideoBlock,
   AudioBlock,
   FileBlock,
-  TableBlock,
   BookmarkBlock,
 } from "../Page/PageComponents";
 
@@ -67,9 +65,6 @@ const BlockRenderer = React.memo(
         case "bulleted_list":
           return <BulletedListBlock {...commonProps} />;
 
-        case "numbered_list":
-          return <NumberedListBlock {...commonProps} />;
-
         case "todo":
           return <TodoBlock {...commonProps} />;
 
@@ -99,9 +94,6 @@ const BlockRenderer = React.memo(
 
         case "file":
           return <FileBlock {...commonProps} />;
-
-        case "table":
-          return <TableBlock {...commonProps} />;
 
         case "bookmark":
           return <BookmarkBlock {...commonProps} />;

@@ -169,29 +169,6 @@ export const BulletedListBlock = ({ block, onUpdate }: BlockProps) => {
   );
 };
 
-// Numbered List Block
-export const NumberedListBlock = ({ block, onUpdate }: BlockProps) => {
-  const number = (block.order_index || 0) + 1;
-  const textContent = typeof block.content === "string" ? block.content : "";
-
-  const handleChange = (content: string) => {
-    console.log("NumberedListBlock onChange:", { id: block.id, content });
-    onUpdate?.(block.id, content);
-  };
-
-  return (
-    <div className="group relative flex gap-2 border py-1">
-      <span className="flex-shrink-0 text-sm text-gray-400">{number}.</span>
-      <EditableContent
-        content={textContent}
-        onChange={handleChange}
-        placeholder="List item"
-        className="flex-1 text-base leading-relaxed text-gray-200"
-      />
-    </div>
-  );
-};
-
 // Todo Block
 export const TodoBlock = ({ block, onUpdate }: BlockProps) => {
   const [checked, setChecked] = useState(block.properties?.checked || false);
@@ -308,7 +285,7 @@ export const QuoteBlock = ({ block, onUpdate }: BlockProps) => {
         content={textContent}
         onChange={handleChange}
         placeholder="Quote"
-        className="text-base italic leading-relaxed text-gray-300"
+        className="text-base italic leading-relaxed text-white"
       />
     </div>
   );
@@ -319,7 +296,6 @@ export const DividerBlock = () => {
   return <hr className="my-4 border-gray-700" />;
 };
 
-// Callout Block
 // Callout Block
 export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
   const [icon, setIcon] = useState(block.properties?.icon || "💡");
@@ -779,62 +755,6 @@ export const FileBlock = ({ block, onUpdate }: BlockProps) => {
           Download
         </a>
       </div>
-    </div>
-  );
-};
-
-// Table Block
-export const TableBlock = ({ block, onUpdate }: BlockProps) => {
-  const tableData =
-    typeof block.content === "object" ? block.content : { rows: [[""]] };
-  const [rows, setRows] = useState(tableData.rows || [[""]]);
-
-  const handleCellChange = (
-    rowIndex: number,
-    cellIndex: number,
-    value: string
-  ) => {
-    const newRows = [...rows];
-    newRows[rowIndex][cellIndex] = value;
-    setRows(newRows);
-    console.log("TableBlock cell change:", {
-      id: block.id,
-      rowIndex,
-      cellIndex,
-      value,
-      rows: newRows,
-    });
-    onUpdate?.(block.id, { rows: newRows });
-  };
-
-  return (
-    <div className="group relative my-2 overflow-x-auto border">
-      <table className="w-full border-collapse rounded-lg border border-gray-700">
-        <tbody>
-          {rows.map((row: string[], rowIndex: number) => (
-            <tr
-              key={rowIndex}
-              className="border-b border-gray-700 last:border-b-0"
-            >
-              {row.map((cell: string, cellIndex: number) => (
-                <td
-                  key={cellIndex}
-                  className="min-w-[100px] border-r border-gray-700 p-2 align-top last:border-r-0"
-                >
-                  <EditableContent
-                    content={cell}
-                    onChange={(val) =>
-                      handleCellChange(rowIndex, cellIndex, val)
-                    }
-                    className="text-sm text-gray-200"
-                    placeholder="Empty"
-                  />
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 };

@@ -107,15 +107,6 @@ const blockTypeOptions: BlockTypeOption[] = [
     category: "list",
   },
   {
-    type: "numbered_list",
-    label: "Numbered List",
-    description: "Create a numbered list",
-    icon: "1.",
-    keywords: ["numbered", "list", "ol", "ordered"],
-    shortcut: "/number",
-    category: "list",
-  },
-  {
     type: "todo",
     label: "To-do List",
     description: "Track tasks with a to-do list",
@@ -174,30 +165,12 @@ const blockTypeOptions: BlockTypeOption[] = [
 
   // Advanced blocks
   {
-    type: "table",
-    label: "Table",
-    description: "Add a simple table",
-    icon: "⊞",
-    keywords: ["table", "grid", "spreadsheet"],
-    shortcut: "/table",
-    category: "advanced",
-  },
-  {
     type: "bookmark",
     label: "Bookmark",
     description: "Save a link as a visual bookmark",
     icon: "🔖",
     keywords: ["bookmark", "link", "url"],
     shortcut: "/bookmark",
-    category: "advanced",
-  },
-  {
-    type: "embed",
-    label: "Embed",
-    description: "Embed external content",
-    icon: "🌐",
-    keywords: ["embed", "iframe", "external"],
-    shortcut: "/embed",
     category: "advanced",
   },
 ];

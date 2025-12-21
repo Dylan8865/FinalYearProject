@@ -134,24 +134,10 @@ const blockTypes: BlockTypeOption[] = [
 
   // Advanced
   {
-    type: "table",
-    label: "Table",
-    description: "Grid of data",
-    icon: "⊞",
-    category: "advanced",
-  },
-  {
     type: "bookmark",
     label: "Bookmark",
     description: "Save a web link",
     icon: "🔖",
-    category: "advanced",
-  },
-  {
-    type: "embed",
-    label: "Embed",
-    description: "Embed external content",
-    icon: "🌐",
     category: "advanced",
   },
 ];
