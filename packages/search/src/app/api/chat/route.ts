@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
     const { data: chats, error } = await supabase
       .from("chat")
-      .select("id, title, created_at")
+      .select("id, title, created_at, is_favorite")
       .eq("profile_id", profileId)
       .order("created_at", { ascending: false });
 
@@ -98,6 +98,53 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Chat POST error:", error);
     return NextResponse.json<ChatResponse>({
+      success: false,
+      error: "An unexpected error occurred",
+    });
+  }
+}
+
+// PATCH - Update chat (e.g., favorite status)
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    const { chatId, isFavorite } = body;
+
+    console.log("PATCH request:", { chatId, isFavorite });
+
+    if (!chatId) {
+      return NextResponse.json({
+        success: false,
+        error: "Chat ID is required",
+      });
+    }
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("chat")
+      .update({ is_favorite: isFavorite })
+      .eq("id", chatId)
+      .select("id, is_favorite")
+      .single();
+
+    if (error) {
+      console.error("Error updating chat:", error);
+      return NextResponse.json({
+        success: false,
+        error: "Failed to update chat",
+      });
+    }
+
+    console.log("PATCH success:", data);
+
+    return NextResponse.json({
+      success: true,
+      chat: data,
+    });
+  } catch (error) {
+    console.error("Chat PATCH error:", error);
+    return NextResponse.json({
       success: false,
       error: "An unexpected error occurred",
     });

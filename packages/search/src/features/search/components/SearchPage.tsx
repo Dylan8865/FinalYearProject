@@ -34,6 +34,7 @@ export interface Conversation {
   title: string;
   messages: Message[];
   createdAt: Date;
+  isFavorite?: boolean;
 }
 
 interface SearchPageProps {
@@ -48,6 +49,7 @@ export default function SearchPage({ user }: SearchPageProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Theme-based colors
@@ -78,7 +80,7 @@ export default function SearchPage({ user }: SearchPageProps) {
         if (data.success && data.chats) {
           // Load each chat with its messages
           const loadedConversations = await Promise.all(
-            data.chats.map(async (chat: { id: string; title: string; created_at: string }) => {
+            data.chats.map(async (chat: { id: string; title: string; created_at: string; is_favorite?: boolean }) => {
               const historyResponse = await fetch(`/api/history?chatId=${chat.id}`);
               const historyData = await historyResponse.json();
 
@@ -113,6 +115,7 @@ export default function SearchPage({ user }: SearchPageProps) {
                 title: chat.title,
                 messages,
                 createdAt: new Date(chat.created_at),
+                isFavorite: chat.is_favorite || false,
               };
             })
           );
@@ -323,6 +326,40 @@ export default function SearchPage({ user }: SearchPageProps) {
     }
   };
 
+  // Handle toggle favorite
+  const handleToggleFavorite = async (id: string) => {
+    const conversation = conversations.find((c) => c.id === id);
+    if (!conversation) return;
+
+    const newFavoriteState = !conversation.isFavorite;
+
+    try {
+      // Update in database
+      const response = await fetch("/api/chat", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatId: id,
+          isFavorite: newFavoriteState,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local state
+        setConversations((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, isFavorite: newFavoriteState } : c))
+        );
+        if (activeConversation?.id === id) {
+          setActiveConversation({ ...activeConversation, isFavorite: newFavoriteState });
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
+  };
+
   // Handle feedback submission
   const handleFeedback = async (messageId: string, type: "positive" | "negative") => {
     try {
@@ -378,20 +415,28 @@ export default function SearchPage({ user }: SearchPageProps) {
     }
   };
 
-  // Filter conversations based on search query
-  const filteredConversations = searchQuery.trim()
-    ? conversations.filter((conv) => {
-        const query = searchQuery.toLowerCase();
-        // Search in conversation title
-        if (conv.title.toLowerCase().includes(query)) {
-          return true;
-        }
-        // Search in message content
-        return conv.messages.some((msg) =>
-          msg.content.toLowerCase().includes(query)
-        );
-      })
-    : conversations;
+  // Filter conversations based on search query and favorites
+  const filteredConversations = conversations.filter((conv) => {
+    // Filter by favorites first
+    if (showFavoritesOnly && !conv.isFavorite) {
+      return false;
+    }
+
+    // Then filter by search query if active
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      // Search in conversation title
+      if (conv.title.toLowerCase().includes(query)) {
+        return true;
+      }
+      // Search in message content
+      return conv.messages.some((msg) =>
+        msg.content.toLowerCase().includes(query)
+      );
+    }
+
+    return true;
+  });
 
   const handleToggleSearch = () => {
     setIsSearchActive(!isSearchActive);
@@ -411,11 +456,14 @@ export default function SearchPage({ user }: SearchPageProps) {
         onNewChat={handleNewChat}
         onSelectConversation={handleSelectConversation}
         onDeleteConversation={handleDeleteConversation}
+        onToggleFavorite={handleToggleFavorite}
         isLoggedIn={!!user}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         isSearchActive={isSearchActive}
         onToggleSearch={handleToggleSearch}
+        showFavoritesOnly={showFavoritesOnly}
+        onToggleFavoritesFilter={() => setShowFavoritesOnly(!showFavoritesOnly)}
       />
 
       {/* Main Content */}

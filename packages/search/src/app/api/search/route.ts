@@ -124,7 +124,7 @@ function generateSuggestions(query: string): string[] {
     "Try using different keywords",
     "Use broader search terms",
     "Check for spelling errors",
-    "Browse the Knowledge Repository",
+    "Browse the Explore section for related topics",
   ];
 }
 
