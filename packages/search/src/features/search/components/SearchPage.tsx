@@ -34,6 +34,7 @@ export interface Conversation {
   title: string;
   messages: Message[];
   createdAt: Date;
+  isFavorite?: boolean;
 }
 
 interface SearchPageProps {
@@ -46,6 +47,9 @@ export default function SearchPage({ user }: SearchPageProps) {
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Theme-based colors
@@ -76,32 +80,39 @@ export default function SearchPage({ user }: SearchPageProps) {
         if (data.success && data.chats) {
           // Load each chat with its messages
           const loadedConversations = await Promise.all(
-            data.chats.map(async (chat: { id: string; title: string; created_at: string }) => {
+            data.chats.map(async (chat: { id: string; title: string; created_at: string; is_favorite?: boolean }) => {
               const historyResponse = await fetch(`/api/history?chatId=${chat.id}`);
               const historyData = await historyResponse.json();
+
+              // Fetch feedback for this chat
+              const feedbackResponse = await fetch(`/api/feedback/messages?chatId=${chat.id}&profileId=${user.id}`);
+              const feedbackData = await feedbackResponse.json();
+              const feedbackMap = feedbackData.success ? feedbackData.feedback : {};
 
               const messages: Message[] = [];
               
               if (historyData.success && historyData.history) {
                 historyData.history.forEach((entry: { 
+                  id: string;
                   prompt_text: string; 
                   result_text: string; 
                   created_at: string;
                 }) => {
-                  // Add user message
+                  // Add user message - use history ID + 'user' suffix
                   messages.push({
-                    id: crypto.randomUUID(),
+                    id: `${entry.id}-user`,
                     role: "user",
                     content: entry.prompt_text,
                     timestamp: new Date(entry.created_at),
                   });
                   
-                  // Add assistant message
+                  // Add assistant message - use history ID as message ID for feedback matching
                   messages.push({
-                    id: crypto.randomUUID(),
+                    id: entry.id,
                     role: "assistant",
                     content: entry.result_text,
                     timestamp: new Date(entry.created_at),
+                    feedback: feedbackMap[entry.id] || null,
                   });
                 });
               }
@@ -111,11 +122,25 @@ export default function SearchPage({ user }: SearchPageProps) {
                 title: chat.title,
                 messages,
                 createdAt: new Date(chat.created_at),
+                isFavorite: chat.is_favorite || false,
               };
             })
           );
 
           setConversations(loadedConversations);
+
+          // Check if there's a chatId in URL query params (from analytics revisit)
+          const urlParams = new URLSearchParams(window.location.search);
+          const chatIdFromUrl = urlParams.get('chatId');
+          
+          if (chatIdFromUrl) {
+            const chatToOpen = loadedConversations.find(c => c.id === chatIdFromUrl);
+            if (chatToOpen) {
+              setActiveConversation(chatToOpen);
+            }
+            // Clear the URL parameter
+            window.history.replaceState({}, '', '/search');
+          }
         }
       } catch (error) {
         console.error("Error loading saved chats:", error);
@@ -175,18 +200,6 @@ export default function SearchPage({ user }: SearchPageProps) {
     };
     setActiveConversation(withLoading);
 
-    // Log search analytics (non-blocking)
-    fetch("/api/analytics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventType: "search",
-        profileId: user?.id,
-        chatId: conversation.id,
-        query: content,
-      }),
-    }).catch(() => {}); // Ignore analytics errors
-
     // Call search API
     try {
       const searchPayload = { 
@@ -218,9 +231,9 @@ export default function SearchPage({ user }: SearchPageProps) {
         assistantContent = data.answer || "I couldn't find any knowledge matching your query.";
         
         if (data.suggestions && data.suggestions.length > 0) {
-          assistantContent += "\n\n**Suggestions:**\n";
+          assistantContent += "\n\n---\n\n**Suggestions(If didn't find what you were looking for):**\n\n";
           data.suggestions.forEach((suggestion: string) => {
-            assistantContent += `• ${suggestion}\n`;
+            assistantContent += `- ${suggestion}\n`;
           });
           assistantContent += "\nYou can also try browsing the Knowledge Repository or contribute your own knowledge (if registered).";
         }
@@ -238,8 +251,11 @@ export default function SearchPage({ user }: SearchPageProps) {
         createdAt: result.created_at || new Date().toISOString(),
       })) || [];
 
+      // Use historyId from API response if available, otherwise generate UUID
+      const messageId = data.historyId || crypto.randomUUID();
+
       const assistantMessage: Message = {
-        id: crypto.randomUUID(),
+        id: messageId,
         role: "assistant",
         content: assistantContent,
         timestamp: new Date(),
@@ -321,10 +337,46 @@ export default function SearchPage({ user }: SearchPageProps) {
     }
   };
 
+  // Handle toggle favorite
+  const handleToggleFavorite = async (id: string) => {
+    const conversation = conversations.find((c) => c.id === id);
+    if (!conversation) return;
+
+    const newFavoriteState = !conversation.isFavorite;
+
+    try {
+      // Update in database
+      const response = await fetch("/api/chat", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatId: id,
+          isFavorite: newFavoriteState,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local state
+        setConversations((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, isFavorite: newFavoriteState } : c))
+        );
+        if (activeConversation?.id === id) {
+          setActiveConversation({ ...activeConversation, isFavorite: newFavoriteState });
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
+  };
+
   // Handle feedback submission
   const handleFeedback = async (messageId: string, type: "positive" | "negative") => {
     try {
-      await fetch("/api/feedback", {
+      console.log('[SearchPage] handleFeedback called:', { messageId, type, currentConversation: activeConversation?.id });
+      
+      const response = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -335,8 +387,12 @@ export default function SearchPage({ user }: SearchPageProps) {
         }),
       });
 
+      const result = await response.json();
+      console.log('[SearchPage] API response:', result);
+
       // Update message feedback state locally
       if (activeConversation) {
+        console.log('[SearchPage] Updating local state to:', type);
         const updatedMessages = activeConversation.messages.map((msg) =>
           msg.id === messageId ? { ...msg, feedback: type } : msg
         );
@@ -345,34 +401,70 @@ export default function SearchPage({ user }: SearchPageProps) {
         setConversations((prev) =>
           prev.map((c) => (c.id === activeConversation.id ? updatedConversation : c))
         );
+        console.log('[SearchPage] State updated, new feedback:', 
+          updatedMessages.find(m => m.id === messageId)?.feedback
+        );
       }
     } catch (error) {
       console.error("Error submitting feedback:", error);
     }
   };
 
-  // Handle report submission
-  const handleReport = async (messageId: string, reason: string, details?: string) => {
+  // Handle canceling feedback
+  const handleCancelFeedback = async (messageId: string) => {
     try {
-      const response = await fetch("/api/report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messageId,
-          chatId: activeConversation?.id,
-          reason,
-          details,
-          profileId: user?.id,
-        }),
+      console.log(`[Cancel Feedback] Calling DELETE for messageId: ${messageId}, profileId: ${user?.id}`);
+      
+      const response = await fetch(`/api/feedback?messageId=${messageId}&profileId=${user?.id}`, {
+        method: "DELETE",
       });
 
-      const data = await response.json();
-      if (data.success) {
-        // Could show a toast notification here
-        console.log("Report submitted successfully");
+      const result = await response.json();
+      console.log(`[Cancel Feedback] DELETE response:`, result);
+
+      // Update message feedback state locally
+      if (activeConversation) {
+        const updatedMessages = activeConversation.messages.map((msg) =>
+          msg.id === messageId ? { ...msg, feedback: null } : msg
+        );
+        const updatedConversation = { ...activeConversation, messages: updatedMessages };
+        setActiveConversation(updatedConversation);
+        setConversations((prev) =>
+          prev.map((c) => (c.id === activeConversation.id ? updatedConversation : c))
+        );
       }
     } catch (error) {
-      console.error("Error submitting report:", error);
+      console.error("Error canceling feedback:", error);
+    }
+  };
+
+  // Filter conversations based on search query and favorites
+  const filteredConversations = conversations.filter((conv) => {
+    // Filter by favorites first
+    if (showFavoritesOnly && !conv.isFavorite) {
+      return false;
+    }
+
+    // Then filter by search query if active
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      // Search in conversation title
+      if (conv.title.toLowerCase().includes(query)) {
+        return true;
+      }
+      // Search in message content
+      return conv.messages.some((msg) =>
+        msg.content.toLowerCase().includes(query)
+      );
+    }
+
+    return true;
+  });
+
+  const handleToggleSearch = () => {
+    setIsSearchActive(!isSearchActive);
+    if (isSearchActive) {
+      setSearchQuery(""); // Clear search when closing
     }
   };
 
@@ -382,12 +474,19 @@ export default function SearchPage({ user }: SearchPageProps) {
       <Sidebar
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        conversations={user ? conversations : []}
+        conversations={user ? filteredConversations : []}
         activeConversation={activeConversation}
         onNewChat={handleNewChat}
         onSelectConversation={handleSelectConversation}
         onDeleteConversation={handleDeleteConversation}
+        onToggleFavorite={handleToggleFavorite}
         isLoggedIn={!!user}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        isSearchActive={isSearchActive}
+        onToggleSearch={handleToggleSearch}
+        showFavoritesOnly={showFavoritesOnly}
+        onToggleFavoritesFilter={() => setShowFavoritesOnly(!showFavoritesOnly)}
       />
 
       {/* Main Content */}
@@ -474,7 +573,7 @@ export default function SearchPage({ user }: SearchPageProps) {
                   message={message} 
                   onRelatedTopicClick={handleSendMessage}
                   onFeedback={handleFeedback}
-                  onReport={handleReport}
+                  onCancelFeedback={handleCancelFeedback}
                 />
               ))}
               <div ref={messagesEndRef} />

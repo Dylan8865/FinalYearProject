@@ -1,6 +1,7 @@
 // Google Gemini AI Service
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GEMINI_EMBEDDING_URL = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent";
 
 interface GeminiResponse {
   candidates?: {
@@ -138,5 +139,44 @@ Return ONLY a JSON array of strings, no other text. Example: ["topic 1", "topic 
   } catch (error) {
     console.error("Error generating related topics:", error);
     return [];
+  }
+}
+
+// Generate text embedding for semantic search
+export async function generateEmbedding(text: string): Promise<number[] | null> {
+  if (!GEMINI_API_KEY) {
+    console.warn("No Gemini API key - embeddings disabled");
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${GEMINI_EMBEDDING_URL}?key=${GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content: {
+          parts: [{ text }]
+        },
+        taskType: "RETRIEVAL_QUERY"
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      console.error("Gemini Embedding API error:", data.error.message);
+      return null;
+    }
+
+    if (data.embedding?.values) {
+      return data.embedding.values;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error generating embedding:", error);
+    return null;
   }
 }

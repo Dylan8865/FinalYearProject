@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateAnswer, generateRelatedTopicsAI } from "@/lib/gemini";
+import { generateAnswer, generateRelatedTopicsAI, generateEmbedding } from "@/lib/gemini";
 
 // Types for search results
 interface KnowledgeEntry {
   id: string;
-  content: {
+  content: string | {
     url?: string;
     title?: string;
     description?: string;
-  };
+    rows?: any[][];
+    [key: string]: any;
+  } | null;
   type: string;
-  valid: boolean;
+  validity: number;
   created_at: string;
   order_index: number;
 }
@@ -43,6 +45,7 @@ interface SearchResponse {
   suggestions?: string[];
   relatedTopics?: string[];
   error?: string;
+  historyId?: string;
 }
 
 // Calculate recency score (0-100) based on created_at
@@ -124,7 +127,7 @@ function generateSuggestions(query: string): string[] {
     "Try using different keywords",
     "Use broader search terms",
     "Check for spelling errors",
-    "Browse the Knowledge Repository",
+    "Browse the Explore section for related topics",
   ];
 }
 
@@ -217,12 +220,12 @@ async function saveSearchHistory(
   chatId?: string,
   userId?: string,
   promptOrder?: number
-) {
+): Promise<string | null> {
   console.log("Attempting to save search history:", { chatId, userId, hasAnswer: !!answer });
   
   if (!chatId || !userId) {
     console.log("Skipping search history save - missing chatId or userId:", { chatId, userId });
-    return;
+    return null;
   }
 
   try {
@@ -255,45 +258,162 @@ async function saveSearchHistory(
 
     // Save search history
     console.log("Inserting search history:", { chatId, promptOrder });
-    const { data: historyData, error: historyError } = await supabase.from("search-history").insert({
-      prompt_text: query,
-      result_text: answer,
-      prompt_order: promptOrder || 0,
-      chat_id: chatId,
-    });
+    const { data: historyData, error: historyError } = await supabase
+      .from("search-history")
+      .insert({
+        prompt_text: query,
+        result_text: answer,
+        prompt_order: promptOrder || 0,
+        chat_id: chatId,
+      })
+      .select("id")
+      .single();
     
     if (historyError) {
       console.error("Error saving search history:", historyError);
+      return null;
     } else {
       console.log("Search history saved successfully:", historyData);
+      return historyData?.id || null;
     }
   } catch (error) {
     console.error("Failed to save search history (caught exception):", error);
+    return null;
   }
 }
+
+// Normalize query for better cache matching
+function normalizeQuery(query: string): string {
+  return query
+    .toLowerCase()
+    .trim()
+    // Remove common question words
+    .replace(/^(what is|what's|what are|how to|how do|tell me about|explain|describe|define)\s+/i, '')
+    // Remove question marks and extra punctuation
+    .replace(/[?!.]+$/, '')
+    // Remove extra spaces
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Helper function to cache answers
+async function cacheAnswer(supabase: any, query: string, answer: string) {
+  try {
+    const normalizedQuery = normalizeQuery(query);
+    console.log(`[CACHE] Normalized "${query}" → "${normalizedQuery}"`);
+    
+    // Generate embedding for semantic search
+    const embedding = await generateEmbedding(query);
+    
+    const { data: existing, error: checkError } = await supabase
+      .from("analysis-cache")
+      .select("id, count, input_text")
+      .eq("input_hash", normalizedQuery)
+      .single();
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error("Cache check error:", checkError);
+    }
+
+    if (existing) {
+      const updateData: any = {
+        result_text: answer,
+        count: existing.count + 1,
+        input_text: query
+      };
+      
+      // Add embedding if available
+      if (embedding) {
+        updateData.embeddings = embedding;
+      }
+      
+      const { error: updateError } = await supabase
+        .from("analysis-cache")
+        .update(updateData)
+        .eq("id", existing.id);
+      
+      if (updateError) {
+        console.error("Cache update error:", updateError);
+      } else {
+        console.log(`[CACHE] Updated cache for: "${normalizedQuery}" (count: ${existing.count + 1})`);
+      }
+    } else {
+      const insertData: any = {
+        input_text: query,
+        input_hash: normalizedQuery,
+        result_text: answer,
+        count: 1,
+      };
+      
+      // Add embedding if available
+      if (embedding) {
+        insertData.embeddings = embedding;
+      }
+      
+      const { error: insertError } = await supabase
+        .from("analysis-cache")
+        .insert(insertData);
+      
+      if (insertError) {
+        console.error("Cache insert error:", insertError);
+      } else {
+        console.log(`[CACHE] Cached new query: "${normalizedQuery}" ${embedding ? '(with embedding)' : ''}`);
+      }
+    }
+  } catch (error) {
+    console.error("Failed to cache answer:", error);
+  }
+}
+
 
 async function handleSearch(
   query: string,
   chatId?: string,
   userId?: string,
-  promptOrder?: number
-): Promise<NextResponse<SearchResponse>> {
+  promptOrder: number = 1
+) {
   try {
     const supabase = await createClient();
-
+    
     // Step 1: Check analysis-cache for similar queries (cached answers)
-    const { data: cachedAnswers } = await supabase
-      .from("analysis-cache")
-      .select("id, input_text, result_text, count, created_at")
-      .ilike("input_text", `%${query}%`)
-      .order("count", { ascending: false })
-      .limit(1);
+    const normalizedQuery = normalizeQuery(query);
+    
+    // Try semantic search first if embeddings are available
+    const queryEmbedding = await generateEmbedding(query);
+    let cachedAnswers = null;
+    
+    if (queryEmbedding) {
+      // Use vector similarity search
+      const { data: semanticMatches } = await supabase.rpc('match_cache_queries', {
+        query_embedding: queryEmbedding,
+        match_threshold: 0.85, // 85% similarity
+        match_count: 1
+      });
+      
+      if (semanticMatches && semanticMatches.length > 0) {
+        cachedAnswers = [semanticMatches[0]];
+        console.log(`[CACHE] Semantic cache hit: "${semanticMatches[0].input_text}" (similarity: ${semanticMatches[0].similarity.toFixed(3)})`);
+      }
+    }
+    
+    // Fallback to normalized text matching if no semantic match
+    if (!cachedAnswers) {
+      const { data } = await supabase
+        .from("analysis-cache")
+        .select("id, input_text, result_text, count, created_at")
+        .eq("input_hash", normalizedQuery)
+        .limit(1);
+      cachedAnswers = data;
+      if (cachedAnswers && cachedAnswers.length > 0) {
+        console.log(`[CACHE] Text cache hit: "${normalizedQuery}"`);
+      }
+    }
 
-    // If we have a cached answer with high confidence, use it
-    if (cachedAnswers && cachedAnswers.length > 0 && cachedAnswers[0].count > 2) {
+    // If we have a cached answer, use it
+    if (cachedAnswers && cachedAnswers.length > 0) {
       const cached = cachedAnswers[0];
       
-      // Increment count (Fibonacci-based update logic can be added here)
+      // Increment count
       await supabase
         .from("analysis-cache")
         .update({ count: cached.count + 1 })
@@ -302,7 +422,7 @@ async function handleSearch(
       const relatedTopics = await generateRelatedTopicsAI(query);
       
       // Save search history for cached answer
-      await saveSearchHistory(supabase, query, cached.result_text, chatId, userId, promptOrder);
+      const historyId = await saveSearchHistory(supabase, query, cached.result_text, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
@@ -311,14 +431,15 @@ async function handleSearch(
         results: [],
         hasResults: true,
         relatedTopics: relatedTopics.length > 0 ? relatedTopics : undefined,
+        historyId: historyId || undefined,
       });
     }
 
     // Step 2: Search in item-data table for actual knowledge
     const { data: entries, error } = await supabase
       .from("item-data")
-      .select("id, content, created_at, type, valid, order_index")
-      .eq("valid", true)
+      .select("id, content, created_at, type, validity, order_index")
+      .gte("validity", 60)
       .order("order_index", { ascending: true })
       .limit(100);
 
@@ -330,8 +451,11 @@ async function handleSearch(
       const answer = aiAnswer || "I encountered an issue searching the knowledge base, but I can still help. " + 
         "Could you please rephrase your question or try again?";
       
+      // Cache the answer
+      await cacheAnswer(supabase, query, answer);
+      
       // Save search history even on DB error
-      await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
+      const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
@@ -341,6 +465,7 @@ async function handleSearch(
         hasResults: false,
         relatedTopics: aiTopics.length > 0 ? aiTopics : undefined,
         suggestions: generateSuggestions(query),
+        historyId: historyId || undefined,
       });
     }
 
@@ -350,8 +475,11 @@ async function handleSearch(
       const aiTopics = await generateRelatedTopicsAI(query);
       const answer = aiAnswer || "I couldn't find any knowledge matching your query in our repository. However, I can try to help based on general knowledge.";
       
+      // Cache the answer (especially important for queries with no DB data)
+      await cacheAnswer(supabase, query, answer);
+      
       // Save search history for no results
-      await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
+      const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
@@ -361,28 +489,62 @@ async function handleSearch(
         hasResults: false,
         relatedTopics: aiTopics.length > 0 ? aiTopics : undefined,
         suggestions: generateSuggestions(query),
+        historyId: historyId || undefined,
       });
     }
 
     // Process and rank results
     const searchResults: SearchResult[] = entries
       .map((entry: KnowledgeEntry) => {
-        const title = entry.content?.title || "";
-        const description = entry.content?.description || "";
-        const url = entry.content?.url || "";
-        const searchText = `${title} ${description} ${url}`.toLowerCase();
+        // Handle different content structures based on block type
+        let title = "";
+        let description = "";
+        let searchableText = "";
+        
+        if (typeof entry.content === "string") {
+          // Simple text content (headings, paragraphs, quotes, lists, code, etc.)
+          searchableText = entry.content;
+          description = entry.content;
+          title = entry.type || "Content";
+        } else if (entry.content && typeof entry.content === "object") {
+          // Object content (could be bookmark, table, or other structured data)
+          if (entry.content.title && entry.content.description) {
+            // Bookmark format: { title, description, url }
+            title = entry.content.title || "";
+            description = entry.content.description || "";
+            searchableText = `${title} ${description} ${entry.content.url || ""}`;
+          } else if (entry.content.rows && Array.isArray(entry.content.rows)) {
+            // Table format: { rows: [...] }
+            const tableText = entry.content.rows
+              .flat()
+              .filter((cell: any) => cell)
+              .join(" ");
+            searchableText = tableText;
+            description = tableText;
+            title = "Table";
+          } else {
+            // Other object formats - try to extract text
+            searchableText = JSON.stringify(entry.content);
+            description = searchableText;
+            title = entry.type || "Content";
+          }
+        } else {
+          // Empty or null content (dividers, empty blocks)
+          return null;
+        }
         
         // Calculate relevance score with keyword matching
+        const searchTextLower = searchableText.toLowerCase();
         const queryLower = query.toLowerCase();
         const queryWords = queryLower.split(/[\s:,.-]+/).filter(w => w.length > 2);
         
         // Check if query matches (full phrase or significant word overlap)
         let matchScore = 0;
-        if (searchText.includes(queryLower)) {
+        if (searchTextLower.includes(queryLower)) {
           matchScore = 100; // Exact phrase match
         } else {
           // Count matching words
-          const matchingWords = queryWords.filter(word => searchText.includes(word));
+          const matchingWords = queryWords.filter(word => searchTextLower.includes(word));
           matchScore = queryWords.length > 0 ? (matchingWords.length / queryWords.length) * 100 : 0;
         }
         
@@ -391,9 +553,9 @@ async function handleSearch(
           return null;
         }
         
-        const content = description || title;
+        const content = description;
         const relevanceScore = matchScore;
-        const validityScore = entry.valid ? 85 : 50;
+        const validityScore = entry.validity || 0; // Use numeric validity (0-100)
         const recencyScore = calculateRecencyScore(entry.created_at);
         const totalScore = calculateTotalScore(relevanceScore, validityScore, recencyScore);
 
@@ -408,8 +570,7 @@ async function handleSearch(
         };
       })
       .filter((result): result is SearchResult => result !== null)
-      // Filter by minimum validity (60%)
-      .filter((result: SearchResult) => result.validityScore >= 60)
+      // Results are already filtered by validity >= 60 in the database query
       // Sort by total score descending
       .sort((a: SearchResult, b: SearchResult) => b.totalScore - a.totalScore);
 
@@ -419,8 +580,11 @@ async function handleSearch(
       const aiTopics = await generateRelatedTopicsAI(query);
       const answer = aiAnswer || "I couldn't find any validated knowledge matching your query.";
       
+      // Cache the answer
+      await cacheAnswer(supabase, query, answer);
+      
       // Save search history for no validated results
-      await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
+      const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
       
       return NextResponse.json<SearchResponse>({
         success: true,
@@ -430,6 +594,7 @@ async function handleSearch(
         hasResults: false,
         relatedTopics: aiTopics.length > 0 ? aiTopics : undefined,
         suggestions: generateSuggestions(query),
+        historyId: historyId || undefined,
       });
     }
 
@@ -448,21 +613,11 @@ async function handleSearch(
     const aiTopics = await generateRelatedTopicsAI(query, context);
     const relatedTopics = aiTopics.length > 0 ? aiTopics : generateRelatedTopics(query, searchResults);
 
-    // Cache the answer in analysis-cache for future similar queries
-    try {
-      await supabase
-        .from("analysis-cache")
-        .insert({
-          input_text: query,
-          result_text: answer,
-          count: 1,
-        });
-    } catch {
-      // Ignore cache errors, don't fail the request
-    }
+    // Cache the answer for future queries
+    await cacheAnswer(supabase, query, answer);
 
     // Save search history for successful search
-    await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
+    const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
 
     return NextResponse.json<SearchResponse>({
       success: true,
@@ -471,6 +626,7 @@ async function handleSearch(
       results: searchResults,
       hasResults: true,
       relatedTopics,
+      historyId: historyId || undefined,
     });
   } catch (error) {
     console.error("Search error:", error);
@@ -480,8 +636,11 @@ async function handleSearch(
       const supabase = await createClient();
       const aiAnswer = await generateAnswer({ query });
       if (aiAnswer) {
+        // Cache the error fallback answer
+        await cacheAnswer(supabase, query, aiAnswer);
+        
         // Save search history for error fallback
-        await saveSearchHistory(supabase, query, aiAnswer, chatId, userId, promptOrder);
+        const historyId = await saveSearchHistory(supabase, query, aiAnswer, chatId, userId, promptOrder);
         
         return NextResponse.json<SearchResponse>({
           success: true,
@@ -490,6 +649,7 @@ async function handleSearch(
           results: [],
           hasResults: false,
           suggestions: generateSuggestions(query),
+          historyId: historyId || undefined,
         });
       }
     } catch {

@@ -11,7 +11,7 @@ interface ChatMessageProps {
   message: Message;
   onRelatedTopicClick?: (topic: string) => void;
   onFeedback?: (messageId: string, type: "positive" | "negative") => void;
-  onReport?: (messageId: string, reason: string, details?: string) => void;
+  onCancelFeedback?: (messageId: string) => void;
 }
 
 // Validity badge component
@@ -69,19 +69,16 @@ function FeedbackButtons({
   currentFeedback, 
   isDark,
   onFeedback,
-  onReport
+  onCancelFeedback
 }: { 
   messageId: string; 
   currentFeedback?: "positive" | "negative" | null;
   isDark: boolean;
   onFeedback?: (messageId: string, type: "positive" | "negative") => void;
-  onReport?: (messageId: string, reason: string, details?: string) => void;
+  onCancelFeedback?: (messageId: string) => void;
 }) {
-  const [showReportForm, setShowReportForm] = useState(false);
-  const [reportReason, setReportReason] = useState("");
-  const [reportDetails, setReportDetails] = useState("");
-  const [feedbackGiven, setFeedbackGiven] = useState<"positive" | "negative" | null>(currentFeedback || null);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [thankYouMessage, setThankYouMessage] = useState("");
 
   const buttonBase = `p-1.5 rounded-lg transition-colors`;
   const inactiveStyle = isDark 
@@ -89,18 +86,26 @@ function FeedbackButtons({
     : "text-gray-400 hover:text-gray-600 hover:bg-gray-100";
 
   const handleFeedback = (type: "positive" | "negative") => {
-    setFeedbackGiven(type);
-    setShowThankYou(true);
-    onFeedback?.(messageId, type);
-    setTimeout(() => setShowThankYou(false), 2000);
-  };
-
-  const handleReport = () => {
-    if (reportReason) {
-      onReport?.(messageId, reportReason, reportDetails);
-      setShowReportForm(false);
-      setReportReason("");
-      setReportDetails("");
+    console.log('[ChatMessage] handleFeedback called:', { 
+      messageId, 
+      type, 
+      currentFeedback 
+    });
+    
+    // If clicking the same button, cancel the feedback
+    if (currentFeedback === type) {
+      console.log('[ChatMessage] Same button clicked, canceling');
+      setThankYouMessage("Feedback removed");
+      setShowThankYou(true);
+      onCancelFeedback?.(messageId);
+      setTimeout(() => setShowThankYou(false), 2000);
+    } else {
+      // Otherwise, set or update feedback
+      console.log('[ChatMessage] Different button clicked, updating');
+      setThankYouMessage("Thank you for your feedback!");
+      setShowThankYou(true);
+      onFeedback?.(messageId, type);
+      setTimeout(() => setShowThankYou(false), 2000);
     }
   };
 
@@ -110,19 +115,19 @@ function FeedbackButtons({
       <div className="flex items-center gap-1">
         <button
           onClick={() => handleFeedback("positive")}
-          className={`${buttonBase} ${feedbackGiven === "positive" ? "text-green-500 bg-green-500/10" : inactiveStyle}`}
+          className={`${buttonBase} ${currentFeedback === "positive" ? "text-green-500 bg-green-500/10" : inactiveStyle}`}
           title="Helpful"
         >
-          <svg className="h-4 w-4" fill={feedbackGiven === "positive" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-4 w-4" fill={currentFeedback === "positive" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
           </svg>
         </button>
         <button
           onClick={() => handleFeedback("negative")}
-          className={`${buttonBase} ${feedbackGiven === "negative" ? "text-red-500 bg-red-500/10" : inactiveStyle}`}
+          className={`${buttonBase} ${currentFeedback === "negative" ? "text-red-500 bg-red-500/10" : inactiveStyle}`}
           title="Not helpful"
         >
-          <svg className="h-4 w-4" fill={feedbackGiven === "negative" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-4 w-4" fill={currentFeedback === "negative" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
           </svg>
         </button>
@@ -131,73 +136,14 @@ function FeedbackButtons({
       {/* Thank you message */}
       {showThankYou && (
         <span className={`text-xs ${isDark ? "text-green-400" : "text-green-600"}`}>
-          Thank you for your feedback!
+          {thankYouMessage}
         </span>
-      )}
-
-      {/* Report button */}
-      <button
-        onClick={() => setShowReportForm(!showReportForm)}
-        className={`${buttonBase} ${inactiveStyle} ml-auto`}
-        title="Report this response"
-      >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      </button>
-
-      {/* Report form */}
-      {showReportForm && (
-        <div className={`absolute right-0 top-full z-10 mt-2 w-72 rounded-lg border ${isDark ? "border-gray-600 bg-gray-800" : "border-gray-200 bg-white"} p-4 shadow-lg`}>
-          <h4 className={`mb-3 text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
-            Report this content
-          </h4>
-          <div className="space-y-2">
-            {["inaccurate", "inappropriate", "spam", "other"].map((reason) => (
-              <label key={reason} className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="reportReason"
-                  value={reason}
-                  checked={reportReason === reason}
-                  onChange={(e) => setReportReason(e.target.value)}
-                  className="text-teal-500"
-                />
-                <span className={`text-sm capitalize ${isDark ? "text-gray-300" : "text-gray-700"}`}>
-                  {reason}
-                </span>
-              </label>
-            ))}
-          </div>
-          <textarea
-            placeholder="Additional details (optional)"
-            value={reportDetails}
-            onChange={(e) => setReportDetails(e.target.value)}
-            className={`mt-3 w-full rounded-lg border ${isDark ? "border-gray-600 bg-gray-700 text-white" : "border-gray-300 bg-white text-gray-900"} p-2 text-sm`}
-            rows={2}
-          />
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={handleReport}
-              disabled={!reportReason}
-              className="flex-1 rounded-lg bg-red-500 px-3 py-1.5 text-sm text-white hover:bg-red-600 disabled:opacity-50"
-            >
-              Submit Report
-            </button>
-            <button
-              onClick={() => setShowReportForm(false)}
-              className={`rounded-lg px-3 py-1.5 text-sm ${isDark ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}`}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );
 }
 
-export default function ChatMessage({ message, onRelatedTopicClick, onFeedback, onReport }: ChatMessageProps) {
+export default function ChatMessage({ message, onRelatedTopicClick, onFeedback, onCancelFeedback }: ChatMessageProps) {
   const { theme } = useTheme();
   const isUser = message.role === "user";
 
@@ -444,11 +390,12 @@ export default function ChatMessage({ message, onRelatedTopicClick, onFeedback, 
         {!isUser && !message.isLoading && (
           <div className="relative">
             <FeedbackButtons
+              key={`feedback-${message.id}-${message.feedback || 'none'}`}
               messageId={message.id}
               currentFeedback={message.feedback}
               isDark={isDark}
               onFeedback={onFeedback}
-              onReport={onReport}
+              onCancelFeedback={onCancelFeedback}
             />
           </div>
         )}
