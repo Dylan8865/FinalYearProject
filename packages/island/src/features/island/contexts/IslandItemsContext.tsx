@@ -9,7 +9,11 @@ interface IslandItemsContextType {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  purchaseItem: (itemId: string, profileId: string, manaCost: number) => Promise<{ success: boolean; newMana?: number }>;
+  purchaseItem: (
+    itemId: string,
+    profileId: string,
+    manaCost: number
+  ) => Promise<{ success: boolean; newMana?: number }>;
   placeItemOnIsland: (
     islandItemId: string,
     islandId: string,
@@ -23,8 +27,22 @@ interface IslandItemsContextType {
     posY: number
   ) => Promise<boolean>;
   deleteItem: (islandItemId: string) => Promise<boolean>;
-  removeItemFromIsland: (islandItemId: string, profileId: string) => Promise<boolean>;
-  moveToInventory: (islandItemId: string, slotX: number, slotY: number) => Promise<boolean>;
+  removeItemFromIsland: (
+    islandItemId: string,
+    profileId: string
+  ) => Promise<boolean>;
+  moveToInventory: (
+    islandItemId: string,
+    slotX: number,
+    slotY: number
+  ) => Promise<boolean>;
+  updateIslandName: (id: string, title: string) => Promise<boolean>;
+  updateIslandCoverImage: (
+    id: string,
+    coverImage: string | null
+  ) => Promise<boolean>;
+  uploadIslandCoverImage: (id: string, file: File) => Promise<boolean>;
+  removeIslandCoverImage: (id: string) => Promise<boolean>;
 }
 
 const IslandItemsContext = createContext<IslandItemsContextType | undefined>(

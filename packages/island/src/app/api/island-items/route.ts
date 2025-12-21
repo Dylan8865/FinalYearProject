@@ -9,11 +9,12 @@ export async function GET(request: Request) {
     const islandId = searchParams.get("island_id");
     const id = searchParams.get("id");
 
-    let query = supabase.from("island-item").select("*, item(*), island(*)");
+    const baseQuery = supabase
+      .from("island-item")
+      .select("*, item(*), island(*)");
 
     if (id) {
-      query = query.eq("id", id).single();
-      const { data: islandItem, error } = await query;
+      const { data: islandItem, error } = await baseQuery.eq("id", id).single();
 
       if (error) {
         console.error("Supabase error:", error);
@@ -23,37 +24,40 @@ export async function GET(request: Request) {
         );
       }
 
+      const item = islandItem as any;
       // Enhance item with resolved image URLs
-      if (islandItem?.item) {
+      if (item?.item) {
         let imageCoverUrl = null;
         let modelUrl = null;
 
-        if (islandItem.item.image_cover_path) {
+        if (item.item.image_cover_path) {
           const { data } = supabase.storage
             .from("items")
-            .getPublicUrl(islandItem.item.image_cover_path);
+            .getPublicUrl(item.item.image_cover_path);
           imageCoverUrl = data?.publicUrl || null;
         }
 
-        if (islandItem.item.model_path) {
+        if (item.item.model_path) {
           const { data } = supabase.storage
             .from("items")
-            .getPublicUrl(islandItem.item.model_path);
+            .getPublicUrl(item.item.model_path);
           modelUrl = data?.publicUrl || null;
         }
 
         return NextResponse.json({
-          ...islandItem,
+          ...item,
           item: {
-            ...islandItem.item,
+            ...item.item,
             imageCoverUrl,
             modelUrl,
           },
         });
       }
 
-      return NextResponse.json(islandItem);
+      return NextResponse.json(item);
     }
+
+    let query = baseQuery;
 
     if (profileId) {
       query = query.eq("profile_id", profileId);
@@ -226,7 +230,7 @@ export async function PUT(request: Request) {
     // Build update object with optional pos_x/pos_y clearing
     const updateData: Record<string, any> = {
       title: body.title,
-      cover_image: body.cover_image,
+      image_cover_path: body.image_cover_path ?? body.cover_image,
       level: body.level,
       grid_x: body.grid_x,
       grid_y: body.grid_y,

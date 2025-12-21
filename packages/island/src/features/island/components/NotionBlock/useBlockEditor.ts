@@ -760,6 +760,106 @@ export const useBlockEditor = ({
     );
   }, [saveBlockToServer]);
 
+  const uploadBlockImage = useCallback(
+    async (id: string, file: File) => {
+      const previewUrl = URL.createObjectURL(file);
+
+      // Optimistic update
+      setState((prev) => ({
+        ...prev,
+        blocks: prev.blocks.map((b) =>
+          b.id === id ? { ...b, content: previewUrl } : b
+        ),
+        saveCount: prev.saveCount + 1,
+      }));
+
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch(`/api/item-data/${id}/image`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to upload image");
+        }
+
+        const { publicUrl } = await response.json();
+
+        // Update with final URL
+        setState((prev) => ({
+          ...prev,
+          blocks: prev.blocks.map((b) =>
+            b.id === id ? { ...b, content: publicUrl } : b
+          ),
+        }));
+
+        setTimeout(() => URL.revokeObjectURL(previewUrl), 100);
+        return true;
+      } catch (error) {
+        console.error("Upload error:", error);
+        URL.revokeObjectURL(previewUrl);
+        // Revert by fetching or just clearing if new
+        showToast("Failed to upload image", "error");
+        onError?.(error as Error);
+        // Revert optimistic update
+        setState((prev) => ({
+          ...prev,
+          blocks: prev.blocks.map((b) =>
+            b.id === id ? { ...b, content: "" } : b
+          ),
+        }));
+        return false;
+      } finally {
+        setState((prev) => ({
+          ...prev,
+          saveCount: Math.max(0, prev.saveCount - 1),
+        }));
+      }
+    },
+    [onError, showToast]
+  );
+
+  const removeBlockImage = useCallback(
+    async (id: string) => {
+      // Optimistic update
+      setState((prev) => ({
+        ...prev,
+        blocks: prev.blocks.map((b) =>
+          b.id === id ? { ...b, content: "" } : b
+        ),
+        saveCount: prev.saveCount + 1,
+      }));
+
+      try {
+        const response = await fetch(`/api/item-data/${id}/image`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to remove image");
+        }
+
+        return true;
+      } catch (error) {
+        console.error("Remove error:", error);
+        showToast("Failed to remove image", "error");
+        onError?.(error as Error);
+        // Revert by refetching items would be safer but complex, let's just let the next refetch handle it or keep it empty
+        return false;
+      } finally {
+        setState((prev) => ({
+          ...prev,
+          saveCount: Math.max(0, prev.saveCount - 1),
+        }));
+      }
+    },
+    [onError, showToast]
+  );
+
   return {
     blocks: sortedBlocks,
     focusedBlockId: state.focusedBlockId,
@@ -780,6 +880,8 @@ export const useBlockEditor = ({
     moveBlockDown,
     reorderBlocks,
     mergeWithPreviousBlock,
+    uploadBlockImage,
+    removeBlockImage,
 
     setFocusedBlockId,
     focusNextBlock,

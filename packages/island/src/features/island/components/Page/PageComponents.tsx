@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { ItemDataType, BlockProperties, BlockType } from "@/types/types";
 import Image from "next/image";
+import { ImageIcon, X, Upload } from "lucide-react";
 
 interface BlockProps {
   block: ItemDataType;
   onUpdate?: (id: string, content: any, properties?: BlockProperties) => void;
   onDelete?: (id: string) => void;
   onAddBlock?: (afterId: string, type: BlockType) => void;
+  onUploadImage?: (id: string, file: File) => Promise<boolean>;
+  onRemoveImage?: (id: string) => Promise<boolean>;
   isEditing?: boolean;
   children?: React.ReactNode;
 }
@@ -451,10 +454,26 @@ export const CodeBlock = ({ block, onUpdate }: BlockProps) => {
 };
 
 // Image Block
-export const ImageBlock = ({ block, onUpdate }: BlockProps) => {
-  const [url, setUrl] = useState(block.content || block.properties?.url || "");
+export const ImageBlock = ({
+  block,
+  onUpdate,
+  onUploadImage,
+  onRemoveImage,
+}: BlockProps) => {
+  const [url, setUrl] = useState(
+    typeof block.content === "string" ? block.content : ""
+  );
   const [caption, setCaption] = useState(block.properties?.caption || "");
   const [isEditingUrl, setIsEditingUrl] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setUrl(typeof block.content === "string" ? block.content : "");
+  }, [block.content]);
+
+  useEffect(() => {
+    setCaption(block.properties?.caption || "");
+  }, [block.properties?.caption]);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
@@ -463,66 +482,136 @@ export const ImageBlock = ({ block, onUpdate }: BlockProps) => {
 
   const handleUrlBlur = () => {
     setIsEditingUrl(false);
-    console.log("ImageBlock url change:", {
-      id: block.id,
-      url,
-      caption,
-    });
     onUpdate?.(block.id, url, {
       ...block.properties,
-      url,
       caption,
     });
   };
 
   const handleCaptionChange = (newCaption: string) => {
     setCaption(newCaption);
-    console.log("ImageBlock caption change:", {
-      id: block.id,
-      caption: newCaption,
-    });
     onUpdate?.(block.id, url, {
       ...block.properties,
-      url,
       caption: newCaption,
     });
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onUploadImage) return;
+
+    try {
+      await onUploadImage(block.id, file);
+    } catch (err) {
+      console.error("Upload error:", err);
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!onRemoveImage) return;
+    try {
+      await onRemoveImage(block.id);
+    } catch (err) {
+      console.error("Remove error:", err);
+    }
+  };
+
   if (!url || isEditingUrl) {
     return (
-      <div className="my-2 rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/30 p-4">
+      <div className="group relative my-2 rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/20 p-8 transition-colors hover:border-gray-500 hover:bg-gray-800/30">
         <input
-          type="text"
-          value={url}
-          onChange={handleUrlChange}
-          onBlur={handleUrlBlur}
-          onFocus={() => setIsEditingUrl(true)}
-          placeholder="Enter image URL..."
-          className="w-full bg-transparent text-sm text-gray-200 outline-none"
-          autoFocus={isEditingUrl}
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          accept="image/*"
         />
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="flex w-full max-w-md items-center gap-2 rounded border border-gray-700 bg-gray-900/50 p-2">
+            <input
+              type="text"
+              value={url}
+              onChange={handleUrlChange}
+              onBlur={handleUrlBlur}
+              onFocus={() => setIsEditingUrl(true)}
+              onKeyDown={(e) => e.key === "Enter" && handleUrlBlur()}
+              placeholder="Paste an image link..."
+              className="flex-1 bg-transparent text-sm text-gray-200 outline-none"
+              autoFocus={isEditingUrl}
+            />
+          </div>
+          <div className="flex items-center gap-2 text-gray-500">
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Or
+            </span>
+          </div>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-gray-600"
+          >
+            <Upload className="h-4 w-4" />
+            Upload File
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="group relative my-2 border">
-      <div
-        className="relative h-64 w-full overflow-hidden rounded-lg"
-        onClick={() => setIsEditingUrl(true)}
-      >
-        <Image
-          src={url}
-          alt={caption || "Image"}
-          fill
-          className="cursor-pointer object-contain"
-        />
+    <div className="group relative my-4 flex flex-col items-center">
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+        accept="image/*"
+      />
+      <div className="group/img relative flex min-h-[100px] w-full items-center justify-center overflow-hidden rounded-lg bg-neutral-900/50">
+        <div className="relative flex h-full max-h-[60vh] w-full items-center justify-center">
+          <img
+            src={url}
+            alt={caption || "Image"}
+            className="h-auto max-h-[60vh] w-auto max-w-full object-contain"
+          />
+        </div>
+
+        {/* Hover Controls */}
+        <div className="absolute right-3 top-3 flex items-center gap-2 opacity-0 transition-opacity group-hover/img:opacity-100">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 rounded bg-black/60 px-2 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur transition-colors hover:bg-black/80"
+            title="Change image"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Change
+          </button>
+          <button
+            onClick={() => setIsEditingUrl(true)}
+            className="flex items-center gap-1.5 rounded bg-black/60 px-2 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur transition-colors hover:bg-black/80"
+            title="Edit URL"
+          >
+            <ImageIcon className="h-3.5 w-3.5" />
+            URL
+          </button>
+          <button
+            onClick={handleRemove}
+            className="flex items-center gap-1.5 rounded bg-black/60 px-2 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur transition-colors hover:bg-black/80"
+            title="Remove image"
+          >
+            <X className="h-3.5 w-3.5" />
+            Remove
+          </button>
+        </div>
       </div>
       <EditableContent
         content={caption}
         onChange={handleCaptionChange}
         placeholder="Add a caption..."
-        className="mt-2 text-center text-sm text-gray-400"
+        className="mt-3 w-full max-w-2xl text-center text-sm text-gray-500 hover:text-gray-400 focus:text-gray-300"
       />
     </div>
   );

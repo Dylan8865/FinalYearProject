@@ -39,7 +39,7 @@ export interface IslandItemType {
   id: string;
   created_at: string;
   title: string | null;
-  cover_image: string | null;
+  image_cover_path: string | null;
   level: number | null;
   grid_x: number | null;
   grid_y: number | null;

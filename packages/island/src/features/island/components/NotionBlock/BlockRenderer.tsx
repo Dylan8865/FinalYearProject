@@ -26,6 +26,8 @@ interface BlockRendererProps {
   onUpdate: (id: string, content: any, properties?: BlockProperties) => void;
   onDelete: (id: string) => void;
   onAddBlock: (afterId: string, type: BlockType) => void;
+  onUploadImage?: (id: string, file: File) => Promise<boolean>;
+  onRemoveImage?: (id: string) => Promise<boolean>;
   children?: React.ReactNode; // For nested blocks (toggle)
 }
 
@@ -36,7 +38,15 @@ interface BlockRendererProps {
  * Uses a switch statement for clear type mapping.
  */
 const BlockRenderer = React.memo(
-  ({ block, onUpdate, onDelete, onAddBlock, children }: BlockRendererProps) => {
+  ({
+    block,
+    onUpdate,
+    onDelete,
+    onAddBlock,
+    onUploadImage,
+    onRemoveImage,
+    children,
+  }: BlockRendererProps) => {
     const blockType = block.type as BlockType;
 
     const commonProps = {
@@ -44,6 +54,8 @@ const BlockRenderer = React.memo(
       onUpdate,
       onDelete,
       onAddBlock,
+      onUploadImage,
+      onRemoveImage,
       isEditing: false,
     };
 
