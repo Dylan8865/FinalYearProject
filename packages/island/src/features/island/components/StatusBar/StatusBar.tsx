@@ -9,13 +9,19 @@ import PlusIcon from "@/icons/PlusIcon";
 import { ProfileType } from "@/types/types";
 import { useToast } from "../../contexts/ToastContext";
 import SlotTooltip from "../Dialog/SlotTooltip";
+import CollectIcon from "@/icons/CollectIcon";
 
 interface StatusBarProps {
   setIsDialogOpen: (value: string) => void;
   profile: ProfileType & { no_of_islands: number };
+  onCollectAllMana?: () => void;
 }
 
-const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
+const StatusBar = ({
+  setIsDialogOpen,
+  profile,
+  onCollectAllMana,
+}: StatusBarProps) => {
   const { showToast } = useToast();
   const [showMenuTooltip, setShowMenuTooltip] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -53,6 +59,11 @@ const StatusBar = ({ setIsDialogOpen, profile }: StatusBarProps) => {
             data={profile.mana.toLocaleString()}
             bgColor="bg-[#cfa272]"
             orientation="right"
+            btnIcon={<CollectIcon />}
+            onClick={onCollectAllMana}
+            onMouseEnter={() => setShowMenuTooltip("Q / q")}
+            onMouseLeave={() => setShowMenuTooltip(null)}
+            onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
           />
           <StatusButton
             icon={<IslandIcon />}
