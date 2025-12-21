@@ -84,8 +84,8 @@ const ValidationDetailsPopup = ({
     <div
       className={
         isExpanded
-          ? "fixed bottom-1/2 right-1/2 z-50 h-fit w-5/6 translate-x-[50%] translate-y-[50%] rounded-lg border border-gray-700 bg-[#242424] transition-all duration-500 md:bottom-6 md:right-6 md:w-[30dvw] md:translate-x-0 md:translate-y-0"
-          : `fixed top-1/2 z-50 h-fit w-80 rounded-lg border border-gray-700 bg-[#242424] shadow-2xl transition-all duration-500 md:top-0 md:h-full md:rounded-none ${
+          ? "fixed bottom-1/2 right-1/2 z-50 h-fit max-h-[60dvh] w-5/6 translate-x-[50%] translate-y-[50%] overflow-y-scroll rounded-lg border border-gray-700 bg-[#242424] transition-all duration-500 md:bottom-6 md:right-6 md:w-[30dvw] md:translate-x-0 md:translate-y-0"
+          : `fixed top-1/2 z-50 h-fit max-h-[60dvh] w-80 overflow-y-scroll rounded-lg border border-gray-700 bg-[#242424] shadow-2xl transition-all duration-500 md:top-0 md:h-full md:max-h-none md:rounded-none ${
               isOpen
                 ? "right-1/2 translate-x-[50%] translate-y-[-50%] md:right-[34dvw] md:translate-x-0 md:translate-y-0"
                 : "-right-80 rounded-lg"
