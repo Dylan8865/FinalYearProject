@@ -4,6 +4,7 @@ import RightArrowIcon from "@/icons/RightArrowIcon";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { TiArrowMinimise } from "react-icons/ti";
 import SlotTooltip from "../Dialog/SlotTooltip";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface PageControlsProps {
   onArrowClick?: () => void;
@@ -24,27 +25,30 @@ const PageControls = ({
   status = "unverified",
   onStatusClick,
 }: PageControlsProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
+
   // Status color mapping
   const statusConfig = {
     unverified: {
       color: "bg-gray-600",
       text: "Unverified",
-      textColor: "text-gray-300",
+      textColor: isDark ? "text-gray-300" : "text-gray-600",
     },
     pending: {
       color: "bg-yellow-500",
       text: "Pending",
-      textColor: "text-yellow-100",
+      textColor: isDark ? "text-yellow-100" : "text-yellow-700",
     },
     declined: {
       color: "bg-red-500",
       text: "Declined",
-      textColor: "text-red-100",
+      textColor: isDark ? "text-red-100" : "text-red-700",
     },
     verified: {
       color: "bg-green-500",
       text: "Verified",
-      textColor: "text-green-100",
+      textColor: isDark ? "text-green-100" : "text-green-700",
     },
   };
 
@@ -55,10 +59,14 @@ const PageControls = ({
 
   return (
     <>
-      <div className="sticky top-0 z-50 flex w-full items-center justify-between bg-[#191919]">
-        <div className="flex items-center justify-start gap-3 p-3 text-base md:text-xs">
+      <div
+        className={`sticky top-0 z-50 flex w-full items-center justify-between ${isDark ? "bg-[#191919]" : "bg-[#f5f5f5]"}`}
+      >
+        <div
+          className={`flex items-center justify-start gap-3 p-3 text-base ${isDark ? "text-white" : "text-black"} md:text-xs`}
+        >
           <button
-            className="flex items-center justify-center text-white"
+            className="flex items-center justify-center"
             onClick={() => {
               setIsExpanded(false);
               onClick?.();
@@ -70,7 +78,7 @@ const PageControls = ({
             <RightArrowIcon />
           </button>
           <button
-            className="flex items-center justify-center text-white"
+            className="flex items-center justify-center"
             onClick={() => setIsExpanded(!isExpanded)}
             onMouseEnter={() =>
               setShowMenuTooltip(isExpanded ? "Esc" : "Ctrl + Enter")
@@ -85,7 +93,7 @@ const PageControls = ({
             )}
           </button>
           <button
-            className="flex h-[16px] items-center gap-1.5 rounded bg-gray-800 px-2 text-[10px] leading-none hover:bg-gray-700"
+            className={`flex h-[16px] items-center gap-1.5 rounded ${isDark ? "bg-gray-800 hover:bg-gray-700" : "bg-gray-200 hover:bg-gray-300"} px-2 text-[10px] leading-none`}
             onClick={onStatusClick}
             title="View validation details"
           >
@@ -93,7 +101,9 @@ const PageControls = ({
             <span className={config.textColor}>{config.text}</span>
           </button>
         </div>
-        <div className="flex items-center justify-center overflow-hidden pr-2 text-white/50">
+        <div
+          className={`flex items-center justify-center overflow-hidden pr-2 ${isDark ? "text-white/50" : "text-black/50"}`}
+        >
           {isSaving && (
             <div className="flex items-center justify-center gap-2">
               <LoadingIcon className="!h-3 !w-3" />

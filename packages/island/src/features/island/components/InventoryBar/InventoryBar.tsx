@@ -35,6 +35,8 @@ interface InventoryBarProps {
  * @param onItemClick - Callback when user clicks an item
  * @param onSlotClick - Callback when user clicks an empty slot
  */
+import { useTheme } from "../../contexts/ThemeContext";
+
 const InventoryBar = ({
   selectedPlacedItem,
   setSelectedPlacedItem,
@@ -42,6 +44,9 @@ const InventoryBar = ({
   onItemClick,
   onSlotClick,
 }: InventoryBarProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
+
   // Fetch all island items from context
   const { islandItems, updateItemPosition } = useIslandItemsContext();
 
@@ -119,12 +124,14 @@ const InventoryBar = ({
   return (
     <>
       <div className="pointer-events-none z-0 flex w-screen items-center justify-center">
-        <div className="pointer-events-auto z-20 flex h-full w-full items-center justify-center bg-black px-4 pb-4 md:h-10 md:w-fit md:pb-0">
+        <div
+          className={`pointer-events-auto z-20 flex h-full w-full items-center justify-center ${isDark ? "bg-black" : "border-t-4 border-black bg-white"} px-4 pb-4 md:h-10 md:w-fit md:pb-0`}
+        >
           <div className="mt-[-24px] grid w-96 grid-cols-6 items-center justify-center gap-2 md:flex md:w-full">
             {hotbarItems.map((islandItem, index) => (
               <InventoryButton
                 key={`slot-${index}-${islandItem?.id || "empty"}`}
-                className={`${islandItem && selectedPlacedItem === islandItem.id ? "bg-[#fbbf24]" : "bg-[#d9d9d9] hover:bg-[#808080]"} relative text-black transition-colors ${index === 6 ? "md:ml-0" : ""}`}
+                className={`${islandItem && selectedPlacedItem === islandItem.id ? "bg-[#fbbf24]" : `${isDark ? "bg-[#d9d9d9] hover:bg-[#808080]" : "bg-[#f5f5f5] hover:bg-[#e0e0e0]"}`} relative text-black transition-colors ${index === 6 ? "md:ml-0" : ""}`}
                 onClick={() => {
                   // If we have a selection that is NOT the current item, try to move/swap first
                   // Use explicit islandItem.id for comparison (unique instance ID)
@@ -187,7 +194,7 @@ const InventoryBar = ({
             ))}
             <div className="ml-0 flex w-fit gap-2 md:ml-4">
               <InventoryButton
-                className="bg-[#dcd1c1] hover:bg-[#aaa194]"
+                className={`${isDark ? "bg-[#dcd1c1] hover:bg-[#aaa194]" : "bg-[#f5ead9] hover:bg-[#e8dbcc]"} text-black`}
                 onClick={() => setIsDialogOpen("inventory")}
                 onMouseEnter={() => setShowMenuTooltip("I / i")}
                 onMouseLeave={() => setShowMenuTooltip(null)}
@@ -196,7 +203,7 @@ const InventoryBar = ({
                 <MenuIcon />
               </InventoryButton>
               <InventoryButton
-                className="bg-[#dcd1c1] text-2xl hover:bg-[#aaa194]"
+                className={`${isDark ? "bg-[#dcd1c1] hover:bg-[#aaa194]" : "bg-[#f5ead9] hover:bg-[#e8dbcc]"} text-2xl text-black`}
                 onClick={() => setIsDialogOpen("store")}
                 onMouseEnter={() => setShowMenuTooltip("S / s")}
                 onMouseLeave={() => setShowMenuTooltip(null)}
@@ -205,7 +212,7 @@ const InventoryBar = ({
                 <StoreIcon />
               </InventoryButton>
               <InventoryButton
-                className="hidden bg-[#dcd1c1] hover:bg-[#aaa194] md:flex"
+                className={`hidden ${isDark ? "bg-[#dcd1c1] hover:bg-[#aaa194]" : "bg-[#f5ead9] hover:bg-[#e8dbcc]"} text-black md:flex`}
                 onClick={() => setIsDialogOpen("tutorial")}
                 onMouseEnter={() => setShowMenuTooltip("H / h")}
                 onMouseLeave={() => setShowMenuTooltip(null)}

@@ -8,15 +8,15 @@ import LoginIcon from "@/icons/LoginIcon";
 import WarningIcon from "@/icons/WarningIcon";
 import { signOut } from "@/features/auth/actions/logout";
 import DeleteAccountContent from "./DeleteAccountContent";
-import { MoonIcon, SunIcon } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
+import MoonIcon from "@/icons/MoonIcon";
+import SunIcon from "@/icons/SunIcon";
 
 interface ProfileContentProps {
   userName: string;
   userEmail: string;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<string>>;
   setIsSigningOut: React.Dispatch<React.SetStateAction<boolean>>;
-  themeColour: string;
-  setThemeColour: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const ProfileContent = ({
@@ -24,14 +24,13 @@ const ProfileContent = ({
   userEmail,
   setIsDialogOpen,
   setIsSigningOut,
-  themeColour,
-  setThemeColour,
 }: ProfileContentProps) => {
+  const { themeColour, toggleTheme } = useTheme();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   return (
-    <>
-      <div className="space-y-4">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-4 overflow-y-auto overflow-x-hidden p-2">
+      <div className="flex flex-col gap-2">
         <EditButton
           fieldName="Username:"
           fieldValue={userName}
@@ -43,9 +42,7 @@ const ProfileContent = ({
           icon={themeColour === "dark" ? <SunIcon /> : <MoonIcon />}
           title={themeColour === "dark" ? "Light Mode" : "Dark Mode"}
           color="gray"
-          onClick={() => {
-            setThemeColour(themeColour === "dark" ? "light" : "dark");
-          }}
+          onClick={toggleTheme}
         />
         <SettingButton
           icon={<LockIcon />}
@@ -73,7 +70,7 @@ const ProfileContent = ({
       {showDeleteDialog && (
         <DeleteAccountContent onClose={() => setShowDeleteDialog(false)} />
       )}
-    </>
+    </div>
   );
 };
 

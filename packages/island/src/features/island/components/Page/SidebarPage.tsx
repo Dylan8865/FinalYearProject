@@ -9,6 +9,7 @@ import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
 import { useItemData } from "../../hooks/useItemData";
 import { BlockEditorContainer } from "../NotionBlock";
 import LoadingScreen from "../Shared/LoadingScreen";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface SidebarPageProps {
   isOpen?: boolean;
@@ -23,6 +24,9 @@ const SidebarPage = ({
   itemName: _itemName,
   onClick,
 }: SidebarPageProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
+
   const { islandItems } = useIslandItemsContext();
 
   const islandItem = useMemo(() => {
@@ -58,16 +62,11 @@ const SidebarPage = ({
     try {
       const response = await fetch(`/api/island-items?id=${islandItem.id}`);
       const data = await response.json();
-      console.log("Fetched island item data:", data);
       const item = Array.isArray(data) ? data[0] : data;
-      console.log("Status:", item.status);
-      console.log("Validation Status:", item.validation_status);
 
       // Store validation_status separately
       setValidationStatus(item.validation_status || null);
 
-      // If validation_status is 'pending', show 'pending' regardless of status field
-      // Otherwise, show the actual status value
       if (item.validation_status === "pending") {
         setCurrentStatus("pending");
       } else {
@@ -95,15 +94,12 @@ const SidebarPage = ({
   useEffect(() => {
     if (!isOpen || !islandItem?.id) return;
 
-    // Initial fetch
     fetchCurrentStatus();
 
-    // Poll for status updates every 3 seconds
     const intervalId = setInterval(() => {
       fetchCurrentStatus();
     }, 3000);
 
-    // Cleanup interval on unmount or when sidebar closes
     return () => clearInterval(intervalId);
   }, [isOpen, islandItem?.id, fetchCurrentStatus]);
 
@@ -111,7 +107,6 @@ const SidebarPage = ({
   const handlePublish = useCallback(async () => {
     if (!islandItem?.id) return;
 
-    // Check if currently saving
     if (isSaving) {
       showToast("Please wait for current changes to save", "info");
       return;
@@ -133,14 +128,7 @@ const SidebarPage = ({
       }
 
       showToast("Published! Your content is queued for validation.", "success");
-      // Keep popup open to show transition to pending state
-      // setIsPopupOpen(false); // Don't close popup - let it show the validation progress
-
-      // Update validation_status to pending immediately for better UX
-      // Note: status remains 'unverified' until AI responds
       setValidationStatus("pending");
-
-      // Trigger an immediate status fetch to sync with server
       fetchCurrentStatus();
     } catch (error) {
       console.error("Publish error:", error);
@@ -174,14 +162,8 @@ const SidebarPage = ({
       }
 
       showToast("Appeal submitted! Your content will be reviewed.", "success");
-      // Keep popup open to show transition to pending moderator review state
-      // setIsPopupOpen(false); // Don't close popup - let it show the moderator review status
-
-      // Update status to pending immediately for better UX
       setCurrentStatus("pending");
-      setValidationStatus(null); // Clear validation_status as it's now moderator review
-
-      // Trigger an immediate status fetch to sync with server
+      setValidationStatus(null);
       fetchCurrentStatus();
     } catch (error) {
       console.error("Appeal error:", error);
@@ -191,6 +173,7 @@ const SidebarPage = ({
       );
     }
   }, [islandItem?.id, showToast, fetchCurrentStatus]);
+
   // Reset expansion state when page is opened
   useEffect(() => {
     if (isOpen) {
@@ -206,19 +189,16 @@ const SidebarPage = ({
       const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
       const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
 
-      // Ctrl + S (Force Save)
       if (cmdOrCtrl && e.key === "s") {
         e.preventDefault();
         showToast("Changes saved", "success");
       }
 
-      // Ctrl + Enter (Maximize)
       if (cmdOrCtrl && e.key === "Enter") {
         e.preventDefault();
         setIsExpanded(true);
       }
 
-      // Escape (Minimize or Close)
       if (e.key === "Escape") {
         if (isExpanded) {
           setIsExpanded(false);
@@ -244,7 +224,7 @@ const SidebarPage = ({
           onClick={onClick}
         ></div>
         <div
-          className="absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
+          className={`absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col ${isDark ? "bg-[#191919]" : "bg-[#f5f5f5]"} transition-transform duration-300 md:w-[34dvw]`}
           style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
         >
           <PageControls
@@ -279,7 +259,7 @@ const SidebarPage = ({
           onClick={onClick}
         ></div>
         <div
-          className="absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col bg-[#191919] transition-transform duration-300 md:w-[34dvw]"
+          className={`absolute right-0 top-0 z-50 flex h-full w-4/5 flex-col ${isDark ? "bg-[#191919]" : "bg-[#f5f5f5]"} transition-transform duration-300 md:w-[34dvw]`}
           style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
         >
           <PageControls
@@ -329,7 +309,7 @@ const SidebarPage = ({
         onClick={onClick}
       ></div>
       <div
-        className={`${isExpanded ? "w-full" : "w-4/5 md:w-[34dvw]"} absolute right-0 top-0 z-50 flex h-full flex-col bg-[#191919] transition-all duration-300 ease-in-out`}
+        className={`${isExpanded ? "w-full" : "w-4/5 md:w-[34dvw]"} absolute right-0 top-0 z-50 flex h-full flex-col ${isDark ? "bg-[#191919]" : "bg-[#f5f5f5]"} transition-all duration-300 ease-in-out`}
         style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
       >
         <PageControls
@@ -361,7 +341,9 @@ const SidebarPage = ({
         />
 
         {/* Scrollable Content Container */}
-        <div className="flex flex-col items-center overflow-y-scroll">
+        <div
+          className={`flex flex-col items-center overflow-y-scroll ${isDark ? "text-white" : "text-black"}`}
+        >
           {/* Page Header */}
           <PageHeader
             isExpanded={isExpanded}

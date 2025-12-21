@@ -39,6 +39,7 @@ import {
 import LoadingScreen from "./Shared/LoadingScreen";
 import TutorialContent from "./Dialog/TutorialContent";
 import QuestionIcon from "@/icons/QuestionIcon";
+import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -1110,7 +1111,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   );
 
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [themeColour, setThemeColour] = useState("dark");
+  const { themeColour, setThemeColour } = useTheme();
 
   if (loading || isSigningOut) {
     return <LoadingScreen />;
@@ -1173,7 +1174,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       {!isCameraAtDefault && (
         <button
           onClick={resetCamera}
-          className="animate-fade-in pointer-events-auto absolute right-6 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180 md:bottom-6 md:left-6 md:right-auto md:top-auto"
+          className="animate-fade-in pointer-events-auto absolute right-16 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180 md:bottom-6 md:left-6 md:right-auto md:top-auto"
         >
           <RefreshIcon />
         </button>
@@ -1182,7 +1183,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       {/* Floating Help button for mobile only */}
       <button
         onClick={() => setIsDialogOpen("tutorial")}
-        className="animate-fade-in pointer-events-auto absolute right-16 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:scale-110 md:hidden"
+        className="animate-fade-in pointer-events-auto absolute right-6 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:scale-110 md:hidden"
       >
         <QuestionIcon />
       </button>
@@ -1200,8 +1201,6 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
             userEmail={profile.email}
             setIsDialogOpen={setIsDialogOpen}
             setIsSigningOut={setIsSigningOut}
-            themeColour={themeColour}
-            setThemeColour={setThemeColour}
           />
         </Dialog>
       )}
@@ -1345,11 +1344,13 @@ const IslandPage = ({ profile }: IslandPageProps) => {
   // Fetch all items for the profile (both inventory and placed items)
   // Don't pass islandId here - we need ALL items, not just placed ones
   return (
-    <IslandItemsProvider profileId={profile.id}>
-      <ToastProvider>
-        <IslandPageContent profile={profile} />
-      </ToastProvider>
-    </IslandItemsProvider>
+    <ThemeProvider>
+      <IslandItemsProvider profileId={profile.id}>
+        <ToastProvider>
+          <IslandPageContent profile={profile} />
+        </ToastProvider>
+      </IslandItemsProvider>
+    </ThemeProvider>
   );
 };
 
