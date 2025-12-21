@@ -8,6 +8,10 @@ import LoginIcon from "@/icons/LoginIcon";
 import WarningIcon from "@/icons/WarningIcon";
 import { signOut } from "@/features/auth/actions/logout";
 import DeleteAccountContent from "./DeleteAccountContent";
+import { useTheme } from "../../contexts/ThemeContext";
+import MoonIcon from "@/icons/MoonIcon";
+import SunIcon from "@/icons/SunIcon";
+import SlotTooltip from "./SlotTooltip";
 
 interface ProfileContentProps {
   userName: string;
@@ -22,43 +26,65 @@ const ProfileContent = ({
   setIsDialogOpen,
   setIsSigningOut,
 }: ProfileContentProps) => {
+  const { themeColour, toggleTheme } = useTheme();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showMenuTooltip, setShowMenuTooltip] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   return (
     <>
-      <div className="space-y-4">
-        <EditButton
-          fieldName="Username:"
-          fieldValue={userName}
-          onClick={() => setIsDialogOpen("change-username")}
-        />
-        <EditButton fieldName="Email:" fieldValue={userEmail} />
-        <SettingButton
-          fieldName="Settings"
-          icon={<LockIcon />}
-          title="Change Password"
-          color="gray"
-          onClick={() => setIsDialogOpen("change-password")}
-        />
-        <SettingButton
-          icon={<LoginIcon />}
-          title="Log Out"
-          color="gray"
-          onClick={() => {
-            setIsSigningOut(true);
-            signOut();
-          }}
-        />
-        <SettingButton
-          icon={<WarningIcon />}
-          title="Delete Account"
-          color="red"
-          onClick={() => setShowDeleteDialog(true)}
-        />
-      </div>
+      <div className="flex h-full w-full flex-col items-center justify-center gap-4 overflow-y-auto overflow-x-hidden p-2">
+        <div className="flex flex-col gap-2">
+          <EditButton
+            fieldName="Username:"
+            fieldValue={userName}
+            onClick={() => setIsDialogOpen("change-username")}
+          />
+          <EditButton fieldName="Email:" fieldValue={userEmail} />
+          <SettingButton
+            fieldName="Settings"
+            icon={themeColour === "dark" ? <SunIcon /> : <MoonIcon />}
+            title={themeColour === "dark" ? "Light Mode" : "Dark Mode"}
+            color="gray"
+            onClick={toggleTheme}
+            onMouseEnter={() => setShowMenuTooltip("Ctrl + Shift + L / l")}
+            onMouseLeave={() => setShowMenuTooltip(null)}
+            onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
+          />
+          <SettingButton
+            icon={<LockIcon />}
+            title="Change Password"
+            color="gray"
+            onClick={() => setIsDialogOpen("change-password")}
+          />
+          <SettingButton
+            icon={<LoginIcon />}
+            title="Log Out"
+            color="gray"
+            onClick={() => {
+              setIsSigningOut(true);
+              signOut();
+            }}
+          />
+          <SettingButton
+            icon={<WarningIcon />}
+            title="Delete Account"
+            color="red"
+            onClick={() => setShowDeleteDialog(true)}
+          />
+        </div>
 
-      {showDeleteDialog && (
-        <DeleteAccountContent onClose={() => setShowDeleteDialog(false)} />
+        {showDeleteDialog && (
+          <DeleteAccountContent onClose={() => setShowDeleteDialog(false)} />
+        )}
+      </div>
+      {showMenuTooltip && (
+        <SlotTooltip
+          title={showMenuTooltip}
+          description={["Shortcut Key"]}
+          x={mousePos.x}
+          y={mousePos.y - 100}
+        />
       )}
     </>
   );

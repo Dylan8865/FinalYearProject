@@ -16,6 +16,7 @@ import Image from "next/image";
 import SlotTooltip from "./SlotTooltip";
 import { useToast } from "@/features/island/contexts/ToastContext";
 import LoadingScreen from "../Shared/LoadingScreen";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface StoreRowProps {
   items: ItemType[];
@@ -30,13 +31,17 @@ const StoreRow = ({
   icon,
   setSelectedItem,
 }: StoreRowProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const [showTooltip, setShowTooltip] = useState<ItemType | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   return (
     <>
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-sm md:text-lg">
+        <div
+          className={`flex items-center gap-2 text-sm md:text-lg ${isDark ? "text-white" : "text-black"}`}
+        >
           {icon}
           <h1>{category}</h1>
         </div>
@@ -46,7 +51,7 @@ const StoreRow = ({
             .map((item) => (
               <div key={item.id} className="space-y-[6px]">
                 <button
-                  className="flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden bg-[#d9d9d9] transition hover:bg-[#959595]"
+                  className={`flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden ${isDark ? "bg-[#d9d9d9] hover:bg-[#959595]" : "bg-[#f5f5f5] hover:bg-[#e0e0e0]"} transition`}
                   onClick={() => setSelectedItem(item)}
                   onMouseEnter={() => setShowTooltip(item)}
                   onMouseLeave={() => setShowTooltip(null)}
@@ -71,7 +76,11 @@ const StoreRow = ({
 
                 <div className="flex w-16 items-center justify-between">
                   <ManaIcon width={16} height={16} />
-                  <div className="text-xs">{item.mana_required}</div>
+                  <div
+                    className={`text-xs ${isDark ? "text-white" : "text-black"}`}
+                  >
+                    {item.mana_required}
+                  </div>
                 </div>
               </div>
             ))}
@@ -103,6 +112,8 @@ const StoreContent = ({ profile, onUpdateMana }: StoreContentProps) => {
   const [selectedItem, setSelectedItem] = useState<ItemType | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const { showToast } = useToast();
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
 
   const handlePurchase = async (itemId: string) => {
     setIsPurchasing(true);
@@ -171,24 +182,34 @@ const StoreContent = ({ profile, onUpdateMana }: StoreContentProps) => {
           >
             <div className="space-y-6">
               <p className="text-center">
-                <span className="text-neutral-300">
+                <span
+                  className={isDark ? "text-neutral-300" : "text-neutral-600"}
+                >
                   Are you sure you want to purchase
                 </span>
                 <br />
-                <span className="text-lg font-bold">{selectedItem.name}</span>
+                <span
+                  className={`text-lg font-bold ${isDark ? "text-white" : "text-black"}`}
+                >
+                  {selectedItem.name}
+                </span>
                 <br />
-                <span className="text-neutral-300">?</span>
+                <span
+                  className={isDark ? "text-neutral-300" : "text-neutral-600"}
+                >
+                  ?
+                </span>
               </p>
               <div className="flex justify-center gap-4">
                 <Button
-                  className="border border-transparent bg-[#333333] transition hover:border-[#515151] disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`border border-transparent ${isDark ? "bg-[#333333]" : "bg-[#f5f5f5]"} transition hover:border-[#515151] disabled:cursor-not-allowed disabled:opacity-50 ${isDark ? "text-white" : "text-black"}`}
                   onClick={() => handlePurchase(selectedItem.id)}
                   disabled={isPurchasing}
                 >
                   Yes
                 </Button>
                 <Button
-                  className="border border-transparent bg-[#1a1a1a] transition hover:border-[#515151] disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`border border-transparent ${isDark ? "bg-[#1a1a1a]" : "bg-[#e0e0e0]"} transition hover:border-[#515151] disabled:cursor-not-allowed disabled:opacity-50 ${isDark ? "text-white" : "text-black"}`}
                   onClick={() => setSelectedItem(null)}
                   disabled={isPurchasing}
                 >

@@ -1,7 +1,9 @@
+"use client";
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { ItemDataType, BlockProperties, BlockType } from "@/types/types";
 import Image from "next/image";
 import { ImageIcon, X, Upload } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface BlockProps {
   block: ItemDataType;
@@ -15,8 +17,6 @@ interface BlockProps {
 }
 
 // Editable content component
-// Using React.memo to prevent re-renders when parent re-renders but content/handlers haven't changed
-// though the issue is mostly about the internal DOM management
 const EditableContent = React.memo(
   ({
     content,
@@ -29,16 +29,11 @@ const EditableContent = React.memo(
     placeholder?: string;
     className?: string;
   }) => {
+    const { themeColour } = useTheme();
+    const isDark = themeColour === "dark";
     const ref = useRef<HTMLDivElement>(null);
 
-    // Use useLayoutEffect to update DOM before paint
-    // This handles both initial load and external updates
     useLayoutEffect(() => {
-      // We only update the DOM if:
-      // 1. The new content is different from what's currently in the DOM
-      // 2. AND (we are not focused OR the DOM is empty)
-      // This ensures we don't mess with the cursor while the user is typing,
-      // but we still update if the content changed externally or it's the first render.
       if (ref.current && ref.current.innerText !== content) {
         if (document.activeElement !== ref.current) {
           ref.current.innerText = content;
@@ -48,7 +43,6 @@ const EditableContent = React.memo(
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
       const text = e.currentTarget.innerText;
-      // Only fire change if actually different to avoid unnecessary loops
       if (text !== content) {
         onChange(text);
       }
@@ -60,7 +54,7 @@ const EditableContent = React.memo(
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}
-        className={`min-h-[1.5em] cursor-text outline-none empty:before:text-gray-500 empty:before:content-[attr(data-placeholder)] ${className}`}
+        className={`min-h-[1.5em] cursor-text outline-none ${isDark ? "empty:before:text-gray-500" : "empty:before:text-gray-400"} empty:before:content-[attr(data-placeholder)] ${className}`}
         data-placeholder={placeholder}
       />
     );
@@ -70,10 +64,11 @@ EditableContent.displayName = "EditableContent";
 
 // Paragraph Block
 export const ParagraphBlock = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const textContent = typeof block.content === "string" ? block.content : "";
 
   const handleChange = (content: string) => {
-    console.log("ParagraphBlock onChange:", { id: block.id, content });
     onUpdate?.(block.id, content);
   };
 
@@ -83,7 +78,7 @@ export const ParagraphBlock = ({ block, onUpdate }: BlockProps) => {
         content={textContent}
         onChange={handleChange}
         placeholder="Type to write..."
-        className="text-base leading-relaxed text-gray-200"
+        className={`text-base leading-relaxed ${isDark ? "text-gray-200" : "text-gray-800"}`}
       />
     </div>
   );
@@ -91,10 +86,11 @@ export const ParagraphBlock = ({ block, onUpdate }: BlockProps) => {
 
 // Heading Blocks
 export const Heading1Block = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const textContent = typeof block.content === "string" ? block.content : "";
 
   const handleChange = (content: string) => {
-    console.log("Heading1Block onChange:", { id: block.id, content });
     onUpdate?.(block.id, content);
   };
 
@@ -104,17 +100,18 @@ export const Heading1Block = ({ block, onUpdate }: BlockProps) => {
         content={textContent}
         onChange={handleChange}
         placeholder="Heading 1"
-        className="text-3xl font-bold text-white"
+        className={`text-3xl font-bold ${isDark ? "text-white" : "text-black"}`}
       />
     </div>
   );
 };
 
 export const Heading2Block = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const textContent = typeof block.content === "string" ? block.content : "";
 
   const handleChange = (content: string) => {
-    console.log("Heading2Block onChange:", { id: block.id, content });
     onUpdate?.(block.id, content);
   };
 
@@ -124,17 +121,18 @@ export const Heading2Block = ({ block, onUpdate }: BlockProps) => {
         content={textContent}
         onChange={handleChange}
         placeholder="Heading 2"
-        className="text-2xl font-semibold text-white"
+        className={`text-2xl font-semibold ${isDark ? "text-white" : "text-black"}`}
       />
     </div>
   );
 };
 
 export const Heading3Block = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const textContent = typeof block.content === "string" ? block.content : "";
 
   const handleChange = (content: string) => {
-    console.log("Heading3Block onChange:", { id: block.id, content });
     onUpdate?.(block.id, content);
   };
 
@@ -144,7 +142,7 @@ export const Heading3Block = ({ block, onUpdate }: BlockProps) => {
         content={textContent}
         onChange={handleChange}
         placeholder="Heading 3"
-        className="text-xl font-medium text-white"
+        className={`text-xl font-medium ${isDark ? "text-white" : "text-black"}`}
       />
     </div>
   );
@@ -152,21 +150,24 @@ export const Heading3Block = ({ block, onUpdate }: BlockProps) => {
 
 // Bulleted List Block
 export const BulletedListBlock = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const textContent = typeof block.content === "string" ? block.content : "";
 
   const handleChange = (content: string) => {
-    console.log("BulletedListBlock onChange:", { id: block.id, content });
     onUpdate?.(block.id, content);
   };
 
   return (
     <div className="group relative flex gap-2 py-1">
-      <span className="mt-2.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-gray-400" />
+      <span
+        className={`mt-2.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${isDark ? "bg-gray-400" : "bg-gray-600"}`}
+      />
       <EditableContent
         content={textContent}
         onChange={handleChange}
         placeholder="List item"
-        className="flex-1 text-base leading-relaxed text-gray-200"
+        className={`flex-1 text-base leading-relaxed ${isDark ? "text-gray-200" : "text-gray-800"}`}
       />
     </div>
   );
@@ -174,17 +175,14 @@ export const BulletedListBlock = ({ block, onUpdate }: BlockProps) => {
 
 // Todo Block
 export const TodoBlock = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const [checked, setChecked] = useState(block.properties?.checked || false);
   const textContent = typeof block.content === "string" ? block.content : "";
 
   const toggleChecked = () => {
     const newChecked = !checked;
     setChecked(newChecked);
-    console.log("TodoBlock toggleChecked:", {
-      id: block.id,
-      content: textContent,
-      checked: newChecked,
-    });
     onUpdate?.(block.id, textContent, {
       ...block.properties,
       checked: newChecked,
@@ -192,11 +190,6 @@ export const TodoBlock = ({ block, onUpdate }: BlockProps) => {
   };
 
   const handleChange = (content: string) => {
-    console.log("TodoBlock onChange:", {
-      id: block.id,
-      content,
-      checked,
-    });
     onUpdate?.(block.id, content, {
       ...block.properties,
       checked,
@@ -209,24 +202,24 @@ export const TodoBlock = ({ block, onUpdate }: BlockProps) => {
         type="checkbox"
         checked={checked}
         onChange={toggleChecked}
-        className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded border-gray-500 bg-transparent text-blue-500 focus:ring-blue-500"
+        className={`mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded ${isDark ? "border-gray-500 bg-transparent text-blue-500" : "border-gray-300 bg-white text-blue-600"} focus:ring-blue-500`}
       />
       <EditableContent
         content={textContent}
         onChange={handleChange}
         placeholder="To-do"
-        className={`flex-1 text-base leading-relaxed ${checked ? "text-gray-500 line-through" : "text-gray-200"}`}
+        className={`flex-1 text-base leading-relaxed ${checked ? (isDark ? "text-gray-500" : "text-gray-400") + " line-through" : isDark ? "text-gray-200" : "text-gray-800"}`}
       />
     </div>
   );
 };
 
 // Toggle Block
-// Toggle Block
 export const ToggleBlock = ({ block, onUpdate, children }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const [isOpen, setIsOpen] = useState(false);
   const summaryContent = typeof block.content === "string" ? block.content : "";
-  // Optional: extended details stored in properties, if the user wants text *inside* the toggle besides nested blocks
   const detailsContent = block.properties?.details || "";
 
   const handleSummaryChange = (content: string) => {
@@ -245,7 +238,7 @@ export const ToggleBlock = ({ block, onUpdate, children }: BlockProps) => {
       <div className="flex gap-2">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="mt-0.5 flex-shrink-0 text-gray-400 transition-transform hover:text-gray-200"
+          className={`mt-0.5 flex-shrink-0 ${isDark ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"} transition-transform`}
           style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
         >
           ▶
@@ -254,16 +247,15 @@ export const ToggleBlock = ({ block, onUpdate, children }: BlockProps) => {
           content={summaryContent}
           onChange={handleSummaryChange}
           placeholder="Toggle list"
-          className="flex-1 text-base leading-relaxed text-gray-200"
+          className={`flex-1 text-base leading-relaxed ${isDark ? "text-gray-200" : "text-gray-800"}`}
         />
       </div>
       {isOpen && (
         <div className="ml-6 mt-2">
-          {/* If user specifically wants a text area inside the toggle *before* nested blocks */}
           <EditableContent
             content={detailsContent}
             onChange={handleDetailsChange}
-            className="mb-2 text-white/70"
+            className={`mb-2 ${isDark ? "text-white/70" : "text-black/70"}`}
             placeholder="Empty toggle details..."
           />
           {children}
@@ -275,20 +267,23 @@ export const ToggleBlock = ({ block, onUpdate, children }: BlockProps) => {
 
 // Quote Block
 export const QuoteBlock = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const textContent = typeof block.content === "string" ? block.content : "";
 
   const handleChange = (content: string) => {
-    console.log("QuoteBlock onChange:", { id: block.id, content });
     onUpdate?.(block.id, content);
   };
 
   return (
-    <div className="group relative border-l-4 border-gray-500 bg-gray-800/30 py-2 pl-4">
+    <div
+      className={`group relative border-l-4 ${isDark ? "border-gray-500 bg-gray-800/30" : "border-gray-300 bg-gray-100"} py-2 pl-4`}
+    >
       <EditableContent
         content={textContent}
         onChange={handleChange}
         placeholder="Quote"
-        className="text-base italic leading-relaxed text-white"
+        className={`text-base italic leading-relaxed ${isDark ? "text-white" : "text-black"}`}
       />
     </div>
   );
@@ -296,14 +291,22 @@ export const QuoteBlock = ({ block, onUpdate }: BlockProps) => {
 
 // Divider Block
 export const DividerBlock = () => {
-  return <hr className="my-4 border-gray-700" />;
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
+  return (
+    <hr className={`my-4 ${isDark ? "border-gray-700" : "border-gray-200"}`} />
+  );
 };
 
 // Callout Block
 export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const [icon, setIcon] = useState(block.properties?.icon || "💡");
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const bgColor = block.properties?.backgroundColor || "bg-blue-900/20";
+  const bgColor =
+    block.properties?.backgroundColor ||
+    (isDark ? "bg-blue-900/20" : "bg-blue-50");
   const textContent = typeof block.content === "string" ? block.content : "";
   const iconPickerRef = useRef<HTMLDivElement>(null);
 
@@ -329,7 +332,6 @@ export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
         setShowIconPicker(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -354,26 +356,26 @@ export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
 
   return (
     <div
-      className={`group relative flex items-center gap-3 rounded-lg border border-neutral-700 ${bgColor} p-4`}
+      className={`group relative flex items-center gap-3 rounded-lg border ${isDark ? "border-neutral-700" : "border-neutral-200"} ${bgColor} p-4`}
     >
       <div className="relative">
         <button
           type="button"
           onClick={() => setShowIconPicker(!showIconPicker)}
-          className="flex h-8 w-8 items-center justify-center rounded text-2xl hover:bg-white/10"
+          className={`flex h-8 w-8 items-center justify-center rounded text-2xl ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
         >
           {icon}
         </button>
         {showIconPicker && (
           <div
             ref={iconPickerRef}
-            className="absolute left-0 top-10 z-50 grid w-48 grid-cols-5 gap-2 rounded-lg border border-gray-700 bg-gray-900 p-2 shadow-xl"
+            className={`absolute left-0 top-10 z-50 grid w-48 grid-cols-5 gap-2 rounded-lg border ${isDark ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-white"} p-2 shadow-xl`}
           >
             {commonIcons.map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => handleIconSelect(emoji)}
-                className="flex h-8 w-8 items-center justify-center rounded text-xl hover:bg-gray-700"
+                className={`flex h-8 w-8 items-center justify-center rounded text-xl ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-100"}`}
               >
                 {emoji}
               </button>
@@ -385,7 +387,7 @@ export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
         content={textContent}
         onChange={handleContentChange}
         placeholder="Callout"
-        className="flex-1 text-base leading-relaxed text-gray-200"
+        className={`flex-1 text-base leading-relaxed ${isDark ? "text-gray-200" : "text-gray-800"}`}
       />
     </div>
   );
@@ -393,17 +395,14 @@ export const CalloutBlock = ({ block, onUpdate }: BlockProps) => {
 
 // Code Block
 export const CodeBlock = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const [language, setLanguage] = useState(
     block.properties?.language || "javascript"
   );
   const textContent = typeof block.content === "string" ? block.content : "";
 
   const handleContentChange = (content: string) => {
-    console.log("CodeBlock onChange:", {
-      id: block.id,
-      content,
-      language,
-    });
     onUpdate?.(block.id, content, {
       ...block.properties,
       language,
@@ -413,10 +412,6 @@ export const CodeBlock = ({ block, onUpdate }: BlockProps) => {
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLanguage = e.target.value;
     setLanguage(newLanguage);
-    console.log("CodeBlock language change:", {
-      id: block.id,
-      language: newLanguage,
-    });
     onUpdate?.(block.id, textContent, {
       ...block.properties,
       language: newLanguage,
@@ -424,12 +419,16 @@ export const CodeBlock = ({ block, onUpdate }: BlockProps) => {
   };
 
   return (
-    <div className="group relative my-2 rounded-lg border border-neutral-700">
-      <div className="mb-1 flex items-center justify-between rounded-t-lg bg-gray-800 px-3 py-1">
+    <div
+      className={`group relative my-2 rounded-lg border ${isDark ? "border-neutral-700" : "border-neutral-200"}`}
+    >
+      <div
+        className={`mb-1 flex items-center justify-between rounded-t-lg ${isDark ? "bg-gray-800" : "bg-gray-100"} px-3 py-1`}
+      >
         <select
           value={language}
           onChange={handleLanguageChange}
-          className="rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 outline-none"
+          className={`rounded ${isDark ? "bg-gray-700 text-gray-300" : "bg-white text-gray-700"} px-2 py-1 text-xs outline-none`}
         >
           <option value="javascript">JavaScript</option>
           <option value="typescript">TypeScript</option>
@@ -441,12 +440,14 @@ export const CodeBlock = ({ block, onUpdate }: BlockProps) => {
           <option value="bash">Bash</option>
         </select>
       </div>
-      <div className="overflow-x-auto rounded-b-lg bg-gray-900 p-4">
+      <div
+        className={`overflow-x-auto rounded-b-lg ${isDark ? "bg-gray-900" : "bg-white"} p-4`}
+      >
         <EditableContent
           content={textContent}
           onChange={handleContentChange}
           placeholder="// code here"
-          className="font-mono text-sm leading-relaxed text-green-400"
+          className={`font-mono text-sm leading-relaxed ${isDark ? "text-green-400" : "text-green-600"}`}
         />
       </div>
     </div>
@@ -460,6 +461,8 @@ export const ImageBlock = ({
   onUploadImage,
   onRemoveImage,
 }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const [url, setUrl] = useState(
     typeof block.content === "string" ? block.content : ""
   );
@@ -476,8 +479,7 @@ export const ImageBlock = ({
   }, [block.properties?.caption]);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setUrl(newUrl);
+    setUrl(e.target.value);
   };
 
   const handleUrlBlur = () => {
@@ -522,7 +524,9 @@ export const ImageBlock = ({
 
   if (!url || isEditingUrl) {
     return (
-      <div className="group relative my-2 rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/20 p-8 transition-colors hover:border-gray-500 hover:bg-gray-800/30">
+      <div
+        className={`group relative my-2 rounded-lg border-2 border-dashed ${isDark ? "border-gray-700 bg-gray-800/20 hover:border-gray-500 hover:bg-gray-800/30" : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"} p-8 transition-colors`}
+      >
         <input
           type="file"
           ref={fileInputRef}
@@ -531,7 +535,9 @@ export const ImageBlock = ({
           accept="image/*"
         />
         <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="flex w-full max-w-md items-center gap-2 rounded border border-gray-700 bg-gray-900/50 p-2">
+          <div
+            className={`flex w-full max-w-md items-center gap-2 rounded border ${isDark ? "border-gray-700 bg-gray-900/50" : "border-gray-200 bg-white"} p-2`}
+          >
             <input
               type="text"
               value={url}
@@ -540,18 +546,20 @@ export const ImageBlock = ({
               onFocus={() => setIsEditingUrl(true)}
               onKeyDown={(e) => e.key === "Enter" && handleUrlBlur()}
               placeholder="Paste an image link..."
-              className="flex-1 bg-transparent text-sm text-gray-200 outline-none"
+              className={`flex-1 bg-transparent text-sm ${isDark ? "text-gray-200" : "text-gray-800"} outline-none`}
               autoFocus={isEditingUrl}
             />
           </div>
-          <div className="flex items-center gap-2 text-gray-500">
+          <div
+            className={`flex items-center gap-2 ${isDark ? "text-gray-500" : "text-gray-400"}`}
+          >
             <span className="text-xs font-medium uppercase tracking-wider">
               Or
             </span>
           </div>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-gray-600"
+            className={`flex items-center gap-2 rounded-md ${isDark ? "bg-gray-700 text-gray-200 hover:bg-gray-600" : "bg-gray-200 text-gray-800 hover:bg-gray-300"} px-4 py-2 text-sm font-medium transition-colors`}
           >
             <Upload className="h-4 w-4" />
             Upload File
@@ -570,7 +578,9 @@ export const ImageBlock = ({
         className="hidden"
         accept="image/*"
       />
-      <div className="group/img relative flex min-h-[100px] w-full items-center justify-center overflow-hidden rounded-lg bg-neutral-900/50">
+      <div
+        className={`group/img relative flex min-h-[100px] w-full items-center justify-center overflow-hidden rounded-lg ${isDark ? "bg-neutral-900/50" : "bg-neutral-100"}`}
+      >
         <div className="relative flex h-full max-h-[60vh] w-full items-center justify-center">
           <img
             src={url}
@@ -579,7 +589,6 @@ export const ImageBlock = ({
           />
         </div>
 
-        {/* Hover Controls */}
         <div className="absolute right-3 top-3 flex items-center gap-2 opacity-0 transition-opacity group-hover/img:opacity-100">
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -611,7 +620,7 @@ export const ImageBlock = ({
         content={caption}
         onChange={handleCaptionChange}
         placeholder="Add a caption..."
-        className="mt-3 w-full max-w-2xl text-center text-sm text-gray-500 hover:text-gray-400 focus:text-gray-300"
+        className={`mt-3 w-full max-w-2xl text-center text-sm ${isDark ? "text-gray-500 hover:text-gray-400 focus:text-gray-300" : "text-gray-400 hover:text-gray-500 focus:text-gray-600"}`}
       />
     </div>
   );
@@ -619,6 +628,8 @@ export const ImageBlock = ({
 
 // Bookmark Block
 export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
   const [url, setUrl] = useState(block.content || block.properties?.url || "");
   const [title, setTitle] = useState(block.properties?.title || "");
   const [description, setDescription] = useState(
@@ -627,18 +638,11 @@ export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
   const [isEditingUrl, setIsEditingUrl] = useState(false);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setUrl(newUrl);
+    setUrl(e.target.value);
   };
 
   const handleUrlBlur = () => {
     setIsEditingUrl(false);
-    console.log("BookmarkBlock url change:", {
-      id: block.id,
-      url,
-      title,
-      description,
-    });
     onUpdate?.(block.id, url, {
       ...block.properties,
       url,
@@ -649,10 +653,6 @@ export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    console.log("BookmarkBlock title change:", {
-      id: block.id,
-      title: newTitle,
-    });
     onUpdate?.(block.id, url, {
       ...block.properties,
       url,
@@ -663,10 +663,6 @@ export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
 
   const handleDescriptionChange = (newDescription: string) => {
     setDescription(newDescription);
-    console.log("BookmarkBlock description change:", {
-      id: block.id,
-      description: newDescription,
-    });
     onUpdate?.(block.id, url, {
       ...block.properties,
       url,
@@ -677,7 +673,9 @@ export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
 
   if (!url || isEditingUrl) {
     return (
-      <div className="my-2 rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/30 p-4">
+      <div
+        className={`my-2 rounded-lg border-2 border-dashed ${isDark ? "border-gray-700 bg-gray-800/30" : "border-gray-300 bg-gray-50"} p-4`}
+      >
         <input
           type="text"
           value={url}
@@ -685,7 +683,7 @@ export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
           onBlur={handleUrlBlur}
           onFocus={() => setIsEditingUrl(true)}
           placeholder="Enter bookmark URL..."
-          className="w-full bg-transparent text-sm text-gray-200 outline-none"
+          className={`w-full bg-transparent text-sm ${isDark ? "text-gray-200" : "text-gray-800"} outline-none`}
           autoFocus={isEditingUrl}
         />
       </div>
@@ -693,21 +691,27 @@ export const BookmarkBlock = ({ block, onUpdate }: BlockProps) => {
   }
 
   return (
-    <div className="group relative my-2 rounded-lg border border-gray-700 bg-gray-800/30 p-4">
+    <div
+      className={`group relative my-2 rounded-lg border ${isDark ? "border-gray-700 bg-gray-800/30" : "border-gray-200 bg-gray-50"} p-4`}
+    >
       <EditableContent
         content={title}
         onChange={handleTitleChange}
         placeholder="Bookmark title..."
-        className="mb-2 font-medium text-gray-200"
+        className={`mb-2 font-medium ${isDark ? "text-gray-200" : "text-gray-800"}`}
       />
       <EditableContent
         content={description}
         onChange={handleDescriptionChange}
         placeholder="Description..."
-        className="mb-2 text-sm text-gray-400"
+        className={`mb-2 text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
       />
       <div className="flex items-center gap-2">
-        <p className="flex-1 truncate text-xs text-gray-500">{url}</p>
+        <p
+          className={`flex-1 truncate text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}
+        >
+          {url}
+        </p>
         <a
           href={url}
           target="_blank"

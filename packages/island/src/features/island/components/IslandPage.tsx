@@ -37,6 +37,9 @@ import {
   useToast,
 } from "@/features/island/contexts/ToastContext";
 import LoadingScreen from "./Shared/LoadingScreen";
+import TutorialContent from "./Dialog/TutorialContent";
+import QuestionIcon from "@/icons/QuestionIcon";
+import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 
 interface IslandPageProps {
   profile: ProfileType & { no_of_islands: number };
@@ -94,6 +97,22 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       }));
     }
   }, [islands, loading, totalLevel]);
+
+  // Handle first-time tutorial
+  useEffect(() => {
+    // We use localStorage to track if the user has seen the tutorial on this device
+    // and check the profile's created_at to see if they are a "recently registered" user.
+    const tutorialSeen = localStorage.getItem("tutorial_seen");
+
+    // Default to showing tutorial if never seen before on this device
+    if (!tutorialSeen) {
+      setIsDialogOpen("tutorial");
+      // Note: We don't set 'tutorial_seen' to 'true' here yet,
+      // let the user handle it or set it on close.
+      // But setting it now is easier for "first time appear".
+      localStorage.setItem("tutorial_seen", "true");
+    }
+  }, []);
 
   // Background validation processing (for development)
   useEffect(() => {
@@ -160,6 +179,87 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     setIsDialogOpen("edit-island");
   };
 
+  // Mana system state - simplified
+  interface IslandManaState {
+    manaRate: number;
+    accumulatedMana: number;
+  }
+  const [islandManaStates, setIslandManaStates] = useState<
+    Record<string, IslandManaState>
+  >({});
+  const [manaPopup, setManaPopup] = useState<{
+    visible: boolean;
+    amount: number;
+  }>({ visible: false, amount: 0 });
+
+  // Sync to database every minute (more frequent to prevent data loss)
+  const syncManaToDb = useCallback(
+    async (islandId: string, accumulatedMana: number) => {
+      try {
+        await fetch("/api/islands", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: islandId,
+            accumulated_mana: Math.floor(accumulatedMana),
+            last_updated_at: new Date().toISOString(),
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to sync mana to DB:", err);
+      }
+    },
+    []
+  );
+
+  const handleCollectAllMana = useCallback(async () => {
+    // Check if there is even anything to collect
+    const totalToCollect = Object.values(islandManaStates).reduce(
+      (acc, state) => acc + state.accumulatedMana,
+      0
+    );
+
+    if (totalToCollect < 1) {
+      showToast("No mana to collect from any island!", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/islands/collect-all-mana", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to collect all mana");
+      }
+
+      const data = await response.json();
+
+      // Update profile mana
+      setProfile((prev) => ({ ...prev, mana: data.new_mana }));
+
+      // Reset all island mana states
+      setIslandManaStates((prev) => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach((id) => {
+          updated[id] = { ...updated[id], accumulatedMana: 0 };
+        });
+        return updated;
+      });
+
+      // Show success toast
+      showToast(
+        `Successfully collected ${data.collected.toLocaleString()} mana from all islands!`,
+        "success"
+      );
+    } catch (err) {
+      console.error("Failed to collect all mana:", err);
+      showToast("Error collecting mana. Please try again.", "error");
+    }
+  }, [islandManaStates, showToast]);
+
+  const { toggleTheme } = useTheme();
+
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -175,20 +275,40 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
 
       const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
       const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+      const shift = e.shiftKey;
       const key = e.key.toLowerCase();
 
       if (key === "s" && !cmdOrCtrl) {
-        // Only open if nothing else is open to avoid conflicts
         if (!isDialogOpen && !sidebarContentPage?.open) {
           setIsDialogOpen("store");
         }
       } else if (key === "i" && !cmdOrCtrl) {
-        // Only open if nothing else is open to avoid conflicts
         if (!isDialogOpen && !sidebarContentPage?.open) {
           setIsDialogOpen("inventory");
         }
+      } else if (key === "h" && !cmdOrCtrl) {
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("tutorial");
+        }
+      } else if (key === "p" && !cmdOrCtrl) {
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("profile");
+        }
+      } else if (key === "l" && !cmdOrCtrl) {
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("level");
+        }
+      } else if (key === "a" && !cmdOrCtrl) {
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          setIsDialogOpen("island");
+        }
+      } else if (key === "q" && !cmdOrCtrl) {
+        if (!isDialogOpen && !sidebarContentPage?.open) {
+          handleCollectAllMana();
+        }
+      } else if (cmdOrCtrl && shift && key === "l") {
+        toggleTheme();
       } else if (key === "escape") {
-        // Close standard dialogs
         if (isDialogOpen) {
           setIsDialogOpen("");
         }
@@ -197,7 +317,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isDialogOpen, sidebarContentPage]);
+  }, [isDialogOpen, sidebarContentPage, toggleTheme, handleCollectAllMana]);
 
   const handleUpgradeIsland = async (id: string) => {
     // 1. Find current island level to determine cost
@@ -243,17 +363,6 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   };
 
   // Mana system state - simplified
-  interface IslandManaState {
-    manaRate: number;
-    accumulatedMana: number;
-  }
-  const [islandManaStates, setIslandManaStates] = useState<
-    Record<string, IslandManaState>
-  >({});
-  const [manaPopup, setManaPopup] = useState<{
-    visible: boolean;
-    amount: number;
-  }>({ visible: false, amount: 0 });
 
   /**
    * Get the next available Y position (vertical stacking) for a given grid cell
@@ -861,26 +970,6 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
     console.log("Placed objects updated:", placedObjects);
   }, [placedObjects]);
 
-  // Sync accumulated mana to database
-  const syncManaToDb = useCallback(
-    async (islandId: string, accumulatedMana: number) => {
-      try {
-        await fetch("/api/islands", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: islandId,
-            accumulated_mana: Math.floor(accumulatedMana),
-            last_updated_at: new Date().toISOString(),
-          }),
-        });
-      } catch (err) {
-        console.error("Failed to sync mana to DB:", err);
-      }
-    },
-    []
-  );
-
   // Initialize mana states for islands
   useEffect(() => {
     if (!islands || islands.length === 0) return;
@@ -1079,6 +1168,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   );
 
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const { themeColour, setThemeColour } = useTheme();
 
   if (loading || isSigningOut) {
     return <LoadingScreen />;
@@ -1116,7 +1206,11 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       {/* 2D UI Overlays */}
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-10">
         <div className="pointer-events-auto">
-          <StatusBar setIsDialogOpen={setIsDialogOpen} profile={profile} />
+          <StatusBar
+            setIsDialogOpen={setIsDialogOpen}
+            profile={profile}
+            onCollectAllMana={handleCollectAllMana}
+          />
         </div>
       </div>
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-10">
@@ -1141,11 +1235,19 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       {!isCameraAtDefault && (
         <button
           onClick={resetCamera}
-          className="animate-fade-in pointer-events-auto absolute right-6 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180 md:bottom-6 md:left-6 md:right-auto md:top-auto"
+          className="animate-fade-in pointer-events-auto absolute right-16 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:rotate-180 md:bottom-6 md:left-6 md:right-auto md:top-auto"
         >
           <RefreshIcon />
         </button>
       )}
+
+      {/* Floating Help button for mobile only */}
+      <button
+        onClick={() => setIsDialogOpen("tutorial")}
+        className="animate-fade-in pointer-events-auto absolute right-6 top-6 z-10 flex items-center justify-center bg-transparent text-2xl transition-all duration-300 hover:scale-110 md:hidden"
+      >
+        <QuestionIcon />
+      </button>
 
       {isDialogOpen === "profile" && (
         <Dialog
@@ -1172,7 +1274,17 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
           className="flex items-center justify-center"
           setIsDialogOpen={setIsDialogOpen}
         >
-          <AchievementContent islands={islands} islandItems={islandItems} />
+          <AchievementContent
+            islands={islands}
+            islandItems={islandItems}
+            onNavigateToIsland={(pos) => {
+              controlsRef.current?.navigateTo(
+                [pos[0] + 10, pos[1] + 15, pos[2] + 5],
+                pos
+              );
+              setIsDialogOpen("");
+            }}
+          />
         </Dialog>
       )}
 
@@ -1274,6 +1386,18 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
         </Dialog>
       )}
 
+      {isDialogOpen === "tutorial" && (
+        <Dialog
+          iconStyle="bg-[#dcd1c1] text-black"
+          icon={<QuestionIcon />}
+          title="How to Play"
+          setIsDialogOpen={setIsDialogOpen}
+          size="medium"
+        >
+          <TutorialContent onClose={() => setIsDialogOpen("")} />
+        </Dialog>
+      )}
+
       {/* Sidebar Content */}
       <SidebarPage
         isOpen={sidebarContentPage?.open}
@@ -1291,11 +1415,13 @@ const IslandPage = ({ profile }: IslandPageProps) => {
   // Fetch all items for the profile (both inventory and placed items)
   // Don't pass islandId here - we need ALL items, not just placed ones
   return (
-    <IslandItemsProvider profileId={profile.id}>
-      <ToastProvider>
-        <IslandPageContent profile={profile} />
-      </ToastProvider>
-    </IslandItemsProvider>
+    <ThemeProvider>
+      <IslandItemsProvider profileId={profile.id}>
+        <ToastProvider>
+          <IslandPageContent profile={profile} />
+        </ToastProvider>
+      </IslandItemsProvider>
+    </ThemeProvider>
   );
 };
 

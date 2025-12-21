@@ -4,17 +4,22 @@ import QuestionIcon from "@/icons/QuestionIcon";
 import TrophyIcon from "@/icons/TrophyIcon";
 import IslandIcon from "@/icons/IslandIcon";
 import { calculateIslandTotalManaRate } from "@/utils/manaCalculations";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface AchievementContentProps {
   islands: IslandTypeWithPosition[];
   islandItems: IslandItemType[];
+  onNavigateToIsland?: (position: [number, number, number]) => void;
 }
 
 const AchievementContent = ({
   islands,
   islandItems,
+  onNavigateToIsland,
 }: AchievementContentProps) => {
   const [showLevelInfo, setShowLevelInfo] = useState(false);
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
 
   // Calculate Total Level
   const totalLevel = islands.reduce(
@@ -44,18 +49,28 @@ const AchievementContent = ({
   return (
     <div className="flex h-full w-full flex-col gap-6 overflow-y-auto p-4">
       {/* Total Level Section */}
-      <div className="relative flex items-center justify-between rounded-lg border border-[#68a5ad]/50 bg-[#68a5ad]/20 p-4">
+      <div
+        className={`relative flex items-center justify-between rounded-lg border ${isDark ? "border-[#68a5ad]/50 bg-[#68a5ad]/20" : "border-[#68a5ad]/70 bg-[#68a5ad]/10"} p-4`}
+      >
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#68a5ad] text-2xl text-white">
             <TrophyIcon />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-gray-300">Total Level</h3>
-            <p className="text-2xl font-bold text-white">{totalLevel}</p>
+            <h3
+              className={`text-sm font-semibold ${isDark ? "text-gray-300" : "text-gray-600"}`}
+            >
+              Total Level
+            </h3>
+            <p
+              className={`text-2xl font-bold ${isDark ? "text-white" : "text-black"}`}
+            >
+              {totalLevel}
+            </p>
           </div>
         </div>
         <div
-          className="mt-2 cursor-pointer text-xl text-gray-400 hover:text-white"
+          className={`mt-2 cursor-pointer text-xl ${isDark ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-black"}`}
           onClick={(e) => {
             e.stopPropagation();
             setShowLevelInfo(!showLevelInfo);
@@ -66,10 +81,18 @@ const AchievementContent = ({
 
         {/* Tooltip for Level Info */}
         {showLevelInfo && (
-          <div className="absolute right-0 top-full z-10 mt-2 w-64 rounded-md border border-gray-600 bg-[#2a2a2a] p-3 text-xs text-gray-300 shadow-xl">
-            <p className="mb-1 font-semibold text-white">How Levels Work</p>
+          <div
+            className={`absolute right-0 top-full z-10 mt-2 w-64 rounded-md border ${isDark ? "border-gray-600 bg-[#2a2a2a] text-gray-300" : "border-gray-300 bg-white text-gray-600"} p-3 text-xs shadow-xl`}
+          >
+            <p
+              className={`mb-1 font-semibold ${isDark ? "text-white" : "text-black"}`}
+            >
+              How Levels Work
+            </p>
             <p>Your global level is the total of all island levels.</p>
-            <p className="mt-1 italic text-gray-400">
+            <p
+              className={`mt-1 italic ${isDark ? "text-gray-400" : "text-gray-500"}`}
+            >
               Example: Lvl 1 + Lvl 2 = Lvl 3
             </p>
           </div>
@@ -78,19 +101,37 @@ const AchievementContent = ({
 
       {/* Global Stats Grid */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard title="Total Islands" value={islands.length} />
-        <StatCard title="Total Items" value={totalItems} />
-        <StatCard title="Total Rates" value={`${totalManaRateAll}/m`} />
-        <StatCard title="Placed Items" value={placedCount} />
-        <StatCard title="In Inventory" value={inventoryCount} />
-        <StatCard title="Functional" value={functionalCount} />
-        <StatCard title="Decorative" value={decorativeCount} />
-        <StatCard title="Terrain" value={terrainCount} />
+        <StatCard
+          title="Total Islands"
+          value={islands.length}
+          isDark={isDark}
+        />
+        <StatCard title="Total Items" value={totalItems} isDark={isDark} />
+        <StatCard
+          title="Total Rates"
+          value={`${totalManaRateAll}/m`}
+          isDark={isDark}
+        />
+        <StatCard title="Placed Items" value={placedCount} isDark={isDark} />
+        <StatCard title="In Inventory" value={inventoryCount} isDark={isDark} />
+        <StatCard
+          title="Functional Item"
+          value={functionalCount}
+          isDark={isDark}
+        />
+        <StatCard
+          title="Decorative Item"
+          value={decorativeCount}
+          isDark={isDark}
+        />
+        <StatCard title="Terrain Item" value={terrainCount} isDark={isDark} />
       </div>
 
       {/* Islands Breakdown */}
       <div className="flex-1">
-        <h3 className="mb-3 text-sm font-bold uppercase tracking-widest text-gray-300">
+        <h3
+          className={`mb-3 text-sm font-bold uppercase tracking-widest ${isDark ? "text-gray-300" : "text-gray-600"}`}
+        >
           Island Summary
         </h3>
         <div className="space-y-3">
@@ -106,14 +147,21 @@ const AchievementContent = ({
             return (
               <div
                 key={island.id}
-                className="flex items-center justify-between rounded-md bg-white/5 p-3 transition-colors hover:bg-white/10"
+                onClick={() =>
+                  onNavigateToIsland?.(
+                    island.position as [number, number, number]
+                  )
+                }
+                className={`flex cursor-pointer items-center justify-between rounded-md ${isDark ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-black/10"} p-3 transition-colors`}
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded bg-[#5a706b] text-white">
                     <IslandIcon />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">
+                    <h4
+                      className={`text-sm font-bold ${isDark ? "text-white" : "text-black"}`}
+                    >
                       {island.name}
                     </h4>
                     <p className="text-xs text-[#68a5ad]">
@@ -123,14 +171,24 @@ const AchievementContent = ({
                 </div>
                 <div className="flex gap-4 text-right">
                   <div>
-                    <p className="text-xs text-gray-400">Mana Rate</p>
+                    <p
+                      className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                    >
+                      Mana Rate
+                    </p>
                     <p className="font-mono text-sm font-bold text-[#4fd1c5]">
                       {totalManaRate}/m
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">Items Placed</p>
-                    <p className="font-mono text-sm font-bold text-white">
+                    <p
+                      className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                    >
+                      Items Placed
+                    </p>
+                    <p
+                      className={`font-mono text-sm font-bold ${isDark ? "text-white" : "text-black"}`}
+                    >
                       {islandSpecificItems.length}
                     </p>
                   </div>
@@ -147,13 +205,23 @@ const AchievementContent = ({
 const StatCard = ({
   title,
   value,
+  isDark,
 }: {
   title: string;
   value: string | number;
+  isDark: boolean;
 }) => (
-  <div className="flex flex-col rounded bg-white/5 p-3 text-center transition-colors hover:bg-white/10">
-    <span className="text-xs text-gray-400">{title}</span>
-    <span className="text-lg font-bold text-white">{value}</span>
+  <div
+    className={`flex flex-col rounded ${isDark ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-black/10"} p-3 text-center transition-colors`}
+  >
+    <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+      {title}
+    </span>
+    <span
+      className={`text-lg font-bold ${isDark ? "text-white" : "text-black"}`}
+    >
+      {value}
+    </span>
   </div>
 );
 

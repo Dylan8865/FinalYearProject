@@ -6,6 +6,9 @@ interface SettingButtonProps {
   title: string;
   color: string;
   onClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  onMouseMove?: (e: React.MouseEvent) => void;
 }
 
 const SettingButton = ({
@@ -14,13 +17,22 @@ const SettingButton = ({
   title,
   color,
   onClick,
+  onMouseEnter,
+  onMouseLeave,
+  onMouseMove,
 }: SettingButtonProps) => {
   return (
     <div className="flex w-80 justify-between md:w-auto md:gap-4">
       <div className={`${!fieldName && "opacity-0"} flex items-center`}>
         {fieldName}
       </div>
-      <button className="flex h-8 w-60 md:h-10 md:w-80" onClick={onClick}>
+      <button
+        className="flex h-8 w-60 md:h-10 md:w-80"
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onMouseMove={onMouseMove}
+      >
         <div
           className={`${
             color == "gray"

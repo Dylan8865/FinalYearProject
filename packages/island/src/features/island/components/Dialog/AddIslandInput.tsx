@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const AddIslandInput = ({
   id,
@@ -22,6 +23,8 @@ const AddIslandInput = ({
   error: string;
 }) => {
   const [focused, setFocused] = useState(false);
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
 
   return (
     <div className="relative" style={{ width }}>
@@ -49,7 +52,7 @@ const AddIslandInput = ({
 
       <label
         htmlFor={id}
-        className={`pointer-events-none absolute left-3 rounded bg-black px-1.5 transition-all ${
+        className={`pointer-events-none absolute left-3 rounded ${isDark ? "bg-black" : "bg-white"} px-1.5 transition-all ${
           value || focused ? "-top-2 text-xs" : "top-3 text-sm"
         } text-gray-400`} // label color consistent
       >

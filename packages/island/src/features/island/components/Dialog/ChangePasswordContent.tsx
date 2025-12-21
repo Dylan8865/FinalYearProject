@@ -2,6 +2,7 @@ import React, { useState, useTransition } from "react";
 import AddIslandInput from "./AddIslandInput";
 import AddIslandButton from "./AddIslandButton";
 import { changePassword } from "@/features/auth/actions/changePassword";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface ChangePasswordContentProps {
   setIsDialogOpen?: React.Dispatch<React.SetStateAction<string>>;
@@ -66,11 +67,16 @@ const ChangePasswordContent = ({
     });
   };
 
+  const { themeColour } = useTheme();
+  const isDark = themeColour === "dark";
+
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
       <form className="flex w-[300px] flex-col gap-6" onSubmit={handleSubmit}>
         <div className="text-center">
-          <h2 className="text-lg font-bold text-white">
+          <h2
+            className={`text-lg font-bold ${isDark ? "text-white" : "text-black"}`}
+          >
             Enter your new password below
           </h2>
         </div>
