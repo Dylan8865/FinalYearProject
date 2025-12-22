@@ -29,21 +29,22 @@ export interface KnowledgeGraphData {
 }
 
 /**
- * GET /api/knowledge-graph?topic=uuid
+ * GET /api/knowledge-graph?topic=name_or_uuid
  * Fetch knowledge graph data for visualization
  * - If topic param provided: Returns only that topic and its directly connected neighbors
+ * - Topic can be either UUID or topic name
  * - If no param: Returns all topics and relationships
  */
 export async function GET(request: Request) {
   try {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
-    const topicId = searchParams.get('topic');
+    const topicParam = searchParams.get('topic');
 
     // Fetch all topics (nodes)
     const { data: topics, error: topicsError } = await supabase
       .from("cloud-topics-cache")
-      .select("id, main_topic, category, weight, sub_topics");
+      .select("id, main_topic, category, weight, sub_topics, parent_topic_id, depth_level");
 
     if (topicsError || !topics) {
       throw new Error("Failed to fetch topics");
@@ -78,12 +79,16 @@ export async function GET(request: Request) {
 
     // Filter by topic if specified
     let filteredNodes = nodes;
-    if (topicId) {
-      // Find the selected topic
-      const selectedTopic = topics.find(t => t.id === topicId);
+    let selectedTopic: any = null; // Declare outside for parent chain access
+    
+    if (topicParam) {
+      // Find the selected topic by ID or name
+      selectedTopic = topics.find(t => 
+        t.id === topicParam || t.main_topic === topicParam
+      );
       
       if (selectedTopic) {
-        // Create nodes for main topic + sub-topics
+        // Create nodes for main topic
         filteredNodes = [
           {
             id: selectedTopic.id,
@@ -94,14 +99,63 @@ export async function GET(request: Request) {
           }
         ];
 
-        // Add sub-topics as separate nodes
-        const subTopicNodes: GraphNode[] = (selectedTopic.sub_topics || []).map((subTopic: string, idx: number) => ({
-          id: `${selectedTopic.id}-sub-${idx}`,
-          name: subTopic,
-          category: selectedTopic.category || "Other",
-          weight: 40, // Smaller weight for sub-topics
-          subTopics: [],
-        }));
+        // Fetch actual child topics from database using parent_topic_id
+        const { data: childTopics } = await supabase
+          .from("cloud-topics-cache")
+          .select("id, main_topic, category, weight")
+          .eq("parent_topic_id", selectedTopic.id);
+
+        let subTopicNodes: GraphNode[] = [];
+
+        // If no child topics exist but sub_topics JSON array has data, migrate them to database
+        if ((!childTopics || childTopics.length === 0) && selectedTopic.sub_topics && selectedTopic.sub_topics.length > 0) {
+          console.log(`🔄 Migrating sub-topics for "${selectedTopic.main_topic}" to database...`);
+          
+          // Create database records for each sub-topic
+          const subTopicsToInsert = selectedTopic.sub_topics.map((name: string) => ({
+            main_topic: name,
+            parent_topic_id: selectedTopic.id,
+            depth_level: 1, // First level sub-topics
+            category: selectedTopic.category || "Other",
+            weight: 40,
+            sub_topics: [],
+            has_children: false
+          }));
+
+          const { data: insertedTopics, error: insertError } = await supabase
+            .from("cloud-topics-cache")
+            .insert(subTopicsToInsert)
+            .select("id, main_topic, category, weight");
+
+          if (!insertError && insertedTopics) {
+            console.log(`✅ Migrated ${insertedTopics.length} sub-topics to database`);
+            
+            // Update parent to mark it has children
+            await supabase
+              .from("cloud-topics-cache")
+              .update({ has_children: true })
+              .eq("id", selectedTopic.id);
+
+            subTopicNodes = insertedTopics.map((topic: any) => ({
+              id: topic.id,
+              name: topic.main_topic,
+              category: topic.category || "Other",
+              weight: topic.weight || 40,
+              subTopics: [],
+            }));
+          } else {
+            console.error("Failed to migrate sub-topics:", insertError);
+          }
+        } else if (childTopics && childTopics.length > 0) {
+          // Child topics already exist in database
+          subTopicNodes = childTopics.map((child: any) => ({
+            id: child.id,
+            name: child.main_topic,
+            category: child.category || "Other",
+            weight: child.weight || 40,
+            subTopics: [],
+          }));
+        }
 
         filteredNodes = [...filteredNodes, ...subTopicNodes];
 
@@ -114,12 +168,12 @@ export async function GET(request: Request) {
           reasoning: "Sub-topic"
         }));
       } else {
-        // Original filtering logic if topic not found
+        // Original filtering logic if topic not found by name, try by ID
         const connectedEdges = edges.filter(
-          edge => edge.source === topicId || edge.target === topicId
+          edge => edge.source === topicParam || edge.target === topicParam
         );
 
-        const connectedNodeIds = new Set<string>([topicId]);
+        const connectedNodeIds = new Set<string>([topicParam]);
         connectedEdges.forEach(edge => {
           connectedNodeIds.add(edge.source);
           connectedNodeIds.add(edge.target);
@@ -160,7 +214,22 @@ export async function GET(request: Request) {
       },
     };
 
-    return NextResponse.json(graphData);
+    // If this is a single topic, fetch its parent chain for breadcrumb
+    let parentChain: Array<{ id: string; name: string }> = [];
+    if (topicParam && selectedTopic) {
+      let currentParentId = selectedTopic.parent_topic_id;
+      
+      // Traverse up the parent chain
+      while (currentParentId) {
+        const parent = topics.find(t => t.id === currentParentId);
+        if (!parent) break;
+        
+        parentChain.unshift({ id: parent.id, name: parent.main_topic });
+        currentParentId = parent.parent_topic_id;
+      }
+    }
+
+    return NextResponse.json({ ...graphData, parentChain });
 
   } catch (error) {
     console.error("💥 Knowledge graph fetch error:", error);
