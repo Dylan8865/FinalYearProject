@@ -164,18 +164,12 @@ const IslandTooltip = ({
         {/* Stats */}
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           {/* Island's description */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <div className="flex flex-col items-start justify-between gap-1">
             <span style={{ color: "#9ca3af", fontSize: "12px" }}>
               Description
             </span>
             <span
-              className="ml-4 flex-1 truncate text-right"
+              className="flex-1 text-wrap"
               title={toCapitalise(islandDescription)}
               style={{ color: "#fff", fontWeight: "400", fontSize: "13px" }}
             >
