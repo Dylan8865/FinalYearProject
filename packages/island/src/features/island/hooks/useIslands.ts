@@ -35,7 +35,7 @@ export function useIslands() {
 
   const createIsland = async (
     name: string,
-    genre: string,
+    description: string,
     theme: string,
     level: number = 1
   ) => {
@@ -45,7 +45,7 @@ export function useIslands() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, genre, theme, level }),
+        body: JSON.stringify({ name, description, theme, level }),
       });
 
       if (!response.ok) {
@@ -64,7 +64,7 @@ export function useIslands() {
     id: string,
     updates: {
       name?: string;
-      genre?: string;
+      description?: string;
       theme?: string;
       level?: number;
     }

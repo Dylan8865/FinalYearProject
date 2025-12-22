@@ -8,7 +8,7 @@ import { useState } from "react";
 
 interface IslandTooltipProps {
   islandName: string;
-  islandGenre: string;
+  islandDescription: string;
   islandTheme: string;
   islandLevel: number;
   manaRate: number;
@@ -39,7 +39,7 @@ interface IslandTooltipProps {
  */
 const IslandTooltip = ({
   islandName,
-  islandGenre,
+  islandDescription,
   islandTheme,
   islandLevel,
   manaRate,
@@ -163,7 +163,7 @@ const IslandTooltip = ({
 
         {/* Stats */}
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          {/* Island's genre */}
+          {/* Island's description */}
           <div
             style={{
               display: "flex",
@@ -171,13 +171,15 @@ const IslandTooltip = ({
               alignItems: "center",
             }}
           >
-            <span style={{ color: "#9ca3af", fontSize: "12px" }}>Genre</span>
+            <span style={{ color: "#9ca3af", fontSize: "12px" }}>
+              Description
+            </span>
             <span
               className="ml-4 flex-1 truncate text-right"
-              title={toCapitalise(islandGenre)}
+              title={toCapitalise(islandDescription)}
               style={{ color: "#fff", fontWeight: "400", fontSize: "13px" }}
             >
-              {toCapitalise(islandGenre)}
+              {toCapitalise(islandDescription)}
             </span>
           </div>
 
