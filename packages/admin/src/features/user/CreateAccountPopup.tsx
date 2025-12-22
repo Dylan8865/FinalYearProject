@@ -87,31 +87,30 @@ export default function CreateAccountModal({ onClose, onSuccess, onError }: Crea
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#1A1A1A] rounded-3xl border-2 border-[#3B3B3B] w-full max-w-lg shadow-2xl shadow-black/50 max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-[#333333] rounded-lg border border-[#3B3B3B] p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 text-gray-400 hover:text-white hover:bg-[#3B3B3B]
-                     rounded-full w-10 h-10 flex items-center justify-center
-                     transition-all duration-200 text-2xl leading-none"
+          className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl leading-none"
         >
-        ×
+          ×
         </button>
         {/* Modal Header */}
-        <div className="p-8 pb-0">
-          <h1 className="text-lg sm:text-xl font-semibold text-white">
-            Create Account
-          </h1>
-          <p className="text-xs text-[#5D5D5D] mt-1">
-            Add a new user to the system
-          </p>
+        <div className="mb-4">
+          <h2 className="text-white text-xl font-semibold">Create Account</h2>
         </div>
 
         {/* Modal Content */}
-        <form onSubmit={handleSubmit} noValidate className="p-8 space-y-6">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           {/* Name */}
           <div>
-            <label className="text-white text-sm font-medium mb-2 block">Name *</label>
+            <label className="text-gray-400 text-xs mb-2 block">Name *</label>
             <input
               type="text"
               value={name}
@@ -122,7 +121,7 @@ export default function CreateAccountModal({ onClose, onSuccess, onError }: Crea
                 }
               }}
               disabled={isLoading}
-              className={`w-full rounded-lg border ${fieldErrors.name ? 'border-red-500' : 'border-[#3B3B3B]'} bg-[#18181A] px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+              className={`w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border ${fieldErrors.name ? 'border-red-500' : 'border-[#3B3B3B]'} focus:outline-none focus:border-[#7B7B7B] disabled:opacity-50`}
               placeholder="Enter full name"
             />
             {fieldErrors.name && (
@@ -132,7 +131,7 @@ export default function CreateAccountModal({ onClose, onSuccess, onError }: Crea
 
           {/* Email */}
           <div>
-            <label className="text-white text-sm font-medium mb-2 block">Email *</label>
+            <label className="text-gray-400 text-xs mb-2 block">Email *</label>
             <input
               type="email"
               value={email}
@@ -143,7 +142,7 @@ export default function CreateAccountModal({ onClose, onSuccess, onError }: Crea
                 }
               }}
               disabled={isLoading}
-              className={`w-full rounded-lg border ${fieldErrors.email ? 'border-red-500' : 'border-[#3B3B3B]'} bg-[#18181A] px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+              className={`w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border ${fieldErrors.email ? 'border-red-500' : 'border-[#3B3B3B]'} focus:outline-none focus:border-[#7B7B7B] disabled:opacity-50`}
               placeholder="user@example.com"
             />
             {fieldErrors.email && (
@@ -153,7 +152,7 @@ export default function CreateAccountModal({ onClose, onSuccess, onError }: Crea
 
           {/* Password */}
           <div>
-            <label className="text-white text-sm font-medium mb-2 block">Password *</label>
+            <label className="text-gray-400 text-xs mb-2 block">Password *</label>
             <input
               type="password"
               value={password}
@@ -164,7 +163,7 @@ export default function CreateAccountModal({ onClose, onSuccess, onError }: Crea
                 }
               }}
               disabled={isLoading}
-              className={`w-full rounded-lg border ${fieldErrors.password ? 'border-red-500' : 'border-[#3B3B3B]'} bg-[#18181A] px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+              className={`w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border ${fieldErrors.password ? 'border-red-500' : 'border-[#3B3B3B]'} focus:outline-none focus:border-[#7B7B7B] disabled:opacity-50`}
               placeholder="Minimum 6 characters"
             />
             {fieldErrors.password && (
@@ -174,7 +173,7 @@ export default function CreateAccountModal({ onClose, onSuccess, onError }: Crea
 
           {/* Confirm Password */}
           <div>
-            <label className="text-white text-sm font-medium mb-2 block">Confirm Password *</label>
+            <label className="text-gray-400 text-xs mb-2 block">Confirm Password *</label>
             <input
               type="password"
               value={confirmPassword}
@@ -185,7 +184,7 @@ export default function CreateAccountModal({ onClose, onSuccess, onError }: Crea
                 }
               }}
               disabled={isLoading}
-              className={`w-full rounded-lg border ${fieldErrors.confirmPassword ? 'border-red-500' : 'border-[#3B3B3B]'} bg-[#18181A] px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+              className={`w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border ${fieldErrors.confirmPassword ? 'border-red-500' : 'border-[#3B3B3B]'} focus:outline-none focus:border-[#7B7B7B] disabled:opacity-50`}
               placeholder="Re-enter password"
             />
             {fieldErrors.confirmPassword && (
@@ -195,57 +194,35 @@ export default function CreateAccountModal({ onClose, onSuccess, onError }: Crea
 
           {/* Account Type */}
           <div>
-            <label className="text-white text-sm font-medium mb-2 block">Account Type *</label>
-            <div className="relative">
-              <select
-                value={accountType}
-                onChange={(e) => setAccountType(e.target.value)}
-                disabled={isLoading}
-                className="w-full rounded-lg border border-[#3B3B3B] bg-[#18181A] px-4 py-3 pr-10 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer appearance-none"
-              >
-                <option value="island">Island</option>
-                <option value="non-island">Non-Island</option>
-                <option value="admin">Admin</option>
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                ▼
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mt-1.5">
-              {accountType === "island" && "User can manage their own island"}
-              {accountType === "non-island" && "User without island management"}
-              {accountType === "admin" && "Full administrative access"}
-            </p>
+            <label className="text-gray-400 text-xs mb-2 block">Account Type *</label>
+            <select
+              value={accountType}
+              onChange={(e) => setAccountType(e.target.value)}
+              disabled={isLoading}
+              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B] disabled:opacity-50"
+            >
+              <option value="island">Island</option>
+              <option value="non-island">Non-Island</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-6">
+          <div className="space-y-2 pt-2">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="flex-1 px-6 py-3.5 rounded-xl border-2 border-[#3B3B3B] bg-transparent text-white hover:bg-[#282828] hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold"
+              className="w-full bg-[#333333] hover:bg-[#4B4B4B] text-white border-2 border-[#4B4B4B] py-2 rounded transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-xl hover:shadow-blue-600/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all font-semibold flex items-center justify-center gap-2"
+              className="w-full bg-[#6D3F33] hover:bg-[#7B4A3A] text-white py-2 rounded transition-colors disabled:opacity-50"
             >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating...
-                </>
-              ) : (
-                <>
-                  Create Account
-                </>
-              )}
+              {isLoading ? "Creating..." : "Create Account"}
             </button>
           </div>
         </form>

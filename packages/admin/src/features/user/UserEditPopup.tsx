@@ -170,8 +170,14 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
   const shortUID = user.id.slice(0, 8) + "..." + user.id.slice(-8);
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-8">
-      <div className="bg-[#333333] rounded-lg border border-[#3B3B3B] w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+    <div 
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-[#333333] rounded-lg border border-[#3B3B3B] p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div className="relative pb-2">
           <button
