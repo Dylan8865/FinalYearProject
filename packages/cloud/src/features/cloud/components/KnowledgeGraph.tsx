@@ -22,6 +22,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [mouseDownPos, setMouseDownPos] = useState({ x: 0, y: 0 });
 
   // Initialize node positions
   useEffect(() => {
@@ -186,26 +187,23 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
       if (!pos) return;
 
       const isCentralNode = selectedNodeId === node.id;
-      const isSubTopic = node.id.includes('-sub-');
       const isHovered = hoveredNode?.id === node.id;
       const isSelected = selectedNode?.id === node.id;
       
-      // Central node is larger, sub-topics are smaller
+      // Central node is larger
       const baseRadius = Math.sqrt(node.weight) * 0.5 + 5;
-      const radius = isCentralNode ? baseRadius * 1.5 : (isSubTopic ? baseRadius * 0.7 : baseRadius);
+      const radius = isCentralNode ? baseRadius * 1.5 : baseRadius;
 
       // Node circle
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
       ctx.fillStyle = isCentralNode
         ? "rgba(139, 92, 246, 0.95)" // Purple for central topic
-        : isSubTopic
-        ? "rgba(59, 130, 246, 0.8)" // Blue for sub-topics
         : isSelected 
         ? "rgba(255, 100, 100, 0.9)"
         : isHovered 
         ? "rgba(100, 200, 255, 0.9)"
-        : "rgba(100, 150, 255, 0.7)";
+        : "rgba(59, 130, 246, 0.8)"; // Blue for all other nodes
       ctx.fill();
       ctx.strokeStyle = isCentralNode ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 255, 255, 0.5)";
       ctx.lineWidth = isCentralNode ? 4 : (isHovered || isSelected ? 3 : 1);
@@ -213,7 +211,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
 
       // Node label - always show labels
       ctx.fillStyle = "white";
-      ctx.font = `${isCentralNode ? 'bold 16px' : (isSubTopic ? '11px' : '14px')} sans-serif`;
+      ctx.font = `${isCentralNode ? 'bold 16px' : '14px'} sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(node.name, pos.x, pos.y - radius - 10);
@@ -224,48 +222,60 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
 
   // Mouse handlers
   const handleMouseDown = (e: React.MouseEvent) => {
+    setMouseDownPos({ x: e.clientX, y: e.clientY });
     setIsDragging(true);
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging) {
-      setPan({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
-      });
-    } else {
-      // Check hover
-      const rect = canvasRef.current?.getBoundingClientRect();
-      if (!rect) return;
-
-      const x = (e.clientX - rect.left - pan.x) / zoom;
-      const y = (e.clientY - rect.top - pan.y) / zoom;
-
-      let found = null;
-      for (const node of nodes) {
-        const pos = positions.get(node.id);
-        if (!pos) continue;
-
-        const radius = Math.sqrt(node.weight) * 0.5 + 5;
-        const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
-        
-        if (distance < radius) {
-          found = node;
-          break;
-        }
+      const moved = Math.abs(e.clientX - pan.x - dragStart.x) > 5 || 
+                    Math.abs(e.clientY - pan.y - dragStart.y) > 5;
+      if (moved) {
+        setPan({
+          x: e.clientX - dragStart.x,
+          y: e.clientY - dragStart.y,
+        });
       }
-
-      setHoveredNode(found);
     }
+    
+    // Always check hover (even while dragging)
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const x = (e.clientX - rect.left - pan.x) / zoom;
+    const y = (e.clientY - rect.top - pan.y) / zoom;
+
+    let found = null;
+    for (const node of nodes) {
+      const pos = positions.get(node.id);
+      if (!pos) continue;
+
+      const radius = Math.sqrt(node.weight) * 0.5 + 5;
+      const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
+      
+      if (distance < radius) {
+        found = node;
+        break;
+      }
+    }
+
+    setHoveredNode(found);
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
-  const handleClick = () => {
-    if (hoveredNode) {
+  const handleClick = (e: React.MouseEvent) => {
+    // Only trigger click if mouse didn't move much (wasn't a drag)
+    const dragDistance = Math.sqrt(
+      Math.pow(e.clientX - mouseDownPos.x, 2) + 
+      Math.pow(e.clientY - mouseDownPos.y, 2)
+    );
+    
+    if (dragDistance < 5 && hoveredNode) {
+      console.log('🖱️ Node clicked:', hoveredNode);
       setSelectedNode(hoveredNode);
       if (onNodeClick) {
         onNodeClick(hoveredNode);
@@ -285,7 +295,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
         ref={canvasRef}
         width={1200}
         height={800}
-        className="w-full h-full cursor-move"
+        className={`w-full h-full ${hoveredNode ? 'cursor-pointer' : 'cursor-move'}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

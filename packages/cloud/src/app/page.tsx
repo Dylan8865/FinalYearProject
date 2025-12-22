@@ -2,6 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import IslandIcon from "@/icons/IslandIcon";
+import TagCanvas3D from "@/features/cloud/components/TagCanvas3D";
+import { useTopics } from "@/features/cloud/hooks/useTopics";
+import { useAuth } from "@/hooks/useAuth";
+import { createClient } from "@/lib/supabase/client";
 
 // Word cloud data with different sizes and positions
 const CLOUD_WORDS = [
@@ -57,6 +62,7 @@ export default function Cloud() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const { user, loading: authLoading } = useAuth();
 
   // Fetch topics from database
   const { topics, words, loading, error, refetch } = useTopics();
@@ -112,7 +118,7 @@ export default function Cloud() {
   }, [loading, words.length, isProcessing, refetch]);
 
   // Use database words if available, otherwise fallback
-  const cloudWords = words.length > 0 ? words : FALLBACK_WORDS;
+  const cloudWords = words.length > 0 ? words : CLOUD_WORDS;
 
   // Filter words based on search query
   const filteredWords = activeSearch
@@ -122,11 +128,8 @@ export default function Cloud() {
     : cloudWords;
 
   const handleWordClick = (word: string) => {
-    setClickedWord(word);
-    setTimeout(() => {
-      // Navigate to search app
-      window.location.href = `http://localhost:3005?q=${encodeURIComponent(word)}`;
-    }, 200);
+    // Navigate to knowledge graph with selected topic
+    router.push(`/knowledge-graph?topic=${encodeURIComponent(word)}`);
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -137,6 +140,13 @@ export default function Cloud() {
   const handleClearSearch = () => {
     setSearchQuery("");
     setActiveSearch("");
+  };
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    // The useAuth hook will automatically detect the sign out
+    // No need to redirect, the UI will update automatically
   };
 
   return (
@@ -166,7 +176,7 @@ export default function Cloud() {
               className="text-gray-400 hover:text-white transition-colors"
             >
               Search
-            </button>
+            </a>
             <button className="text-white font-medium border-b-2 border-white">
               Cloud
             </button>
@@ -179,51 +189,77 @@ export default function Cloud() {
           </nav>
         </div>
 
-        <button
-          onClick={() => router.push("/login")}
-          className="text-white hover:text-gray-300 transition-colors"
-        >
-          Sign in
-        </button>
+        {user ? (
+          <div className="flex items-center gap-4">
+            <span className="text-gray-300 text-sm">
+              {user.email}
+            </span>
+            <button
+              onClick={() => router.push("/favorites")}
+              className="text-white hover:text-gray-300 transition-colors"
+            >
+              ⭐ Favorites
+            </button>
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => router.push("/login")}
+            className="text-white hover:text-gray-300 transition-colors"
+          >
+            Sign in
+          </button>
+        )}
       </header>
 
       {/* 3D Word Cloud */}
-      <div className="absolute inset-0 flex items-center justify-center pt-16">
+      <div className="absolute inset-0 flex items-center justify-center pt-16 px-4">
         {loading ? (
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
             <p className="text-gray-400">Loading topics...</p>
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4 w-full">
             <p className="text-yellow-400">Using offline data</p>
             <TagCanvas3D
               words={filteredWords}
-              width={700}
-              height={700}
+              width={window.innerWidth - 32}
+              height={800}
               onWordClick={handleWordClick}
               options={{
-                textHeight: 20,
-                maxSpeed: 0.03,
-                depth: 0.75,
-                outlineColour: "transparent",
-                outlineThickness: 0,
+                textHeight: 16,
+                maxSpeed: 0.04,
+                depth: 0.8,
+                radiusX: 1.2,
+                radiusY: 0.95,
+                radiusZ: 0.95,
+                zoom: 0.9,
               }}
+              className="w-full"
             />
           </div>
         ) : (
           <TagCanvas3D
             words={filteredWords}
-            width={700}
-            height={700}
+            width={window.innerWidth - 32}
+            height={800}
             onWordClick={handleWordClick}
             options={{
-              textHeight: 20,
-              maxSpeed: 0.03,
-              depth: 0.75,
-              outlineColour: "transparent",
-              outlineThickness: 0,
+              textHeight: 16,
+              maxSpeed: 0.04,
+              depth: 0.8,
+              radiusX: 1.2,
+              radiusY: 0.95,
+              radiusZ: 0.95,
+              zoom: 0.9,
             }}
+            className="w-full"
           />
         )}
       </div>
