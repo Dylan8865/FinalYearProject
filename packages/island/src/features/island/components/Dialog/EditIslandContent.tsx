@@ -15,7 +15,7 @@ interface EditIslandContentProps {
   island: {
     id: string;
     name: string;
-    genre: string;
+    description: string;
     theme: string;
   };
   onIslandUpdated: () => void;
@@ -35,11 +35,11 @@ const EditIslandContent = ({
 
   const [value, setValue] = useState<{
     name: string;
-    genre: string;
+    description: string;
     theme: Option | null;
   }>({
     name: island.name,
-    genre: island.genre,
+    description: island.description,
     theme:
       {
         spring: { label: "Spring", value: "spring" },
@@ -51,11 +51,11 @@ const EditIslandContent = ({
 
   const [errors, setErrors] = useState<{
     name: string;
-    genre: string;
+    description: string;
     theme: string;
   }>({
     name: "",
-    genre: "",
+    description: "",
     theme: "",
   });
 
@@ -75,7 +75,7 @@ const EditIslandContent = ({
     e.preventDefault();
     const newErrors = {
       name: value.name ? "" : "This field is required",
-      genre: value.genre ? "" : "This field is required",
+      description: value.description ? "" : "This field is required",
       theme: value.theme ? "" : "This field is required",
     };
 
@@ -87,7 +87,7 @@ const EditIslandContent = ({
 
     updateIsland(island.id, {
       name: value.name,
-      genre: value.genre,
+      description: value.description,
       theme: value.theme!.value,
     }).then((response) => {
       if (response) {
@@ -191,15 +191,15 @@ const EditIslandContent = ({
           error={errors.name}
         />
         <AddIslandInput
-          id="islandGenre"
-          name="genre"
+          id="islandDescription"
+          name="description"
           type="text"
-          placeholder="Island Genre"
+          placeholder="Island Description"
           color="#8cada5"
           width="100%"
-          value={value.genre}
+          value={value.description}
           handleChange={handleChange}
-          error={errors.genre}
+          error={errors.description}
         />
         <AddIslandSelect
           id="islandTheme"

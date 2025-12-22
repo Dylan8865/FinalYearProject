@@ -41,17 +41,13 @@ const ExploreCard = ({
                 Content
               </p>
               <p className="text-xs text-black leading-snug line-clamp-4">
-                {description || "No genre available"}
+                {description || "No description available"}
               </p>
             </div>
 
             <div className="pt-2 border-t border-black/10">
-              <p className="text-[11px] text-black/60">
-                Last updated by
-              </p>
-              <p className="text-xs text-black font-medium">
-                {lastUpdatedBy}
-              </p>
+              <p className="text-[11px] text-black/60">Last updated by</p>
+              <p className="text-xs text-black font-medium">{lastUpdatedBy}</p>
             </div>
           </div>
         </div>

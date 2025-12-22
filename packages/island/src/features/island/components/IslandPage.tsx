@@ -158,7 +158,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const [editingIsland, setEditingIsland] = useState<{
     id: string;
     name: string;
-    genre: string;
+    description: string;
     theme: string;
   } | null>(null);
 
@@ -172,10 +172,10 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
   const handleEditIsland = (
     id: string,
     name: string,
-    genre: string,
+    description: string,
     theme: string
   ) => {
-    setEditingIsland({ id, name, genre, theme });
+    setEditingIsland({ id, name, description, theme });
     setIsDialogOpen("edit-island");
   };
 
