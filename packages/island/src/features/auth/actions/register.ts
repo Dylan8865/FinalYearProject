@@ -60,7 +60,7 @@ export async function register(formData: FormData) {
         level: 1,
         theme: theme,
         profile_id: authData.user.id,
-        genre: "General",
+        description: "General",
         last_updated_at: new Date().toISOString(),
         accumulated_mana: 0,
       });

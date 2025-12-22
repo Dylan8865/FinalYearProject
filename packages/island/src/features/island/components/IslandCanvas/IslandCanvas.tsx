@@ -15,7 +15,7 @@ import Whales from "./Whales";
 
 export interface IslandData {
   id: string;
-  genre: string;
+  description: string;
   theme: string;
   position: [number, number, number];
   gridSize: number;
@@ -52,7 +52,7 @@ interface IslandCanvasProps {
   onEditIsland?: (
     id: string,
     name: string,
-    genre: string,
+    description: string,
     theme: string
   ) => void;
   onUpgradeIsland?: (id: string) => void;
@@ -122,7 +122,7 @@ const IslandCanvas = ({
                 // Mana-related props
                 islandId={island.id}
                 islandName={island.name || "My Island"}
-                islandGenre={island.genre}
+                islandDescription={island.description}
                 islandTheme={island.theme}
                 islandLevel={island.level || 1}
                 manaRate={manaState.manaRate}
@@ -139,7 +139,7 @@ const IslandCanvas = ({
                   onEditIsland?.(
                     island.id,
                     island.name || "My Island",
-                    island.genre,
+                    island.description,
                     island.theme
                   );
                 }}

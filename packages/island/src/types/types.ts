@@ -14,7 +14,7 @@ export interface IslandType {
   created_at: string;
   name: string;
   level: number;
-  genre: string;
+  description: string;
   theme: string;
   profile_id: string;
   user: ProfileType;

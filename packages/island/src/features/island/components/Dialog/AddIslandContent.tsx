@@ -25,21 +25,21 @@ const AddIslandContent = ({
 }: AddIslandContentProps) => {
   const [value, setValue] = useState<{
     name: string;
-    genre: string;
+    description: string;
     theme: Option | null;
   }>({
     name: "",
-    genre: "",
+    description: "",
     theme: null,
   });
 
   const [errors, setErrors] = useState<{
     name: string;
-    genre: string;
+    description: string;
     theme: string;
   }>({
     name: "",
-    genre: "",
+    description: "",
     theme: "",
   });
 
@@ -62,7 +62,7 @@ const AddIslandContent = ({
     e.preventDefault();
     const newErrors = {
       name: value.name ? "" : "This field is required",
-      genre: value.genre ? "" : "This field is required",
+      description: value.description ? "" : "This field is required",
       theme: value.theme ? "" : "This field is required",
     };
 
@@ -73,7 +73,7 @@ const AddIslandContent = ({
     }
 
     setDisabled(true);
-    createIsland(value.name, value.genre, value.theme!.value).then(
+    createIsland(value.name, value.description, value.theme!.value).then(
       (response) => {
         if (response) {
           const newMana = mana - 1_000_000;
@@ -103,15 +103,15 @@ const AddIslandContent = ({
           error={errors.name}
         />
         <AddIslandInput
-          id="islandGenre"
-          name="genre"
+          id="islandDescription"
+          name="description"
           type="text"
-          placeholder="Island Genre"
+          placeholder="Island Description"
           color="#8cada5"
           width="100%"
-          value={value.genre}
+          value={value.description}
           handleChange={handleChange}
-          error={errors.genre}
+          error={errors.description}
         />
         <AddIslandSelect
           id="islandTheme"
