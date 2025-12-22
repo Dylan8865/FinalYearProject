@@ -1,6 +1,19 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+// Helper function to propagate feedback to knowledge entries
+// No action needed - feedback is already in the 'feedback' table
+// Engagement scores are calculated on-the-fly during search
+async function propagateFeedbackToEntries(
+  supabase: any,
+  messageId: string,
+  feedbackType: "positive" | "negative"
+) {
+  // No-op: feedback is already stored in 'feedback' table
+  // Search will calculate engagement scores on-the-fly by querying feedback + search-history
+  console.log(`[Feedback] ${feedbackType} feedback stored for message ${messageId} (will be calculated on-the-fly)`);
+}
+
 // Types
 interface FeedbackRequest {
   messageId: string;
@@ -98,6 +111,9 @@ export async function POST(request: Request) {
         error: "Failed to submit feedback",
       });
     }
+
+    // Propagate feedback to underlying knowledge entries
+    await propagateFeedbackToEntries(supabase, messageId, feedbackType);
 
     return NextResponse.json<FeedbackResponse>({
       success: true,

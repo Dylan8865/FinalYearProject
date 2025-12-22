@@ -40,7 +40,9 @@ ${context}
 
 User question: ${query}
 
-Please provide a helpful, conversational response that synthesizes the information above. Include relevant details and cite the sources when appropriate.`
+Please provide a helpful, conversational response that synthesizes the information above. 
+DO NOT include source citations like "(Source 1: callout)" in your response. 
+Present the information naturally without referencing where it came from.`
     : `${systemPrompt || defaultSystemPrompt}
 
 User question: ${query}
