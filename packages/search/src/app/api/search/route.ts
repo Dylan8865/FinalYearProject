@@ -46,6 +46,7 @@ interface SearchResponse {
   relatedTopics?: string[];
   error?: string;
   historyId?: string;
+  usedEntries?: string[]; // Track which entries contributed to the answer
 }
 
 // Calculate recency score (0-100) based on created_at
@@ -63,12 +64,34 @@ function calculateRecencyScore(createdAt: string): number {
   return 20;
 }
 
+// Calculate engagement score (0-100) based on user feedback
+function calculateEngagementScore(
+  positiveCount: number,
+  negativeCount: number
+): number {
+  const totalFeedback = positiveCount + negativeCount;
+  
+  // If no feedback, return neutral score
+  if (totalFeedback === 0) return 50;
+  
+  // Calculate percentage of positive feedback
+  const positiveRate = positiveCount / totalFeedback;
+  
+  // Convert to 0-100 score with some dampening for low feedback counts
+  // Items with more feedback are more reliable
+  const confidenceFactor = Math.min(totalFeedback / 10, 1); // Full confidence at 10+ feedback
+  const baseScore = positiveRate * 100;
+  
+  // Blend with neutral score based on confidence
+  return Math.round(baseScore * confidenceFactor + 50 * (1 - confidenceFactor));
+}
+
 // Calculate total score using ranking algorithm C1
 function calculateTotalScore(
   relevanceScore: number,
   validityScore: number,
   recencyScore: number,
-  engagementScore: number = 50 // Default engagement score
+  engagementScore: number
 ): number {
   // C1: Relevance Score = (AI Similarity × 0.4) + (Validity × 0.3) + (Recency × 0.2) + (Engagement × 0.1)
   return (
@@ -212,16 +235,17 @@ export async function POST(request: Request) {
   }
 }
 
-// Helper function to save search history
+// Helper function to save search history and track which entries were used
 async function saveSearchHistory(
   supabase: any,
   query: string,
   answer: string,
   chatId?: string,
   userId?: string,
-  promptOrder?: number
+  promptOrder?: number,
+  usedEntryIds?: string[]
 ): Promise<string | null> {
-  console.log("Attempting to save search history:", { chatId, userId, hasAnswer: !!answer });
+  console.log("Attempting to save search history:", { chatId, userId, hasAnswer: !!answer, usedEntries: usedEntryIds?.length });
   
   if (!chatId || !userId) {
     console.log("Skipping search history save - missing chatId or userId:", { chatId, userId });
@@ -265,6 +289,7 @@ async function saveSearchHistory(
         result_text: answer,
         prompt_order: promptOrder || 0,
         chat_id: chatId,
+        used_entry_ids: usedEntryIds || [], // Store as JSON array in search-history
       })
       .select("id")
       .single();
@@ -272,10 +297,12 @@ async function saveSearchHistory(
     if (historyError) {
       console.error("Error saving search history:", historyError);
       return null;
-    } else {
-      console.log("Search history saved successfully:", historyData);
-      return historyData?.id || null;
     }
+    
+    const historyId = historyData?.id || null;
+    console.log("Search history saved successfully with entry mappings:", historyData);
+    
+    return historyId;
   } catch (error) {
     console.error("Failed to save search history (caught exception):", error);
     return null;
@@ -287,9 +314,7 @@ function normalizeQuery(query: string): string {
   return query
     .toLowerCase()
     .trim()
-    // Remove common question words
-    .replace(/^(what is|what's|what are|how to|how do|tell me about|explain|describe|define)\s+/i, '')
-    // Remove question marks and extra punctuation
+    // Only remove question marks at the end
     .replace(/[?!.]+$/, '')
     // Remove extra spaces
     .replace(/\s+/g, ' ')
@@ -375,18 +400,18 @@ async function handleSearch(
   try {
     const supabase = await createClient();
     
-    // Step 1: Check analysis-cache for similar queries (cached answers)
+    // Step 1: Check analysis-cache using semantic search (has embeddings)
     const normalizedQuery = normalizeQuery(query);
     
-    // Try semantic search first if embeddings are available
+    // Try semantic search in cache first
     const queryEmbedding = await generateEmbedding(query);
     let cachedAnswers = null;
     
     if (queryEmbedding) {
-      // Use vector similarity search
+      // Use vector similarity search on cache with very strict threshold
       const { data: semanticMatches } = await supabase.rpc('match_cache_queries', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.85, // 85% similarity
+        match_threshold: 0.95, // 95% similarity - almost exact match required
         match_count: 1
       });
       
@@ -396,7 +421,7 @@ async function handleSearch(
       }
     }
     
-    // Fallback to normalized text matching if no semantic match
+    // Fallback to exact text match if no semantic match
     if (!cachedAnswers) {
       const { data } = await supabase
         .from("analysis-cache")
@@ -405,7 +430,7 @@ async function handleSearch(
         .limit(1);
       cachedAnswers = data;
       if (cachedAnswers && cachedAnswers.length > 0) {
-        console.log(`[CACHE] Text cache hit: "${normalizedQuery}"`);
+        console.log(`[CACHE] Exact text cache hit: "${normalizedQuery}"`);
       }
     }
 
@@ -436,12 +461,19 @@ async function handleSearch(
     }
 
     // Step 2: Search in item-data table for actual knowledge
+    console.log('[DEBUG] Searching item-data for query:', query);
     const { data: entries, error } = await supabase
       .from("item-data")
       .select("id, content, created_at, type, validity, order_index")
       .gte("validity", 60)
       .order("order_index", { ascending: true })
       .limit(100);
+
+    console.log('[DEBUG] Database response:', { 
+      entriesCount: entries?.length || 0, 
+      hasError: !!error,
+      errorMessage: error?.message 
+    });
 
     if (error) {
       console.error("Supabase search error:", error);
@@ -493,6 +525,53 @@ async function handleSearch(
       });
     }
 
+    // Calculate feedback counts ON-THE-FLY from existing feedback table
+    // No new tables, no changes to item-data!
+    const entryIds = entries.map(e => e.id);
+    
+    // Query all search histories that used these entries
+    const { data: historiesWithEntries } = await supabase
+      .from("search-history")
+      .select("id, used_entry_ids")
+      .not("used_entry_ids", "is", null);
+    
+    // Build a map of which search histories used which entries
+    const entryToHistoryMap = new Map<string, string[]>();
+    historiesWithEntries?.forEach((history: any) => {
+      const usedIds = history.used_entry_ids || [];
+      usedIds.forEach((entryId: string) => {
+        if (!entryToHistoryMap.has(entryId)) {
+          entryToHistoryMap.set(entryId, []);
+        }
+        entryToHistoryMap.get(entryId)!.push(history.id);
+      });
+    });
+    
+    // Get feedback for all relevant search histories
+    const allHistoryIds = Array.from(new Set(
+      Array.from(entryToHistoryMap.values()).flat()
+    ));
+    
+    const { data: allFeedback } = allHistoryIds.length > 0 ? await supabase
+      .from("feedback")
+      .select("message_id, feedback_type")
+      .in("message_id", allHistoryIds)
+      : { data: [] };
+    
+    // Count feedback per entry
+    const feedbackMap = new Map<string, { positive: number; negative: number }>();
+    entryIds.forEach(entryId => {
+      const historyIds = entryToHistoryMap.get(entryId) || [];
+      const feedbackForEntry = allFeedback?.filter((f: any) => 
+        historyIds.includes(f.message_id)
+      ) || [];
+      
+      const positive = feedbackForEntry.filter((f: any) => f.feedback_type === "positive").length;
+      const negative = feedbackForEntry.filter((f: any) => f.feedback_type === "negative").length;
+      
+      feedbackMap.set(entryId, { positive, negative });
+    });
+
     // Process and rank results
     const searchResults: SearchResult[] = entries
       .map((entry: KnowledgeEntry) => {
@@ -503,8 +582,21 @@ async function handleSearch(
         
         if (typeof entry.content === "string") {
           // Simple text content (headings, paragraphs, quotes, lists, code, etc.)
-          searchableText = entry.content;
-          description = entry.content;
+          // Content might be JSON-encoded string, so try to parse it
+          try {
+            const parsed = JSON.parse(entry.content);
+            if (typeof parsed === "string") {
+              searchableText = parsed;
+              description = parsed;
+            } else {
+              searchableText = entry.content;
+              description = entry.content;
+            }
+          } catch {
+            // Not JSON, use as-is
+            searchableText = entry.content;
+            description = entry.content;
+          }
           title = entry.type || "Content";
         } else if (entry.content && typeof entry.content === "object") {
           // Object content (could be bookmark, table, or other structured data)
@@ -535,21 +627,44 @@ async function handleSearch(
         
         // Calculate relevance score with keyword matching
         const searchTextLower = searchableText.toLowerCase();
-        const queryLower = query.toLowerCase();
+        const queryLower = query.toLowerCase().trim();
         const queryWords = queryLower.split(/[\s:,.-]+/).filter(w => w.length > 2);
         
-        // Check if query matches (full phrase or significant word overlap)
+        // Extract main keywords and technical terms
+        const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'about', 'common', 'how', 'what', 'when', 'where', 'why'];
+        const keywords = queryWords.filter(w => !stopWords.includes(w));
+        
+        // Identify specific technical terms (uppercase abbreviations, "ratings", "types", etc.)
+        const technicalTerms = keywords.filter(w => 
+          w === w.toUpperCase() || // AFUE, SEER, BTU
+          ['rating', 'ratings', 'efficiency', 'types', 'models', 'brands'].some(t => w.includes(t))
+        );
+        
+        // Check if query matches
         let matchScore = 0;
         if (searchTextLower.includes(queryLower)) {
           matchScore = 100; // Exact phrase match
-        } else {
-          // Count matching words
-          const matchingWords = queryWords.filter(word => searchTextLower.includes(word));
-          matchScore = queryWords.length > 0 ? (matchingWords.length / queryWords.length) * 100 : 0;
+        } else if (technicalTerms.length > 0) {
+          // If query has technical terms, REQUIRE at least one to be in content
+          const matchingTechnical = technicalTerms.filter(term => searchTextLower.includes(term.toLowerCase()));
+          if (matchingTechnical.length > 0) {
+            // Technical term found, check other keywords too
+            const matchingKeywords = keywords.filter(word => searchTextLower.includes(word));
+            matchScore = (matchingKeywords.length / keywords.length) * 100;
+          } else {
+            // No technical terms matched - this content is not relevant
+            matchScore = 0;
+          }
+        } else if (keywords.length > 0) {
+          // No technical terms, just check keyword overlap
+          const matchingKeywords = keywords.filter(word => searchTextLower.includes(word));
+          if (matchingKeywords.length > 0) {
+            matchScore = (matchingKeywords.length / keywords.length) * 100;
+          }
         }
         
-        // Skip entries with very low relevance
-        if (matchScore < 20) {
+        // Require at least 10% match
+        if (matchScore < 10) {
           return null;
         }
         
@@ -557,7 +672,12 @@ async function handleSearch(
         const relevanceScore = matchScore;
         const validityScore = entry.validity || 0; // Use numeric validity (0-100)
         const recencyScore = calculateRecencyScore(entry.created_at);
-        const totalScore = calculateTotalScore(relevanceScore, validityScore, recencyScore);
+        
+        // Get engagement score from feedback data
+        const feedback = feedbackMap.get(entry.id) || { positive: 0, negative: 0 };
+        const engagementScore = calculateEngagementScore(feedback.positive, feedback.negative);
+        
+        const totalScore = calculateTotalScore(relevanceScore, validityScore, recencyScore, engagementScore);
 
         return {
           id: entry.id,
@@ -598,10 +718,13 @@ async function handleSearch(
       });
     }
 
-    // Build context from search results for AI
-    const context = searchResults.slice(0, 5).map((r, i) => 
-      `Source ${i + 1}: ${r.source}\nContent: ${r.content.slice(0, 500)}`
+    // Build context from search results for AI (without source labels)
+    const context = searchResults.slice(0, 5).map(r => 
+      `${r.source}\n${r.content.slice(0, 500)}`
     ).join("\n\n");
+    
+    // Track which entry IDs were used
+    const usedEntryIds = searchResults.slice(0, 5).map(r => r.id);
 
     // Generate AI-powered conversational response using the search results as context
     const aiAnswer = await generateAnswer({ query, context });
@@ -616,8 +739,8 @@ async function handleSearch(
     // Cache the answer for future queries
     await cacheAnswer(supabase, query, answer);
 
-    // Save search history for successful search
-    const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder);
+    // Save search history for successful search with entry mapping
+    const historyId = await saveSearchHistory(supabase, query, answer, chatId, userId, promptOrder, usedEntryIds);
 
     return NextResponse.json<SearchResponse>({
       success: true,
@@ -627,6 +750,7 @@ async function handleSearch(
       hasResults: true,
       relatedTopics,
       historyId: historyId || undefined,
+      usedEntries: usedEntryIds,
     });
   } catch (error) {
     console.error("Search error:", error);
