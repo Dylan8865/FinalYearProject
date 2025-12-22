@@ -4,11 +4,17 @@ import AnalyticsDashboard from "@/features/search/components/AnalyticsDashboard"
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
+    if (error || !user) {
+      redirect("/login?error=session_expired");
+    }
+
+    return <AnalyticsDashboard userId={user.id} />;
+  } catch (error) {
+    console.error("Analytics page auth error:", error);
+    redirect("/login?error=auth_error");
   }
-
-  return <AnalyticsDashboard userId={user.id} />;
 }
