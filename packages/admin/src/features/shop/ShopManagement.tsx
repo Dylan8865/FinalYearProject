@@ -304,14 +304,14 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                               onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
                               min="0"
-                              max="999999999"
+                              max="9999999"
                             />
                           </div>
                           <div className="flex-1">
                             <label className="text-gray-400 text-xs mb-1 block">Max</label>
                             <input
                               type="number"
-                              placeholder="999999999"
+                              placeholder="9999999"
                               value={filterManaMax}
                               onChange={(e) => {
                                 handleManaMaxChange(e.target.value);
@@ -320,7 +320,7 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                               onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
                               min="0"
-                              max="999999999"
+                              max="9999999"
                             />
                           </div>
                         </div>

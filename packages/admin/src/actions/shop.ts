@@ -5,6 +5,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 const MAX_MANA_VALUE = 9999999;
+const MAX_MANA_RATE = 999;
 
 interface UpdateItemData {
   name: string;
@@ -62,8 +63,8 @@ export async function updateItem(itemId: string, data: UpdateItemData) {
   if (typeof data.mana_rate !== "number" || data.mana_rate < 0 || !Number.isInteger(data.mana_rate)) {
     throw new Error("Mana rate must be a non-negative integer");
   }
-  if (data.mana_rate > MAX_MANA_VALUE) {
-    throw new Error(`Mana rate value is too large (max ${MAX_MANA_VALUE.toLocaleString()})`);
+  if (data.mana_rate > MAX_MANA_RATE) {
+    throw new Error(`Mana rate value is too large (max ${MAX_MANA_RATE.toLocaleString()})`);
   }
 
   // Check if item exists
