@@ -37,11 +37,12 @@ export async function login(formData: FormData) {
 
       redirect("/island");
     } else {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        return { error: error.message };
-      }
-      redirect("/");
+      // Sign out since the user was technically authenticated via signInWithPassword
+      await supabase.auth.signOut();
+      return {
+        error:
+          "This account is not registered as an island account. Please register an island account or use the correct account type.",
+      };
     }
   }
 }
