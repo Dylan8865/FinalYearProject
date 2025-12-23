@@ -3,9 +3,6 @@
 import { useState } from "react";
 import { register } from "@/actions/register";
 import WILogo from "@/icons/WILogo";
-import GoogleLogo from "@/icons/GoogleLogo";
-import AppleLogo from "@/icons/AppleLogo";
-import FBLogo from "@/icons/FBLogo";
 import Link from "next/link";
 
 const RegisterPage = () => {
@@ -132,40 +129,11 @@ const RegisterPage = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-[#6D3F33] hover:bg-[#5A2E29] text-white rounded-md p-1.5 mb-3 disabled:opacity-50 disabled:cursor-not-allowed text-[12px]"
+            className="w-full bg-[#6D3F33] hover:bg-[#5A2E29] text-white rounded-md p-1.5 disabled:opacity-50 disabled:cursor-not-allowed text-[12px]"
           >
             {isSubmitting ? "Creating account..." : "Continue"}
           </button>
 
-          <div className="flex items-center">
-            <hr className="flex-grow border-t border-[#3B3B3B]" />
-            <span className="mx-2 sm:mx-3 text-[#5D5D5D] text-sm">or</span>
-            <hr className="flex-grow border-t border-[#3B3B3B]" />
-          </div>
-
-          <div className="flex justify-between mt-3 space-x-3">
-            <button
-              type="button"
-              disabled={isSubmitting}
-              className="flex-1 bg-[#282828] border border-[#3B3B3B] rounded-md p-2 flex items-center justify-center hover:bg-[#18181A] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <GoogleLogo className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              disabled={isSubmitting}
-              className="flex-1 bg-[#282828] border border-[#3B3B3B] rounded-md p-2 flex items-center justify-center hover:bg-[#18181A] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <AppleLogo className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              disabled={isSubmitting}
-              className="flex-1 bg-[#282828] border border-[#3B3B3B] rounded-md p-2 flex items-center justify-center hover:bg-[#18181A] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FBLogo className="w-4 h-4" />
-            </button>
-          </div>
           <div className="flex justify-center mt-4">
             <p className="text-[12px] text-[#5D5D5D]">
               Already have an account?{" "}

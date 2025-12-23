@@ -2,11 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { login } from "../actions/login";
-import { signInWithOAuth } from "../actions/oauth";
 import WILogo from "@/icons/WILogo";
-import GoogleLogo from "@/icons/GoogleLogo";
-import AppleLogo from "@/icons/AppleLogo";
-import FBLogo from "@/icons/FBLogo";
 import Link from "next/link";
 
 const LoginPage = () => {
@@ -19,18 +15,6 @@ const LoginPage = () => {
 
     startTransition(async () => {
       const result = await login(new FormData(e.currentTarget));
-      if (result?.error) {
-        setError(result.error);
-      }
-    });
-  };
-
-  const handleOAuthSignIn = async (
-    provider: "google" | "facebook" | "apple"
-  ) => {
-    setError(null);
-    startTransition(async () => {
-      const result = await signInWithOAuth(provider);
       if (result?.error) {
         setError(result.error);
       }
@@ -94,43 +78,11 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={isPending}
-            className="mb-3 w-full rounded-md bg-teal-600 p-1.5 text-white hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-md bg-teal-600 p-1.5 text-white hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "Signing in..." : "Continue"}
           </button>
 
-          <div className="flex items-center">
-            <hr className="flex-grow border-t border-[#3B3B3B]" />
-            <span className="mx-2 text-sm text-[#5D5D5D] sm:mx-3">or</span>
-            <hr className="flex-grow border-t border-[#3B3B3B]" />
-          </div>
-
-          <div className="mt-3 flex justify-between space-x-3">
-            <button
-              type="button"
-              onClick={() => handleOAuthSignIn("google")}
-              disabled={isPending}
-              className="flex flex-1 items-center justify-center rounded-md border border-[#3B3B3B] bg-[#282828] p-2 hover:bg-[#18181A] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <GoogleLogo className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOAuthSignIn("apple")}
-              disabled={isPending}
-              className="flex flex-1 items-center justify-center rounded-md border border-[#3B3B3B] bg-[#282828] p-2 hover:bg-[#18181A] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <AppleLogo className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOAuthSignIn("facebook")}
-              disabled={isPending}
-              className="flex flex-1 items-center justify-center rounded-md border border-[#3B3B3B] bg-[#282828] p-2 hover:bg-[#18181A] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <FBLogo className="h-4 w-4" />
-            </button>
-          </div>
           <div className="mt-4 flex justify-center">
             <p className="text-[12px] text-[#5D5D5D]">
               Don&apos;t have an account?{" "}

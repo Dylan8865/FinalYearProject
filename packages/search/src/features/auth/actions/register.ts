@@ -35,6 +35,7 @@ export async function register(formData: FormData) {
       name: name,
       email: email,
       last_login_time: new Date().toISOString(),
+      type: "non-island",
     });
 
     if (profileError) {

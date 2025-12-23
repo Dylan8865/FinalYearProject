@@ -28,11 +28,28 @@ export async function login(formData: FormData) {
     return { error: "Authentication failed" };
   }
 
-  // Update last_login_time
+  // Update last_login_time and set type to 'non-island' if not already set
   const now = new Date().toISOString();
+  
+  // First check if profile exists and get current type
+  const { data: profile } = await supabase
+    .from("profile")
+    .select("type")
+    .eq("id", authData.user.id)
+    .single();
+  
+  // Update last_login_time and set type if null
+  const updateData: { last_login_time: string; type?: string } = {
+    last_login_time: now,
+  };
+  
+  if (!profile?.type) {
+    updateData.type = "non-island";
+  }
+  
   await supabase
     .from("profile")
-    .update({ last_login_time: now })
+    .update(updateData)
     .eq("id", authData.user.id);
 
   redirect("/");
