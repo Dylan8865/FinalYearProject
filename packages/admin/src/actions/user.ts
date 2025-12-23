@@ -178,13 +178,18 @@ export async function deleteUser(userId: string) {
 }
 
 export async function resetUser(userId: string) {
-  const supabase = await createClient();
+  // Use service role client for admin operations
+  const supabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
-  // Verify admin privileges
-  const { data: { user } } = await supabase.auth.getUser();
+  // Verify admin privileges using regular client
+  const regularClient = await createClient();
+  const { data: { user } } = await regularClient.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const { data: profile } = await supabase
+  const { data: profile } = await regularClient
     .from("profile")
     .select("type")
     .eq("id", user.id)
