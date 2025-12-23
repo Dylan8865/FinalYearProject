@@ -132,7 +132,6 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
     return matchesSearch && matchesType && matchesManaMin && matchesManaMax && matchesLevelMin && matchesLevelMax && matchesDateFrom && matchesDateTo;
   });
 
-  // Sort users
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (!sortColumn || sortOrder === "none") {
       // Default: newest first

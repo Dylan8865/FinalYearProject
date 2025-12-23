@@ -118,8 +118,7 @@ export async function updateIslandItemStatus(
   adminComment?: string
 ) {
   await requireAdmin();
-  
-  // Input validation
+
   if (!id || typeof id !== "string" || id.trim().length === 0) {
     throw new Error("Invalid island item ID");
   }

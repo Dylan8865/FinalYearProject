@@ -193,7 +193,6 @@ export default function ValidationLogDashboard({ logs, stats }: ValidationLogDas
     return matchesSearch && matchesStatus && matchesUser && matchesDateFrom && matchesDateTo;
   });
 
-  // Sort logs
   const sortedLogs = [...filteredLogs].sort((a, b) => {
     if (!sortColumn || sortOrder === "none") {
       // Default: newest first

@@ -61,7 +61,6 @@ export default function KnowledgeManagement({ items, stats }: KnowledgeManagemen
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const filterPanelRef = useRef<HTMLDivElement>(null);
 
-  // Get unique users for filter dropdown
   const uniqueUsers = Array.from(
     new Set(
       items

@@ -7,7 +7,6 @@ export default async function ShopPage() {
   const { profile } = await requireAdmin();
   const supabase = await createClient();
 
-  // Fetch all items
   const { data: items, error: itemsError } = await supabase
     .from("item")
     .select("id, name, type, mana_required, mana_rate, image_cover_path")

@@ -4,7 +4,6 @@ import DashboardHeader from "@/features/header/AdminHeader";
 import DashboardCards from "@/features/dashboard/DashboardCards";
 
 export default async function DashboardPage() {
-  // Single line replaces all auth checks + adds 30min timeout
   const { user, profile } = await requireAdmin();
   
   const supabase = await createClient();

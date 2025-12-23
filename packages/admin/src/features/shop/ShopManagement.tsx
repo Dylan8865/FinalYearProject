@@ -107,12 +107,10 @@ export default function ShopManagement({ items }: ShopManagementProps) {
     return matchesSearch && matchesType && matchesManaMin && matchesManaMax && matchesRateMin && matchesRateMax;
   });
 
-  // Sort items alphabetically by default
   const sortedItems = [...filteredItems].sort((a, b) => {
     return (a.name || "").localeCompare(b.name || "");
   });
 
-  // Pagination
   const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;

@@ -7,7 +7,6 @@ export default async function UserPage() {
   const { profile } = await requireAdmin();
   const supabase = await createClient();
 
-  // Fetch all users
   const { data: users, error: usersError } = await supabase
     .from("profile")
     .select("id, name, email, created_at, last_login_time, mana, level, type")

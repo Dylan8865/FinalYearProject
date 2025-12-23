@@ -54,7 +54,6 @@ export default function KnowledgeDetailView({
 
   const currentStatus = (item.validation_status === "pending" ? "pending" : item.status) as "unverified" | "pending" | "declined" | "verified";
 
-  // Fetch item data
   useEffect(() => {
     const fetchData = async () => {
       try {
