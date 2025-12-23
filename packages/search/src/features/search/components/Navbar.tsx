@@ -8,8 +8,8 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/search", label: "Search" },
-    { href: "/cloud", label: "Cloud" },
-    { href: "/explore", label: "Explore" },
+    { href: "http://localhost:3002", label: "Cloud" },
+    { href: "http://localhost:3003", label: "Explore" },
   ];
 
   return (

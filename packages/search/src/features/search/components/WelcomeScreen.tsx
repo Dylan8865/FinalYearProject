@@ -41,7 +41,7 @@ const suggestions = [
 export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps) {
   const { theme } = useTheme();
   const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const greeting = getGreeting();
 
   const isDark = theme === "dark";
@@ -58,6 +58,15 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
     inputRef.current?.focus();
   }, []);
 
+  // Auto-resize textarea
+  useEffect(() => {
+    const textarea = inputRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 200) + "px";
+    }
+  }, [input]);
+
   const handleSubmit = () => {
     if (input.trim()) {
       onSuggestionClick(input.trim());
@@ -65,8 +74,8 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -79,10 +88,10 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
 
       {/* Search Input */}
       <div className="w-full max-w-2xl">
-        <div className={`relative flex items-center rounded-full border ${borderColor} bg-transparent px-6 py-4 transition-colors focus-within:border-teal-400`}>
+        <div className={`relative flex items-end rounded-full border ${borderColor} bg-transparent px-6 py-4 transition-colors focus-within:border-teal-400`}>
           {/* Search Icon */}
           <svg
-            className={`mr-4 h-6 w-6 ${mutedTextColor}`}
+            className={`mb-1 mr-4 h-6 w-6 shrink-0 ${mutedTextColor}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -96,14 +105,14 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
           </svg>
 
           {/* Input */}
-          <input
+          <textarea
             ref={inputRef}
-            type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="What do you want to learn today?"
-            className={`flex-1 bg-transparent text-lg ${textColor} outline-none ${placeholderColor}`}
+            rows={1}
+            className={`max-h-[200px] min-h-[28px] flex-1 resize-none break-all whitespace-pre-wrap bg-transparent text-lg ${textColor} outline-none ${placeholderColor}`}
           />
 
           {/* Submit button (appears when there's input) */}
