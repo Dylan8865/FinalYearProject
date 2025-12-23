@@ -144,22 +144,39 @@ export async function POST(request: Request) {
       });
     }
 
-    // Fetch the selected topic
-    const { data: selectedTopic, error: topicError } = await supabase
+    // Fetch the selected topic (try ID first, then fall back to main_topic)
+    let { data: selectedTopic, error: topicError } = await supabase
       .from("cloud-topics-cache")
       .select("id, main_topic, sub_topics")
       .eq("id", topicId)
-      .single();
+      .maybeSingle();
+
+    if (!selectedTopic) {
+      // Fallback: try finding by name if ID lookup failed
+      const { data: nameMatch, error: nameError } = await supabase
+        .from("cloud-topics-cache")
+        .select("id, main_topic, sub_topics")
+        .eq("main_topic", topicId)
+        .maybeSingle();
+
+      selectedTopic = nameMatch;
+      topicError = nameError;
+    }
 
     if (topicError || !selectedTopic) {
-      throw new Error("Topic not found");
+      console.error(`❌ Topic not found: ${topicId}`);
+      throw new Error(`Topic "${topicId}" not found in cache`);
     }
+
+    // Ensure we use the actual UUID for subsequent queries
+    const actualTopicId = selectedTopic.id;
+    const topicDisplayName = selectedTopic.main_topic;
 
     // Fetch all other topics to compare against
     const { data: allTopics, error: fetchError } = await supabase
       .from("cloud-topics-cache")
       .select("id, main_topic, sub_topics")
-      .neq("id", topicId);
+      .neq("id", actualTopicId);
 
     if (fetchError || !allTopics) {
       throw new Error("Failed to fetch topics");
@@ -175,7 +192,7 @@ export async function POST(request: Request) {
 
     // Filter to only relationships involving the selected topic
     const relevantRelationships = relationships.filter(
-      (rel) => rel.sourceId === topicId || rel.targetId === topicId
+      (rel) => rel.sourceId === actualTopicId || rel.targetId === actualTopicId
     );
 
     if (relevantRelationships.length === 0) {

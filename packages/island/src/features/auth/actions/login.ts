@@ -23,11 +23,25 @@ export async function login(formData: FormData) {
   }
 
   if (data.user) {
-    await supabase
+    const { data: profile } = await supabase
       .from("profile")
-      .update({ last_login_time: new Date().toISOString() })
-      .eq("id", data.user.id);
-  }
+      .select("*")
+      .eq("id", data.user.id)
+      .single();
 
-  redirect("/island");
+    if (profile?.type === "island") {
+      await supabase
+        .from("profile")
+        .update({ last_login_time: new Date().toISOString() })
+        .eq("id", data.user.id);
+
+      redirect("/island");
+    } else {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        return { error: error.message };
+      }
+      redirect("/");
+    }
+  }
 }

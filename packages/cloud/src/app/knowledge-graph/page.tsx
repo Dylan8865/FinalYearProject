@@ -2,17 +2,17 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import dynamic from "next/dynamic";
 import IslandIcon from "@/icons/IslandIcon";
-import Breadcrumb from "@/features/cloud/components/Breadcrumb";
+import Breadcrumb from "@/features/knowledge-graph/components/Breadcrumb";
 import type {
   KnowledgeGraphData,
   GraphNode,
 } from "@/app/api/knowledge-graph/route";
 
 const KnowledgeGraph = dynamic(
-  () => import("@/features/cloud/components/KnowledgeGraph3D"),
+  () => import("@/features/knowledge-graph/components/KnowledgeGraph3D"),
   { ssr: false }
 );
 

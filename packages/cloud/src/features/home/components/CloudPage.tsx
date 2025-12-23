@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { CloudProvider, useCloudContext } from "@/features/cloud/contexts/CloudContext";
+import {
+  HomeProvider,
+  useHomeContext,
+} from "@/features/home/contexts/HomeContext";
+
 import TagCanvas3D from "./TagCanvas3D";
 import SearchBar from "./SearchBar";
 
@@ -11,16 +15,15 @@ interface CloudPageProps {
 
 // Inner component that uses the context
 function CloudContent({ className }: CloudPageProps) {
-  const { words, loading, error } = useCloudContext();
+  const { words, loading, error } = useHomeContext();
+
   const [searchValue, setSearchValue] = useState("");
 
   // Filter words based on search
   const filteredWords = useMemo(() => {
     if (!searchValue.trim()) return words;
     const search = searchValue.toLowerCase();
-    return words.filter((word) => 
-      word.text.toLowerCase().includes(search)
-    );
+    return words.filter((word) => word.text.toLowerCase().includes(search));
   }, [words, searchValue]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -63,8 +66,8 @@ function CloudContent({ className }: CloudPageProps) {
       {/* 3D Word Cloud */}
       {!loading && !error && filteredWords.length > 0 && (
         <div className="w-full h-full">
-          <TagCanvas3D 
-            words={filteredWords} 
+          <TagCanvas3D
+            words={filteredWords}
             onWordClick={(word) => console.log("Clicked:", word)}
           />
         </div>
@@ -89,8 +92,8 @@ function CloudContent({ className }: CloudPageProps) {
 
 export default function CloudPage({ className }: CloudPageProps) {
   return (
-    <CloudProvider>
+    <HomeProvider>
       <CloudContent className={className} />
-    </CloudProvider>
+    </HomeProvider>
   );
 }

@@ -210,25 +210,11 @@ function Scene({
 }
 
 // Optimization Wrapper: Centralized Animation Controller
+// Currently disabled to save GPU resources (demand rendering)
 function AnimationController({ children }: { children: React.ReactNode }) {
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      const { elapsedTime } = state.clock;
-      // Animate all nodes at once via their parent group's position/rotation
-      // Or we can iterate children if we want individual offsets
-      groupRef.current.children.forEach((child, i) => {
-        if (child.type === "Group") {
-          // Access the original base position stored in userData or similar
-          // For simplicity in this specific setup, we'll just give the whole group a slight sway
-          child.position.y += Math.sin(elapsedTime * 0.5 + i) * 0.001;
-        }
-      });
-    }
-  });
-
-  return <group ref={groupRef}>{children}</group>;
+  // const groupRef = useRef<THREE.Group>(null);
+  // useFrame((state) => { ... });
+  return <group>{children}</group>;
 }
 
 // Main export component
@@ -265,15 +251,16 @@ export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
       <Canvas
         camera={{ position: [0, 0, 12], fov: 60 }}
         dpr={Math.min(
-          2,
+          1.5, // Reduced from 2.0 to save GPU memory on high-DPI screens
           typeof window !== "undefined" ? window.devicePixelRatio : 1
         )}
+        frameloop="demand" // ONLY render when things change (major optimization)
         gl={{
           antialias: true,
-          alpha: true,
+          alpha: false, // Background is solid black, no need for alpha blending
           powerPreference: "high-performance",
-          // preserveDrawingBuffer helps with some context loss edge cases
-          preserveDrawingBuffer: true,
+          // preserveDrawingBuffer: false is default and better for memory
+          preserveDrawingBuffer: false,
         }}
         onCreated={handleCreated}
       >

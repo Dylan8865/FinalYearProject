@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import IslandIcon from "@/icons/IslandIcon";
-import TagCanvas3D from "@/features/cloud/components/TagCanvas3D";
-import { useTopics } from "@/features/cloud/hooks/useTopics";
-import { useAuth } from "@/hooks/useAuth";
+import TagCanvas3D from "@/features/home/components/TagCanvas3D";
+import { useTopics } from "@/features/home/hooks/useTopics";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { createClient } from "@/lib/supabase/client";
 import UserMenu from "@/components/UserMenu";
 
@@ -74,7 +74,7 @@ export default function Cloud() {
       // Only run if not already processing and cache appears empty/small
       if (isProcessing || loading || words.length > 10) return;
 
-      console.log('🤖 Auto-processing: Checking for unprocessed data...');
+      console.log("🤖 Auto-processing: Checking for unprocessed data...");
       setIsProcessing(true);
 
       try {
@@ -82,16 +82,18 @@ export default function Cloud() {
         let hasMore = true;
 
         while (hasMore) {
-          const response = await fetch('/api/batch-process', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const response = await fetch("/api/batch-process", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ limit: 5, offset }),
           });
 
           if (!response.ok) break;
 
           const data = await response.json();
-          console.log(`✅ Processed batch: ${data.successful} successful, ${data.errors} errors`);
+          console.log(
+            `✅ Processed batch: ${data.successful} successful, ${data.errors} errors`
+          );
 
           hasMore = data.hasMore;
           offset = data.nextOffset;
@@ -101,13 +103,13 @@ export default function Cloud() {
 
           // Wait 3 seconds between batches (rate limiting)
           if (hasMore) {
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            await new Promise((resolve) => setTimeout(resolve, 3000));
           }
         }
 
-        console.log('🎉 Auto-processing completed!');
+        console.log("🎉 Auto-processing completed!");
       } catch (error) {
-        console.error('❌ Auto-processing error:', error);
+        console.error("❌ Auto-processing error:", error);
       } finally {
         setIsProcessing(false);
       }
@@ -149,7 +151,9 @@ export default function Cloud() {
       {isProcessing && (
         <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-30 bg-blue-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-          <span className="text-sm font-medium">Processing topics with AI...</span>
+          <span className="text-sm font-medium">
+            Processing topics with AI...
+          </span>
         </div>
       )}
 
@@ -246,7 +250,11 @@ export default function Cloud() {
       {activeSearch && (
         <div className="absolute top-24 left-1/2 transform -translate-x-1/2 text-center z-10">
           <p className="text-gray-300 text-lg">
-            Found <span className="text-green-400 font-bold">{filteredWords.length}</span> matching topics for &quot;{activeSearch}&quot;
+            Found{" "}
+            <span className="text-green-400 font-bold">
+              {filteredWords.length}
+            </span>{" "}
+            matching topics for &quot;{activeSearch}&quot;
           </p>
           <button
             onClick={handleClearSearch}
