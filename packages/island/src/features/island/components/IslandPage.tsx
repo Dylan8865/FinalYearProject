@@ -497,7 +497,7 @@ const IslandPageContent = ({ profile: initialProfile }: IslandPageProps) => {
       } else if (clickedType !== "terrain") {
         console.log("Cannot place on non-terrain blocks");
         showToast(
-          "Items can only be placed on terrain blocks, not on decorative or functional items.",
+          "Items can only be placed on island's surface or on top of terrain blocks, not on decorative or functional items.",
           "error"
         );
       }
