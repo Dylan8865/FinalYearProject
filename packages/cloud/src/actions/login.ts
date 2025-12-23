@@ -2,8 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import bcrypt from "bcryptjs";
-import { cookies } from "next/headers";
 
 export async function login(formData: FormData) {
   const email = formData.get("email") as string;
@@ -16,62 +14,47 @@ export async function login(formData: FormData) {
 
   const supabase = await createClient();
 
-  // Check if email exists
-  const { data: user, error: fetchError } = await supabase
-    .from("profile")
-    .select("id, email, password, name")
-    .eq("email", email)
-    .single();
+  // Authenticate with Supabase Auth (same as admin package)
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (fetchError || !user) {
-    return { error: "Invalid email or password" };
+  if (authError) {
+    return { error: authError.message };
   }
 
-  // Compare password with hashed password
-  const passwordMatch = await bcrypt.compare(password, user.password);
-
-  if (!passwordMatch) {
-    return { error: "Invalid email or password" };
+  if (!authData.user) {
+    return { error: "Authentication failed" };
   }
 
   // Update last_login_time
+  const now = new Date().toISOString();
   await supabase
     .from("profile")
-    .update({ last_login_time: new Date().toISOString() })
-    .eq("id", user.id);
-
-  // Set session cookie
-  const cookieStore = await cookies();
-  cookieStore.set("user_id", user.id, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-  });
+    .update({ last_login_time: now })
+    .eq("id", authData.user.id);
 
   redirect("/");
 }
 
 export async function logout() {
-  const cookieStore = await cookies();
-  cookieStore.delete("user_id");
-  redirect("/login");
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/");
 }
 
 export async function getUser() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get("user_id")?.value;
-
-  if (!userId) {
-    return null;
-  }
-
   const supabase = await createClient();
-  const { data: user } = await supabase
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return null;
+
+  const { data: profile } = await supabase
     .from("profile")
-    .select("id, email, name")
-    .eq("id", userId)
+    .select("*")
+    .eq("id", user.id)
     .single();
 
-  return user;
+  return profile;
 }

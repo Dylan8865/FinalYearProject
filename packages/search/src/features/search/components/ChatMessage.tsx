@@ -37,31 +37,6 @@ function ValidityBadge({ score }: { score: number }) {
   );
 }
 
-// Source card component
-function SourceCard({ source, isDark }: { source: SearchSource; isDark: boolean }) {
-  const cardBg = isDark ? "bg-gray-700/50" : "bg-gray-50";
-  const cardBorder = isDark ? "border-gray-600" : "border-gray-200";
-  const titleColor = isDark ? "text-teal-400" : "text-teal-600";
-  const textColor = isDark ? "text-gray-300" : "text-gray-600";
-  
-  return (
-    <div className={`rounded-lg border ${cardBorder} ${cardBg} p-3`}>
-      <div className="mb-2 flex items-start justify-between gap-2">
-        <h4 className={`text-sm font-medium ${titleColor}`}>{source.title}</h4>
-        <ValidityBadge score={source.validityScore} />
-      </div>
-      <p className={`text-xs ${textColor} line-clamp-2`}>
-        {source.content.slice(0, 150)}...
-      </p>
-      <button 
-        className={`mt-2 text-xs ${titleColor} hover:underline`}
-        onClick={() => {/* TODO: Open source modal */}}
-      >
-        View original →
-      </button>
-    </div>
-  );
-}
 
 // Feedback buttons component
 function FeedbackButtons({ 
@@ -342,25 +317,6 @@ export default function ChatMessage({ message, onRelatedTopicClick, onFeedback, 
             {message.content}
           </ReactMarkdown>
         </div>
-
-        {/* Sources Section */}
-        {!isUser && message.sources && message.sources.length > 0 && (
-          <div className="mt-4 border-t border-gray-600/30 pt-4">
-            <h3 className={`mb-3 text-sm font-semibold ${isDark ? "text-gray-300" : "text-gray-700"}`}>
-              📚 Sources ({message.sources.length})
-            </h3>
-            <div className="grid gap-2">
-              {message.sources.slice(0, 3).map((source) => (
-                <SourceCard key={source.id} source={source} isDark={isDark} />
-              ))}
-            </div>
-            {message.sources.length > 3 && (
-              <button className={`mt-2 text-sm ${isDark ? "text-teal-400" : "text-teal-600"} hover:underline`}>
-                Show {message.sources.length - 3} more sources
-              </button>
-            )}
-          </div>
-        )}
 
         {/* Related Topics Section */}
         {!isUser && message.relatedTopics && message.relatedTopics.length > 0 && (

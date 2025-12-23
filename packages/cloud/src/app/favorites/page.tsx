@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import IslandIcon from "@/icons/IslandIcon";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Favorite {
   id: string;
@@ -19,13 +20,23 @@ interface Favorite {
 
 export default function FavoritesPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Redirect to login if not authenticated
   useEffect(() => {
-    fetchFavorites();
-  }, []);
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (user) {
+      fetchFavorites();
+    }
+  }, [user]);
 
   const fetchFavorites = async () => {
     try {

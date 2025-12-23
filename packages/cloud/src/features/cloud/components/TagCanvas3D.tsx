@@ -95,38 +95,38 @@ declare global {
   }
 }
 
-// Default options matching your TagCanvas configuration
+// Default options matching reference image: white text, red on hover, no outlines, spherical
 const defaultOptions: TagCanvasOptions = {
   interval: 20,
-  textFont: "Impact, Arial Black, sans-serif",
-  textColour: null,
-  textHeight: 25,
-  outlineColour: "#fff",
-  outlineThickness: 5,
-  maxSpeed: 0.04,
-  minBrightness: 0.1,
-  depth: 0.92,
-  pulsateTo: 0.2,
-  pulsateTime: 0.75,
+  textFont: "Arial, sans-serif",
+  textColour: "#ffffff", // All text white
+  textHeight: 20,
+  outlineColour: "#ff0000", // Red for selected/hovered
+  outlineThickness: 0, // No outline by default
+  maxSpeed: 0.05,
+  minBrightness: 0.2,
+  depth: 0.9,
+  pulsateTo: 0.6,
+  pulsateTime: 0.5,
   initial: [0.1, -0.1],
-  decel: 0.98,
+  decel: 0.95,
   reverse: true,
   hideTags: false,
-  shadow: "#ccf",
-  shadowBlur: 3,
+  shadow: "transparent", // No shadow
+  shadowBlur: 0,
   weight: true,
   weightFrom: "data-weight",
-  fadeIn: 800,
+  fadeIn: 600,
   wheelZoom: false,
   pinchZoom: true,
   shuffleTags: true,
-  shape: "sphere",
-  noSelect: false, // CHANGED: Allow clicking on tags
+  shape: "sphere", // Spherical/orbit shape
+  noSelect: false,
   freezeActive: true,
   activeCursor: "pointer",
-  outlineMethod: "outline",
+  outlineMethod: "colour", // Use color change for hover
   dragControl: true,
-  clickToFront: 500, // ADDED: Bring clicked tags to front
+  clickToFront: 400,
 };
 
 /**
@@ -231,14 +231,9 @@ export default function TagCanvas3D({
     };
   }, [words, options]);
 
-  // Get color based on weight
+  // All words should be white (reference image style)
   const getColorForWeight = (weight: number): string => {
-    // Color gradient from blue to cyan to green based on weight
-    if (weight >= 80) return "#22c55e"; // Green - highest
-    if (weight >= 60) return "#06b6d4"; // Cyan
-    if (weight >= 40) return "#3b82f6"; // Blue
-    if (weight >= 20) return "#8b5cf6"; // Purple
-    return "#ec4899"; // Pink - lowest
+    return "#ffffff"; // All white, selection shows in red via outlineColour
   };
 
   return (
