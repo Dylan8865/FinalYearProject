@@ -3,106 +3,86 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import IslandIcon from "@/icons/IslandIcon";
-
-// Mock content data - will be replaced with database
-const MOCK_CONTENT = [
-  { id: 1, title: "Lorem ipsum", type: "read", duration: "2m read", category: "technology", date: "2025-11-28" },
-  { id: 2, title: "Lorem ipsum", type: "watch", duration: "2m watch", category: "design", date: "2025-11-27" },
-  { id: 3, title: "Lorem ipsum", type: "read", duration: "3m read", category: "business", date: "2025-11-26" },
-  { id: 4, title: "Lorem ipsum", type: "watch", duration: "5m watch", category: "technology", date: "2025-11-25" },
-  { id: 5, title: "Lorem ipsum", type: "read", duration: "2m read", category: "science", date: "2025-11-24" },
-  { id: 6, title: "Lorem ipsum", type: "read", duration: "4m read", category: "design", date: "2025-11-23" },
-  { id: 7, title: "Lorem ipsum", type: "watch", duration: "3m watch", category: "business", date: "2025-11-22" },
-  { id: 8, title: "Lorem ipsum", type: "read", duration: "2m read", category: "technology", date: "2025-11-21" },
-  { id: 9, title: "Lorem ipsum", type: "read", duration: "6m read", category: "science", date: "2025-11-20" },
-  { id: 10, title: "Lorem ipsum", type: "watch", duration: "4m watch", category: "design", date: "2025-11-19" },
-  { id: 11, title: "Lorem ipsum", type: "read", duration: "2m read", category: "business", date: "2025-11-18" },
-  { id: 12, title: "Lorem ipsum", type: "read", duration: "3m read", category: "technology", date: "2025-11-17" },
-];
-
-const CATEGORIES = ["all", "technology", "design", "business", "science"];
-const SORT_OPTIONS = [
-  { value: "newest", label: "Newest First" },
-  { value: "oldest", label: "Oldest First" },
-  { value: "title-asc", label: "Title A-Z" },
-  { value: "title-desc", label: "Title Z-A" },
-  { value: "duration-asc", label: "Duration (Ascending)" },
-  { value: "duration-desc", label: "Duration (Descending)" },
-];
+import { supabase } from "@/lib/supabase";
 
 export default function Explore() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryParam = searchParams.get("q") || "";
-  
+
   const [searchQuery, setSearchQuery] = useState(queryParam);
   const [isSearching, setIsSearching] = useState(!!queryParam);
-  const [content, setContent] = useState(MOCK_CONTENT);
+  const [content, setContent] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Filter and sort content
+  // Fetch content
   useEffect(() => {
-    let filtered = [...MOCK_CONTENT];
+    async function fetchIslands() {
+      setLoading(true);
+      try {
+        let query = supabase
+          .from("island")
+          .select("id, name, description, theme, created_at, last_updated_at, level");
 
-    // Filter by category
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter((item) => item.category === selectedCategory);
+        // Search filter
+        if (queryParam) {
+          query = query.ilike("name", `%${queryParam}%`);
+        }
+
+        // Category filter
+        if (selectedCategory !== "all") {
+          query = query.eq("theme", selectedCategory);
+        }
+
+        // Sorting
+        switch (sortBy) {
+          case "newest":
+            query = query.order("created_at", { ascending: false });
+            break;
+          case "oldest":
+            query = query.order("created_at", { ascending: true });
+            break;
+          case "title-asc":
+            query = query.order("name", { ascending: true });
+            break;
+          case "title-desc":
+            query = query.order("name", { ascending: false });
+            break;
+          // Duration sorts removed as we don't have duration usage yet
+        }
+
+        const { data, error } = await query.limit(20);
+
+        if (error) throw error;
+        setContent(data || []);
+      } catch (err) {
+        console.error("Error fetching islands:", err);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    // Sort content
-    switch (sortBy) {
-      case "newest":
-        filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        break;
-      case "oldest":
-        filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        break;
-      case "title-asc":
-        filtered.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case "title-desc":
-        filtered.sort((a, b) => b.title.localeCompare(a.title));
-        break;
-      case "duration-asc":
-        filtered.sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
-        break;
-      case "duration-desc":
-        filtered.sort((a, b) => parseInt(b.duration) - parseInt(a.duration));
-        break;
-    }
-
-    setContent(filtered);
-  }, [selectedCategory, sortBy]);
-
-  useEffect(() => {
-    if (queryParam) {
-      setSearchQuery(queryParam);
-      setIsSearching(true);
-      // Filter content based on search (mock filtering)
-      setContent(MOCK_CONTENT);
-    }
-  }, [queryParam]);
+    fetchIslands();
+  }, [queryParam, selectedCategory, sortBy]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      setIsSearching(true);
-      router.push(`/explore?q=${encodeURIComponent(searchQuery)}`);
-    } else {
-      setIsSearching(false);
-      router.push("/explore");
-    }
+    // Allow empty search to "match all"
+    setIsSearching(true);
+    router.push(`/?q=${encodeURIComponent(searchQuery)}`);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    if (!e.target.value.trim()) {
-      setIsSearching(false);
-    }
+    // Determine searching state based on input presence? 
+    // User wants "start searching" on enter even if empty.
   };
+
+  const categories = ["spring", "summer", "autumn", "winter"]; // Derived from themes seen in screenshot
 
   return (
     <div className="h-screen overflow-y-auto bg-gray-900 text-white">
@@ -196,7 +176,7 @@ export default function Explore() {
                 />
               </svg>
               <span className="capitalize">
-                {selectedCategory === "all" ? "Category Filter" : selectedCategory}
+                {selectedCategory === "all" ? "Theme Filter" : selectedCategory}
               </span>
               <svg
                 className={`w-4 h-4 transition-transform ${showCategoryDropdown ? "rotate-180" : ""}`}
@@ -211,18 +191,27 @@ export default function Explore() {
             {/* Category Dropdown */}
             {showCategoryDropdown && (
               <div className="absolute top-full left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
-                {CATEGORIES.map((category) => (
+                <button
+                  onClick={() => {
+                    setSelectedCategory("all");
+                    setShowCategoryDropdown(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 capitalize hover:bg-gray-700 transition-colors rounded-t-lg ${selectedCategory === "all" ? "bg-gray-700 text-blue-400" : "text-white"
+                    }`}
+                >
+                  All Themes
+                </button>
+                {categories.map((category) => (
                   <button
                     key={category}
                     onClick={() => {
                       setSelectedCategory(category);
                       setShowCategoryDropdown(false);
                     }}
-                    className={`w-full text-left px-4 py-3 capitalize hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                      selectedCategory === category ? "bg-gray-700 text-blue-400" : "text-white"
-                    }`}
+                    className={`w-full text-left px-4 py-3 capitalize hover:bg-gray-700 transition-colors ${selectedCategory === category ? "bg-gray-700 text-blue-400" : "text-white"
+                      }`}
                   >
-                    {category === "all" ? "All Categories" : category}
+                    {category}
                   </button>
                 ))}
               </div>
@@ -251,7 +240,7 @@ export default function Explore() {
                   d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
                 />
               </svg>
-              <span>{SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label || "Sort By"}</span>
+              <span className="capitalize">{sortBy.replace('-', ' ')}</span>
               <svg
                 className={`w-4 h-4 transition-transform ${showSortDropdown ? "rotate-180" : ""}`}
                 fill="none"
@@ -265,20 +254,10 @@ export default function Explore() {
             {/* Sort Dropdown */}
             {showSortDropdown && (
               <div className="absolute top-full left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
-                {SORT_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => {
-                      setSortBy(option.value);
-                      setShowSortDropdown(false);
-                    }}
-                    className={`w-full text-left px-4 py-3 hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                      sortBy === option.value ? "bg-gray-700 text-blue-400" : "text-white"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+                <button onClick={() => { setSortBy("newest"); setShowSortDropdown(false); }} className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-t-lg text-white">Newest First</button>
+                <button onClick={() => { setSortBy("oldest"); setShowSortDropdown(false); }} className="w-full text-left px-4 py-3 hover:bg-gray-700 text-white">Oldest First</button>
+                <button onClick={() => { setSortBy("title-asc"); setShowSortDropdown(false); }} className="w-full text-left px-4 py-3 hover:bg-gray-700 text-white">Title A-Z</button>
+                <button onClick={() => { setSortBy("title-desc"); setShowSortDropdown(false); }} className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-b-lg text-white">Title Z-A</button>
               </div>
             )}
           </div>
@@ -288,9 +267,9 @@ export default function Explore() {
       {/* Results Header */}
       <div className="px-8 py-4">
         <h2 className="text-lg font-semibold">
-          {isSearching
-            ? `${content.length} matching results`
-            : "Recently added"}
+          {loading ? "Loading..." : (
+            isSearching && queryParam ? `${content.length} matching results` : "All Results"
+          )}
         </h2>
       </div>
 
@@ -300,57 +279,32 @@ export default function Explore() {
           {content.map((item) => (
             <div
               key={item.id}
-              className="group cursor-pointer"
-              onClick={() => router.push(`/explore/${item.id}`)}
+              className="group cursor-pointer hover:bg-gray-800/50 rounded-xl p-2 transition-colors"
+              onClick={() => router.push(`/island/${item.id}`)}
             >
               {/* Card Image Placeholder */}
-              <div className="aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gradient-to-b from-sky-300 to-sky-400">
-                {/* Image will be loaded from database */}
+              <div className="aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gradient-to-b from-sky-300 to-sky-400 relative">
+                {/* Mock visual for theme */}
+                <div className="absolute inset-0 flex items-center justify-center text-sky-900/20 font-bold text-4xl uppercase tracking-widest">
+                  {item.theme || 'ISLAND'}
+                </div>
               </div>
 
               {/* Card Info */}
-              <div className="flex items-center justify-between">
-                <h3 className="text-white font-medium">{item.title}</h3>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-white font-medium truncate">{item.name}</h3>
+                <p className="text-gray-400 text-xs line-clamp-2 min-h-[2.5em]">{item.description}</p>
               </div>
 
-              {/* Duration */}
-              <div className="flex items-center gap-2 mt-1 text-gray-400 text-sm">
-                {item.type === "read" ? (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                )}
-                <span>{item.duration}</span>
+              {/* Footer */}
+              <div className="flex items-center justify-between mt-3 text-gray-500 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="bg-gray-800 px-2 py-1 rounded uppercase tracking-wider">{item.theme || 'island'}</span>
+                  <span>Level {item.level}</span>
+                </div>
+                <div>
+                  {new Date(item.last_updated_at || item.created_at).toLocaleDateString()}
+                </div>
               </div>
             </div>
           ))}

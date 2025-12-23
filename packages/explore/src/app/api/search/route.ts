@@ -15,10 +15,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ data: [] });
     }
 
+    // Fallback: Query the 'island' table directly if 'search_index' doesn't work or as the primary source
+    // The user mentioned the database changes broke the link, so we trust the 'island' table.
     const { data, error } = await supabase
-      .from("search_index")
-      .select("id, title, content, metadata, updated_at") // ✅ 只加这一项
-      .ilike("title", `%${q}%`)
+      .from("island")
+      .select("id, name, description")
+      .ilike("name", `%${q}%`)
       .limit(20);
 
     if (error) {
@@ -26,7 +28,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ data: [] }, { status: 500 });
     }
 
-    return NextResponse.json({ data });
+    // Map the island data to the expected search result format
+    const formattedData = data.map((island: any) => ({
+      id: island.id,
+      title: island.name,
+      content: island.description,
+      // We can add metadata if needed, but for now strict mapping is enough
+    }));
+
+    return NextResponse.json({ data: formattedData });
   } catch (err) {
     console.error("Search API crashed:", err);
     return NextResponse.json({ data: [] }, { status: 500 });
