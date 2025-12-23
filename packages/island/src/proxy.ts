@@ -15,7 +15,6 @@ export async function proxy(request: NextRequest) {
     // If no profile or not an island account, redirect to login and clear session
     if (!profile || profile.type !== "island") {
       const url = new URL("/login", request.url);
-      url.searchParams.set("error", "not_an_island_account");
 
       const newResponse = NextResponse.redirect(url);
 
