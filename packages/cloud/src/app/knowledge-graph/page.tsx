@@ -113,7 +113,7 @@ export default function KnowledgeGraphPage() {
         body: JSON.stringify({ topicId }),
       });
 
-      console.log('Processing response:', response);
+      console.log("Processing response:", response);
 
       const result = await response.json();
 

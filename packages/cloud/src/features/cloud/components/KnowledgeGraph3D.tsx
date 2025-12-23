@@ -14,14 +14,14 @@ interface KnowledgeGraph3DProps {
 }
 
 // Individual node component with interactive text (no sphere)
-function Node({ 
-  node, 
-  position, 
-  isSelected, 
-  onClick 
-}: { 
-  node: GraphNode; 
-  position: [number, number, number]; 
+function Node({
+  node,
+  position,
+  isSelected,
+  onClick,
+}: {
+  node: GraphNode;
+  position: [number, number, number];
   isSelected: boolean;
   onClick: () => void;
 }) {
@@ -32,7 +32,8 @@ function Node({
   // Subtle floating animation
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime + position[0]) * 0.1;
+      groupRef.current.position.y =
+        position[1] + Math.sin(state.clock.elapsedTime + position[0]) * 0.1;
     }
   });
 
@@ -85,14 +86,14 @@ function Node({
 }
 
 // Edge/connection line component
-function Edge({ 
-  start, 
-  end, 
+function Edge({
+  start,
+  end,
   strength,
   startRadius = 0.1,
-  endRadius = 0.1
-}: { 
-  start: [number, number, number]; 
+  endRadius = 0.1,
+}: {
+  start: [number, number, number];
   end: [number, number, number];
   strength: number;
   startRadius?: number;
@@ -101,14 +102,20 @@ function Edge({
   const points = useMemo(() => {
     const startVec = new THREE.Vector3(...start);
     const endVec = new THREE.Vector3(...end);
-    
+
     // Calculate direction from start to end
-    const direction = new THREE.Vector3().subVectors(endVec, startVec).normalize();
-    
+    const direction = new THREE.Vector3()
+      .subVectors(endVec, startVec)
+      .normalize();
+
     // Shorten line by node radius on both ends so it connects to sphere edge
-    const adjustedStart = startVec.clone().add(direction.clone().multiplyScalar(startRadius));
-    const adjustedEnd = endVec.clone().sub(direction.clone().multiplyScalar(endRadius));
-    
+    const adjustedStart = startVec
+      .clone()
+      .add(direction.clone().multiplyScalar(startRadius));
+    const adjustedEnd = endVec
+      .clone()
+      .sub(direction.clone().multiplyScalar(endRadius));
+
     return [adjustedStart, adjustedEnd];
   }, [start, end, startRadius, endRadius]);
 
@@ -124,7 +131,12 @@ function Edge({
 }
 
 // Main 3D scene
-function Scene({ nodes, edges, onNodeClick, selectedNodeId }: KnowledgeGraph3DProps) {
+function Scene({
+  nodes,
+  edges,
+  onNodeClick,
+  selectedNodeId,
+}: KnowledgeGraph3DProps) {
   // Calculate 3D positions in orbital/spherical arrangement
   const nodePositions = useMemo(() => {
     const positions = new Map<string, [number, number, number]>();
@@ -132,9 +144,9 @@ function Scene({ nodes, edges, onNodeClick, selectedNodeId }: KnowledgeGraph3DPr
 
     nodes.forEach((node, index) => {
       const totalNodes = nodes.length;
-      
+
       // Distribute nodes evenly on a sphere using Fibonacci sphere algorithm
-      const phi = Math.acos(1 - 2 * (index + 0.5) / totalNodes);
+      const phi = Math.acos(1 - (2 * (index + 0.5)) / totalNodes);
       const theta = Math.PI * (1 + Math.sqrt(5)) * index;
 
       const x = radius * Math.sin(phi) * Math.cos(theta);
@@ -158,7 +170,7 @@ function Scene({ nodes, edges, onNodeClick, selectedNodeId }: KnowledgeGraph3DPr
       {edges.map((edge, index) => {
         const startPos = nodePositions.get(edge.source);
         const endPos = nodePositions.get(edge.target);
-        
+
         if (!startPos || !endPos) return null;
 
         return (
@@ -220,15 +232,15 @@ export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
   // Handle WebGL context loss/restore
   const handleCreated = ({ gl }: { gl: THREE.WebGLRenderer }) => {
     const canvas = gl.domElement;
-    
-    canvas.addEventListener('webglcontextlost', (e) => {
+
+    canvas.addEventListener("webglcontextlost", (e) => {
       e.preventDefault();
-      console.log('WebGL context lost, waiting for restore...');
+      console.log("WebGL context lost, waiting for restore...");
       setHasError(true);
     });
-    
-    canvas.addEventListener('webglcontextrestored', () => {
-      console.log('WebGL context restored');
+
+    canvas.addEventListener("webglcontextrestored", () => {
+      console.log("WebGL context restored");
       setHasError(false);
     });
   };
@@ -256,23 +268,69 @@ export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
   }
 
   return (
-    <div className="w-full h-full bg-gray-950">
+    <div className="w-full h-full bg-gray-950 relative overflow-hidden">
+      {/* The Canvas stays mounted so it can receive the 'webglcontextrestored' event */}
       <Canvas
         camera={{ position: [0, 0, 12], fov: 60 }}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance",
+          // preserveDrawingBuffer helps with some context loss edge cases
+          preserveDrawingBuffer: true,
+        }}
         onCreated={handleCreated}
       >
         <color attach="background" args={["#030712"]} />
         <Scene {...props} />
       </Canvas>
 
+      {/* Error Overlay (Only shows if context is lost) */}
+      {hasError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-950/90 z-20 backdrop-blur-md">
+          <div className="text-center p-8 bg-gray-900 border border-yellow-500/30 rounded-2xl shadow-2xl max-w-sm mx-4">
+            <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <h3 className="text-white font-bold text-xl mb-2">
+              Graphics Context Lost
+            </h3>
+            <p className="text-gray-400 text-sm mb-6">
+              Your browser reclaimed the 3D memory. This usually happens if you
+              have too many tabs open or your GPU is busy.
+            </p>
+            <div className="flex flex-col gap-3">
+              <p className="text-xs text-gray-500 animate-pulse">
+                Waiting for browser to restore...
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-all shadow-lg active:scale-95"
+              >
+                Reload Page Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Instructions overlay */}
-      <div className="absolute bottom-4 left-4 bg-gray-900/80 backdrop-blur-sm border border-white/20 rounded-lg p-3 text-xs text-gray-300">
-        <p>🖱️ <strong>Left drag:</strong> Rotate</p>
-        <p>🖱️ <strong>Right drag:</strong> Pan</p>
-        <p>🖱️ <strong>Scroll:</strong> Zoom</p>
-        <p>🎯 <strong>Click node:</strong> Drill down</p>
-      </div>
+      {!hasError && (
+        <div className="absolute bottom-4 left-4 bg-gray-900/80 backdrop-blur-sm border border-white/20 rounded-lg p-3 text-xs text-gray-300 pointer-events-none transition-opacity duration-500">
+          <p>
+            🖱️ <strong>Left drag:</strong> Rotate
+          </p>
+          <p>
+            🖱️ <strong>Right drag:</strong> Pan
+          </p>
+          <p>
+            🖱️ <strong>Scroll:</strong> Zoom
+          </p>
+          <p>
+            🎯 <strong>Click node:</strong> Drill down
+          </p>
+        </div>
+      )}
     </div>
   );
 }
