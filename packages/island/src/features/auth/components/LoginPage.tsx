@@ -93,6 +93,13 @@ const LoginPage = () => {
               placeholder="Enter your password"
             />
           </div>
+
+          <div className="flex items-center">
+            <hr className="flex-grow border-t border-[#3B3B3B]" />
+            {/* <span className="mx-2 text-sm text-[#5D5D5D] sm:mx-3">or</span>
+            <hr className="flex-grow border-t border-[#3B3B3B]" /> */}
+          </div>
+
           <button
             type="submit"
             disabled={isPending}
@@ -101,13 +108,7 @@ const LoginPage = () => {
             {isPending ? "Signing in..." : "Continue"}
           </button>
 
-          <div className="flex items-center">
-            <hr className="flex-grow border-t border-[#3B3B3B]" />
-            <span className="mx-2 text-sm text-[#5D5D5D] sm:mx-3">or</span>
-            <hr className="flex-grow border-t border-[#3B3B3B]" />
-          </div>
-
-          <div className="mt-3 flex justify-between space-x-3">
+          {/* <div className="mt-3 flex justify-between space-x-3">
             <button
               type="button"
               onClick={() => handleOAuthSignIn("google")}
@@ -132,7 +133,7 @@ const LoginPage = () => {
             >
               <FacebookIcon className="h-4 w-4" />
             </button>
-          </div>
+          </div> */}
           <div className="mt-4 flex justify-center">
             <p className="text-[12px] text-[#5D5D5D]">
               Don&apos;t have an account?{" "}
