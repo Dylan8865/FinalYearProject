@@ -28,16 +28,60 @@ export async function updateUser(userId: string, data: UpdateUserData) {
     throw new Error("Not authorized");
   }
 
+  // Input validation and sanitization
+  if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
+    throw new Error("Invalid user ID");
+  }
+
   // Validate name
-  if (!data.name || !data.name.trim()) {
+  if (!data.name || typeof data.name !== "string" || !data.name.trim()) {
     throw new Error("Username is required");
+  }
+  
+  // Sanitize name (trim and limit length)
+  const sanitizedName = data.name.trim();
+  if (sanitizedName.length > 100) {
+    throw new Error("Username is too long (max 100 characters)");
+  }
+
+  // Validate mana
+  if (typeof data.mana !== "number" || data.mana < 0 || !Number.isInteger(data.mana)) {
+    throw new Error("Mana must be a non-negative integer");
+  }
+  if (data.mana > 999999999) {
+    throw new Error("Mana value is too large (max 999,999,999)");
+  }
+
+  // Validate level
+  if (typeof data.level !== "number" || data.level < 0 || !Number.isInteger(data.level)) {
+    throw new Error("Level must be a non-negative integer");
+  }
+  if (data.level > 32767) {
+    throw new Error("Level value is too large (max 32,767)");
+  }
+
+  // Validate type
+  const validTypes = ["admin", "island", "non-island"];
+  if (!validTypes.includes(data.type)) {
+    throw new Error("Invalid user type");
+  }
+
+  // Check if user exists
+  const { data: existingUser, error: fetchError } = await supabase
+    .from("profile")
+    .select("id")
+    .eq("id", userId)
+    .single();
+
+  if (fetchError || !existingUser) {
+    throw new Error("User not found");
   }
 
   // Update user
   const { error } = await supabase
     .from("profile")
     .update({
-      name: data.name.trim(),
+      name: sanitizedName,
       mana: data.mana,
       level: data.level,
       type: data.type,
@@ -66,9 +110,30 @@ export async function deleteUser(userId: string) {
     throw new Error("Not authorized");
   }
 
+  // Input validation
+  if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
+    throw new Error("Invalid user ID");
+  }
+
   // Prevent self-deletion
   if (user.id === userId) {
     throw new Error("Cannot delete your own account");
+  }
+
+  // Check if user exists
+  const { data: targetUser, error: fetchError } = await supabase
+    .from("profile")
+    .select("id, type")
+    .eq("id", userId)
+    .single();
+
+  if (fetchError || !targetUser) {
+    throw new Error("User not found");
+  }
+
+  // Prevent deleting other admins (optional safety check)
+  if (targetUser.type === "admin") {
+    throw new Error("Cannot delete admin accounts");
   }
 
   // Delete all related data in correct order (respecting foreign keys)
@@ -127,15 +192,9 @@ export async function deleteUser(userId: string) {
     const { error: authError } = await adminClient.auth.admin.deleteUser(userId);
     
     if (authError) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to delete auth user:", authError);
-      }
       throw new Error(`Failed to delete auth user: ${authError.message}`);
     }
   } catch (authError: any) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("Failed to delete auth user:", authError);
-    }
     throw new Error(`Failed to delete auth user: ${authError.message || authError}`);
   }
 
@@ -159,9 +218,30 @@ export async function resetUser(userId: string) {
     throw new Error("Not authorized");
   }
 
+  // Input validation
+  if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
+    throw new Error("Invalid user ID");
+  }
+
   // Prevent self-reset
   if (user.id === userId) {
     throw new Error("Cannot reset your own account");
+  }
+
+  // Check if user exists
+  const { data: targetUser, error: fetchError } = await supabase
+    .from("profile")
+    .select("id, type")
+    .eq("id", userId)
+    .single();
+
+  if (fetchError || !targetUser) {
+    throw new Error("User not found");
+  }
+
+  // Prevent resetting admin accounts
+  if (targetUser.type === "admin") {
+    throw new Error("Cannot reset admin accounts");
   }
 
   // Delete all user-related data in correct order (respecting foreign keys)

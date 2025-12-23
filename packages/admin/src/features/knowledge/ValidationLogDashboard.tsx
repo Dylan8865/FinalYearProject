@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { formatDate } from "@/lib/utils/formatters";
 
@@ -45,6 +45,12 @@ export default function ValidationLogDashboard({ logs, stats }: ValidationLogDas
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterUser, setFilterUser] = useState<string>("all");
+  const [userSearchInput, setUserSearchInput] = useState<string>("");
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [selectedUserIndex, setSelectedUserIndex] = useState<number>(-1);
+  const [filterDateFrom, setFilterDateFrom] = useState<string>("");
+  const [filterDateTo, setFilterDateTo] = useState<string>("");
   const [sortColumn, setSortColumn] = useState<SortColumn | null>("created_at");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [showFilter, setShowFilter] = useState(false);
@@ -55,6 +61,55 @@ export default function ValidationLogDashboard({ logs, stats }: ValidationLogDas
   const [requestCopySuccess, setRequestCopySuccess] = useState(false);
   const [responseCopySuccess, setResponseCopySuccess] = useState(false);
   const [itemIdCopySuccess, setItemIdCopySuccess] = useState(false);
+  
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+  const filterPanelRef = useRef<HTMLDivElement>(null);
+
+  // Get unique users from logs
+  const uniqueUsers = Array.from(
+    new Set(
+      logs
+        .filter((log) => log.island_item?.profile?.name && log.island_item?.profile_id)
+        .map((log) => JSON.stringify({ 
+          name: log.island_item?.profile?.name, 
+          email: log.island_item?.profile?.email,
+          profileId: log.island_item?.profile_id 
+        }))
+    )
+  )
+    .map((str) => JSON.parse(str))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Filter users based on search input
+  const filteredUsers = uniqueUsers.filter((user) =>
+    user.name.toLowerCase().includes(userSearchInput.toLowerCase()) ||
+    user.email.toLowerCase().includes(userSearchInput.toLowerCase()) ||
+    user.profileId.toLowerCase().includes(userSearchInput.toLowerCase())
+  );
+
+  // Close user dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close filter panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterPanelRef.current && !filterPanelRef.current.contains(event.target as Node)) {
+        setShowFilter(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleCopyId = async () => {
     try {
@@ -121,14 +176,29 @@ export default function ValidationLogDashboard({ logs, stats }: ValidationLogDas
       log.island_item?.profile?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.id.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesFilter = filterStatus === "all" || log.status === filterStatus;
+    const matchesStatus = filterStatus === "all" || log.status === filterStatus;
 
-    return matchesSearch && matchesFilter;
+    const matchesUser =
+      filterUser === "all" ||
+      log.island_item?.profile_id === filterUser;
+
+    const matchesDateFrom =
+      !filterDateFrom ||
+      new Date(log.created_at) >= new Date(filterDateFrom + "T00:00:00");
+
+    const matchesDateTo =
+      !filterDateTo ||
+      new Date(log.created_at) <= new Date(filterDateTo + "T23:59:59");
+
+    return matchesSearch && matchesStatus && matchesUser && matchesDateFrom && matchesDateTo;
   });
 
   // Sort logs
   const sortedLogs = [...filteredLogs].sort((a, b) => {
-    if (!sortColumn || sortOrder === "none") return 0;
+    if (!sortColumn || sortOrder === "none") {
+      // Default: newest first
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
 
     let comparison = 0;
     switch (sortColumn) {
@@ -261,31 +331,175 @@ export default function ValidationLogDashboard({ logs, stats }: ValidationLogDas
               <div className="relative">
                 <button
                   onClick={() => setShowFilter(!showFilter)}
-                  className="bg-[#1E1E1E] text-white px-6 py-2 rounded-full border border-[#3B3B3B] hover:bg-[#252525] transition-colors"
+                  className={`px-6 py-2 rounded-full border transition-colors ${
+                    filterStatus !== "all" || filterUser !== "all" || filterDateFrom || filterDateTo
+                      ? 'bg-[#6D3F33] border-[#7B4A3A] text-white'
+                      : 'bg-[#1E1E1E] border-[#3B3B3B] text-white hover:bg-[#252525]'
+                  }`}
                 >
                   Filter
                 </button>
 
                 {/* Filter Dropdown */}
                 {showFilter && (
-                  <div className="absolute top-10 right-0 bg-[#282828] border border-[#3B3B3B] rounded-lg p-4 min-w-[200px] z-10">
-                    <h4 className="text-white text-sm font-semibold mb-2">Filter by Status</h4>
-                    <select
-                      value={filterStatus}
-                      onChange={(e) => {
-                        setFilterStatus(e.target.value);
-                        setCurrentPage(1);
-                        setShowFilter(false);
-                      }}
-                      className="w-full bg-[#1E1E1E] text-white px-3 py-1 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
-                    >
-                      <option value="all">All Status</option>
-                      <option value="queued">Queued</option>
-                      <option value="processing">Processing</option>
-                      <option value="completed">Completed</option>
-                      <option value="failed">Failed</option>
-                      <option value="superseeded">Superseeded</option>
-                    </select>
+                  <div ref={filterPanelRef} className="absolute top-10 right-0 bg-[#282828] border border-[#3B3B3B] rounded-lg w-[420px] z-10 max-h-[55vh] overflow-y-auto">
+                    <div className="p-4 space-y-4">
+                      {/* Status Filter */}
+                      <div>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Status</h4>
+                        <select
+                          value={filterStatus}
+                          onChange={(e) => {
+                            setFilterStatus(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                        >
+                          <option value="all">All Status</option>
+                          <option value="queued">Queued</option>
+                          <option value="processing">Processing</option>
+                          <option value="completed">Completed</option>
+                          <option value="failed">Failed</option>
+                          <option value="superseeded">Superseeded</option>
+                        </select>
+                      </div>
+
+                      {/* User Filter with Autocomplete */}
+                      <div className="relative" ref={userDropdownRef}>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Creator</h4>
+                        <input
+                          type="text"
+                          placeholder="Search by username, email, or user ID..."
+                          value={userSearchInput}
+                          onChange={(e) => {
+                            setUserSearchInput(e.target.value);
+                            setShowUserDropdown(true);
+                            setSelectedUserIndex(-1);
+                          }}
+                          onFocus={() => setShowUserDropdown(true)}
+                          onBlur={() => {
+                            setTimeout(() => setShowUserDropdown(false), 200);
+                          }}
+                          onKeyDown={(e) => {
+                            if (!showUserDropdown || filteredUsers.length === 0) return;
+                            const maxResults = Math.min(3, filteredUsers.length);
+                            
+                            if (e.key === "ArrowDown") {
+                              e.preventDefault();
+                              setSelectedUserIndex((prev) => (prev < maxResults - 1 ? prev + 1 : prev));
+                            } else if (e.key === "ArrowUp") {
+                              e.preventDefault();
+                              setSelectedUserIndex((prev) => (prev > 0 ? prev - 1 : -1));
+                            } else if (e.key === "Enter" && selectedUserIndex >= 0) {
+                              e.preventDefault();
+                              const selectedUser = filteredUsers[selectedUserIndex];
+                              setFilterUser(selectedUser.profileId);
+                              setUserSearchInput(selectedUser.name);
+                              setShowUserDropdown(false);
+                              setSelectedUserIndex(-1);
+                              setCurrentPage(1);
+                            } else if (e.key === "Escape") {
+                              setShowUserDropdown(false);
+                              setSelectedUserIndex(-1);
+                            }
+                          }}
+                          className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                        />
+                        {filterUser !== "all" && (
+                          <div className="text-xs text-gray-400 mt-1">
+                            Selected: {uniqueUsers.find(u => u.profileId === filterUser)?.name || "Unknown"}
+                            <button
+                              onClick={() => {
+                                setFilterUser("all");
+                                setUserSearchInput("");
+                                setCurrentPage(1);
+                              }}
+                              className="ml-2 text-red-400 hover:text-red-300"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )}
+                        {showUserDropdown && userSearchInput && filteredUsers.length > 0 && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-[#1E1E1E] border border-[#3B3B3B] rounded max-h-48 overflow-y-auto z-20">
+                            {filteredUsers.slice(0, 3).map((user, index) => (
+                              <button
+                                key={user.profileId}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  setFilterUser(user.profileId);
+                                  setUserSearchInput(user.name);
+                                  setShowUserDropdown(false);
+                                  setSelectedUserIndex(-1);
+                                  setCurrentPage(1);
+                                }}
+                                onMouseEnter={() => setSelectedUserIndex(index)}
+                                className={`w-full text-left px-3 py-2 transition-colors text-white text-sm border-b border-[#3B3B3B] last:border-b-0 ${
+                                  selectedUserIndex === index ? 'bg-[#282828]' : 'hover:bg-[#282828]'
+                                }`}
+                              >
+                                <div className="font-medium">{user.name}</div>
+                                <div className="text-xs text-gray-400 truncate">{user.email}</div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Date Range Filter */}
+                      <div>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Date Range</h4>
+                        <div className="space-y-2">
+                          <div>
+                            <label className="text-gray-400 text-xs mb-1 block">From</label>
+                            <input
+                              type="date"
+                              value={filterDateFrom}
+                              onChange={(e) => {
+                                setFilterDateFrom(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B] [color-scheme:dark]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-gray-400 text-xs mb-1 block">To</label>
+                            <input
+                              type="date"
+                              value={filterDateTo}
+                              onChange={(e) => {
+                                setFilterDateTo(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B] [color-scheme:dark]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Filter Actions */}
+                      <div className="flex gap-2 pt-2 border-t border-[#3B3B3B]">
+                        <button
+                          onClick={() => {
+                            setFilterStatus("all");
+                            setFilterUser("all");
+                            setUserSearchInput("");
+                            setFilterDateFrom("");
+                            setFilterDateTo("");
+                            setCurrentPage(1);
+                          }}
+                          className="flex-1 bg-[#1E1E1E] hover:bg-[#252525] text-white px-3 py-2 rounded border border-[#3B3B3B] transition-colors text-sm"
+                        >
+                          Clear Filters
+                        </button>
+                        <button
+                          onClick={() => setShowFilter(false)}
+                          className="flex-1 bg-[#6D3F33] hover:bg-[#7B4A3A] text-white px-3 py-2 rounded transition-colors text-sm"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ItemEditModal from "./ItemEditPopup";
 
@@ -21,6 +21,10 @@ export default function ShopManagement({ items }: ShopManagementProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
+  const [filterManaMin, setFilterManaMin] = useState<string>("");
+  const [filterManaMax, setFilterManaMax] = useState<string>("");
+  const [filterRateMin, setFilterRateMin] = useState<string>("");
+  const [filterRateMax, setFilterRateMax] = useState<string>("");
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [showFilter, setShowFilter] = useState(false);
@@ -30,6 +34,8 @@ export default function ShopManagement({ items }: ShopManagementProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isErrorAnimatingOut, setIsErrorAnimatingOut] = useState(false);
   const [isSuccessAnimatingOut, setIsSuccessAnimatingOut] = useState(false);
+
+  const filterPanelRef = useRef<HTMLDivElement>(null);
 
   // Initialize filter from URL parameter
   useEffect(() => {
@@ -41,6 +47,18 @@ export default function ShopManagement({ items }: ShopManagementProps) {
     ) {
       setFilterType(filterParam);
     }
+  }, []);
+
+  // Close filter panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterPanelRef.current && !filterPanelRef.current.contains(event.target as Node)) {
+        setShowFilter(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Auto-hide error message after 5 seconds
@@ -78,16 +96,27 @@ export default function ShopManagement({ items }: ShopManagementProps) {
       item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.id.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesFilter = filterType === "all" || item.type === filterType;
+    const matchesType = filterType === "all" || item.type === filterType;
 
-    return matchesSearch && matchesFilter;
+    const matchesManaMin = !filterManaMin || (item.mana_required || 0) >= parseInt(filterManaMin);
+    const matchesManaMax = !filterManaMax || (item.mana_required || 0) <= parseInt(filterManaMax);
+
+    const matchesRateMin = !filterRateMin || (item.mana_rate || 0) >= parseInt(filterRateMin);
+    const matchesRateMax = !filterRateMax || (item.mana_rate || 0) <= parseInt(filterRateMax);
+
+    return matchesSearch && matchesType && matchesManaMin && matchesManaMax && matchesRateMin && matchesRateMax;
+  });
+
+  // Sort items alphabetically by default
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    return (a.name || "").localeCompare(b.name || "");
   });
 
   // Pagination
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedItems = filteredItems.slice(startIndex, endIndex);
+  const paginatedItems = sortedItems.slice(startIndex, endIndex);
 
   // Get image URL from Supabase public bucket
   const getImageUrl = (imagePath: string | null, itemId: string) => {
@@ -138,31 +167,126 @@ export default function ShopManagement({ items }: ShopManagementProps) {
               <div className="relative">
                 <button
                   onClick={() => setShowFilter(!showFilter)}
-                  className="bg-[#1E1E1E] text-white px-6 py-2 rounded-full border border-[#3B3B3B] hover:bg-[#252525] transition-colors"
+                  className={`px-6 py-2 rounded-full border transition-colors ${
+                    filterType !== "all" || filterManaMin || filterManaMax || filterRateMin || filterRateMax
+                      ? 'bg-[#6D3F33] border-[#7B4A3A] text-white'
+                      : 'bg-[#1E1E1E] border-[#3B3B3B] text-white hover:bg-[#252525]'
+                  }`}
                 >
                   Filter
                 </button>
 
                 {/* Filter Dropdown */}
                 {showFilter && (
-                  <div className="absolute top-10 right-0 bg-[#282828] border border-[#3B3B3B] rounded-lg p-4 min-w-[200px] z-10">
-                    <h4 className="text-white text-sm font-semibold mb-2">
-                      Filter by Type
-                    </h4>
-                    <select
-                      value={filterType}
-                      onChange={(e) => {
-                        setFilterType(e.target.value);
-                        setCurrentPage(1);
-                        setShowFilter(false);
-                      }}
-                      className="w-full bg-[#1E1E1E] text-white px-3 py-1 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
-                    >
-                      <option value="all">All Items</option>
-                      <option value="decorative">Decorative</option>
-                      <option value="terrain">Terrain</option>
-                      <option value="functional">Functional</option>
-                    </select>
+                  <div ref={filterPanelRef} className="absolute top-10 right-0 bg-[#282828] border border-[#3B3B3B] rounded-lg w-[420px] z-10 max-h-[55vh] overflow-y-auto">
+                    <div className="p-4 space-y-4">
+                      {/* Type Filter */}
+                      <div>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Type</h4>
+                        <select
+                          value={filterType}
+                          onChange={(e) => {
+                            setFilterType(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                        >
+                          <option value="all">All Types</option>
+                          <option value="decorative">Decorative</option>
+                          <option value="terrain">Terrain</option>
+                          <option value="functional">Functional</option>
+                        </select>
+                      </div>
+
+                      {/* Mana Required Filter */}
+                      <div>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Mana Required</h4>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <label className="text-gray-400 text-xs mb-1 block">Min</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={filterManaMin}
+                              onChange={(e) => {
+                                setFilterManaMin(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-gray-400 text-xs mb-1 block">Max</label>
+                            <input
+                              type="number"
+                              placeholder="9999999"
+                              value={filterManaMax}
+                              onChange={(e) => {
+                                setFilterManaMax(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Mana Rate Filter */}
+                      <div>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Mana Rate</h4>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <label className="text-gray-400 text-xs mb-1 block">Min</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={filterRateMin}
+                              onChange={(e) => {
+                                setFilterRateMin(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-gray-400 text-xs mb-1 block">Max</label>
+                            <input
+                              type="number"
+                              placeholder="999"
+                              value={filterRateMax}
+                              onChange={(e) => {
+                                setFilterRateMax(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Filter Actions */}
+                      <div className="flex gap-2 pt-2 border-t border-[#3B3B3B]">
+                        <button
+                          onClick={() => {
+                            setFilterType("all");
+                            setFilterManaMin("");
+                            setFilterManaMax("");
+                            setFilterRateMin("");
+                            setFilterRateMax("");
+                            setCurrentPage(1);
+                          }}
+                          className="flex-1 bg-[#1E1E1E] hover:bg-[#252525] text-white px-3 py-2 rounded border border-[#3B3B3B] transition-colors text-sm"
+                        >
+                          Clear Filters
+                        </button>
+                        <button
+                          onClick={() => setShowFilter(false)}
+                          className="flex-1 bg-[#6D3F33] hover:bg-[#7B4A3A] text-white px-3 py-2 rounded transition-colors text-sm"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -365,7 +489,7 @@ export default function ShopManagement({ items }: ShopManagementProps) {
       {/* Error Toast */}
       {errorMessage && (
         <div
-          className={`fixed bottom-4 right-4 bg-[#333333] border border-red-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${
+          className={`fixed bottom-4 right-4 bg-[#333333] border-red-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${
             isErrorAnimatingOut ? "animate-slide-out" : "animate-slide-in"
           }`}
         >
@@ -388,7 +512,7 @@ export default function ShopManagement({ items }: ShopManagementProps) {
       {/* Success Toast */}
       {successMessage && (
         <div
-          className={`fixed bottom-4 right-4 bg-[#333333] border border-green-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${
+          className={`fixed bottom-4 right-4 bg-[#333333] border-green-600 border-2 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50 ${
             isSuccessAnimatingOut ? "animate-slide-out" : "animate-slide-in"
           }`}
         >

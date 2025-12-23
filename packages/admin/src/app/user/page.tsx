@@ -13,11 +13,7 @@ export default async function UserPage() {
     .select("id, name, email, created_at, last_login_time, mana, level, type")
     .order("created_at", { ascending: false });
 
-  if (usersError) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("Error fetching users:", usersError);
-    }
-  }
+  // Error is handled by returning empty array to users || []
 
   // Fetch stats
   const { count: totalUsers } = await supabase

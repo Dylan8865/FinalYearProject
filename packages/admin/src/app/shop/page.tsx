@@ -13,11 +13,7 @@ export default async function ShopPage() {
     .select("id, name, type, mana_required, mana_rate, image_cover_path")
     .order("name", { ascending: true });
 
-  if (itemsError) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("Error fetching items:", itemsError);
-    }
-  }
+  // Error is handled by returning empty array to items || []
 
   return (
     <div className="min-h-screen bg-[#1E1E1E]">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { updateUser, deleteUser, resetUser } from "@/actions/user";
 
 interface User {
@@ -23,6 +24,7 @@ interface UserEditModalProps {
 }
 
 export default function UserEditModal({ user, onClose, onUpdate, onError, onSuccess }: UserEditModalProps) {
+  const router = useRouter();
   const [name, setName] = useState(user.name || "");
   const [mana, setMana] = useState(user.mana?.toString() || "0");
   const [level, setLevel] = useState(user.level?.toString() || "0");
@@ -246,6 +248,17 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
                 )}
               </div>
             </div>
+
+            {/* View Contributions Button */}
+            <button
+              onClick={() => {
+                router.push(`/knowledge?userId=${user.id}`);
+                onClose();
+              }}
+              className="w-full bg-[#1E1E1E] hover:bg-[#252525] text-white border border-[#3B3B3B] py-2 rounded transition-colors flex items-center justify-center gap-2"
+            >
+              <span>View Contributions</span>
+            </button>
 
             {/* Account Info Box */}
             <div className="bg-[#1E1E1E] border border-[#3B3B3B] rounded p-4 space-y-2">

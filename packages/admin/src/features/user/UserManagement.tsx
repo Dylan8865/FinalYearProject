@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { formatDate } from "@/lib/utils/formatters";
 import UserEditModal from "./UserEditPopup";
@@ -35,6 +35,12 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
+  const [filterManaMin, setFilterManaMin] = useState<string>("");
+  const [filterManaMax, setFilterManaMax] = useState<string>("");
+  const [filterLevelMin, setFilterLevelMin] = useState<string>("");
+  const [filterLevelMax, setFilterLevelMax] = useState<string>("");
+  const [filterDateFrom, setFilterDateFrom] = useState<string>("");
+  const [filterDateTo, setFilterDateTo] = useState<string>("");
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -47,6 +53,8 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
   const [isSuccessAnimatingOut, setIsSuccessAnimatingOut] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
+  const filterPanelRef = useRef<HTMLDivElement>(null);
+
   // Initialize filter from URL parameter
   useEffect(() => {
     const filterParam = searchParams.get("filter");
@@ -54,6 +62,18 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
       setFilterType(filterParam);
     }
   }, [searchParams]);
+
+  // Close filter panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterPanelRef.current && !filterPanelRef.current.contains(event.target as Node)) {
+        setShowFilter(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Auto-hide error message after 5 seconds
   useEffect(() => {
@@ -91,16 +111,33 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
       user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.id.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesFilter =
+    const matchesType =
       filterType === "all" ||
       user.type === filterType;
 
-    return matchesSearch && matchesFilter;
+    const matchesManaMin = !filterManaMin || (user.mana || 0) >= parseInt(filterManaMin);
+    const matchesManaMax = !filterManaMax || (user.mana || 0) <= parseInt(filterManaMax);
+
+    const matchesLevelMin = !filterLevelMin || (user.level || 0) >= parseInt(filterLevelMin);
+    const matchesLevelMax = !filterLevelMax || (user.level || 0) <= parseInt(filterLevelMax);
+
+    const matchesDateFrom =
+      !filterDateFrom ||
+      new Date(user.created_at) >= new Date(filterDateFrom + "T00:00:00");
+
+    const matchesDateTo =
+      !filterDateTo ||
+      new Date(user.created_at) <= new Date(filterDateTo + "T23:59:59");
+
+    return matchesSearch && matchesType && matchesManaMin && matchesManaMax && matchesLevelMin && matchesLevelMax && matchesDateFrom && matchesDateTo;
   });
 
   // Sort users
   const sortedUsers = [...filteredUsers].sort((a, b) => {
-    if (!sortColumn || sortOrder === "none") return 0;
+    if (!sortColumn || sortOrder === "none") {
+      // Default: newest first
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
 
     let comparison = 0;
     switch (sortColumn) {
@@ -218,29 +255,159 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
               <div className="relative">
                 <button
                   onClick={() => setShowFilter(!showFilter)}
-                  className="bg-[#1E1E1E] text-white px-6 py-2 rounded-full border border-[#3B3B3B] hover:bg-[#252525] transition-colors"
+                  className={`px-6 py-2 rounded-full border transition-colors ${
+                    filterType !== "all" || filterManaMin || filterManaMax || filterLevelMin || filterLevelMax || filterDateFrom || filterDateTo
+                      ? 'bg-[#6D3F33] border-[#7B4A3A] text-white'
+                      : 'bg-[#1E1E1E] border-[#3B3B3B] text-white hover:bg-[#252525]'
+                  }`}
                 >
                   Filter
                 </button>
 
                 {/* Filter Dropdown */}
                 {showFilter && (
-                  <div className="absolute top-10 right-0 bg-[#282828] border border-[#3B3B3B] rounded-lg p-4 min-w-[200px] z-10">
-                    <h4 className="text-white text-sm font-semibold mb-2">Filter by Type</h4>
-                    <select
-                      value={filterType}
-                      onChange={(e) => {
-                        setFilterType(e.target.value);
-                        setCurrentPage(1);
-                        setShowFilter(false);
-                      }}
-                      className="w-full bg-[#1E1E1E] text-white px-3 py-1 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
-                    >
-                      <option value="all">All Users</option>
-                      <option value="admin">Admin</option>
-                      <option value="island">Island</option>
-                      <option value="non-island">Non-Island</option>
-                    </select>
+                  <div ref={filterPanelRef} className="absolute top-10 right-0 bg-[#282828] border border-[#3B3B3B] rounded-lg w-[420px] z-10 max-h-[55vh] overflow-y-auto">
+                    <div className="p-4 space-y-4">
+                      {/* Type Filter */}
+                      <div>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Type</h4>
+                        <select
+                          value={filterType}
+                          onChange={(e) => {
+                            setFilterType(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                        >
+                          <option value="all">All Users</option>
+                          <option value="admin">Admin</option>
+                          <option value="island">Island</option>
+                          <option value="non-island">Non-Island</option>
+                        </select>
+                      </div>
+
+                      {/* Mana Filter */}
+                      <div>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Mana</h4>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <label className="text-gray-400 text-xs mb-1 block">Min</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={filterManaMin}
+                              onChange={(e) => {
+                                setFilterManaMin(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-gray-400 text-xs mb-1 block">Max</label>
+                            <input
+                              type="number"
+                              placeholder="999999"
+                              value={filterManaMax}
+                              onChange={(e) => {
+                                setFilterManaMax(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Level Filter */}
+                      <div>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Level</h4>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <label className="text-gray-400 text-xs mb-1 block">Min</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={filterLevelMin}
+                              onChange={(e) => {
+                                setFilterLevelMin(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-gray-400 text-xs mb-1 block">Max</label>
+                            <input
+                              type="number"
+                              placeholder="999"
+                              value={filterLevelMax}
+                              onChange={(e) => {
+                                setFilterLevelMax(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Date Range Filter */}
+                      <div>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Date Created</h4>
+                        <div className="space-y-2">
+                          <div>
+                            <label className="text-gray-400 text-xs mb-1 block">From</label>
+                            <input
+                              type="date"
+                              value={filterDateFrom}
+                              onChange={(e) => {
+                                setFilterDateFrom(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B] [color-scheme:dark]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-gray-400 text-xs mb-1 block">To</label>
+                            <input
+                              type="date"
+                              value={filterDateTo}
+                              onChange={(e) => {
+                                setFilterDateTo(e.target.value);
+                                setCurrentPage(1);
+                              }}
+                              className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B] [color-scheme:dark]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Filter Actions */}
+                      <div className="flex gap-2 pt-2 border-t border-[#3B3B3B]">
+                        <button
+                          onClick={() => {
+                            setFilterType("all");
+                            setFilterManaMin("");
+                            setFilterManaMax("");
+                            setFilterLevelMin("");
+                            setFilterLevelMax("");
+                            setFilterDateFrom("");
+                            setFilterDateTo("");
+                            setCurrentPage(1);
+                          }}
+                          className="flex-1 bg-[#1E1E1E] hover:bg-[#252525] text-white px-3 py-2 rounded border border-[#3B3B3B] transition-colors text-sm"
+                        >
+                          Clear Filters
+                        </button>
+                        <button
+                          onClick={() => setShowFilter(false)}
+                          className="flex-1 bg-[#6D3F33] hover:bg-[#7B4A3A] text-white px-3 py-2 rounded transition-colors text-sm"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

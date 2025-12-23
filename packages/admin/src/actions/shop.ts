@@ -28,11 +28,58 @@ export async function updateItem(itemId: string, data: UpdateItemData) {
     throw new Error("Not authorized");
   }
 
+  // Input validation
+  if (!itemId || typeof itemId !== "string" || itemId.trim().length === 0) {
+    throw new Error("Invalid item ID");
+  }
+
+  // Validate name
+  if (!data.name || typeof data.name !== "string" || !data.name.trim()) {
+    throw new Error("Item name is required");
+  }
+  const sanitizedName = data.name.trim();
+  if (sanitizedName.length > 200) {
+    throw new Error("Item name is too long (max 200 characters)");
+  }
+
+  // Validate type
+  const validTypes = ["functional", "decorative", "terrain"];
+  if (!validTypes.includes(data.type)) {
+    throw new Error("Invalid item type");
+  }
+
+  // Validate mana_required
+  if (typeof data.mana_required !== "number" || data.mana_required < 0 || !Number.isInteger(data.mana_required)) {
+    throw new Error("Mana required must be a non-negative integer");
+  }
+  if (data.mana_required > 999999999) {
+    throw new Error("Mana required value is too large");
+  }
+
+  // Validate mana_rate
+  if (typeof data.mana_rate !== "number" || data.mana_rate < 0 || !Number.isInteger(data.mana_rate)) {
+    throw new Error("Mana rate must be a non-negative integer");
+  }
+  if (data.mana_rate > 999999999) {
+    throw new Error("Mana rate value is too large");
+  }
+
+  // Check if item exists
+  const { data: existingItem, error: fetchError } = await supabase
+    .from("item")
+    .select("id")
+    .eq("id", itemId)
+    .single();
+
+  if (fetchError || !existingItem) {
+    throw new Error("Item not found");
+  }
+
   // Update item
   const { error } = await supabase
     .from("item")
     .update({
-      name: data.name,
+      name: sanitizedName,
       type: data.type,
       mana_required: data.mana_required,
       mana_rate: data.mana_rate,

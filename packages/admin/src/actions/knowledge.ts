@@ -118,7 +118,43 @@ export async function updateIslandItemStatus(
   adminComment?: string
 ) {
   await requireAdmin();
+  
+  // Input validation
+  if (!id || typeof id !== "string" || id.trim().length === 0) {
+    throw new Error("Invalid island item ID");
+  }
+
+  // Validate status
+  const validStatuses = ["verified", "declined", "pending"];
+  if (!validStatuses.includes(status)) {
+    throw new Error("Invalid status value");
+  }
+
+  // Sanitize and validate admin comment
+  if (adminComment !== undefined) {
+    if (typeof adminComment !== "string") {
+      throw new Error("Admin comment must be a string");
+    }
+    // Trim whitespace
+    adminComment = adminComment.trim();
+    // Check max length (prevent excessive data)
+    if (adminComment.length > 5000) {
+      throw new Error("Admin comment is too long (max 5000 characters)");
+    }
+  }
+
   const supabase = await createClient();
+
+  // Check if item exists
+  const { data: existingItem, error: fetchError } = await supabase
+    .from("island-item")
+    .select("id, status")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !existingItem) {
+    throw new Error("Island item not found");
+  }
 
   const updateData: any = {
     status,

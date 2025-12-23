@@ -341,7 +341,7 @@ export default function ItemEditModal({
             {/* Mana Rate */}
             <div>
               <label className="text-gray-400 text-xs mb-2 block">
-                Mana Generation Rate Per Second (Max: 999)
+                Mana Generation Rate Per Minute (Max: 999)
               </label>
               <input
                 type="number"

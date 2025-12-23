@@ -2,6 +2,19 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
+// Normalize Gmail addresses to prevent duplicate accounts
+// Gmail ignores dots in the local part and treats hello@gmail.com and hello.there@gmail.com as the same
+function normalizeEmail(email: string): string {
+  const [localPart, domain] = email.toLowerCase().split('@');
+  
+  // For Gmail addresses, remove dots from local part
+  if (domain === 'gmail.com' || domain === 'googlemail.com') {
+    return localPart.replace(/\./g, '') + '@' + domain;
+  }
+  
+  return email.toLowerCase();
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -43,6 +56,24 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+
+    // Check if normalized email already exists (prevent Gmail aliasing duplicates)
+    const normalizedEmail = normalizeEmail(email);
+    const { data: existingProfiles } = await adminClient
+      .from("profile")
+      .select("email")
+      .not("email", "is", null);
+
+    if (existingProfiles) {
+      for (const profile of existingProfiles) {
+        if (profile.email && normalizeEmail(profile.email) === normalizedEmail) {
+          return NextResponse.json(
+            { error: "An account with this email already exists" },
+            { status: 400 }
+          );
+        }
+      }
+    }
 
     // Create user with admin API (auto-confirms email)
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
