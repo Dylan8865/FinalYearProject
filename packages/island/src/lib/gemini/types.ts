@@ -36,7 +36,7 @@ export interface ValidationResponse {
 export interface ValidationLog {
   id: string;
   created_at: string;
-  status: 'queued' | 'processing' | 'completed' | 'failed' | 'superseeded';
+  status: "queued" | "processing" | "completed" | "failed" | "superseeded";
   item_id: string;
   request: ValidationRequest | IslandItemRequest;
   response: ValidationResponse | null;
@@ -47,10 +47,10 @@ export interface ValidationLog {
 export interface IslandItem {
   id: string;
   title: string | null;
-  status: 'unverified' | 'pending' | 'declined' | 'verified';
+  status: "unverified" | "pending" | "declined" | "verified";
   validity: number | null;
   comment: string | null;
-  validation_status: 'pending' | 'completed' | 'error' | null;
+  validation_status: "pending" | "completed" | "error" | null;
 }
 
 export interface ItemData {

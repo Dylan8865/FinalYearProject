@@ -6,7 +6,7 @@ import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsCon
 import Image from "next/image";
 import { IslandItemType } from "@/types/types";
 import SlotTooltip from "./SlotTooltip";
-import { toCapitalise } from "@/lib/capitalise";
+import { toCapitalise } from "@/lib/utils/capitalise";
 import { useTheme } from "../../contexts/ThemeContext";
 
 interface InventoryContentProps {

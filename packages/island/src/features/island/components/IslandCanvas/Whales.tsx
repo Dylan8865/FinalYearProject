@@ -8,37 +8,6 @@ import { SkeletonUtils } from "three-stdlib";
 
 const MODEL_PATH = "/models/humpback_whale.glb";
 
-const playWhaleSound = (frequency = 150) => {
-  if (typeof window === "undefined") return;
-  const audioCtx = new (
-    window.AudioContext || (window as any).webkitAudioContext
-  )();
-  const oscillator = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
-
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-
-  oscillator.frequency.exponentialRampToValueAtTime(
-    frequency * 1.5,
-    audioCtx.currentTime + 1
-  );
-  oscillator.frequency.exponentialRampToValueAtTime(
-    frequency * 0.8,
-    audioCtx.currentTime + 3
-  );
-
-  gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-  gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.5);
-  gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 3);
-
-  oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-
-  oscillator.start();
-  oscillator.stop(audioCtx.currentTime + 3);
-};
-
 interface WhaleProps {
   id: number;
   position: [number, number, number];
@@ -229,20 +198,10 @@ const WhaleInstance = ({
       scale={scale}
       onPointerEnter={() => setIsHovered(true)}
       onPointerLeave={() => setIsHovered(false)}
-      onClick={(e) => {
-        e.stopPropagation();
-        playWhaleSound(50 + Math.random() * 30);
-      }}
     >
       <group rotation={[0, 0, 0]}>
         <primitive object={clonedScene} />
       </group>
-
-      {/* Interaction hit box */}
-      <mesh visible={false}>
-        <boxGeometry args={[4, 2, 8]} />
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
     </group>
   );
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { BlockType, ItemDataType } from "@/types/types";
+import { ItemDataType } from "@/types/types";
 import { BlockEditor } from "./useBlockEditor";
 import { FocusManager } from "./useFocusManager";
 

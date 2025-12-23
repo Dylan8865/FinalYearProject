@@ -11,7 +11,7 @@ export type {
   ValidationLog,
   IslandItem,
   ItemData,
-} from './types';
+} from "./types";
 
 // Gemini client
-export { validateWithGemini } from './client';
+export { validateWithGemini } from "./client";

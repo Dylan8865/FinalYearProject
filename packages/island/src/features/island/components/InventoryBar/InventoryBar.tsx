@@ -9,7 +9,7 @@ import QuestionIcon from "@/icons/QuestionIcon";
 import { useIslandItemsContext } from "@/features/island/contexts/IslandItemsContext";
 import { ItemType } from "@/types/types";
 import SlotTooltip from "../Dialog/SlotTooltip";
-import { toCapitalise } from "@/lib/capitalise";
+import { toCapitalise } from "@/lib/utils/capitalise";
 
 interface InventoryBarProps {
   selectedPlacedItem: string | null;
