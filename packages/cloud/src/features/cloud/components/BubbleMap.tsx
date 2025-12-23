@@ -60,9 +60,9 @@ export default function BubbleMap({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Node positions (for animation)
-  const [nodePositions, setNodePositions] = useState<Map<string, { x: number; y: number }>>(
-    new Map()
-  );
+  const [nodePositions, setNodePositions] = useState<
+    Map<string, { x: number; y: number }>
+  >(new Map());
 
   // Hovered node
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -151,7 +151,9 @@ export default function BubbleMap({
       const isMain = node.type === "main";
 
       // Draw shadow
-      ctx.shadowColor = isMain ? "rgba(0, 100, 200, 0.5)" : "rgba(0, 150, 200, 0.3)";
+      ctx.shadowColor = isMain
+        ? "rgba(0, 100, 200, 0.5)"
+        : "rgba(0, 150, 200, 0.3)";
       ctx.shadowBlur = isHovered ? 20 : 10;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
@@ -196,7 +198,7 @@ export default function BubbleMap({
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      const fontSize = Math.max(10, Math.min(16, radius * 0.35));
+      const fontSize = Math.max(8, Math.min(14, radius * 0.25));
       ctx.font = `${isMain ? "bold " : ""}${fontSize}px Inter, sans-serif`;
 
       // Word wrap for long text
@@ -325,7 +327,10 @@ export default function BubbleMap({
     if (e.touches.length === 1) {
       const touch = e.touches[0];
       setIsDragging(true);
-      setDragStart({ x: touch.clientX - transform.x, y: touch.clientY - transform.y });
+      setDragStart({
+        x: touch.clientX - transform.x,
+        y: touch.clientY - transform.y,
+      });
     }
   };
 
@@ -370,13 +375,17 @@ export default function BubbleMap({
       {/* Controls */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
         <button
-          onClick={() => setTransform((prev) => ({ ...prev, scale: prev.scale * 1.2 }))}
+          onClick={() =>
+            setTransform((prev) => ({ ...prev, scale: prev.scale * 1.2 }))
+          }
           className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg text-white text-xl backdrop-blur-sm transition-colors"
         >
           +
         </button>
         <button
-          onClick={() => setTransform((prev) => ({ ...prev, scale: prev.scale * 0.8 }))}
+          onClick={() =>
+            setTransform((prev) => ({ ...prev, scale: prev.scale * 0.8 }))
+          }
           className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg text-white text-xl backdrop-blur-sm transition-colors"
         >
           −

@@ -29,14 +29,6 @@ function Node({
   const [hovered, setHovered] = React.useState(false);
   const [justClicked, setJustClicked] = React.useState(false);
 
-  // Subtle floating animation
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.position.y =
-        position[1] + Math.sin(state.clock.elapsedTime + position[0]) * 0.1;
-    }
-  });
-
   const handleClick = (e: any) => {
     e.stopPropagation();
     setJustClicked(true);
@@ -166,40 +158,42 @@ function Scene({
       <pointLight position={[10, 10, 10]} intensity={1} />
       <pointLight position={[-10, -10, -10]} intensity={0.5} color="#a855f7" />
 
-      {/* Render all edges */}
-      {edges.map((edge, index) => {
-        const startPos = nodePositions.get(edge.source);
-        const endPos = nodePositions.get(edge.target);
+      <AnimationController>
+        {/* Render all edges */}
+        {edges.map((edge, index) => {
+          const startPos = nodePositions.get(edge.source);
+          const endPos = nodePositions.get(edge.target);
 
-        if (!startPos || !endPos) return null;
+          if (!startPos || !endPos) return null;
 
-        return (
-          <Edge
-            key={`edge-${index}`}
-            start={startPos}
-            end={endPos}
-            strength={edge.strength}
-            startRadius={0.1}
-            endRadius={0.1}
-          />
-        );
-      })}
+          return (
+            <Edge
+              key={`edge-${index}`}
+              start={startPos}
+              end={endPos}
+              strength={edge.strength}
+              startRadius={0.1}
+              endRadius={0.1}
+            />
+          );
+        })}
 
-      {/* Render all nodes */}
-      {nodes.map((node) => {
-        const position = nodePositions.get(node.id);
-        if (!position) return null;
+        {/* Render all nodes */}
+        {nodes.map((node) => {
+          const position = nodePositions.get(node.id);
+          if (!position) return null;
 
-        return (
-          <Node
-            key={node.id}
-            node={node}
-            position={position}
-            isSelected={node.id === selectedNodeId}
-            onClick={() => onNodeClick?.(node)}
-          />
-        );
-      })}
+          return (
+            <Node
+              key={node.id}
+              node={node}
+              position={position}
+              isSelected={node.id === selectedNodeId}
+              onClick={() => onNodeClick?.(node)}
+            />
+          );
+        })}
+      </AnimationController>
 
       {/* Camera controls - allows user to rotate and zoom */}
       <OrbitControls
@@ -215,63 +209,65 @@ function Scene({
   );
 }
 
+// Optimization Wrapper: Centralized Animation Controller
+function AnimationController({ children }: { children: React.ReactNode }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      const { elapsedTime } = state.clock;
+      // Animate all nodes at once via their parent group's position/rotation
+      // Or we can iterate children if we want individual offsets
+      groupRef.current.children.forEach((child, i) => {
+        if (child.type === "Group") {
+          // Access the original base position stored in userData or similar
+          // For simplicity in this specific setup, we'll just give the whole group a slight sway
+          child.position.y += Math.sin(elapsedTime * 0.5 + i) * 0.001;
+        }
+      });
+    }
+  });
+
+  return <group ref={groupRef}>{children}</group>;
+}
+
 // Main export component
 export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
-  const [isReady, setIsReady] = useState(false);
-  const [hasError, setHasError] = useState(false);
-
-  // Wait for client-side mount before rendering Canvas
-  useEffect(() => {
-    // Small delay to ensure WebGL context is ready
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
   // Handle WebGL context loss/restore
   const handleCreated = ({ gl }: { gl: THREE.WebGLRenderer }) => {
     const canvas = gl.domElement;
 
-    canvas.addEventListener("webglcontextlost", (e) => {
+    const onLost = (e: Event) => {
       e.preventDefault();
       console.log("WebGL context lost, waiting for restore...");
       setHasError(true);
-    });
+    };
 
-    canvas.addEventListener("webglcontextrestored", () => {
+    const onRestored = () => {
       console.log("WebGL context restored");
       setHasError(false);
-    });
+    };
+
+    canvas.addEventListener("webglcontextlost", onLost);
+    canvas.addEventListener("webglcontextrestored", onRestored);
+
+    return () => {
+      canvas.removeEventListener("webglcontextlost", onLost);
+      canvas.removeEventListener("webglcontextrestored", onRestored);
+    };
   };
 
-  if (!isReady) {
-    return (
-      <div className="w-full h-full bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4" />
-          <p className="text-gray-400">Loading 3D graph...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (hasError) {
-    return (
-      <div className="w-full h-full bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-yellow-400 mb-2">⚠️ WebGL context lost</p>
-          <p className="text-gray-400 text-sm">Restoring...</p>
-        </div>
-      </div>
-    );
-  }
+  const [hasError, setHasError] = useState(false);
 
   return (
     <div className="w-full h-full bg-gray-950 relative overflow-hidden">
       {/* The Canvas stays mounted so it can receive the 'webglcontextrestored' event */}
       <Canvas
         camera={{ position: [0, 0, 12], fov: 60 }}
+        dpr={Math.min(
+          2,
+          typeof window !== "undefined" ? window.devicePixelRatio : 1
+        )}
         gl={{
           antialias: true,
           alpha: true,
