@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin-client";
 import { NextResponse } from "next/server";
 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
@@ -114,7 +114,8 @@ export async function POST(request: Request) {
 
     console.log(`🔗 Processing relationships for topic: ${topicId}`);
 
-    const supabase = await createClient();
+    // Use admin client to bypass RLS policies
+    const supabase = createAdminClient();
 
     // Check if relationships already exist for this topic
     const { data: existing } = await supabase
