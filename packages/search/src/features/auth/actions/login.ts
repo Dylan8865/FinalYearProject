@@ -23,10 +23,25 @@ export async function login(formData: FormData) {
   }
 
   if (data.user) {
-    // Update last login time in profile table
+    // First check if profile exists and get current type
+    const { data: profile } = await supabase
+      .from("profile")
+      .select("type")
+      .eq("id", data.user.id)
+      .single();
+    
+    // Update last login time and set type to 'non-island' if null
+    const updateData: { last_login_time: string; type?: string } = {
+      last_login_time: new Date().toISOString(),
+    };
+    
+    if (!profile?.type) {
+      updateData.type = "non-island";
+    }
+    
     await supabase
       .from("profile")
-      .update({ last_login_time: new Date().toISOString() })
+      .update(updateData)
       .eq("id", data.user.id);
   }
 

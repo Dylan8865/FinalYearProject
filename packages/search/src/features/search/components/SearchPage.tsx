@@ -39,9 +39,10 @@ export interface Conversation {
 
 interface SearchPageProps {
   user: User | null;
+  profile?: { name?: string; email?: string } | null;
 }
 
-export default function SearchPage({ user }: SearchPageProps) {
+export default function SearchPage({ user, profile }: SearchPageProps) {
   const { theme } = useTheme();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
@@ -549,7 +550,7 @@ export default function SearchPage({ user }: SearchPageProps) {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             {user ? (
-              <UserMenu email={user.email || ""} />
+              <UserMenu email={profile?.email || user.email || ""} name={profile?.name} />
             ) : (
               <a
                 href="/login"

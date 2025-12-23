@@ -1,7 +1,11 @@
 import { createAdminClient } from "@/lib/supabase/admin-client";
 import { NextResponse } from "next/server";
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
+const GEMINI_API_URL = process.env.GEMINI_API_URL 
+
+if (!GEMINI_API_URL) {
+  throw new Error("GEMINI_API_URL not configured");
+}
 
 interface TopicInput {
   id: string;
