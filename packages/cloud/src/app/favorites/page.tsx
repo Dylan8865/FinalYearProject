@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import IslandIcon from "@/icons/IslandIcon";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface Favorite {
   id: string;
@@ -28,7 +28,7 @@ export default function FavoritesPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [user, authLoading, router]);
 
@@ -41,48 +41,51 @@ export default function FavoritesPage() {
   const fetchFavorites = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/favorites');
+      const response = await fetch("/api/favorites");
 
       if (response.status === 401) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
 
       if (!response.ok) {
-        throw new Error('Failed to fetch favorites');
+        throw new Error("Failed to fetch favorites");
       }
 
       const data = await response.json();
       setFavorites(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load favorites');
+      setError(err instanceof Error ? err.message : "Failed to load favorites");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (favoriteId: string) => {
-    if (!confirm('Are you sure you want to remove this favorite?')) return;
+    if (!confirm("Are you sure you want to remove this favorite?")) return;
 
     try {
       const response = await fetch(`/api/favorites?id=${favoriteId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete favorite');
+        throw new Error("Failed to delete favorite");
       }
 
       // Remove from local state
-      setFavorites(favorites.filter(f => f.id !== favoriteId));
+      setFavorites(favorites.filter((f) => f.id !== favoriteId));
     } catch (err) {
-      alert('Failed to delete favorite');
+      alert("Failed to delete favorite");
     }
   };
 
   const handleViewGraph = (favorite: Favorite) => {
     // Store graph data in sessionStorage for instant loading
-    sessionStorage.setItem('favorite-graph', JSON.stringify(favorite.graph_data));
+    sessionStorage.setItem(
+      "favorite-graph",
+      JSON.stringify(favorite.graph_data)
+    );
     router.push(`/knowledge-graph?topic=${favorite.topic_id}&from=favorites`);
   };
 
@@ -137,7 +140,7 @@ export default function FavoritesPage() {
               Explore knowledge graphs and save your favorites!
             </p>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push("/")}
               className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg"
             >
               Explore Topics
@@ -170,7 +173,9 @@ export default function FavoritesPage() {
 
                 <div className="text-sm text-gray-400 space-y-1 mb-4">
                   <p>📊 Topics: {favorite.graph_data.nodes?.length || 0}</p>
-                  <p>🔗 Connections: {favorite.graph_data.edges?.length || 0}</p>
+                  <p>
+                    🔗 Connections: {favorite.graph_data.edges?.length || 0}
+                  </p>
                   <p className="text-xs text-gray-500">
                     Saved: {new Date(favorite.created_at).toLocaleDateString()}
                   </p>

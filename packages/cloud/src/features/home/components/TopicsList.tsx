@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { TopicSummary } from "@/features/cloud/hooks/useTopicExtraction";
+import { TopicSummary } from "@/features/home/hooks/useTopicExtraction";
 
 interface TopicsListProps {
   topics: TopicSummary[];
@@ -15,7 +15,11 @@ interface TopicsListProps {
  * Displays all extracted main topics as simple clickable text items.
  * When a user clicks on a topic, it switches to the Bubble Map view.
  */
-export default function TopicsList({ topics, loading, onTopicClick }: TopicsListProps) {
+export default function TopicsList({
+  topics,
+  loading,
+  onTopicClick,
+}: TopicsListProps) {
   if (loading) {
     return (
       <div className="flex flex-col gap-3 p-6">
@@ -46,9 +50,7 @@ export default function TopicsList({ topics, loading, onTopicClick }: TopicsList
           onClick={() => onTopicClick(topic.id, topic.main_topic)}
           className="text-left py-2 px-3 text-white hover:text-gray-300 transition-colors"
         >
-          <span className="text-base">
-            {topic.main_topic}
-          </span>
+          <span className="text-base">{topic.main_topic}</span>
           <span className="text-gray-500 text-sm ml-2">
             ({topic.sub_topic_count})
           </span>

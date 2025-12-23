@@ -10,14 +10,21 @@ interface KnowledgeGraphProps {
   selectedNodeId?: string; // ID of the central node
 }
 
-export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNodeId }: KnowledgeGraphProps) {
+export default function KnowledgeGraph({
+  nodes,
+  edges,
+  onNodeClick,
+  selectedNodeId,
+}: KnowledgeGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
-  
+
   // Simulation state
-  const [positions, setPositions] = useState<Map<string, { x: number; y: number; vx: number; vy: number }>>(new Map());
+  const [positions, setPositions] = useState<
+    Map<string, { x: number; y: number; vx: number; vy: number }>
+  >(new Map());
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -41,9 +48,9 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
       });
 
       // Place other nodes in a circle around it
-      const otherNodes = nodes.filter(n => n.id !== selectedNodeId);
+      const otherNodes = nodes.filter((n) => n.id !== selectedNodeId);
       const radius = 250;
-      
+
       otherNodes.forEach((node, i) => {
         const angle = (i / otherNodes.length) * 2 * Math.PI;
         newPositions.set(node.id, {
@@ -79,7 +86,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
       const alpha = 0.3; // Simulation intensity
 
       // Force-directed layout
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         const pos = newPositions.get(node.id);
         if (!pos) return;
 
@@ -98,7 +105,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
         let fy = 0;
 
         // Repulsion between nodes
-        nodes.forEach(otherNode => {
+        nodes.forEach((otherNode) => {
           if (node.id === otherNode.id) return;
           const otherPos = newPositions.get(otherNode.id);
           if (!otherPos) return;
@@ -106,7 +113,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
           const dx = pos.x - otherPos.x;
           const dy = pos.y - otherPos.y;
           const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-          
+
           if (distance < 200) {
             const force = (200 - distance) / distance;
             fx += dx * force * 0.1;
@@ -115,7 +122,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
         });
 
         // Attraction along edges
-        edges.forEach(edge => {
+        edges.forEach((edge) => {
           if (edge.source === node.id) {
             const targetPos = newPositions.get(edge.target);
             if (!targetPos) return;
@@ -123,10 +130,10 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
             const dx = targetPos.x - pos.x;
             const dy = targetPos.y - pos.y;
             const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-            
+
             const force = Math.log(distance) * edge.strength * 0.05;
-            fx += dx / distance * force;
-            fy += dy / distance * force;
+            fx += (dx / distance) * force;
+            fy += (dy / distance) * force;
           }
         });
 
@@ -168,7 +175,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
     ctx.scale(zoom, zoom);
 
     // Draw edges
-    edges.forEach(edge => {
+    edges.forEach((edge) => {
       const sourcePos = positions.get(edge.source);
       const targetPos = positions.get(edge.target);
       if (!sourcePos || !targetPos) return;
@@ -182,14 +189,14 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
     });
 
     // Draw nodes
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       const pos = positions.get(node.id);
       if (!pos) return;
 
       const isCentralNode = selectedNodeId === node.id;
       const isHovered = hoveredNode?.id === node.id;
       const isSelected = selectedNode?.id === node.id;
-      
+
       // Central node is larger
       const baseRadius = Math.sqrt(node.weight) * 0.5 + 5;
       const radius = isCentralNode ? baseRadius * 1.5 : baseRadius;
@@ -199,19 +206,21 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
       ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
       ctx.fillStyle = isCentralNode
         ? "rgba(139, 92, 246, 0.95)" // Purple for central topic
-        : isSelected 
+        : isSelected
         ? "rgba(255, 100, 100, 0.9)"
-        : isHovered 
+        : isHovered
         ? "rgba(100, 200, 255, 0.9)"
         : "rgba(59, 130, 246, 0.8)"; // Blue for all other nodes
       ctx.fill();
-      ctx.strokeStyle = isCentralNode ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 255, 255, 0.5)";
-      ctx.lineWidth = isCentralNode ? 4 : (isHovered || isSelected ? 3 : 1);
+      ctx.strokeStyle = isCentralNode
+        ? "rgba(255, 255, 255, 0.9)"
+        : "rgba(255, 255, 255, 0.5)";
+      ctx.lineWidth = isCentralNode ? 4 : isHovered || isSelected ? 3 : 1;
       ctx.stroke();
 
       // Node label - always show labels
       ctx.fillStyle = "white";
-      ctx.font = `${isCentralNode ? 'bold 16px' : '14px'} sans-serif`;
+      ctx.font = `${isCentralNode ? "bold 16px" : "14px"} sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(node.name, pos.x, pos.y - radius - 10);
@@ -229,8 +238,9 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging) {
-      const moved = Math.abs(e.clientX - pan.x - dragStart.x) > 5 || 
-                    Math.abs(e.clientY - pan.y - dragStart.y) > 5;
+      const moved =
+        Math.abs(e.clientX - pan.x - dragStart.x) > 5 ||
+        Math.abs(e.clientY - pan.y - dragStart.y) > 5;
       if (moved) {
         setPan({
           x: e.clientX - dragStart.x,
@@ -238,7 +248,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
         });
       }
     }
-    
+
     // Always check hover (even while dragging)
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -253,7 +263,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
 
       const radius = Math.sqrt(node.weight) * 0.5 + 5;
       const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
-      
+
       if (distance < radius) {
         found = node;
         break;
@@ -270,12 +280,12 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
   const handleClick = (e: React.MouseEvent) => {
     // Only trigger click if mouse didn't move much (wasn't a drag)
     const dragDistance = Math.sqrt(
-      Math.pow(e.clientX - mouseDownPos.x, 2) + 
-      Math.pow(e.clientY - mouseDownPos.y, 2)
+      Math.pow(e.clientX - mouseDownPos.x, 2) +
+        Math.pow(e.clientY - mouseDownPos.y, 2)
     );
-    
+
     if (dragDistance < 5 && hoveredNode) {
-      console.log('🖱️ Node clicked:', hoveredNode);
+      console.log("🖱️ Node clicked:", hoveredNode);
       setSelectedNode(hoveredNode);
       if (onNodeClick) {
         onNodeClick(hoveredNode);
@@ -286,7 +296,7 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(prev => Math.min(3, Math.max(0.3, prev * delta)));
+    setZoom((prev) => Math.min(3, Math.max(0.3, prev * delta)));
   };
 
   return (
@@ -295,7 +305,9 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
         ref={canvasRef}
         width={1200}
         height={800}
-        className={`w-full h-full ${hoveredNode ? 'cursor-pointer' : 'cursor-move'}`}
+        className={`w-full h-full ${
+          hoveredNode ? "cursor-pointer" : "cursor-move"
+        }`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -319,14 +331,14 @@ export default function KnowledgeGraph({ nodes, edges, onNodeClick, selectedNode
       {/* Controls */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         <button
-          onClick={() => setZoom(prev => Math.min(3, prev * 1.2))}
+          onClick={() => setZoom((prev) => Math.min(3, prev * 1.2))}
           className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg backdrop-blur-sm"
           title="Zoom In"
         >
           +
         </button>
         <button
-          onClick={() => setZoom(prev => Math.max(0.3, prev * 0.8))}
+          onClick={() => setZoom((prev) => Math.max(0.3, prev * 0.8))}
           className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg backdrop-blur-sm"
           title="Zoom Out"
         >

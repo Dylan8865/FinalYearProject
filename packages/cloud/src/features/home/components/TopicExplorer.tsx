@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useTopicExtraction } from "@/features/cloud/hooks/useTopicExtraction";
+import { useTopicExtraction } from "@/features/home/hooks/useTopicExtraction";
 import TopicsList from "./TopicsList";
-import BubbleMap from "./BubbleMap";
+import BubbleMap from "@/features/knowledge-graph/components/BubbleMap";
 
 /**
  * TopicExplorer Component
@@ -53,7 +53,11 @@ export default function TopicExplorer() {
   };
 
   // Handle node click in bubble map
-  const handleNodeClick = (node: { id: string; name: string; type: string }) => {
+  const handleNodeClick = (node: {
+    id: string;
+    name: string;
+    type: string;
+  }) => {
     if (node.type === "sub") {
       // Optionally generate sub-topics for the clicked sub-topic
       console.log("Clicked sub-topic:", node.name);
@@ -128,8 +132,8 @@ export default function TopicExplorer() {
           <div className="text-6xl mb-4">🌐</div>
           <h2 className="text-xl text-white mb-2">No Topics Yet</h2>
           <p className="text-white/60 mb-4 max-w-md">
-            Topics will be extracted from your item-data automatically.
-            Or enter a custom topic above to generate a bubble map.
+            Topics will be extracted from your item-data automatically. Or enter
+            a custom topic above to generate a bubble map.
           </p>
         </div>
       )}

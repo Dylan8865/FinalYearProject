@@ -4,7 +4,7 @@ import TerrainBlock from "./TerrainBlocks";
 import DecorativeBlock from "./DecorativeBlock";
 import FunctionalBlock from "./FunctionalBlock";
 import ItemTooltip from "./ItemTooltip";
-import { toCapitalise } from "@/lib/capitalise";
+import { toCapitalise } from "@/utils/capitalise";
 
 interface PlacedBlockProps {
   itemId: string;

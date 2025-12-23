@@ -45,9 +45,9 @@ export async function incrementSearchCount(topicId: string) {
 }
 
 /**
- * Toggle favourite status for a topic
+ * Toggle favorite status for a topic
  */
-export async function toggleFavouriteTopic(topicId: string) {
+export async function toggleFavoriteTopic(topicId: string) {
   try {
     const supabase = await createClient();
 
@@ -60,18 +60,18 @@ export async function toggleFavouriteTopic(topicId: string) {
       return { success: false, error: "Unauthorized" };
     }
 
-    // Check if already favourited
+    // Check if already favorited
     const { data: existing } = await supabase
-      .from("user_favourite_topic")
+      .from("user_favorite_topic")
       .select("id")
       .eq("user_id", user.id)
       .eq("topic_id", topicId)
       .single();
 
     if (existing) {
-      // Remove favourite
+      // Remove favorite
       const { error } = await supabase
-        .from("user_favourite_topic")
+        .from("user_favorite_topic")
         .delete()
         .eq("id", existing.id);
 
@@ -79,10 +79,10 @@ export async function toggleFavouriteTopic(topicId: string) {
         return { success: false, error: error.message };
       }
       revalidatePath("/");
-      return { success: true, favourited: false };
+      return { success: true, favorited: false };
     } else {
-      // Add favourite
-      const { error } = await supabase.from("user_favourite_topic").insert({
+      // Add favorite
+      const { error } = await supabase.from("user_favorite_topic").insert({
         user_id: user.id,
         topic_id: topicId,
       });
@@ -91,7 +91,7 @@ export async function toggleFavouriteTopic(topicId: string) {
         return { success: false, error: error.message };
       }
       revalidatePath("/");
-      return { success: true, favourited: true };
+      return { success: true, favorited: true };
     }
   } catch (error) {
     console.error("Unexpected error:", error);

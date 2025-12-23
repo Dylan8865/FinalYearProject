@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useFavourites } from "@/features/cloud/hooks/useFavourites";
+import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 
 interface FavoriteButtonProps {
   id: string;
@@ -14,10 +14,11 @@ interface FavoriteButtonProps {
 
 /**
  * FavoriteButton Component
- * 
- * Shows heart icon to save topics/bubble maps to favourites.
+ *
+ * Shows heart icon to save topics/bubble maps to favorites.
  * Requires login to save (shows login prompt if not logged in).
  */
+
 export default function FavoriteButton({
   id,
   name,
@@ -28,29 +29,29 @@ export default function FavoriteButton({
 }: FavoriteButtonProps) {
   const {
     isLoggedIn,
-    isFavourite,
-    addFavouriteTopic,
-    addFavouriteBubbleMap,
-    removeFavourite,
+    isFavorite,
+    addFavoriteTopic,
+    addFavoriteBubbleMap,
+    removeFavorite,
     error,
-  } = useFavourites();
+  } = useFavorites();
 
-  const isFaved = isFavourite(id);
+  const isFaved = isFavorite(id);
 
   const handleClick = () => {
     if (!isLoggedIn) {
-      alert("Please log in to save favourites!");
+      alert("Please log in to save favorites!");
       // Redirect to login page or show login modal
       return;
     }
 
     if (isFaved) {
-      removeFavourite(id);
+      removeFavorite(id);
     } else {
       if (type === "topic") {
-        addFavouriteTopic(id, name, category);
+        addFavoriteTopic(id, name, category);
       } else {
-        addFavouriteBubbleMap(id, name, bubbleMapData);
+        addFavoriteBubbleMap(id, name, bubbleMapData);
       }
     }
   };
@@ -61,12 +62,13 @@ export default function FavoriteButton({
         onClick={handleClick}
         className={`
           p-2 rounded-full transition-all duration-200
-          ${isFaved 
-            ? "bg-red-500/20 text-red-400 hover:bg-red-500/30" 
-            : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+          ${
+            isFaved
+              ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+              : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
           }
         `}
-        title={isFaved ? "Remove from favourites" : "Add to favourites"}
+        title={isFaved ? "Remove from favorites" : "Add to favorites"}
       >
         <svg
           className="w-6 h-6"
@@ -85,7 +87,8 @@ export default function FavoriteButton({
 
       {/* Login Required Badge */}
       {!isLoggedIn && (
-        <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-gray-900" 
+        <div
+          className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-gray-900"
           title="Login required"
         />
       )}

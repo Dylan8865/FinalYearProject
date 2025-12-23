@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin-client";
 import { NextResponse } from "next/server";
 
-const GEMINI_API_URL = process.env.GEMINI_API_URL 
+const GEMINI_API_URL = process.env.GEMINI_API_URL;
 
 if (!GEMINI_API_URL) {
   throw new Error("GEMINI_API_URL not configured");
@@ -24,17 +24,24 @@ interface BulkRelationship {
 /**
  * Analyze ALL topic relationships in one AI call (much faster!)
  */
-async function analyzeBulkRelationships(topics: TopicInput[]): Promise<BulkRelationship[]> {
+async function analyzeBulkRelationships(
+  topics: TopicInput[]
+): Promise<BulkRelationship[]> {
   const apiKey = process.env.GEMINI_API_KEY;
-  
+
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY not configured");
   }
 
   // Create topic list for AI
-  const topicList = topics.map((t, idx) => 
-    `${idx + 1}. ID: ${t.id}, Topic: "${t.main_topic}", Sub-topics: [${t.sub_topics.slice(0, 5).join(", ")}]`
-  ).join("\n");
+  const topicList = topics
+    .map(
+      (t, idx) =>
+        `${idx + 1}. ID: ${t.id}, Topic: "${
+          t.main_topic
+        }", Sub-topics: [${t.sub_topics.slice(0, 5).join(", ")}]`
+    )
+    .join("\n");
 
   const prompt = `Analyze relationships between these ${topics.length} knowledge topics and return ALL meaningful connections.
 
@@ -80,7 +87,7 @@ Focus on strong connections (strength >= 0.4). Return empty array [] if no stron
 
     const data = await response.json();
     const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    
+
     const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
       console.error("No JSON array found in AI response");
@@ -88,16 +95,17 @@ Focus on strong connections (strength >= 0.4). Return empty array [] if no stron
     }
 
     const results = JSON.parse(jsonMatch[0]);
-    
-    // Convert indices to IDs
-    return results.map((r: any) => ({
-      sourceId: topics[r.sourceIndex - 1]?.id,
-      targetId: topics[r.targetIndex - 1]?.id,
-      strength: Math.min(1, Math.max(0.4, r.strength || 0.5)),
-      type: r.type || "related",
-      reasoning: r.reasoning || "Related topics"
-    })).filter((r: any) => r.sourceId && r.targetId);
 
+    // Convert indices to IDs
+    return results
+      .map((r: any) => ({
+        sourceId: topics[r.sourceIndex - 1]?.id,
+        targetId: topics[r.targetIndex - 1]?.id,
+        strength: Math.min(1, Math.max(0.4, r.strength || 0.5)),
+        type: r.type || "related",
+        reasoning: r.reasoning || "Related topics",
+      }))
+      .filter((r: any) => r.sourceId && r.targetId);
   } catch (error) {
     console.error("Bulk relationship analysis error:", error);
     return [];
@@ -129,35 +137,54 @@ export async function POST(request: Request) {
       .limit(1);
 
     if (existing && existing.length > 0) {
-      console.log('✅ Relationships already exist for this topic');
+      console.log("✅ Relationships already exist for this topic");
       return NextResponse.json({
         message: "Relationships already exist",
         cached: true,
       });
     }
 
-    // Fetch the selected topic
-    const { data: selectedTopic, error: topicError } = await supabase
+    // Fetch the selected topic (try ID first, then fall back to main_topic)
+    let { data: selectedTopic, error: topicError } = await supabase
       .from("cloud-topics-cache")
       .select("id, main_topic, sub_topics")
       .eq("id", topicId)
-      .single();
+      .maybeSingle();
+
+    if (!selectedTopic) {
+      // Fallback: try finding by name if ID lookup failed
+      const { data: nameMatch, error: nameError } = await supabase
+        .from("cloud-topics-cache")
+        .select("id, main_topic, sub_topics")
+        .eq("main_topic", topicId)
+        .maybeSingle();
+
+      selectedTopic = nameMatch;
+      topicError = nameError;
+    }
 
     if (topicError || !selectedTopic) {
-      throw new Error("Topic not found");
+      console.error(`❌ Topic not found: ${topicId}`);
+      throw new Error(`Topic "${topicId}" not found in cache`);
     }
+
+    // Ensure we use the actual UUID for subsequent queries
+    const actualTopicId = selectedTopic.id;
+    const topicDisplayName = selectedTopic.main_topic;
 
     // Fetch all other topics to compare against
     const { data: allTopics, error: fetchError } = await supabase
       .from("cloud-topics-cache")
       .select("id, main_topic, sub_topics")
-      .neq("id", topicId);
+      .neq("id", actualTopicId);
 
     if (fetchError || !allTopics) {
       throw new Error("Failed to fetch topics");
     }
 
-    console.log(`📊 Analyzing ${selectedTopic.main_topic} vs ${allTopics.length} other topics...`);
+    console.log(
+      `📊 Analyzing ${selectedTopic.main_topic} vs ${allTopics.length} other topics...`
+    );
 
     // Analyze this topic vs all others
     const topics = [selectedTopic, ...allTopics];
@@ -165,7 +192,7 @@ export async function POST(request: Request) {
 
     // Filter to only relationships involving the selected topic
     const relevantRelationships = relationships.filter(
-      rel => rel.sourceId === topicId || rel.targetId === topicId
+      (rel) => rel.sourceId === actualTopicId || rel.targetId === actualTopicId
     );
 
     if (relevantRelationships.length === 0) {
@@ -175,7 +202,9 @@ export async function POST(request: Request) {
       });
     }
 
-    console.log(`✅ Found ${relevantRelationships.length} relationships for ${selectedTopic.main_topic}`);
+    console.log(
+      `✅ Found ${relevantRelationships.length} relationships for ${selectedTopic.main_topic}`
+    );
 
     // Store relationships (bidirectional)
     const insertData = [];
@@ -188,7 +217,7 @@ export async function POST(request: Request) {
         relationship_type: rel.type,
         reasoning: rel.reasoning,
       });
-      
+
       // Reverse direction (for bidirectional graph)
       insertData.push({
         source_topic_id: rel.targetId,
@@ -214,13 +243,12 @@ export async function POST(request: Request) {
       totalEdges: insertData.length,
       message: `Found ${relevantRelationships.length} connections for ${selectedTopic.main_topic}`,
     });
-
   } catch (error) {
     console.error("💥 Knowledge graph processing error:", error);
     return NextResponse.json(
-      { 
+      {
         error: error instanceof Error ? error.message : "Processing failed",
-        details: error instanceof Error ? error.stack : undefined
+        details: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );
