@@ -40,13 +40,26 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Quick auth check
+  // Check authentication and admin role
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.redirect(new URL("/login?error=unauthorized", request.url));
+  }
+
+  // Verify user is admin
+  const { data: profile } = await supabase
+    .from("profile")
+    .select("type")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || profile.type !== "admin") {
+    // Sign out non-admin user
+    await supabase.auth.signOut();
+    return NextResponse.redirect(new URL("/login?error=not_admin", request.url));
   }
 
   // Check inactivity timeout
