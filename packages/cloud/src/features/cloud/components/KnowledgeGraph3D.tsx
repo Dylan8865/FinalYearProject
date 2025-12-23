@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Text, Line } from "@react-three/drei";
 import * as THREE from "three";
@@ -205,11 +205,62 @@ function Scene({ nodes, edges, onNodeClick, selectedNodeId }: KnowledgeGraph3DPr
 
 // Main export component
 export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
+  const [isReady, setIsReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  // Wait for client-side mount before rendering Canvas
+  useEffect(() => {
+    // Small delay to ensure WebGL context is ready
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle WebGL context loss/restore
+  const handleCreated = ({ gl }: { gl: THREE.WebGLRenderer }) => {
+    const canvas = gl.domElement;
+    
+    canvas.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      console.log('WebGL context lost, waiting for restore...');
+      setHasError(true);
+    });
+    
+    canvas.addEventListener('webglcontextrestored', () => {
+      console.log('WebGL context restored');
+      setHasError(false);
+    });
+  };
+
+  if (!isReady) {
+    return (
+      <div className="w-full h-full bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4" />
+          <p className="text-gray-400">Loading 3D graph...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="w-full h-full bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-yellow-400 mb-2">⚠️ WebGL context lost</p>
+          <p className="text-gray-400 text-sm">Restoring...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full bg-gray-950">
       <Canvas
         camera={{ position: [0, 0, 12], fov: 60 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        onCreated={handleCreated}
       >
         <color attach="background" args={["#030712"]} />
         <Scene {...props} />

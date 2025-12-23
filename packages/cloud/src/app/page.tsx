@@ -7,6 +7,7 @@ import TagCanvas3D from "@/features/cloud/components/TagCanvas3D";
 import { useTopics } from "@/features/cloud/hooks/useTopics";
 import { useAuth } from "@/hooks/useAuth";
 import { createClient } from "@/lib/supabase/client";
+import UserMenu from "@/components/UserMenu";
 
 // Word cloud data with different sizes and positions
 const CLOUD_WORDS = [
@@ -142,13 +143,6 @@ export default function Cloud() {
     setActiveSearch("");
   };
 
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    // The useAuth hook will automatically detect the sign out
-    // No need to redirect, the UI will update automatically
-  };
-
   return (
     <div className="relative w-screen h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
       {/* Auto-Processing Status Indicator */}
@@ -190,23 +184,7 @@ export default function Cloud() {
         </div>
 
         {user ? (
-          <div className="flex items-center gap-4">
-            <span className="text-gray-300 text-sm">
-              {user.email}
-            </span>
-            <button
-              onClick={() => router.push("/favorites")}
-              className="text-white hover:text-gray-300 transition-colors"
-            >
-              ⭐ Favorites
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
-            >
-              Sign out
-            </button>
-          </div>
+          <UserMenu name={user.name} email={user.email} />
         ) : (
           <button
             onClick={() => router.push("/login")}
