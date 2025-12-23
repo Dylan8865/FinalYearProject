@@ -55,6 +55,98 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
 
   const filterPanelRef = useRef<HTMLDivElement>(null);
 
+  // Validation handlers for filter inputs - only allow valid numbers
+  const handleManaMinChange = (value: string) => {
+    // Strip all non-numeric characters
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue === "") {
+      setFilterManaMin("");
+      return;
+    }
+    // Check length first (999999999 is 9 digits max)
+    if (cleanValue.length > 9) {
+      return;
+    }
+    const numValue = parseInt(cleanValue);
+    if (!isNaN(numValue) && numValue <= 999999999) {
+      setFilterManaMin(cleanValue);
+    }
+  };
+
+  const handleManaMaxChange = (value: string) => {
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue === "") {
+      setFilterManaMax("");
+      return;
+    }
+    if (cleanValue.length > 9) {
+      return;
+    }
+    const numValue = parseInt(cleanValue);
+    if (!isNaN(numValue) && numValue <= 999999999) {
+      setFilterManaMax(cleanValue);
+    }
+  };
+
+  const handleLevelMinChange = (value: string) => {
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue === "") {
+      setFilterLevelMin("");
+      return;
+    }
+    // Check length first (32767 is 5 digits max)
+    if (cleanValue.length > 5) {
+      return;
+    }
+    const numValue = parseInt(cleanValue);
+    if (!isNaN(numValue) && numValue <= 32767) {
+      setFilterLevelMin(cleanValue);
+    }
+  };
+
+  const handleLevelMaxChange = (value: string) => {
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue === "") {
+      setFilterLevelMax("");
+      return;
+    }
+    if (cleanValue.length > 5) {
+      return;
+    }
+    const numValue = parseInt(cleanValue);
+    if (!isNaN(numValue) && numValue <= 32767) {
+      setFilterLevelMax(cleanValue);
+    }
+  };
+
+  // Prevent non-numeric key input
+  const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter, arrows, home, end
+    if (
+      e.key === 'Backspace' ||
+      e.key === 'Delete' ||
+      e.key === 'Tab' ||
+      e.key === 'Escape' ||
+      e.key === 'Enter' ||
+      e.key === 'ArrowLeft' ||
+      e.key === 'ArrowRight' ||
+      e.key === 'ArrowUp' ||
+      e.key === 'ArrowDown' ||
+      e.key === 'Home' ||
+      e.key === 'End'
+    ) {
+      return;
+    }
+    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x')) {
+      return;
+    }
+    // Block anything that's not a digit
+    if (!/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   // Initialize filter from URL parameter
   useEffect(() => {
     const filterParam = searchParams.get("filter");
@@ -115,11 +207,11 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
       filterType === "all" ||
       user.type === filterType;
 
-    const matchesManaMin = !filterManaMin || (user.mana || 0) >= parseInt(filterManaMin);
-    const matchesManaMax = !filterManaMax || (user.mana || 0) <= parseInt(filterManaMax);
+    const matchesManaMin = !filterManaMin || (user.mana || 0) >= (Number(filterManaMin) || 0);
+    const matchesManaMax = !filterManaMax || (user.mana || 0) <= (Number(filterManaMax) || Infinity);
 
-    const matchesLevelMin = !filterLevelMin || (user.level || 0) >= parseInt(filterLevelMin);
-    const matchesLevelMax = !filterLevelMax || (user.level || 0) <= parseInt(filterLevelMax);
+    const matchesLevelMin = !filterLevelMin || (user.level || 0) >= (Number(filterLevelMin) || 0);
+    const matchesLevelMax = !filterLevelMax || (user.level || 0) <= (Number(filterLevelMax) || Infinity);
 
     const matchesDateFrom =
       !filterDateFrom ||
@@ -296,23 +388,29 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
                               placeholder="0"
                               value={filterManaMin}
                               onChange={(e) => {
-                                setFilterManaMin(e.target.value);
+                                handleManaMinChange(e.target.value);
                                 setCurrentPage(1);
                               }}
+                              onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                              min="0"
+                              max="999999999"
                             />
                           </div>
                           <div className="flex-1">
                             <label className="text-gray-400 text-xs mb-1 block">Max</label>
                             <input
                               type="number"
-                              placeholder="999999"
+                              placeholder="999999999"
                               value={filterManaMax}
                               onChange={(e) => {
-                                setFilterManaMax(e.target.value);
+                                handleManaMaxChange(e.target.value);
                                 setCurrentPage(1);
                               }}
+                              onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                              min="0"
+                              max="999999999"
                             />
                           </div>
                         </div>
@@ -329,23 +427,29 @@ export default function UserManagement({ users, stats }: UserManagementProps) {
                               placeholder="0"
                               value={filterLevelMin}
                               onChange={(e) => {
-                                setFilterLevelMin(e.target.value);
+                                handleLevelMinChange(e.target.value);
                                 setCurrentPage(1);
                               }}
+                              onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                              min="0"
+                              max="32767"
                             />
                           </div>
                           <div className="flex-1">
                             <label className="text-gray-400 text-xs mb-1 block">Max</label>
                             <input
                               type="number"
-                              placeholder="999"
+                              placeholder="32767"
                               value={filterLevelMax}
                               onChange={(e) => {
-                                setFilterLevelMax(e.target.value);
+                                handleLevelMaxChange(e.target.value);
                                 setCurrentPage(1);
                               }}
+                              onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                              min="0"
+                              max="32767"
                             />
                           </div>
                         </div>

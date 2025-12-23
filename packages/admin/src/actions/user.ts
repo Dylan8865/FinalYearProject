@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
+const MAX_MANA = 999999999;
+const MAX_LEVEL = 32767;
+
 interface UpdateUserData {
   name: string;
   mana: number;
@@ -48,16 +51,16 @@ export async function updateUser(userId: string, data: UpdateUserData) {
   if (typeof data.mana !== "number" || data.mana < 0 || !Number.isInteger(data.mana)) {
     throw new Error("Mana must be a non-negative integer");
   }
-  if (data.mana > 999999999) {
-    throw new Error("Mana value is too large (max 999,999,999)");
+  if (data.mana > MAX_MANA) {
+    throw new Error(`Mana value is too large (max ${MAX_MANA.toLocaleString()})`);
   }
 
   // Validate level
   if (typeof data.level !== "number" || data.level < 0 || !Number.isInteger(data.level)) {
     throw new Error("Level must be a non-negative integer");
   }
-  if (data.level > 32767) {
-    throw new Error("Level value is too large (max 32,767)");
+  if (data.level > MAX_LEVEL) {
+    throw new Error(`Level value is too large (max ${MAX_LEVEL.toLocaleString()})`);
   }
 
   // Validate type
@@ -131,48 +134,21 @@ export async function deleteUser(userId: string) {
     throw new Error("User not found");
   }
 
-  // Prevent deleting other admins (optional safety check)
+  // Prevent deleting other admins
   if (targetUser.type === "admin") {
     throw new Error("Cannot delete admin accounts");
   }
 
-  // Delete all related data in correct order (respecting foreign keys)
-  
-  // 1. Delete item-data (depends on island-item)
-  const { data: islandItems } = await supabase
-    .from("island-item")
-    .select("id")
-    .eq("profile_id", userId);
-
-  if (islandItems && islandItems.length > 0) {
-    const islandItemIds = islandItems.map((item) => item.id);
-    await supabase.from("item-data").delete().in("island_item_id", islandItemIds);
-  }
-
-  // 2. Delete search-history (depends on chat)
-  const { data: chats } = await supabase
-    .from("chat")
-    .select("id")
-    .eq("profile_id", userId);
-
-  if (chats && chats.length > 0) {
-    const chatIds = chats.map((chat) => chat.id);
-    await supabase.from("search-history").delete().in("chat_id", chatIds);
-  }
-
-  // 3. Delete island-item (depends on island)
-  await supabase.from("island-item").delete().eq("profile_id", userId);
-
-  // 4. Delete island (depends on profile)
-  await supabase.from("island").delete().eq("profile_id", userId);
-
-  // 5. Delete favourite (depends on profile)
-  await supabase.from("favourite").delete().eq("profile_id", userId);
-
-  // 6. Delete chat (depends on profile)
-  await supabase.from("chat").delete().eq("profile_id", userId);
-
-  // 7. Delete profile
+  // Delete profile - everything else cascades automatically:
+  // - chat (CASCADE) → feedback (CASCADE from chat)
+  // - favourite (CASCADE)
+  // - island (CASCADE)
+  // - island-item (CASCADE) → item-data (CASCADE) → cloud-topics-cache (CASCADE)
+  // - knowledge-graph-favorites (CASCADE)
+  // 
+  // Preserved logs (via ON DELETE SET NULL):
+  // - search-history: chat_id set to null, records preserved
+  // - validation-log: item_id set to null, records preserved
   const { error: profileError } = await supabase
     .from("profile")
     .delete()
@@ -182,7 +158,7 @@ export async function deleteUser(userId: string) {
     throw new Error(`Failed to delete user profile: ${profileError.message}`);
   }
 
-  // 8. Delete from auth.users using service role key
+  // Delete from auth.users using service role key
   try {
     const adminClient = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -244,45 +220,11 @@ export async function resetUser(userId: string) {
     throw new Error("Cannot reset admin accounts");
   }
 
-  // Delete all user-related data in correct order (respecting foreign keys)
+  // Delete user data while preserving logs (search-history, validation-log)
+  // Keep islands to prevent account bricking with 0 mana
   
-  // 1. Delete item-data (depends on island-item)
-  const { data: deleteIslandItems } = await supabase
-    .from("island-item")
-    .select("id")
-    .eq("profile_id", userId);
-
-  if (deleteIslandItems && deleteIslandItems.length > 0) {
-    const islandItemIds = deleteIslandItems.map((item) => item.id);
-    const { error: itemDataError } = await supabase
-      .from("item-data")
-      .delete()
-      .in("island_item_id", islandItemIds);
-    
-    if (itemDataError) {
-      throw new Error(`Failed to delete item data: ${itemDataError.message}`);
-    }
-  }
-
-  // 2. Delete search-history (depends on chat)
-  const { data: deleteChats } = await supabase
-    .from("chat")
-    .select("id")
-    .eq("profile_id", userId);
-
-  if (deleteChats && deleteChats.length > 0) {
-    const chatIds = deleteChats.map((chat) => chat.id);
-    const { error: searchHistoryError } = await supabase
-      .from("search-history")
-      .delete()
-      .in("chat_id", chatIds);
-    
-    if (searchHistoryError) {
-      throw new Error(`Failed to delete search history: ${searchHistoryError.message}`);
-    }
-  }
-
-  // 3. Delete island-item (depends on island)
+  // 1. Delete island-item (will CASCADE to item-data and cloud-topics-cache)
+  // Note: validation-log has ON DELETE SET NULL, so logs are preserved
   const { error: islandItemError } = await supabase
     .from("island-item")
     .delete()
@@ -292,17 +234,17 @@ export async function resetUser(userId: string) {
     throw new Error(`Failed to delete island items: ${islandItemError.message}`);
   }
 
-  // 4. Delete island (depends on profile)
-  const { error: islandError } = await supabase
-    .from("island")
+  // 2. Delete knowledge-graph-favorites
+  const { error: knowledgeGraphError } = await supabase
+    .from("knowledge-graph-favorites")
     .delete()
-    .eq("profile_id", userId);
+    .eq("user_id", userId);
   
-  if (islandError) {
-    throw new Error(`Failed to delete islands: ${islandError.message}`);
+  if (knowledgeGraphError) {
+    throw new Error(`Failed to delete knowledge graph favorites: ${knowledgeGraphError.message}`);
   }
 
-  // 5. Delete favourite (depends on profile)
+  // 3. Delete favourite
   const { error: favouriteError } = await supabase
     .from("favourite")
     .delete()
@@ -312,7 +254,8 @@ export async function resetUser(userId: string) {
     throw new Error(`Failed to delete favourites: ${favouriteError.message}`);
   }
 
-  // 6. Delete chat (depends on profile)
+  // 4. Delete chat (will CASCADE to feedback)
+  // Note: search-history has ON DELETE SET NULL on chat_id, so history logs are preserved
   const { error: chatError } = await supabase
     .from("chat")
     .delete()
@@ -322,7 +265,7 @@ export async function resetUser(userId: string) {
     throw new Error(`Failed to delete chats: ${chatError.message}`);
   }
 
-  // 7. Reset profile data (keeping account but clearing progress)
+  // 5. Reset profile data (keeping account but clearing progress)
   const { error: profileError } = await supabase
     .from("profile")
     .update({

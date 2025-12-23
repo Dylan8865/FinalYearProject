@@ -3,6 +3,9 @@
 import { useState, useRef } from "react";
 import { updateItem, uploadItemImage, removeItemImage } from "@/actions/shop";
 
+const MAX_MANA_VALUE = 9999999;
+const MAX_MANA_RATE = 999;
+
 interface Item {
   id: string;
   name: string | null;
@@ -126,7 +129,7 @@ export default function ItemEditModal({
   // Handle mana required input with max validation
   const handleManaRequiredChange = (value: string) => {
     const numValue = parseInt(value) || 0;
-    if (numValue <= 9999999) {
+    if (numValue <= MAX_MANA_VALUE) {
       setManaRequired(value);
     }
   };
@@ -134,8 +137,36 @@ export default function ItemEditModal({
   // Handle mana rate input
   const handleManaRateChange = (value: string) => {
     const numValue = parseInt(value) || 0;
-    if (numValue <= 999) {
+    if (numValue <= MAX_MANA_RATE) {
       setManaRate(value);
+    }
+  };
+
+  // Prevent non-numeric key input
+  const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter, arrows, home, end
+    if (
+      e.key === 'Backspace' ||
+      e.key === 'Delete' ||
+      e.key === 'Tab' ||
+      e.key === 'Escape' ||
+      e.key === 'Enter' ||
+      e.key === 'ArrowLeft' ||
+      e.key === 'ArrowRight' ||
+      e.key === 'ArrowUp' ||
+      e.key === 'ArrowDown' ||
+      e.key === 'Home' ||
+      e.key === 'End'
+    ) {
+      return;
+    }
+    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x')) {
+      return;
+    }
+    // Block anything that's not a digit
+    if (!/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
     }
   };
 
@@ -331,10 +362,11 @@ export default function ItemEditModal({
                 type="number"
                 value={manaRequired}
                 onChange={(e) => handleManaRequiredChange(e.target.value)}
+                onKeyDown={handleNumericKeyDown}
                 className="w-full bg-[#1E1E1E] text-white px-4 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
                 placeholder="0"
                 min="0"
-                max="9999999"
+                max={MAX_MANA_VALUE.toString()}
               />
             </div>
 
@@ -347,10 +379,11 @@ export default function ItemEditModal({
                 type="number"
                 value={manaRate}
                 onChange={(e) => handleManaRateChange(e.target.value)}
+                onKeyDown={handleNumericKeyDown}
                 className="w-full bg-[#1E1E1E] text-white px-4 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
                 placeholder="0"
                 min="0"
-                max="999"
+                max={MAX_MANA_RATE.toString()}
               />
             </div>
 

@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateUser, deleteUser, resetUser } from "@/actions/user";
 
+const MAX_MANA = 999999999;
+const MAX_LEVEL = 32767;
+
 interface User {
   id: string;
   name: string | null;
@@ -40,7 +43,7 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
   // Handle mana input with max validation
   const handleManaChange = (value: string) => {
     const numValue = parseInt(value) || 0;
-    if (numValue <= 999999999) {
+    if (numValue <= MAX_MANA) {
       setMana(value);
     }
   };
@@ -48,8 +51,36 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
   // Handle level input with max int2 validation
   const handleLevelChange = (value: string) => {
     const numValue = parseInt(value) || 0;
-    if (numValue <= 32767) {
+    if (numValue <= MAX_LEVEL) {
       setLevel(value);
+    }
+  };
+
+  // Prevent non-numeric key input
+  const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter, arrows, home, end
+    if (
+      e.key === 'Backspace' ||
+      e.key === 'Delete' ||
+      e.key === 'Tab' ||
+      e.key === 'Escape' ||
+      e.key === 'Enter' ||
+      e.key === 'ArrowLeft' ||
+      e.key === 'ArrowRight' ||
+      e.key === 'ArrowUp' ||
+      e.key === 'ArrowDown' ||
+      e.key === 'Home' ||
+      e.key === 'End'
+    ) {
+      return;
+    }
+    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x')) {
+      return;
+    }
+    // Block anything that's not a digit
+    if (!/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
     }
   };
 
@@ -174,7 +205,14 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
   return (
     <div 
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
+      onClick={(e) => {
+        // Don't close if confirmation modals are showing
+        if (showDeleteConfirm || showResetConfirm) {
+          e.stopPropagation();
+          return;
+        }
+        onClose();
+      }}
     >
       <div 
         className="bg-[#333333] rounded-lg border border-[#3B3B3B] p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative"
@@ -300,24 +338,26 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
                 type="number"
                 value={mana}
                 onChange={(e) => handleManaChange(e.target.value)}
+                onKeyDown={handleNumericKeyDown}
                 className="w-full bg-[#1E1E1E] text-white px-4 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
                 placeholder={user.mana?.toString() || "0"}
                 min="0"
-                max="999999999"
+                max={MAX_MANA.toString()}
               />
             </div>
 
             {/* Level */}
             <div>
-              <label className="text-gray-400 text-xs mb-2 block">Level (Max: 32767)</label>
+              <label className="text-gray-400 text-xs mb-2 block">Level (Max: {MAX_LEVEL.toLocaleString()})</label>
               <input
                 type="number"
                 value={level}
                 onChange={(e) => handleLevelChange(e.target.value)}
+                onKeyDown={handleNumericKeyDown}
                 className="w-full bg-[#1E1E1E] text-white px-4 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
                 placeholder={user.level?.toString() || "0"}
                 min="0"
-                max="32767"
+                max={MAX_LEVEL.toString()}
               />
             </div>
 
@@ -374,8 +414,14 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-          <div className="bg-[#1E1E1E] rounded-lg border border-red-900/50 p-6 w-full max-w-md">
+        <div 
+          className="absolute inset-0 bg-black/50 flex items-center justify-center z-10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div 
+            className="bg-[#1E1E1E] rounded-lg border border-red-900/50 p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h4 className="text-red-400 text-lg font-semibold mb-2">Warning</h4>
             <p className="text-white text-sm mb-4">
               Are you sure you want to delete this user? This action is irreversible.
@@ -412,8 +458,14 @@ export default function UserEditModal({ user, onClose, onUpdate, onError, onSucc
 
       {/* Reset Confirmation Modal */}
       {showResetConfirm && (
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-          <div className="bg-[#1E1E1E] rounded-lg border border-red-900/50 p-6 w-full max-w-md">
+        <div 
+          className="absolute inset-0 bg-black/50 flex items-center justify-center z-10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div 
+            className="bg-[#1E1E1E] rounded-lg border border-red-900/50 p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h4 className="text-red-400 text-lg font-semibold mb-2">Warning</h4>
             <p className="text-white text-sm mb-4">
               Are you sure you want to reset this user's data? This action is irreversible.

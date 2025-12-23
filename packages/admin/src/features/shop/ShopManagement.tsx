@@ -37,6 +37,97 @@ export default function ShopManagement({ items }: ShopManagementProps) {
 
   const filterPanelRef = useRef<HTMLDivElement>(null);
 
+  // Validation handlers for filter inputs
+  const handleManaMinChange = (value: string) => {
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue === "") {
+      setFilterManaMin("");
+      return;
+    }
+    // Check length first (9999999 is 7 digits max)
+    if (cleanValue.length > 7) {
+      return;
+    }
+    const numValue = parseInt(cleanValue);
+    if (!isNaN(numValue) && numValue <= 9999999) {
+      setFilterManaMin(cleanValue);
+    }
+  };
+
+  const handleManaMaxChange = (value: string) => {
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue === "") {
+      setFilterManaMax("");
+      return;
+    }
+    if (cleanValue.length > 7) {
+      return;
+    }
+    const numValue = parseInt(cleanValue);
+    if (!isNaN(numValue) && numValue <= 9999999) {
+      setFilterManaMax(cleanValue);
+    }
+  };
+
+  const handleRateMinChange = (value: string) => {
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue === "") {
+      setFilterRateMin("");
+      return;
+    }
+    // Check length first (999 is 3 digits max)
+    if (cleanValue.length > 3) {
+      return;
+    }
+    const numValue = parseInt(cleanValue);
+    if (!isNaN(numValue) && numValue <= 999) {
+      setFilterRateMin(cleanValue);
+    }
+  };
+
+  const handleRateMaxChange = (value: string) => {
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue === "") {
+      setFilterRateMax("");
+      return;
+    }
+    if (cleanValue.length > 3) {
+      return;
+    }
+    const numValue = parseInt(cleanValue);
+    if (!isNaN(numValue) && numValue <= 999) {
+      setFilterRateMax(cleanValue);
+    }
+  };
+
+  // Prevent non-numeric key input
+  const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter, arrows, home, end
+    if (
+      e.key === 'Backspace' ||
+      e.key === 'Delete' ||
+      e.key === 'Tab' ||
+      e.key === 'Escape' ||
+      e.key === 'Enter' ||
+      e.key === 'ArrowLeft' ||
+      e.key === 'ArrowRight' ||
+      e.key === 'ArrowUp' ||
+      e.key === 'ArrowDown' ||
+      e.key === 'Home' ||
+      e.key === 'End'
+    ) {
+      return;
+    }
+    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x')) {
+      return;
+    }
+    // Block anything that's not a digit
+    if (!/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   // Initialize filter from URL parameter
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -98,11 +189,11 @@ export default function ShopManagement({ items }: ShopManagementProps) {
 
     const matchesType = filterType === "all" || item.type === filterType;
 
-    const matchesManaMin = !filterManaMin || (item.mana_required || 0) >= parseInt(filterManaMin);
-    const matchesManaMax = !filterManaMax || (item.mana_required || 0) <= parseInt(filterManaMax);
+    const matchesManaMin = !filterManaMin || (item.mana_required || 0) >= (Number(filterManaMin) || 0);
+    const matchesManaMax = !filterManaMax || (item.mana_required || 0) <= (Number(filterManaMax) || Infinity);
 
-    const matchesRateMin = !filterRateMin || (item.mana_rate || 0) >= parseInt(filterRateMin);
-    const matchesRateMax = !filterRateMax || (item.mana_rate || 0) <= parseInt(filterRateMax);
+    const matchesRateMin = !filterRateMin || (item.mana_rate || 0) >= (Number(filterRateMin) || 0);
+    const matchesRateMax = !filterRateMax || (item.mana_rate || 0) <= (Number(filterRateMax) || Infinity);
 
     return matchesSearch && matchesType && matchesManaMin && matchesManaMax && matchesRateMin && matchesRateMax;
   });
@@ -207,23 +298,29 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                               placeholder="0"
                               value={filterManaMin}
                               onChange={(e) => {
-                                setFilterManaMin(e.target.value);
+                                handleManaMinChange(e.target.value);
                                 setCurrentPage(1);
                               }}
+                              onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                              min="0"
+                              max="999999999"
                             />
                           </div>
                           <div className="flex-1">
                             <label className="text-gray-400 text-xs mb-1 block">Max</label>
                             <input
                               type="number"
-                              placeholder="9999999"
+                              placeholder="999999999"
                               value={filterManaMax}
                               onChange={(e) => {
-                                setFilterManaMax(e.target.value);
+                                handleManaMaxChange(e.target.value);
                                 setCurrentPage(1);
                               }}
+                              onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                              min="0"
+                              max="999999999"
                             />
                           </div>
                         </div>
@@ -240,10 +337,13 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                               placeholder="0"
                               value={filterRateMin}
                               onChange={(e) => {
-                                setFilterRateMin(e.target.value);
+                                handleRateMinChange(e.target.value);
                                 setCurrentPage(1);
                               }}
+                              onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                              min="0"
+                              max="999"
                             />
                           </div>
                           <div className="flex-1">
@@ -253,10 +353,13 @@ export default function ShopManagement({ items }: ShopManagementProps) {
                               placeholder="999"
                               value={filterRateMax}
                               onChange={(e) => {
-                                setFilterRateMax(e.target.value);
+                                handleRateMaxChange(e.target.value);
                                 setCurrentPage(1);
                               }}
+                              onKeyDown={handleNumericKeyDown}
                               className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B]"
+                              min="0"
+                              max="999"
                             />
                           </div>
                         </div>

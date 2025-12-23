@@ -97,7 +97,8 @@ export default function KnowledgeManagement({ items, stats }: KnowledgeManagemen
   // Close filter panel when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (filterPanelRef.current && !filterPanelRef.current.contains(event.target as Node)) {
+      if (filterPanelRef.current && !filterPanelRef.current.contains(event.target as Node) &&
+          userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
         setShowFilter(false);
       }
     };
@@ -364,7 +365,7 @@ export default function KnowledgeManagement({ items, stats }: KnowledgeManagemen
 
                       {/* User Filter with Autocomplete */}
                       <div className="relative" ref={userDropdownRef}>
-                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Creator</h4>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by User</h4>
                         <input
                           type="text"
                           placeholder="Search for user"

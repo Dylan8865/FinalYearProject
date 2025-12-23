@@ -365,10 +365,10 @@ export default function ValidationLogDashboard({ logs, stats }: ValidationLogDas
 
                       {/* User Filter with Autocomplete */}
                       <div className="relative" ref={userDropdownRef}>
-                        <h4 className="text-white text-sm font-semibold mb-2">Filter by Creator</h4>
+                        <h4 className="text-white text-sm font-semibold mb-2">Filter by User</h4>
                         <input
                           type="text"
-                          placeholder="Search by username, email, or user ID..."
+                          placeholder="Search user"
                           value={userSearchInput}
                           onChange={(e) => {
                             setUserSearchInput(e.target.value);
