@@ -6,12 +6,19 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 // Gmail ignores dots in the local part and treats hello@gmail.com and hello.there@gmail.com as the same
 function normalizeEmail(email: string): string {
   const [localPart, domain] = email.toLowerCase().split('@');
-  
-  // For Gmail addresses, remove dots from local part
+
+  // For Gmail addresses, normalize by removing '+' aliasing and dots from local part
   if (domain === 'gmail.com' || domain === 'googlemail.com') {
-    return localPart.replace(/\./g, '') + '@' + domain;
+    let normalizedLocal = localPart;
+
+    const plusIndex = normalizedLocal.indexOf('+');
+    if (plusIndex !== -1) {
+      normalizedLocal = normalizedLocal.substring(0, plusIndex);
+    }
+
+    normalizedLocal = normalizedLocal.replace(/\./g, '');
+    return normalizedLocal + '@' + domain;
   }
-  
   return email.toLowerCase();
 }
 
