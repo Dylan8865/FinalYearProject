@@ -265,9 +265,15 @@ const BlockEditorContainer = ({
           onClick={() => blockEditor.createBlock(null, "paragraph")}
         >
           <p className="text-gray-500">
-            Click here or press{" "}
-            <kbd className="rounded bg-gray-700 px-1.5 py-0.5 text-xs">/</kbd>{" "}
-            to start writing...
+            Step 1. Click here to add block
+            <br />
+            Step 2. Type{" "}
+            <kbd className="rounded bg-gray-700 px-1.5 py-0.5 text-xs">
+              /
+            </kbd>{" "}
+            to select block type
+            <br />
+            Step 3. Start typing to add content
           </p>
         </div>
 
