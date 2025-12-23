@@ -3,7 +3,7 @@ import { IslandItemType, IslandTypeWithPosition } from "@/types/types";
 import QuestionIcon from "@/icons/QuestionIcon";
 import TrophyIcon from "@/icons/TrophyIcon";
 import IslandIcon from "@/icons/IslandIcon";
-import { calculateIslandTotalManaRate } from "@/lib/utils/manaCalculations";
+import { calculateIslandTotalManaRate } from "@/utils/manaCalculations";
 import { useTheme } from "../../contexts/ThemeContext";
 
 interface AchievementContentProps {

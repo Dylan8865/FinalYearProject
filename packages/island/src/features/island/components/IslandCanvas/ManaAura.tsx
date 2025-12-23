@@ -3,7 +3,7 @@
 import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { MIN_MANA_FOR_AURA } from "@/lib/utils/manaCalculations";
+import { MIN_MANA_FOR_AURA } from "@/utils/manaCalculations";
 
 interface ManaAuraProps {
   accumulatedMana: number;

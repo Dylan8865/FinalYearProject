@@ -7,7 +7,7 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import { calculateIslandTotalManaRate } from "@/lib/utils/manaCalculations";
+import { calculateIslandTotalManaRate } from "@/utils/manaCalculations";
 import { IslandItemType } from "@/types/types";
 
 interface IslandManaState {

@@ -24,7 +24,7 @@ import RefreshIcon from "@/icons/RefreshIcon";
 import {
   calculateIslandTotalManaRate,
   MAX_ACCUMULATION_TIME,
-} from "@/lib/utils/manaCalculations";
+} from "@/utils/manaCalculations";
 import AddIslandContent from "./Dialog/AddIslandContent";
 import EditIslandContent from "./Dialog/EditIslandContent";
 import IslandIcon from "@/icons/IslandIcon";

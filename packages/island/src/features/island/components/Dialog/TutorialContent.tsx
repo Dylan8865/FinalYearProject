@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import BlockIcon from "@/icons/BlockIcon";
 import DragIcon from "@/icons/DragIcon";
 import TrashIcon from "@/icons/TrashIcon";
-import { toCapitalise } from "@/lib/utils/capitalise";
+import { toCapitalise } from "@/utils/capitalise";
 import { useTheme } from "../../contexts/ThemeContext";
 
 interface Step {
