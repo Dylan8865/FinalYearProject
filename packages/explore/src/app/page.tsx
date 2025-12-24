@@ -3,6 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import IslandIcon from "@/icons/IslandIcon";
+import MenuIcon from "@/icons/MenuIcon";
+import CloseIcon from "@/icons/CloseIcon";
+import CloudIcon from "@/icons/CloudIcon";
+import ExploreIcon from "@/icons/ExploreIcon";
 import { supabase } from "@/lib/supabase";
 import { NAV_URLS } from "@/utils/navigation";
 
@@ -18,6 +22,7 @@ export default function Explore() {
   const [sortBy, setSortBy] = useState("newest");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Fetch content
@@ -119,19 +124,69 @@ export default function Explore() {
           </nav>
         </div>
 
-        <button
-          onClick={() => router.push("/login")}
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-        >
-          Sign in
-        </button>
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-4">
+          {/* Mobile Menu Button - Moved to right */}
+          <button
+            className="md:hidden text-white transform scale-125 mr-2 p-2"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
+            <MenuIcon />
+          </button>
+
+          {/* Sign in button removed as requested */}
+        </div>
       </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-gray-900/95 backdrop-blur-sm">
+          <div className="flex flex-col h-full bg-[#1A1D1F] w-3/4 max-w-sm ml-auto shadow-2xl p-6">
+            <div className="flex justify-between items-center mb-8">
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            <nav className="flex flex-col gap-6">
+              <button
+                onClick={() => router.push("/mike/island")}
+                className="flex items-center gap-4 text-gray-300 hover:text-white transition-colors text-lg"
+              >
+                <IslandIcon />
+                <span>Island</span>
+              </button>
+
+              <button
+                onClick={() => router.push("/cloud")}
+                className="flex items-center gap-4 text-gray-300 hover:text-white transition-colors text-lg"
+              >
+                <CloudIcon />
+                <span>Cloud</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-4 text-white font-bold text-xl border-b-2 border-white w-fit pb-1"
+              >
+                <ExploreIcon />
+                <span>Explore</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div className="px-8 py-4">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-md">
+          <form onSubmit={handleSearch} className="flex-1 w-full">
             <div className="flex items-center bg-gray-800 rounded-lg px-4 py-3 border border-gray-700">
               <svg
                 className="w-5 h-5 text-gray-400 mr-3"
@@ -151,7 +206,7 @@ export default function Explore() {
                 value={searchQuery}
                 onChange={handleInputChange}
                 placeholder="Search for knowledge"
-                className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none"
+                className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none w-full"
               />
             </div>
           </form>
