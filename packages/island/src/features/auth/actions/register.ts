@@ -98,7 +98,7 @@ export async function register(formData: FormData) {
       const { data: islandData, error: islandError } = await supabase
         .from("island")
         .insert({
-          name: "Hello World",
+          name: `${name} #1`,
           level: 1,
           theme: theme,
           profile_id: authData.user.id,
