@@ -145,35 +145,57 @@ export default function Sidebar({
           {isOpen && <span>New chat</span>}
         </button>
 
-        {/* Search Chats */}
-        <button
-          onClick={() => {
-            if (!isOpen) {
-              onToggle(); // Open sidebar first if collapsed
-            }
-            onToggleSearch();
-          }}
-          className={`flex items-center gap-4 rounded-lg px-4 py-3 text-base ${isSearchActive ? textColor : mutedTextColor} ${hoverBg}`}
-          title="Search chats"
-        >
-          <svg
-            className="h-6 w-6 shrink-0"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {/* Search Chats - Only show when logged in */}
+        {isLoggedIn && (
+          <button
+            onClick={() => {
+              if (!isOpen) {
+                onToggle(); // Open sidebar first if collapsed
+              }
+              onToggleSearch();
+            }}
+            className={`flex items-center gap-4 rounded-lg px-4 py-3 text-base ${isSearchActive ? textColor : mutedTextColor} ${hoverBg}`}
+            title="Search chats"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-          {isOpen && <span>Search chats</span>}
-        </button>
+            <svg
+              className="h-6 w-6 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            {isOpen && <span>Search chats</span>}
+          </button>
+        )}
+
+        {/* Error message when no conversations to search */}
+        {isOpen && isSearchActive && isLoggedIn && conversations.length === 0 && !searchQuery && (
+          <div className="px-4">
+            <div className={`flex items-start justify-between gap-3 rounded-lg bg-red-500/10 px-4 py-3`}>
+              <p className={`flex-1 text-sm text-red-500`}>
+                No conversations to search. Please start a chat first.
+              </p>
+              <button
+                onClick={onToggleSearch}
+                className="shrink-0 text-red-500 hover:text-red-600"
+                title="Close search"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Search Input - Only show when expanded and search is active */}
-        {isOpen && isSearchActive && (
+        {isOpen && isSearchActive && isLoggedIn && (
           <div className="px-2">
             <div className="relative">
               <input
@@ -202,32 +224,34 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* Favorites Filter */}
-        <button
-          onClick={() => {
-            if (!isOpen) {
-              onToggle(); // Open sidebar first if collapsed
-            }
-            onToggleFavoritesFilter();
-          }}
-          className={`flex items-center gap-4 rounded-lg px-4 py-3 text-base ${showFavoritesOnly ? textColor : mutedTextColor} ${hoverBg}`}
-          title="Show favorites only"
-        >
-          <svg
-            className="h-6 w-6 shrink-0"
-            fill={showFavoritesOnly ? "currentColor" : "none"}
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {/* Favorites Filter - Only show when logged in */}
+        {isLoggedIn && (
+          <button
+            onClick={() => {
+              if (!isOpen) {
+                onToggle(); // Open sidebar first if collapsed
+              }
+              onToggleFavoritesFilter();
+            }}
+            className={`flex items-center gap-4 rounded-lg px-4 py-3 text-base ${showFavoritesOnly ? textColor : mutedTextColor} ${hoverBg}`}
+            title="Show favorites only"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-            />
-          </svg>
-          {isOpen && <span>Favorites</span>}
-        </button>
+            <svg
+              className="h-6 w-6 shrink-0"
+              fill={showFavoritesOnly ? "currentColor" : "none"}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+              />
+            </svg>
+            {isOpen && <span>Favorites</span>}
+          </button>
+        )}
       </div>
 
       {/* Conversations List - Only show when expanded */}
@@ -246,11 +270,20 @@ export default function Sidebar({
               </a>
             </div>
           ) : conversations.length === 0 ? (
-            <p className={`px-4 py-6 text-center text-base ${mutedTextColor}`}>
-              No conversations yet
-            </p>
+            <div className="px-4 py-3">
+              {searchQuery ? (
+                <p className={`text-center text-sm ${mutedTextColor}`}>
+                  No conversations match your search
+                </p>
+              ) : (
+                <p className={`text-center text-base ${mutedTextColor}`}>
+                  No conversations yet
+                </p>
+              )}
+            </div>
           ) : (
-            Object.entries(groupedConversations).map(
+            <>
+              {Object.entries(groupedConversations).map(
               ([group, convs]) =>
                 convs.length > 0 && (
                   <div key={group} className="mb-5">
@@ -324,7 +357,8 @@ export default function Sidebar({
                     ))}
                   </div>
                 )
-            )
+            )}
+            </>
           )}
         </div>
       )}

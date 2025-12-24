@@ -9,24 +9,12 @@ interface ChatInputProps {
 }
 
 // Validation helpers
-const INVALID_CHARS_REGEX = /[<>{}[\]\\^`|]/g;
-
 function validateQuery(query: string): { isValid: boolean; error: string | null; sanitized: string } {
   const trimmed = query.trim();
   
-  // Check for empty query (M3)
+  // Check for empty query
   if (!trimmed) {
     return { isValid: false, error: "Please enter a search query to begin.", sanitized: "" };
-  }
-  
-  // Check for invalid characters (M4)
-  if (INVALID_CHARS_REGEX.test(trimmed)) {
-    const sanitized = trimmed.replace(INVALID_CHARS_REGEX, "");
-    return { 
-      isValid: true, 
-      error: "Your query contains invalid characters. Please use only letters, numbers, and common punctuation.", 
-      sanitized 
-    };
   }
   
   return { isValid: true, error: null, sanitized: trimmed };
@@ -71,11 +59,6 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
       return;
     }
     
-    // Show warning if characters were sanitized, but still proceed
-    if (validation.error) {
-      setError(validation.error);
-    }
-    
     onSend(validation.sanitized);
     setInput("");
   };
@@ -99,10 +82,10 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
         </div>
       )}
       
-      <div className={`relative flex items-end gap-3 rounded-full border ${error ? errorBorderColor : borderColor} bg-transparent px-6 py-3 transition-colors focus-within:border-teal-400`}>
+      <div className={`relative flex items-center gap-4 rounded-full border ${error ? errorBorderColor : borderColor} bg-transparent px-6 py-3 transition-colors focus-within:border-teal-400`}>
         {/* Search Icon */}
         <svg
-          className={`mb-3 h-6 w-6 shrink-0 ${mutedTextColor}`}
+          className={`h-6 w-6 shrink-0 ${mutedTextColor}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -123,7 +106,7 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           placeholder="Ask a follow-up question..."
           rows={1}
-          className={`max-h-[200px] min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-lg ${textColor} outline-none ${placeholderColor}`}
+          className={`max-h-[200px] min-h-[28px] flex-1 resize-none bg-transparent text-lg ${textColor} outline-none ${placeholderColor}`}
           disabled={isLoading}
         />
 
@@ -132,7 +115,7 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="mb-3 text-teal-400 transition-colors hover:text-teal-300 disabled:opacity-50"
+            className="shrink-0 text-teal-400 transition-colors hover:text-teal-300 disabled:opacity-50"
             title="Send message"
           >
           {isLoading ? (
