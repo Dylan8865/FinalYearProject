@@ -50,10 +50,31 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
+    // If no name provided, generate default name with username and island count
+    let islandName = body.name;
+    if (!islandName || islandName.trim() === "") {
+      // Get current island count for this user
+      const { count } = await supabase
+        .from("island")
+        .select("*", { count: "exact", head: true })
+        .eq("profile_id", user.id);
+
+      // Get user profile to get username
+      const { data: profile } = await supabase
+        .from("profile")
+        .select("name")
+        .eq("id", user.id)
+        .single();
+
+      const islandNumber = (count || 1) + 1;
+      islandName = `${profile?.name || "User"} #${islandNumber}`;
+    }
+
     const { data: island, error } = await supabase
       .from("island")
       .insert({
         ...body,
+        name: islandName,
         profile_id: user.id,
       })
       .select()
