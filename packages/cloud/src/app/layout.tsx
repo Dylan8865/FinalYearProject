@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body className="antialiased m-0 p-0">
+      <body className="antialiased m-0 p-0" suppressHydrationWarning>
         {/* TagCanvas library from official source */}
         <Script
           src="https://www.goat1000.com/tagcanvas.min.js"

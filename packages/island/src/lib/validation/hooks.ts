@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 interface ValidationState {
   isValidating: boolean;
@@ -17,11 +17,11 @@ interface ValidationQueueStatus {
 
 /**
  * React hook for triggering and monitoring island item validation
- * 
+ *
  * @example
  * ```tsx
  * const { validateItem, isValidating, error, success } = useValidation();
- * 
+ *
  * const handlePublish = async () => {
  *   const result = await validateItem(islandItemId);
  *   if (result.success) {
@@ -52,10 +52,10 @@ export function useValidation() {
     });
 
     try {
-      const response = await fetch('/api/validate-item', {
-        method: 'POST',
+      const response = await fetch("/api/validate-item", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ islandItemId }),
       });
@@ -65,7 +65,7 @@ export function useValidation() {
       if (!response.ok || !data.success) {
         setState({
           isValidating: false,
-          error: data.error || 'Validation failed',
+          error: data.error || "Validation failed",
           success: false,
           validationLogId: null,
         });
@@ -86,7 +86,7 @@ export function useValidation() {
       };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Network error';
+        error instanceof Error ? error.message : "Network error";
 
       setState({
         isValidating: false,
@@ -103,26 +103,27 @@ export function useValidation() {
    * Check the status of the validation queue
    * @returns Promise with queue status information
    */
-  const checkQueueStatus = useCallback(async (): Promise<ValidationQueueStatus | null> => {
-    try {
-      const response = await fetch('/api/process-validations');
-      const data = await response.json();
+  const checkQueueStatus =
+    useCallback(async (): Promise<ValidationQueueStatus | null> => {
+      try {
+        const response = await fetch("/api/process-validations");
+        const data = await response.json();
 
-      if (!response.ok) {
-        console.error('Failed to check queue status:', data.error);
+        if (!response.ok) {
+          console.error("Failed to check queue status:", data.error);
+          return null;
+        }
+
+        return {
+          queuedCount: data.queuedCount,
+          processingCount: data.processingCount,
+          message: data.message,
+        };
+      } catch (error) {
+        console.error("Error checking queue status:", error);
         return null;
       }
-
-      return {
-        queuedCount: data.queuedCount,
-        processingCount: data.processingCount,
-        message: data.message,
-      };
-    } catch (error) {
-      console.error('Error checking queue status:', error);
-      return null;
-    }
-  }, []);
+    }, []);
 
   /**
    * Reset the validation state
@@ -150,11 +151,11 @@ export function useValidation() {
 /**
  * Hook for triggering background validation processing
  * Useful for admin panels or monitoring dashboards
- * 
+ *
  * @example
  * ```tsx
  * const { processQueue, isProcessing, result } = useValidationProcessor();
- * 
+ *
  * const handleProcess = async () => {
  *   const result = await processQueue();
  *   console.log(`Processed ${result?.processed} items`);
@@ -178,14 +179,14 @@ export function useValidationProcessor() {
     setError(null);
 
     try {
-      const response = await fetch('/api/process-validations', {
-        method: 'POST',
+      const response = await fetch("/api/process-validations", {
+        method: "POST",
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.error || 'Processing failed');
+        setError(data.error || "Processing failed");
         setIsProcessing(false);
         return { success: false, error: data.error };
       }
@@ -204,7 +205,7 @@ export function useValidationProcessor() {
       };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Network error';
+        error instanceof Error ? error.message : "Network error";
 
       setError(errorMessage);
       setIsProcessing(false);

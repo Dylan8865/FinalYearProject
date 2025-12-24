@@ -1,8 +1,8 @@
-import { GoogleGenAI, Type } from '@google/genai';
-import type { ValidationRequest, ValidationResponse } from './types';
+import { GoogleGenAI, Type } from "@google/genai";
+import type { ValidationRequest, ValidationResponse } from "./types";
 
 if (!process.env.GEMINI_API_KEY) {
-  throw new Error('GEMINI_API_KEY is not set in environment variables');
+  throw new Error("GEMINI_API_KEY is not set in environment variables");
 }
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -18,15 +18,16 @@ const validationResponseSchema = {
         properties: {
           island_item_id: {
             type: Type.STRING,
-            description: 'UUID of the island item',
+            description: "UUID of the island item",
           },
           validity: {
             type: Type.NUMBER,
-            description: 'Overall validity score (0-100) as average of all item_data validities',
+            description:
+              "Overall validity score (0-100) as average of all item_data validities",
           },
           comment: {
             type: Type.STRING,
-            description: 'Constructive feedback comment (2-3 sentences)',
+            description: "Constructive feedback comment (2-3 sentences)",
           },
           item_data: {
             type: Type.ARRAY,
@@ -35,22 +36,23 @@ const validationResponseSchema = {
               properties: {
                 id: {
                   type: Type.STRING,
-                  description: 'UUID of the item data',
+                  description: "UUID of the item data",
                 },
                 validity: {
                   type: Type.NUMBER,
-                  description: 'Validity score for this specific data element (0-100)',
+                  description:
+                    "Validity score for this specific data element (0-100)",
                 },
               },
-              required: ['id', 'validity'],
+              required: ["id", "validity"],
             },
           },
         },
-        required: ['island_item_id', 'validity', 'comment', 'item_data'],
+        required: ["island_item_id", "validity", "comment", "item_data"],
       },
     },
   },
-  required: ['results'],
+  required: ["results"],
 };
 
 const VALIDATION_PROMPT = `You are a knowledge validation system for a community knowledge repository where people share personal experiences, life lessons, family recipes, local traditions, practical tips, and wisdom passed down through generations.
@@ -177,33 +179,33 @@ export async function validateWithGemini(
   try {
     // Replace placeholder with actual data in the prompt
     const prompt = VALIDATION_PROMPT.replace(
-      '{DATA_PLACEHOLDER}',
+      "{DATA_PLACEHOLDER}",
       JSON.stringify(requestData, null, 2)
     );
 
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
-        responseMimeType: 'application/json',
+        responseMimeType: "application/json",
         responseSchema: validationResponseSchema,
       },
     });
 
     // Parse the JSON response
     const text = result.text;
-    
+
     if (!text) {
-      throw new Error('No response text received from Gemini API');
+      throw new Error("No response text received from Gemini API");
     }
 
     const validationResponse: ValidationResponse = JSON.parse(text);
 
     return validationResponse;
   } catch (error) {
-    console.error('Gemini validation error:', error);
+    console.error("Gemini validation error:", error);
     throw new Error(
-      `Gemini API validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Gemini API validation failed: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }

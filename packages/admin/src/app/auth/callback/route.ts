@@ -45,10 +45,7 @@ export async function GET(request: NextRequest) {
       .eq("id", user.id);
 
     if (updateError) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to update last login time:", updateError);
-      }
-      // Don't fail the login for this, just log it
+      // Don't fail the login for this error
     }
 
     const forwardedHost = request.headers.get("x-forwarded-host");

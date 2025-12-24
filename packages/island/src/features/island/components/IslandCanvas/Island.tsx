@@ -7,7 +7,7 @@ import { Line } from "@react-three/drei";
 import ManaAura from "./ManaAura";
 import IslandTooltip from "./IslandTooltip";
 
-const THEME = {
+const COLOUR = {
   primary: "#C3B091",
   secondary: "#8B7355",
   accent: "#E8DCC4",
@@ -29,8 +29,52 @@ const THEME = {
   pathway: "#D4A574",
 };
 
+const THEMES: Record<string, typeof COLOUR> = {
+  spring: {
+    ...COLOUR,
+    grass: "#95B853",
+    darkGrass: "#6D8A3A",
+    rock: "#7A6B5D",
+    darkRock: "#5A4F44",
+    accent: "#FFB7C5", // Cherry blossom pink
+    gridLine: "#6D8A3A",
+    water: "#A8E6CF",
+  },
+  summer: {
+    ...COLOUR,
+    grass: "#5D9B31",
+    darkGrass: "#3D6B1D",
+    rock: "#8D6E63",
+    darkRock: "#5D4037",
+    accent: "#FFEB3B", // Sun yellow
+    gridLine: "#3D6B1D",
+    water: "#00BCD4",
+  },
+  autumn: {
+    ...COLOUR,
+    grass: "#B5651D", // Ochre/Rust
+    darkGrass: "#8B4513", // SaddleBrown
+    rock: "#4E342E",
+    darkRock: "#3E2723",
+    accent: "#D2691E", // Chocolate
+    gridLine: "#8B4513",
+    water: "#5C7E8F",
+  },
+  winter: {
+    ...COLOUR,
+    grass: "#F8F9FA", // Pure white snow
+    darkGrass: "#E9ECEF", // Soft grey snow
+    rock: "#455A64",
+    darkRock: "#263238",
+    accent: "#B3E5FC", // Ice blue
+    gridLine: "#B3E5FC",
+    water: "#D1F2F2",
+  },
+};
+
 interface IslandBaseProps {
   gridSize?: number;
+  theme?: string;
   onPointerEnter?: () => void;
   onPointerLeave?: () => void;
   onClick?: (e: any) => void;
@@ -38,10 +82,13 @@ interface IslandBaseProps {
 
 const IslandBase = ({
   gridSize = 5,
+  theme = "default",
   onPointerEnter,
   onPointerLeave,
   onClick,
 }: IslandBaseProps) => {
+  const themeColours = THEMES[theme] || COLOUR;
+
   const radius = (gridSize * 1.2) / 2;
   const height = 4;
   const [randomValues, setRandomValues] = useState<
@@ -100,31 +147,35 @@ const IslandBase = ({
   if (!geometry) return null;
 
   return (
-    <mesh
-      geometry={geometry}
-      position={[0, -height / 2, 0]}
-      rotation={[Math.PI, 0, 0]}
-      castShadow
-      receiveShadow
-      onPointerEnter={onPointerEnter}
-      onPointerLeave={onPointerLeave}
-      onClick={onClick}
-    >
-      <meshStandardMaterial
-        color={THEME.darkRock}
-        roughness={0.95}
-        metalness={0.05}
-        flatShading
-      />
-    </mesh>
+    <group position={[0, -height / 2, 0]}>
+      <mesh
+        geometry={geometry}
+        rotation={[Math.PI, 0, 0]}
+        castShadow
+        receiveShadow
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+        onClick={onClick}
+      >
+        <meshStandardMaterial
+          color={themeColours.darkRock}
+          roughness={0.95}
+          metalness={0.05}
+          flatShading
+        />
+      </mesh>
+    </group>
   );
 };
 
 interface GrassBaseProps {
   gridSize?: number;
+  theme?: string;
 }
 
-const GrassBase = ({ gridSize = 5 }: GrassBaseProps) => {
+const GrassBase = ({ gridSize = 5, theme = "default" }: GrassBaseProps) => {
+  const themeColours = THEMES[theme] || COLOUR;
+
   const radius = (gridSize * 1.2) / 2;
   const [randomValues, setRandomValues] = useState<
     Array<{ offset: number; angle: number }>
@@ -171,12 +222,135 @@ const GrassBase = ({ gridSize = 5 }: GrassBaseProps) => {
     <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, 0.01, 0]}>
       <shapeGeometry args={[shape]} />
       <meshStandardMaterial
-        color={THEME.darkGrass}
+        color={themeColours.darkGrass}
         roughness={0.85}
         side={THREE.DoubleSide}
       />
     </mesh>
   );
+};
+
+const ThemeDecorations = ({
+  theme,
+  radius,
+}: {
+  theme: string;
+  radius: number;
+}) => {
+  const decorations = useMemo(() => {
+    const items = [];
+    const count = 20;
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.3;
+      const dist = radius * (1.02 + Math.random() * 0.1);
+      const x = Math.cos(angle) * dist;
+      const z = Math.sin(angle) * dist;
+      const scale = 0.1 + Math.random() * 0.3;
+      const rotationY = Math.random() * Math.PI;
+      const rotationX = Math.random() * 0.5;
+      const rotationZ = Math.random() * 0.5;
+      items.push({
+        x,
+        z,
+        scale,
+        rotationY,
+        rotationX,
+        rotationZ,
+        id: i,
+      });
+    }
+    return items;
+  }, [radius]);
+
+  const themeColours = THEMES[theme] || COLOUR;
+
+  if (theme === "spring") {
+    return (
+      <group>
+        {decorations.map((d) => (
+          <group key={d.id} position={[d.x, 0.05, d.z]} scale={d.scale}>
+            {/* Small flower cluster */}
+            <mesh position={[0, 0, 0]}>
+              <sphereGeometry args={[0.5, 8, 8]} />
+              <meshStandardMaterial color={themeColours.accent} />
+            </mesh>
+            <mesh position={[0.4, 0, 0.2]}>
+              <sphereGeometry args={[0.3, 6, 6]} />
+              <meshStandardMaterial color="#FFFFFF" />
+            </mesh>
+            <mesh position={[-0.3, 0, -0.4]}>
+              <sphereGeometry args={[0.4, 6, 6]} />
+              <meshStandardMaterial color={themeColours.accent} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+    );
+  }
+
+  if (theme === "summer") {
+    return (
+      <group>
+        {decorations.map((d) => (
+          <mesh
+            key={d.id}
+            position={[d.x, -0.05, d.z]}
+            scale={[d.scale * 3, 0.15, d.scale * 2]}
+            rotation={[0, d.rotationY, 0]}
+          >
+            <cylinderGeometry args={[1, 1.3, 1, 12]} />
+            <meshStandardMaterial color="#F5DEB3" roughness={0.8} />{" "}
+            {/* Wheat/Sand */}
+          </mesh>
+        ))}
+      </group>
+    );
+  }
+
+  if (theme === "autumn") {
+    return (
+      <group>
+        {decorations.map((d) => (
+          <mesh
+            key={d.id}
+            position={[d.x, 0.05, d.z]}
+            scale={d.scale * 0.8}
+            rotation={[d.rotationX, d.rotationY, d.rotationZ]}
+          >
+            {/* Leaf like structure */}
+            <boxGeometry args={[1.5, 0.1, 0.8]} />
+            <meshStandardMaterial
+              color={d.id % 2 === 0 ? "#D2691E" : "#B22222"}
+              roughness={0.7}
+            />
+          </mesh>
+        ))}
+      </group>
+    );
+  }
+
+  if (theme === "winter") {
+    return (
+      <group>
+        {decorations.map((d) => (
+          <mesh
+            key={d.id}
+            position={[d.x, 0.15, d.z]}
+            scale={[d.scale * 2.5, d.scale * 1.8, d.scale * 2.5]}
+          >
+            <sphereGeometry args={[0.7, 12, 12]} />
+            <meshStandardMaterial
+              color="#FFFFFF"
+              roughness={0.3}
+              metalness={0.1}
+            />
+          </mesh>
+        ))}
+      </group>
+    );
+  }
+
+  return null;
 };
 
 interface PlacedObject {
@@ -214,6 +388,7 @@ interface PlacedObject {
 interface GridPlatformProps {
   gridSize?: number;
   islandLevel: number;
+  theme?: string;
   onCellClick: (x: number, z: number, isInner: boolean, cellId: string) => void;
   placedObjects: Record<string, PlacedObject>;
   waterCells: string[];
@@ -224,12 +399,14 @@ interface GridPlatformProps {
 const GridPlatform = ({
   gridSize = 5,
   islandLevel: _islandLevel,
+  theme = "default",
   onCellClick,
   placedObjects,
   waterCells,
   isDraggingItem = false,
   onCellDrop,
 }: GridPlatformProps) => {
+  const themeColours = THEMES[theme] || COLOUR;
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
 
   // Grid configuration constants
@@ -315,7 +492,7 @@ const GridPlatform = ({
           <Line
             key={`h-${row}-${idx}`}
             points={segment}
-            color={THEME.gridLine}
+            color={themeColours.gridLine}
             lineWidth={2}
           />
         );
@@ -350,7 +527,7 @@ const GridPlatform = ({
           <Line
             key={`v-${col}-${idx}`}
             points={segment}
-            color={THEME.gridLine}
+            color={themeColours.gridLine}
             lineWidth={2}
           />
         );
@@ -412,14 +589,14 @@ const GridPlatform = ({
               <meshStandardMaterial
                 color={
                   hasWater
-                    ? THEME.water
+                    ? themeColours.water
                     : isHovered && isDraggingItem
                       ? "#FFD700"
                       : isHovered
-                        ? THEME.gridHighlight
+                        ? themeColours.gridHighlight
                         : isInner
-                          ? THEME.grass
-                          : THEME.darkGrass
+                          ? themeColours.grass
+                          : themeColours.darkGrass
                 }
                 transparent
                 opacity={hasWater ? 0.8 : isHovered ? 0.9 : 0.6}
@@ -427,10 +604,10 @@ const GridPlatform = ({
                   isHovered && isDraggingItem
                     ? "#FFA500"
                     : isHovered
-                      ? THEME.accent
+                      ? themeColours.accent
                       : hasWater
-                        ? THEME.crystal
-                        : THEME.grass
+                        ? themeColours.crystal
+                        : themeColours.grass
                 }
                 emissiveIntensity={
                   isHovered && isDraggingItem
@@ -546,11 +723,16 @@ const Island = ({
     setIsTooltipHovered(false);
   };
 
+  const themeColours = THEMES[islandTheme] || COLOUR;
+
+  const islandRadius = (gridSize * 1.2) / 2;
+
   return (
     <group ref={groupRef} position={position}>
       {/* Island base handles hover/click for showing tooltip and collecting mana */}
       <IslandBase
         gridSize={gridSize}
+        theme={islandTheme}
         onPointerEnter={() => onIslandHover?.(true)}
         onPointerLeave={() => {
           onIslandHover?.(false);
@@ -559,7 +741,10 @@ const Island = ({
         }}
         onClick={handleIslandBaseClick}
       />
-      <GrassBase gridSize={gridSize} />
+      <GrassBase gridSize={gridSize} theme={islandTheme} />
+
+      {/* Theme specific decorations around the island */}
+      <ThemeDecorations theme={islandTheme} radius={islandRadius} />
 
       {/* Mana Aura Effect */}
       {showManaAura && (
@@ -592,6 +777,7 @@ const Island = ({
       <GridPlatform
         gridSize={gridSize}
         islandLevel={islandLevel}
+        theme={islandTheme}
         onCellClick={() => {}}
         placedObjects={placedObjects}
         waterCells={[]}

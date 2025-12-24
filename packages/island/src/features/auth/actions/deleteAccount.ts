@@ -19,18 +19,14 @@ export async function deleteAccount() {
   }
 
   try {
-    // Delete user's islands (will cascade delete island-items due to FK)
-    const { error: islandsError } = await supabase
-      .from("island")
-      .delete()
-      .eq("profile_id", user.id);
-
-    if (islandsError) {
-      console.error("Islands deletion error:", islandsError);
-      return { error: "Failed to delete islands" };
-    }
-
-    // Delete user's profile
+    // Delete user's profile - CASCADE will handle:
+    // - island → island-item → item-data → cloud-topics-cache
+    // - chat → feedback
+    // - favourite
+    // - knowledge-graph-favorites
+    // SET NULL will preserve:
+    // - search-history (chat_id set to NULL)
+    // - validation-log (item_id set to NULL)
     const { error: profileError } = await supabase
       .from("profile")
       .delete()

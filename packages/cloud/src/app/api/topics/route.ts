@@ -195,9 +195,11 @@ export async function GET() {
     }
 
     // Fetch all cached topics (including newly processed)
+    // Only show main topics (depth_level = 0), hide drill-down sub-topics
     const { data: cachedTopics, error: cacheError } = await supabase
       .from("cloud-topics-cache")
       .select("id, main_topic, category, weight, click_count")
+      .eq("depth_level", 0)
       .order("weight", { ascending: false })
       .limit(50);
 

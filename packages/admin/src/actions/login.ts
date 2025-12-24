@@ -54,10 +54,7 @@ export async function login(formData: FormData) {
     .eq("id", authData.user.id);
 
   if (updateError) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("Failed to update last login time:", updateError);
-    }
-    // Don't fail the login for this, just log it
+    // Don't fail the login for this error
   }
 
   // Step 5: User is authenticated and is an admin

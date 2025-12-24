@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
+const GEMINI_API_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
 
 interface TopicExtractionResult {
   mainTopic: string;
@@ -10,9 +11,12 @@ interface TopicExtractionResult {
   weight: number;
 }
 
-async function extractTopicsWithAI(content: string, type: string = "text"): Promise<TopicExtractionResult> {
+async function extractTopicsWithAI(
+  content: string,
+  type: string = "text"
+): Promise<TopicExtractionResult> {
   const apiKey = process.env.GEMINI_API_KEY;
-  
+
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY not configured");
   }
@@ -57,14 +61,14 @@ Examples of BAD topics (NEVER do this):
   // Retry logic for rate limits
   let response;
   let lastError;
-  
+
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       if (attempt > 0) {
         // Exponential backoff: 2s, 4s
         const delay = Math.pow(2, attempt) * 1000;
         console.log(`⏳ Retry attempt ${attempt + 1} after ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
 
       response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
@@ -108,14 +112,14 @@ Examples of BAD topics (NEVER do this):
   try {
     const data = await response.json();
     const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    
+
     const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("No valid JSON in AI response");
     }
 
     const result = JSON.parse(jsonMatch[0]);
-    
+
     return {
       mainTopic: result.mainTopic || "Unknown Topic",
       subTopics: result.subTopics || [],
@@ -219,12 +223,12 @@ export async function POST(request: Request) {
         // Extract content based on type
         let contentText = "";
         let contentType = item.type || "text";
-        
+
         if (typeof item.content === "string") {
           contentText = item.content;
         } else if (item.content && typeof item.content === "object") {
           const content = item.content as Record<string, unknown>;
-          
+
           // Handle different content types
           if (contentType === "image") {
             // For images: extract alt text, caption, or description
@@ -233,7 +237,7 @@ export async function POST(request: Request) {
               content.caption,
               content.description,
               content.title,
-              `Image URL: ${content.url || content.src || content.path}`
+              `Image URL: ${content.url || content.src || content.path}`,
             ].filter(Boolean);
             contentText = imageParts.join(" ") || "Image content";
           } else if (contentType === "audio") {
@@ -243,7 +247,7 @@ export async function POST(request: Request) {
               content.description,
               content.transcript,
               content.caption,
-              `Audio file: ${content.url || content.src || content.path}`
+              `Audio file: ${content.url || content.src || content.path}`,
             ].filter(Boolean);
             contentText = audioParts.join(" ") || "Audio content";
           } else {
@@ -265,24 +269,30 @@ export async function POST(request: Request) {
 
         // AI extraction with content type context
         const extraction = await extractTopicsWithAI(contentText, contentType);
-        
+
         // Generate bubble map
-        const bubbleMapData = generateBubbleMapData(extraction.mainTopic, extraction.subTopics);
+        const bubbleMapData = generateBubbleMapData(
+          extraction.mainTopic,
+          extraction.subTopics
+        );
 
         // Cache result
         const { error: cacheError } = await supabase
           .from("cloud-topics-cache")
-          .upsert({
-            item_id: item.id,
-            main_topic: extraction.mainTopic,
-            sub_topics: extraction.subTopics,
-            category: extraction.category,
-            weight: extraction.weight,
-            bubble_map_data: bubbleMapData,
-            is_stale: false,
-          }, {
-            onConflict: "item_id",
-          });
+          .upsert(
+            {
+              item_id: item.id,
+              main_topic: extraction.mainTopic,
+              sub_topics: extraction.subTopics,
+              category: extraction.category,
+              weight: extraction.weight,
+              bubble_map_data: bubbleMapData,
+              is_stale: false,
+            },
+            {
+              onConflict: "item_id",
+            }
+          );
 
         if (cacheError) {
           console.error(`❌ Cache error for ${item.id}:`, cacheError);
@@ -299,8 +309,7 @@ export async function POST(request: Request) {
         });
 
         // Rate limiting: Wait 4 seconds between requests (15 req/min max for Gemini free tier)
-        await new Promise(resolve => setTimeout(resolve, 4000));
-
+        await new Promise((resolve) => setTimeout(resolve, 4000));
       } catch (error) {
         console.error(`💥 Error processing ${item.id}:`, error);
         errorCount++;
@@ -315,11 +324,12 @@ export async function POST(request: Request) {
       hasMore: items.length === limit,
       nextOffset: offset + limit,
     });
-
   } catch (error) {
     console.error("💥 Batch processing error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }

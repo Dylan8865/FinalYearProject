@@ -158,13 +158,9 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
 
-    // Get island_item_id before deleting
-    const { data: itemData } = await supabase
-      .from("item-data")
-      .select("island_item_id")
-      .eq("id", id)
-      .single();
-
+    // Delete item-data
+    // CASCADE will handle: cloud-topics-cache deletion
+    // SET NULL will handle: validation-log.item_id set to NULL
     const { error } = await supabase.from("item-data").delete().eq("id", id);
 
     if (error) {
@@ -173,14 +169,6 @@ export async function DELETE(request: Request) {
         { error: "Failed to delete item data" },
         { status: 500 }
       );
-    }
-
-    // Set island-item status to unverified when item-data is deleted
-    if (itemData?.island_item_id) {
-      await supabase
-        .from("island-item")
-        .update({ status: "unverified", admin_comment: null })
-        .eq("id", itemData.island_item_id);
     }
 
     return NextResponse.json({ success: true });

@@ -3,7 +3,7 @@
 import { Html } from "@react-three/drei";
 import ManaIcon from "@/icons/ManaIcon";
 import CloseIcon from "@/icons/CloseIcon";
-import { toCapitalise } from "@/lib/capitalise";
+import { toCapitalise } from "@/utils/capitalise";
 import { useState } from "react";
 
 interface IslandTooltipProps {

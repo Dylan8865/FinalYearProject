@@ -23,11 +23,26 @@ export async function login(formData: FormData) {
   }
 
   if (data.user) {
-    await supabase
+    const { data: profile } = await supabase
       .from("profile")
-      .update({ last_login_time: new Date().toISOString() })
-      .eq("id", data.user.id);
-  }
+      .select("*")
+      .eq("id", data.user.id)
+      .single();
 
-  redirect("/island");
+    if (profile?.type === "island") {
+      await supabase
+        .from("profile")
+        .update({ last_login_time: new Date().toISOString() })
+        .eq("id", data.user.id);
+
+      redirect("/island");
+    } else {
+      // Sign out since the user was technically authenticated via signInWithPassword
+      await supabase.auth.signOut();
+      return {
+        error:
+          "This account is not registered as an island account. Please register an island account or use the correct account type.",
+      };
+    }
+  }
 }

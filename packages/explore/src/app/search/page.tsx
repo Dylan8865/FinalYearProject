@@ -30,11 +30,15 @@ export default function SearchPage() {
 
       {loading && <p>Searching...</p>}
 
-      <ul>
+      <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, listStyle: 'none', padding: 0 }}>
         {results.map((r) => (
-          <li key={r.id}>
-            <strong>{r.title}</strong>
-            <p>{r.content}</p>
+          <li key={r.id} style={{ border: '1px solid #333', borderRadius: 8, overflow: 'hidden' }}>
+            <a href={`/island/${r.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}>
+              <div style={{ padding: 16 }}>
+                <strong style={{ display: 'block', marginBottom: 8, fontSize: '1.1rem' }}>{r.title}</strong>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#888' }}>{r.content}</p>
+              </div>
+            </a>
           </li>
         ))}
       </ul>

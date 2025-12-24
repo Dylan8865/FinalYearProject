@@ -7,7 +7,7 @@ export {
   processValidationResponse,
   handleValidationFailure,
   fetchQueuedValidations,
-} from './utils';
+} from "./utils";
 
 // React hooks
-export { useValidation, useValidationProcessor } from './hooks';
+export { useValidation, useValidationProcessor } from "./hooks";

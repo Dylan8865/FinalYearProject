@@ -77,7 +77,7 @@ const ChangePasswordContent = ({
           <h2
             className={`text-lg font-bold ${isDark ? "text-white" : "text-black"}`}
           >
-            Enter your new password below
+            Enter Your New Password Below
           </h2>
         </div>
 

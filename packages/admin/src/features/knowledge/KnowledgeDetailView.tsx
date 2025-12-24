@@ -50,10 +50,10 @@ export default function KnowledgeDetailView({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showBlockScores, setShowBlockScores] = useState(false);
+  const [commentError, setCommentError] = useState("");
 
   const currentStatus = (item.validation_status === "pending" ? "pending" : item.status) as "unverified" | "pending" | "declined" | "verified";
 
-  // Fetch item data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -78,11 +78,12 @@ export default function KnowledgeDetailView({
 
   const handleUpdateStatus = async (newStatus: "verified" | "declined" | "pending") => {
     if (newStatus !== "pending" && !adminComment.trim()) {
-      onError("Please add a comment before updating status");
+      setCommentError("Comments are required before updating status");
       return;
     }
 
     setIsSubmitting(true);
+    setCommentError("");
     try {
       await updateIslandItemStatus(item.id, newStatus, adminComment.trim());
       onSuccess(`Status updated to ${newStatus}`);
@@ -558,14 +559,22 @@ export default function KnowledgeDetailView({
                   {/* Admin Comment Input */}
                   <div className="rounded-lg bg-[#282828] border border-[#3B3B3B] p-4">
                     <h3 className="mb-2 text-sm font-semibold text-gray-400">
-                      Admin Comment (optional)
+                      Admin Comment
                     </h3>
                     <textarea
                       value={adminComment}
-                      onChange={(e) => setAdminComment(e.target.value)}
+                      onChange={(e) => {
+                        setAdminComment(e.target.value);
+                        if (commentError) {
+                          setCommentError("");
+                        }
+                      }}
                       placeholder="Add your comment here..."
-                      className="w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border border-[#3B3B3B] focus:outline-none focus:border-[#7B7B7B] min-h-[100px]"
+                      className={`w-full bg-[#1E1E1E] text-white px-3 py-2 rounded border ${commentError ? 'border-red-500' : 'border-[#3B3B3B]'} focus:outline-none focus:border-[#7B7B7B] min-h-[100px]`}
                     />
+                    {commentError && (
+                      <p className="text-red-400 text-xs mt-1">{commentError}</p>
+                    )}
                   </div>
 
                   {/* Action Buttons */}

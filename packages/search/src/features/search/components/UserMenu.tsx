@@ -7,9 +7,10 @@ import { useTheme } from "../context/ThemeContext";
 
 interface UserMenuProps {
   email: string;
+  name?: string;
 }
 
-export default function UserMenu({ email }: UserMenuProps) {
+export default function UserMenu({ email, name }: UserMenuProps) {
   const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -56,8 +57,8 @@ export default function UserMenu({ email }: UserMenuProps) {
     await signOut();
   };
 
-  // Get first letter of email for avatar
-  const avatarLetter = email.charAt(0).toUpperCase();
+  // Get first letter of name or email for avatar
+  const avatarLetter = name ? name.charAt(0).toUpperCase() : email.charAt(0).toUpperCase();
 
   return (
     <div className="relative" ref={menuRef}>
@@ -72,10 +73,13 @@ export default function UserMenu({ email }: UserMenuProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className={`absolute right-0 top-full z-[100] mt-2 w-72 rounded-lg border ${menuBorder} ${menuBg} py-2 shadow-lg`}>
-          {/* Email */}
+        <div className={`absolute right-0 top-full mt-2 w-72 rounded-lg border ${menuBorder} ${menuBg} py-2 shadow-lg`}>
+          {/* Name and Email */}
           <div className={`border-b ${borderColor} px-5 py-4`}>
-            <p className={`truncate text-base ${textColor}`}>{email}</p>
+            {name && (
+              <p className={`mb-1 text-base font-medium ${textColor}`}>{name}</p>
+            )}
+            <p className={`truncate text-sm ${mutedTextColor}`}>{email}</p>
           </div>
 
           {/* Menu Items */}

@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 /**
  * POST /api/favorites
@@ -8,11 +7,12 @@ import { cookies } from "next/headers";
  */
 export async function POST(request: Request) {
   try {
-    // Check authentication
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("user_id")?.value;
+    const supabase = await createClient();
+    
+    // Check authentication with Supabase Auth
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -29,13 +29,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = await createClient();
-
     // Save to database
     const { data, error } = await supabase
       .from("knowledge-graph-favorites")
       .insert({
-        user_id: userId,
+        user_id: user.id,
         topic_id: topicId,
         topic_name: topicName,
         graph_data: graphData,
@@ -71,24 +69,23 @@ export async function POST(request: Request) {
  */
 export async function GET() {
   try {
-    // Check authentication
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("user_id")?.value;
+    const supabase = await createClient();
+    
+    // Check authentication with Supabase Auth
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
       );
     }
 
-    const supabase = await createClient();
-
     // Fetch user's favorites
     const { data: favorites, error } = await supabase
       .from("knowledge-graph-favorites")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -115,10 +112,12 @@ export async function GET() {
  */
 export async function DELETE(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("user_id")?.value;
+    const supabase = await createClient();
+    
+    // Check authentication with Supabase Auth
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -135,14 +134,12 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const supabase = await createClient();
-
     // Delete only if it belongs to the user
     const { error } = await supabase
       .from("knowledge-graph-favorites")
       .delete()
       .eq("id", favoriteId)
-      .eq("user_id", userId);
+      .eq("user_id", user.id);
 
     if (error) {
       console.error("Database error:", error);

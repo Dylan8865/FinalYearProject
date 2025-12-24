@@ -2,6 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import IslandIcon from "@/icons/IslandIcon";
+import TagCanvas3D from "@/features/home/components/TagCanvas3D";
+import { useTopics } from "@/features/home/hooks/useTopics";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { createClient } from "@/lib/supabase/client";
+import UserMenu from "@/components/UserMenu";
 
 // Word cloud data with different sizes and positions
 const CLOUD_WORDS = [
@@ -57,6 +63,7 @@ export default function Cloud() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const { user, loading: authLoading } = useAuth();
 
   // Fetch topics from database
   const { topics, words, loading, error, refetch } = useTopics();
@@ -67,7 +74,7 @@ export default function Cloud() {
       // Only run if not already processing and cache appears empty/small
       if (isProcessing || loading || words.length > 10) return;
 
-      console.log('🤖 Auto-processing: Checking for unprocessed data...');
+      console.log("🤖 Auto-processing: Checking for unprocessed data...");
       setIsProcessing(true);
 
       try {
@@ -75,16 +82,18 @@ export default function Cloud() {
         let hasMore = true;
 
         while (hasMore) {
-          const response = await fetch('/api/batch-process', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const response = await fetch("/api/batch-process", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ limit: 5, offset }),
           });
 
           if (!response.ok) break;
 
           const data = await response.json();
-          console.log(`✅ Processed batch: ${data.successful} successful, ${data.errors} errors`);
+          console.log(
+            `✅ Processed batch: ${data.successful} successful, ${data.errors} errors`
+          );
 
           hasMore = data.hasMore;
           offset = data.nextOffset;
@@ -94,13 +103,13 @@ export default function Cloud() {
 
           // Wait 3 seconds between batches (rate limiting)
           if (hasMore) {
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            await new Promise((resolve) => setTimeout(resolve, 3000));
           }
         }
 
-        console.log('🎉 Auto-processing completed!');
+        console.log("🎉 Auto-processing completed!");
       } catch (error) {
-        console.error('❌ Auto-processing error:', error);
+        console.error("❌ Auto-processing error:", error);
       } finally {
         setIsProcessing(false);
       }
@@ -112,7 +121,7 @@ export default function Cloud() {
   }, [loading, words.length, isProcessing, refetch]);
 
   // Use database words if available, otherwise fallback
-  const cloudWords = words.length > 0 ? words : FALLBACK_WORDS;
+  const cloudWords = words.length > 0 ? words : CLOUD_WORDS;
 
   // Filter words based on search query
   const filteredWords = activeSearch
@@ -122,11 +131,8 @@ export default function Cloud() {
     : cloudWords;
 
   const handleWordClick = (word: string) => {
-    setClickedWord(word);
-    setTimeout(() => {
-      // Navigate to search app
-      window.location.href = `http://localhost:3005?q=${encodeURIComponent(word)}`;
-    }, 200);
+    // Navigate to knowledge graph with selected topic
+    router.push(`/knowledge-graph?topic=${encodeURIComponent(word)}`);
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -145,7 +151,9 @@ export default function Cloud() {
       {isProcessing && (
         <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-30 bg-blue-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-          <span className="text-sm font-medium">Processing topics with AI...</span>
+          <span className="text-sm font-medium">
+            Processing topics with AI...
+          </span>
         </div>
       )}
 
@@ -166,7 +174,7 @@ export default function Cloud() {
               className="text-gray-400 hover:text-white transition-colors"
             >
               Search
-            </button>
+            </a>
             <button className="text-white font-medium border-b-2 border-white">
               Cloud
             </button>
@@ -179,51 +187,61 @@ export default function Cloud() {
           </nav>
         </div>
 
-        <button
-          onClick={() => router.push("/login")}
-          className="text-white hover:text-gray-300 transition-colors"
-        >
-          Sign in
-        </button>
+        {user ? (
+          <UserMenu name={user.name} email={user.email} />
+        ) : (
+          <button
+            onClick={() => router.push("/login")}
+            className="text-white hover:text-gray-300 transition-colors"
+          >
+            Sign in
+          </button>
+        )}
       </header>
 
       {/* 3D Word Cloud */}
-      <div className="absolute inset-0 flex items-center justify-center pt-16">
+      <div className="absolute inset-0 flex items-center justify-center pt-16 px-4">
         {loading ? (
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
             <p className="text-gray-400">Loading topics...</p>
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4 w-full">
             <p className="text-yellow-400">Using offline data</p>
             <TagCanvas3D
               words={filteredWords}
-              width={700}
-              height={700}
+              width={window.innerWidth - 32}
+              height={800}
               onWordClick={handleWordClick}
               options={{
-                textHeight: 20,
-                maxSpeed: 0.03,
-                depth: 0.75,
-                outlineColour: "transparent",
-                outlineThickness: 0,
+                textHeight: 16,
+                maxSpeed: 0.04,
+                depth: 0.8,
+                radiusX: 1.2,
+                radiusY: 0.95,
+                radiusZ: 0.95,
+                zoom: 0.9,
               }}
+              className="w-full"
             />
           </div>
         ) : (
           <TagCanvas3D
             words={filteredWords}
-            width={700}
-            height={700}
+            width={window.innerWidth - 32}
+            height={800}
             onWordClick={handleWordClick}
             options={{
-              textHeight: 20,
-              maxSpeed: 0.03,
-              depth: 0.75,
-              outlineColour: "transparent",
-              outlineThickness: 0,
+              textHeight: 16,
+              maxSpeed: 0.04,
+              depth: 0.8,
+              radiusX: 1.2,
+              radiusY: 0.95,
+              radiusZ: 0.95,
+              zoom: 0.9,
             }}
+            className="w-full"
           />
         )}
       </div>
@@ -232,7 +250,11 @@ export default function Cloud() {
       {activeSearch && (
         <div className="absolute top-24 left-1/2 transform -translate-x-1/2 text-center z-10">
           <p className="text-gray-300 text-lg">
-            Found <span className="text-green-400 font-bold">{filteredWords.length}</span> matching topics for &quot;{activeSearch}&quot;
+            Found{" "}
+            <span className="text-green-400 font-bold">
+              {filteredWords.length}
+            </span>{" "}
+            matching topics for &quot;{activeSearch}&quot;
           </p>
           <button
             onClick={handleClearSearch}
