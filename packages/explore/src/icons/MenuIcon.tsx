@@ -12,7 +12,7 @@ const MenuIcon = () => {
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
-        d="M3 13v-2h2v2zm8 0v-2h2v2zm8 0v-2h2v2z"
+        d="M4 6h16M4 12h16M4 18h16"
       />
     </svg>
   );

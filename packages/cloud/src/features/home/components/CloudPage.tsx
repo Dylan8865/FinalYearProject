@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import {
   HomeProvider,
   useHomeContext,
 } from "@/features/home/contexts/HomeContext";
-
-import TagCanvas3D from "./TagCanvas3D";
 import SearchBar from "./SearchBar";
+
+const HomeCloud3D = dynamic(() => import("./HomeCloud3D"), { ssr: false });
 
 interface CloudPageProps {
   className?: string;
@@ -15,75 +17,93 @@ interface CloudPageProps {
 
 // Inner component that uses the context
 function CloudContent({ className }: CloudPageProps) {
-  const { words, loading, error } = useHomeContext();
+  const router = useRouter();
+  const { topics, loading, error } = useHomeContext();
 
   const [searchValue, setSearchValue] = useState("");
+  const [matchIndex, setMatchIndex] = useState(0);
 
-  // Filter words based on search
-  const filteredWords = useMemo(() => {
-    if (!searchValue.trim()) return words;
-    const search = searchValue.toLowerCase();
-    return words.filter((word) => word.text.toLowerCase().includes(search));
-  }, [words, searchValue]);
+  // Filter topics based on search
+  const filteredTopics = useMemo(() => {
+    const search = searchValue.trim().toLowerCase();
+    if (!search) return [];
+    return topics.filter((t) => t.text.toLowerCase().includes(search));
+  }, [topics, searchValue]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Search is already filtering in real-time
-    console.log("Search submitted:", searchValue);
+    const search = searchValue.trim().toLowerCase();
+    if (!search) return;
+
+    const matches = topics.filter((t) => t.text.toLowerCase().includes(search));
+
+    if (matches.length > 0) {
+      const nextIndex = (matchIndex + 1) % matches.length;
+      console.log(
+        `🔍 Submission: Cycling to match ${nextIndex + 1} of ${matches.length}`
+      );
+      setMatchIndex(nextIndex);
+    }
   };
 
   const handleClear = () => {
     setSearchValue("");
+    setMatchIndex(0);
   };
 
+  // Reset match index only when the trimmed search value changes
+  useEffect(() => {
+    setMatchIndex(0);
+  }, [searchValue.trim()]);
+
   return (
-    <div className={`relative w-full h-full min-h-screen ${className || ""}`}>
-      {/* Search Bar */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md px-4">
+    <div
+      className={`relative w-full h-full min-h-screen bg-[#030712] ${
+        className || ""
+      }`}
+    >
+      {/* Immersive 3D Space */}
+      <div className="absolute inset-0 z-0">
+        {!loading && !error && (
+          <HomeCloud3D
+            topics={topics}
+            onTopicClick={(word) =>
+              router.push(`/knowledge-graph?topic=${encodeURIComponent(word)}`)
+            }
+            activeSearch={searchValue}
+            searchMatchIndex={matchIndex}
+          />
+        )}
+      </div>
+
+      {/* Search Bar HUD */}
+      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md px-4">
         <SearchBar
           value={searchValue}
           onChange={setSearchValue}
           onSubmit={handleSearchSubmit}
           onClear={handleClear}
-          placeholder="Search topics..."
+          placeholder="Explore the cloud..."
         />
       </div>
 
-      {/* Loading State */}
+      {/* States Overlays */}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white/60">Loading topics...</div>
+        <div className="absolute inset-0 flex items-center justify-center bg-[#030712]/50 backdrop-blur-sm z-20">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500" />
+            <div className="text-purple-300 text-xs font-bold uppercase tracking-widest">
+              Synthesizing...
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Error State */}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-red-400">Error: {error}</div>
-        </div>
-      )}
-
-      {/* 3D Word Cloud */}
-      {!loading && !error && filteredWords.length > 0 && (
-        <div className="w-full h-full">
-          <TagCanvas3D
-            words={filteredWords}
-            onWordClick={(word) => console.log("Clicked:", word)}
-          />
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!loading && !error && words.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white/60">No topics found</div>
-        </div>
-      )}
-
-      {/* No Search Results */}
-      {!loading && !error && words.length > 0 && filteredWords.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white/60">No topics match "{searchValue}"</div>
+        <div className="absolute inset-0 flex items-center justify-center z-20">
+          <div className="bg-red-500/10 border border-red-500/20 px-6 py-4 rounded-2xl backdrop-blur-md">
+            <div className="text-red-400 text-sm">Error: {error}</div>
+          </div>
         </div>
       )}
     </div>
