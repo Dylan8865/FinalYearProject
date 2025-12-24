@@ -163,19 +163,6 @@ export default function KnowledgeGraphPage() {
     }
   };
 
-  // Auto-select topic from URL parameter
-  useEffect(() => {
-    if (graphData && searchParams) {
-      const topicId = searchParams.get("topic");
-      if (topicId) {
-        const node = graphData.nodes.find((n) => n.id === topicId);
-        if (node) {
-          setSelectedNode(node);
-        }
-      }
-    }
-  }, [graphData, searchParams]);
-
   const fetchGraphData = async (topicId?: string) => {
     try {
       setLoading(true);
@@ -195,15 +182,22 @@ export default function KnowledgeGraphPage() {
       const data: KnowledgeGraphData = responseData;
       setGraphData(data);
 
-      // Auto-select the first level node on initial load
-      if (!selectedNode && data.nodes.length > 0) {
+      // Auto-select the first level node on initial load or when navigating to a specific topic
+      if (data.nodes.length > 0) {
+        let nodeToSelect = null;
         if (topicId) {
-          const mainNode = data.nodes.find((n) => n.id === topicId);
-          if (mainNode) setSelectedNode(mainNode);
-        } else {
-          // On root view, select the most important (highest weight) node
+          nodeToSelect = data.nodes.find((n) => n.id === topicId);
+        }
+
+        if (!nodeToSelect) {
+          // If no specific topic or topic not found, sort and pick the top node
           const sorted = [...data.nodes].sort((a, b) => b.weight - a.weight);
-          setSelectedNode(sorted[0]);
+          nodeToSelect = sorted[0];
+        }
+
+        if (nodeToSelect) {
+          setSelectedNode(nodeToSelect);
+          console.log(`🎯 Auto-selected node: ${nodeToSelect.name}`);
         }
       }
 
@@ -501,75 +495,77 @@ export default function KnowledgeGraphPage() {
 
       {/* Modern Glassmorphic Header */}
       <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6 pointer-events-none">
-        <div className="flex items-center gap-6 pointer-events-auto">
-          <button
-            onClick={() => router.push("/")}
-            className="p-3 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl text-white transition-all group"
-            title="Return to Cloud"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-5 h-5 group-hover:-translate-x-1 transition-transform"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-
-          <div className="flex flex-col">
-            <h1 className="text-white font-bold text-xl tracking-tight">
-              Wisdom Island
-            </h1>
-            <p className="text-purple-400/80 text-[10px] uppercase tracking-[0.2em] font-medium">
-              Neural Knowledge Graph
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 pointer-events-auto">
-          {/* Search Overlay */}
-          <div className="w-64">
-            <SearchBar
-              value={searchValue}
-              onChange={setSearchValue}
-              onSubmit={handleSearchSubmit}
-              onClear={handleClear}
-              placeholder="Search graph..."
-              className="scale-75 origin-right"
-            />
-          </div>
-
-          {isProcessing && (
-            <div className="flex items-center gap-3 px-4 py-2 bg-purple-500/10 backdrop-blur-md rounded-full border border-purple-500/20">
-              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-400" />
-              <span className="text-[10px] text-purple-300 font-medium uppercase tracking-widest">
-                Analyzing...
-              </span>
-            </div>
-          )}
-
-          {isFavorited && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 backdrop-blur-md rounded-full border border-green-500/20">
-              <span className="text-green-400 text-xs">✓ Saved</span>
-            </div>
-          )}
-
-          {!isFavorited && user && !loading && graphData && (
+        <div className="flex">
+          <div className="flex items-center gap-6 pointer-events-auto">
             <button
-              onClick={handleSaveFavorite}
-              disabled={savingFavorite}
-              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-full transition-all hover:scale-105 disabled:opacity-50 shadow-lg shadow-purple-500/20"
+              onClick={() => router.push("/")}
+              className="p-3 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl text-white transition-all group"
+              title="Return to Cloud"
             >
-              {savingFavorite ? "Saving..." : "Save to Favorites"}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 group-hover:-translate-x-1 transition-transform"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
             </button>
-          )}
+
+            <div className="flex flex-col">
+              <h1 className="text-white font-bold text-xl tracking-tight">
+                Wisdom Island
+              </h1>
+              <p className="text-purple-400/80 text-[10px] uppercase tracking-[0.2em] font-medium">
+                Neural Knowledge Graph
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 pointer-events-auto">
+            {/* Search Overlay */}
+            <div className="w-64">
+              <SearchBar
+                value={searchValue}
+                onChange={setSearchValue}
+                onSubmit={handleSearchSubmit}
+                onClear={handleClear}
+                placeholder="Search graph..."
+                className="scale-75 origin-right"
+              />
+            </div>
+
+            {isProcessing && (
+              <div className="flex items-center gap-3 px-4 py-2 bg-purple-500/10 backdrop-blur-md rounded-full border border-purple-500/20">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-400" />
+                <span className="text-[10px] text-purple-300 font-medium uppercase tracking-widest">
+                  Analyzing...
+                </span>
+              </div>
+            )}
+
+            {isFavorited && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 backdrop-blur-md rounded-full border border-green-500/20">
+                <span className="text-green-400 text-xs">✓ Saved</span>
+              </div>
+            )}
+
+            {!isFavorited && user && !loading && graphData && (
+              <button
+                onClick={handleSaveFavorite}
+                disabled={savingFavorite}
+                className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-full transition-all hover:scale-105 disabled:opacity-50 shadow-lg shadow-purple-500/20"
+              >
+                {savingFavorite ? "Saving..." : "Save to Favorites"}
+              </button>
+            )}
+          </div>
         </div>
       </header>
 

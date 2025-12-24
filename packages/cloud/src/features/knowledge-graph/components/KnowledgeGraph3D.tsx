@@ -203,6 +203,17 @@ function Scene({
     const categories = Array.from(categoryGroups.keys());
     const catPositions = new Map<string, THREE.Vector3>();
 
+    // Identify directly connected nodes to the center for tighter layout
+    const directNeighbors = new Set(
+      edges
+        .filter((e) => e.source === centerNodeId || e.target === centerNodeId)
+        .map((e) => (e.source === centerNodeId ? e.target : e.source))
+    );
+
+    console.log(
+      `[KnowledgeGraph3D] Layout: center=${centerNodeId}, neighbors=${directNeighbors.size}`
+    );
+
     // Assign a center for each category arranged in a large 3D sphere
     categories.forEach((cat, index) => {
       // The category containing the selected node stays at the center region
@@ -213,7 +224,7 @@ function Scene({
 
       const phi = Math.acos(1 - (2 * (index + 0.5)) / categories.length);
       const theta = Math.PI * (1 + Math.sqrt(5)) * index;
-      const radius = 50; // Vast distance to separate unrelated knowledge groups
+      const radius = selectedNodeId ? 5 : 35; // Dynamically tighten the graph when a node is selected
 
       catPositions.set(
         cat,
@@ -232,13 +243,33 @@ function Scene({
       }
 
       const catCenter = catPositions.get(node.category || "General")!;
-      // Structured spread within the cluster for legibility (from 1-2 to 6-10)
       const clusterNodes = categoryGroups.get(node.category || "General")!;
       const nodeIndex = clusterNodes.indexOf(node.id);
 
       const phi = Math.acos(1 - (2 * (nodeIndex + 0.5)) / clusterNodes.length);
       const theta = Math.PI * (1 + Math.sqrt(5)) * nodeIndex;
-      const offsetRadius = 6 + Math.random() * 4;
+
+      // Neighbors are pulled in close, but spread out more as their count increases to handle density
+      let offsetRadius;
+      if (directNeighbors.has(node.id)) {
+        const neighborCount = directNeighbors.size;
+        if (selectedNodeId) {
+          // Base distance of 5.0 as requested, scales up with the number of neighbors to avoid overcrowding
+          const spreadFactor = Math.max(0, neighborCount - 10) * 0.2;
+          offsetRadius = 5.0 + spreadFactor + Math.random() * 0.3;
+        } else {
+          // Default behavior for root view or non-exclusive focus
+          const spreadFactor = Math.min(neighborCount * 0.15, 4.5);
+          offsetRadius = 2.5 + spreadFactor + Math.random() * 0.5;
+        }
+      } else if (
+        nodes.find((n) => n.id === centerNodeId)?.category ===
+        (node.category || "General")
+      ) {
+        offsetRadius = 4.0 + Math.random() * 2.0;
+      } else {
+        offsetRadius = 6.0 + Math.random() * 3.0;
+      }
 
       const pos = catCenter
         .clone()
@@ -254,7 +285,7 @@ function Scene({
     });
 
     return positions;
-  }, [nodes, selectedNodeId]);
+  }, [nodes, edges, selectedNodeId]);
 
   // Center on search results traversal
   useEffect(() => {
@@ -289,21 +320,33 @@ function Scene({
 
   // Smooth camera transition when selected node changes
   useEffect(() => {
-    if (controlsRef.current && selectedNodeId) {
-      const pos = nodePositions.get(selectedNodeId);
-      if (pos) {
-        controlsRef.current.setLookAt(
-          pos[0],
-          pos[1],
-          pos[2] + 8, // Camera Position
-          pos[0],
-          pos[1],
-          pos[2], // Target
-          true // Animate
-        );
+    // We use a small timeout to ensure the controls are fully ready and the canvas has settled
+    const timer = setTimeout(() => {
+      if (controlsRef.current && selectedNodeId) {
+        const pos = nodePositions.get(selectedNodeId);
+        if (pos) {
+          // Identify neighbor count for focal scaling
+          const neighborCount = edges.filter(
+            (e) => e.source === selectedNodeId || e.target === selectedNodeId
+          ).length;
+
+          const focalDistance = Math.min(4.0 + neighborCount * 0.18, 12);
+
+          controlsRef.current.setLookAt(
+            pos[0],
+            pos[1],
+            pos[2] + focalDistance, // Dynamically adjusted camera distance
+            pos[0],
+            pos[1],
+            pos[2], // Target
+            true // Animate
+          );
+        }
       }
-    }
-  }, [selectedNodeId, nodePositions]);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [selectedNodeId, nodePositions, edges]);
 
   // Configure controls for map-like navigation (Left Click Pan)
   useEffect(() => {

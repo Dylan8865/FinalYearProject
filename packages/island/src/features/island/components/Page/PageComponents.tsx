@@ -4,6 +4,7 @@ import { ItemDataType, BlockProperties, BlockType } from "@/types/types";
 import Image from "next/image";
 import { ImageIcon, X, Upload } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useToast } from "@/features/island/contexts/ToastContext";
 
 interface BlockProps {
   block: ItemDataType;
@@ -462,6 +463,7 @@ export const ImageBlock = ({
   onRemoveImage,
 }: BlockProps) => {
   const { themeColour } = useTheme();
+  const { showToast } = useToast();
   const isDark = themeColour === "dark";
   const [url, setUrl] = useState(
     typeof block.content === "string" ? block.content : ""
@@ -501,6 +503,16 @@ export const ImageBlock = ({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !onUploadImage) return;
+
+    // Limit file size to 50MB
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      showToast("Image size must be less than 50MB", "error");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
 
     try {
       await onUploadImage(block.id, file);

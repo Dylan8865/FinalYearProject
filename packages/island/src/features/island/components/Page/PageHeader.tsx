@@ -79,6 +79,16 @@ const PageHeader = ({
     const file = e.target.files?.[0];
     if (!file || !islandItem?.id) return;
 
+    // Limit file size to 50MB
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      showToast("Image size must be less than 50MB", "error");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
     setIsSaving(true);
     setSaveError(null);
 
