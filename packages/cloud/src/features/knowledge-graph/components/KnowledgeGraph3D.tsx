@@ -16,6 +16,8 @@ interface KnowledgeGraph3DProps {
   edges: GraphEdge[];
   onNodeClick?: (node: GraphNode) => void;
   selectedNodeId?: string;
+  activeSearch?: string;
+  searchMatchIndex?: number;
 }
 
 // Individual node component with interactive text
@@ -23,11 +25,17 @@ function Node({
   node,
   position,
   isSelected,
+  isHighlighted,
+  isCurrentMatch,
+  isSearching,
   onClick,
 }: {
   node: GraphNode;
   position: [number, number, number];
   isSelected: boolean;
+  isHighlighted: boolean;
+  isCurrentMatch: boolean;
+  isSearching: boolean;
   onClick: () => void;
 }) {
   const [hovered, setHovered] = React.useState(false);
@@ -40,11 +48,20 @@ function Node({
     setTimeout(() => setJustClicked(false), 200);
   };
 
-  const textColor = justClicked ? "#ef4444" : isSelected ? "#a855f7" : "white";
-  const fontSize = isSelected ? 0.4 : 0.25;
+  const isVisualFocus = hovered || isCurrentMatch || isSelected;
+  const isAltFocus = hovered || isHighlighted;
+  const color = isCurrentMatch
+    ? "#c084fc"
+    : isHighlighted || isSelected
+    ? "#a855f7"
+    : "white";
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+    <Float
+      speed={isVisualFocus ? 4 : 1.5}
+      rotationIntensity={0.2}
+      floatIntensity={0.5}
+    >
       <group position={position}>
         <Html
           center
@@ -63,43 +80,65 @@ function Node({
               document.body.style.cursor = "auto";
             }}
             style={{
-              color: textColor,
-              fontSize: isSelected ? "24px" : "16px",
-              fontWeight: isSelected ? "800" : "500",
+              color: color,
+              fontSize: isSelected || isCurrentMatch ? "20px" : "14px",
+              fontWeight: isVisualFocus ? "bold" : "500",
               whiteSpace: "nowrap",
               userSelect: "none",
               textShadow: "0 2px 10px rgba(0,0,0,0.9)",
               cursor: "pointer",
-              transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-              transform: hovered ? "scale(1.2)" : "scale(1)",
-              padding: "4px 12px",
-              background: isSelected
+              transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+              transform: isVisualFocus
+                ? "scale(1.3)"
+                : isAltFocus
+                ? "scale(1.1)"
+                : "scale(1)",
+              opacity:
+                isCurrentMatch || isSelected
+                  ? 1
+                  : isHighlighted
+                  ? 0.7
+                  : isSearching
+                  ? 0.1
+                  : 0.8,
+              padding: "6px 12px",
+              background: isCurrentMatch
+                ? "rgba(192, 132, 252, 0.4)" // Brighter purple for current focus
+                : isHighlighted
+                ? "rgba(168, 85, 247, 0.15)"
+                : isSelected
                 ? "rgba(168, 85, 247, 0.2)"
                 : "transparent",
-              borderRadius: "8px",
-              border: isSelected ? "1px solid rgba(168, 85, 247, 0.4)" : "none",
-              backdropFilter: isSelected ? "blur(4px)" : "none",
+              borderRadius: "10px",
+              border: isCurrentMatch
+                ? "2px solid rgba(216, 180, 254, 0.8)"
+                : isHighlighted || isSelected
+                ? "1px solid rgba(168, 85, 247, 0.4)"
+                : "none",
+              boxShadow: isCurrentMatch
+                ? "0 0 25px rgba(168, 85, 247, 0.5)"
+                : "none",
+              backdropFilter: isVisualFocus ? "blur(8px)" : "none",
             }}
           >
             {node.name}
           </div>
         </Html>
 
-        {/* Interactive glow sphere - kept in 3D for depth reference */}
-        <mesh onClick={handleClick} scale={hovered || isSelected ? 1.5 : 1}>
-          <sphereGeometry args={[0.2, 16, 16]} />
+        <mesh onClick={handleClick}>
+          <sphereGeometry args={[isSelected ? 0.3 : 0.15, 16, 16]} />
           <meshBasicMaterial
-            color={textColor}
+            color={color}
             transparent
-            opacity={hovered ? 0.4 : isSelected ? 0.3 : 0.15}
+            opacity={isVisualFocus ? 0.8 : 0.4}
           />
         </mesh>
 
-        {/* Subtle particle ring for selected node */}
-        {isSelected && (
+        {/* Subtle glow ring for focused nodes */}
+        {(isSelected || isCurrentMatch) && (
           <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.3, 0.35, 32]} />
-            <meshBasicMaterial color="#a855f7" transparent opacity={0.6} />
+            <ringGeometry args={[0.4, 0.45, 32]} />
+            <meshBasicMaterial color={color} transparent opacity={0.6} />
           </mesh>
         )}
       </group>
@@ -139,6 +178,8 @@ function Scene({
   edges,
   onNodeClick,
   selectedNodeId,
+  activeSearch,
+  searchMatchIndex,
 }: KnowledgeGraph3DProps) {
   const { camera } = useThree();
   const controlsRef = useRef<CameraControls>(null);
@@ -170,10 +211,9 @@ function Scene({
         return;
       }
 
-      // Fibonacci sphere for category centers
       const phi = Math.acos(1 - (2 * (index + 0.5)) / categories.length);
       const theta = Math.PI * (1 + Math.sqrt(5)) * index;
-      const radius = 35; // Significant distance between unrelated groups
+      const radius = 50; // Vast distance to separate unrelated knowledge groups
 
       catPositions.set(
         cat,
@@ -192,12 +232,13 @@ function Scene({
       }
 
       const catCenter = catPositions.get(node.category || "General")!;
-      // Tight clumping for related nodes (reduced offset from 5 to 1.5)
-      const offsetRadius = 1 + Math.random() * 2;
-      const u = Math.random();
-      const v = Math.random();
-      const theta = 2 * Math.PI * u;
-      const phi = Math.acos(2 * v - 1);
+      // Structured spread within the cluster for legibility (from 1-2 to 6-10)
+      const clusterNodes = categoryGroups.get(node.category || "General")!;
+      const nodeIndex = clusterNodes.indexOf(node.id);
+
+      const phi = Math.acos(1 - (2 * (nodeIndex + 0.5)) / clusterNodes.length);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * nodeIndex;
+      const offsetRadius = 6 + Math.random() * 4;
 
       const pos = catCenter
         .clone()
@@ -214,6 +255,37 @@ function Scene({
 
     return positions;
   }, [nodes, selectedNodeId]);
+
+  // Center on search results traversal
+  useEffect(() => {
+    const search = activeSearch?.trim().toLowerCase();
+    if (!search || !controlsRef.current || nodePositions.size === 0) return;
+
+    const matches = nodes.filter((n) => n.name.toLowerCase().includes(search));
+
+    if (matches.length > 0) {
+      const index = (searchMatchIndex || 0) % matches.length;
+      const match = matches[index];
+      const pos = nodePositions.get(match.id);
+
+      if (pos) {
+        console.log(
+          `[KnowledgeGraph3D] 🎯 Focus: ${index + 1}/${matches.length} - ${
+            match.name
+          }`
+        );
+        controlsRef.current.setLookAt(
+          pos[0],
+          pos[1],
+          pos[2] + 12,
+          pos[0],
+          pos[1],
+          pos[2],
+          true
+        );
+      }
+    }
+  }, [activeSearch, searchMatchIndex, nodes, nodePositions]);
 
   // Smooth camera transition when selected node changes
   useEffect(() => {
@@ -320,19 +392,40 @@ function Scene({
         })}
 
         {/* Render all nodes */}
-        {nodes.map((node) => {
-          const position = nodePositions.get(node.id);
-          if (!position) return null;
-          return (
-            <Node
-              key={node.id}
-              node={node}
-              position={position}
-              isSelected={node.id === selectedNodeId}
-              onClick={() => onNodeClick?.(node)}
-            />
-          );
-        })}
+        {(() => {
+          const search = activeSearch?.trim().toLowerCase();
+          const matches = search
+            ? nodes.filter((n) => n.name.toLowerCase().includes(search))
+            : [];
+          const currentMatchId =
+            matches.length > 0
+              ? matches[(searchMatchIndex || 0) % matches.length].id
+              : null;
+
+          return nodes.map((node) => {
+            const position = nodePositions.get(node.id);
+            if (!position) return null;
+
+            const isSearching = !!search;
+            const isHighlighted = isSearching
+              ? node.name.toLowerCase().includes(search!)
+              : false;
+            const isCurrentMatch = node.id === currentMatchId;
+
+            return (
+              <Node
+                key={node.id}
+                node={node}
+                position={position}
+                isSelected={node.id === selectedNodeId}
+                isHighlighted={isHighlighted}
+                isCurrentMatch={isCurrentMatch}
+                isSearching={isSearching}
+                onClick={() => onNodeClick?.(node)}
+              />
+            );
+          });
+        })()}
       </group>
     </>
   );

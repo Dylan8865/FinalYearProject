@@ -6,6 +6,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import dynamic from "next/dynamic";
 import IslandIcon from "@/icons/IslandIcon";
 import Breadcrumb from "@/features/knowledge-graph/components/Breadcrumb";
+import SearchBar from "@/features/home/components/SearchBar";
 import type {
   KnowledgeGraphData,
   GraphNode,
@@ -35,6 +36,26 @@ export default function KnowledgeGraphPage() {
   const [savingFavorite, setSavingFavorite] = useState(false);
   const [breadcrumbPath, setBreadcrumbPath] = useState<BreadcrumbItem[]>([]);
   const [isDrillingDown, setIsDrillingDown] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [matchIndex, setMatchIndex] = useState(0);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const search = searchValue.trim().toLowerCase();
+    if (!search || !graphData) return;
+
+    const matches = graphData.nodes.filter((n) =>
+      n.name.toLowerCase().includes(search)
+    );
+    if (matches.length > 0) {
+      setMatchIndex((prev) => (prev + 1) % matches.length);
+    }
+  };
+
+  const handleClear = () => {
+    setSearchValue("");
+    setMatchIndex(0);
+  };
 
   // Navigation history stack for instant back navigation (Option 2)
   const [navigationHistory, setNavigationHistory] = useState<
@@ -440,6 +461,8 @@ export default function KnowledgeGraphPage() {
             selectedNodeId={
               selectedNode?.id || searchParams?.get("topic") || undefined
             }
+            activeSearch={searchValue}
+            searchMatchIndex={matchIndex}
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
@@ -486,6 +509,18 @@ export default function KnowledgeGraphPage() {
         </div>
 
         <div className="flex items-center gap-4 pointer-events-auto">
+          {/* Search Overlay */}
+          <div className="w-64">
+            <SearchBar
+              value={searchValue}
+              onChange={setSearchValue}
+              onSubmit={handleSearchSubmit}
+              onClear={handleClear}
+              placeholder="Search graph..."
+              className="scale-75 origin-right"
+            />
+          </div>
+
           {isProcessing && (
             <div className="flex items-center gap-3 px-4 py-2 bg-purple-500/10 backdrop-blur-md rounded-full border border-purple-500/20">
               <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-400" />

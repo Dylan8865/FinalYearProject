@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useMemo, useState, useEffect } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { CameraControls, Float, Html } from "@react-three/drei";
 import * as THREE from "three";
 import {
@@ -15,26 +15,36 @@ interface HomeCloud3DProps {
   topics: CloudTopic[];
   onTopicClick?: (topic: string) => void;
   activeSearch?: string;
+  searchMatchIndex?: number;
 }
 
 function TopicNode({
   topic,
   position,
   isHighlighted,
+  isCurrentMatch,
+  isSearching,
   onClick,
 }: {
   topic: CloudTopic;
   position: [number, number, number];
   isHighlighted: boolean;
+  isCurrentMatch: boolean;
+  isSearching: boolean;
   onClick: () => void;
 }) {
   const [hovered, setHovered] = React.useState(false);
 
   // Scale based on weight
   const weightScale = Math.max(0.2, (topic.weight || 50) / 100);
-  const fontSize =
-    (0.2 + weightScale * 0.4) * (hovered || isHighlighted ? 1.2 : 1);
-  const textColor = isHighlighted ? "#a855f7" : hovered ? "#3b82f6" : "white";
+  const isVisualFocus = hovered || isCurrentMatch;
+  const textColor = isCurrentMatch
+    ? "#c084fc"
+    : isHighlighted
+    ? "#a855f7"
+    : hovered
+    ? "#3b82f6"
+    : "white";
 
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
@@ -62,22 +72,42 @@ function TopicNode({
               color: textColor,
               // Distance-based sizing is handled by distanceFactor,
               // but we can add weight-based base sizing
-              fontSize: `${14 + weightScale * 12}px`,
-              fontWeight: isHighlighted ? "800" : "500",
+              fontSize: `${14 + weightScale * 12 + (isCurrentMatch ? 4 : 0)}px`,
+              fontWeight: isHighlighted || isCurrentMatch ? "800" : "500",
               whiteSpace: "nowrap",
               userSelect: "none",
-              textShadow: "0 2px 10px rgba(0,0,0,0.9)",
+              textShadow: isCurrentMatch
+                ? "0 0 15px rgba(168, 85, 247, 0.4)"
+                : "0 2px 10px rgba(0,0,0,0.9)",
               cursor: "pointer",
               transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-              transform: hovered || isHighlighted ? "scale(1.2)" : "scale(1)",
-              opacity: isHighlighted ? 1 : 0.8,
+              transform:
+                hovered || isCurrentMatch
+                  ? "scale(1.4)"
+                  : hovered || isHighlighted
+                  ? "scale(1.1)"
+                  : "scale(1)",
+              opacity: isCurrentMatch
+                ? 1
+                : isHighlighted
+                ? 0.7
+                : isSearching
+                ? 0.1
+                : 0.8,
               padding: "4px 10px",
-              background: isHighlighted
-                ? "rgba(168, 85, 247, 0.2)"
+              background: isCurrentMatch
+                ? "rgba(192, 132, 252, 0.4)" // Brighter purple for current focus
+                : isHighlighted
+                ? "rgba(168, 85, 247, 0.15)"
                 : "transparent",
               borderRadius: "6px",
-              border: isHighlighted
+              border: isCurrentMatch
+                ? "2px solid rgba(216, 180, 254, 0.8)" // Even brighter border
+                : isHighlighted
                 ? "1px solid rgba(168, 85, 247, 0.4)"
+                : "none",
+              boxShadow: isCurrentMatch
+                ? "0 0 30px rgba(168, 85, 247, 0.6)"
                 : "none",
               backdropFilter: isHighlighted ? "blur(4px)" : "none",
             }}
@@ -106,7 +136,12 @@ function TopicNode({
   );
 }
 
-function Scene({ topics, onTopicClick, activeSearch }: HomeCloud3DProps) {
+function Scene({
+  topics,
+  onTopicClick,
+  activeSearch,
+  searchMatchIndex,
+}: HomeCloud3DProps) {
   const controlsRef = useRef<CameraControls>(null);
 
   const topicPositions = useMemo(() => {
@@ -127,7 +162,7 @@ function Scene({ topics, onTopicClick, activeSearch }: HomeCloud3DProps) {
     categories.forEach((cat, index) => {
       const phi = Math.acos(1 - (2 * (index + 0.5)) / categories.length);
       const theta = Math.PI * (1 + Math.sqrt(5)) * index;
-      const radius = 25; // Increased from 8 to 25 for obvious distance
+      const radius = 40; // Increased to 40 for more global space
 
       catPositions.set(
         cat,
@@ -141,12 +176,13 @@ function Scene({ topics, onTopicClick, activeSearch }: HomeCloud3DProps) {
 
     topics.forEach((topic) => {
       const catCenter = catPositions.get(topic.category || "General")!;
-      // Tighten the cluster volume (offsetRadius decreased from 3-5 to 1.5-3)
-      const offsetRadius = 1.5 + Math.random() * 1.5;
-      const u = Math.random();
-      const v = Math.random();
-      const theta = 2 * Math.PI * u;
-      const phi = Math.acos(2 * v - 1);
+      // Increase internal spacing (from 1.5-3 to 5-10) for readability
+      const clusterNodes = categoryGroups.get(topic.category || "General")!;
+      const nodeIndex = clusterNodes.indexOf(topic.id);
+
+      const phi = Math.acos(1 - (2 * (nodeIndex + 0.5)) / clusterNodes.length);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * nodeIndex;
+      const offsetRadius = 6 + Math.random() * 4;
 
       const x = offsetRadius * Math.sin(phi) * Math.cos(theta);
       const y = offsetRadius * Math.sin(phi) * Math.sin(theta);
@@ -161,26 +197,37 @@ function Scene({ topics, onTopicClick, activeSearch }: HomeCloud3DProps) {
 
   // Center on high-priority match if searching
   useEffect(() => {
-    if (activeSearch && controlsRef.current) {
-      const match = topics.find(
-        (t) => t.text.toLowerCase() === activeSearch.toLowerCase()
-      );
-      if (match) {
-        const pos = topicPositions.get(match.id);
-        if (pos) {
-          controlsRef.current.setLookAt(
-            pos[0],
-            pos[1],
-            pos[2] + 10,
-            pos[0],
-            pos[1],
-            pos[2],
-            true
-          );
-        }
+    const search = activeSearch?.trim().toLowerCase();
+    if (!search || !controlsRef.current || topicPositions.size === 0) return;
+
+    const matches = topics.filter((topic) =>
+      topic.text.toLowerCase().includes(search)
+    );
+
+    if (matches.length > 0) {
+      const index = (searchMatchIndex || 0) % matches.length;
+      const match = matches[index];
+      const pos = topicPositions.get(match.id);
+
+      if (pos) {
+        console.log(
+          `[HomeCloud3D] 🎯 Focus: ${index + 1}/${matches.length} - ${
+            match.text
+          }`
+        );
+
+        controlsRef.current.setLookAt(
+          pos[0],
+          pos[1],
+          pos[2] + 6, // Focused zoom
+          pos[0],
+          pos[1],
+          pos[2],
+          true
+        );
       }
     }
-  }, [activeSearch, topics, topicPositions]);
+  }, [activeSearch, searchMatchIndex, topics, topicPositions]);
 
   // Configure controls for map-like navigation (Left Click Pan)
   useEffect(() => {
@@ -253,24 +300,39 @@ function Scene({ topics, onTopicClick, activeSearch }: HomeCloud3DProps) {
       <FloatingClouds />
 
       <group>
-        {topics.map((topic) => {
-          const position = topicPositions.get(topic.id);
-          if (!position) return null;
+        {(() => {
+          const search = activeSearch?.trim().toLowerCase();
+          const matches = search
+            ? topics.filter((t) => t.text.toLowerCase().includes(search))
+            : [];
+          const currentMatchId =
+            matches.length > 0
+              ? matches[(searchMatchIndex || 0) % matches.length].id
+              : null;
 
-          const isHighlighted = activeSearch
-            ? topic.text.toLowerCase().includes(activeSearch.toLowerCase())
-            : false;
+          return topics.map((topic) => {
+            const position = topicPositions.get(topic.id);
+            if (!position) return null;
 
-          return (
-            <TopicNode
-              key={topic.id}
-              topic={topic}
-              position={position}
-              isHighlighted={isHighlighted}
-              onClick={() => onTopicClick?.(topic.text)}
-            />
-          );
-        })}
+            const isSearching = !!search;
+            const isHighlighted = isSearching
+              ? topic.text.toLowerCase().includes(search!)
+              : false;
+            const isCurrentMatch = topic.id === currentMatchId;
+
+            return (
+              <TopicNode
+                key={topic.id}
+                topic={topic}
+                position={position}
+                isHighlighted={isHighlighted}
+                isCurrentMatch={isCurrentMatch}
+                isSearching={isSearching}
+                onClick={() => onTopicClick?.(topic.text)}
+              />
+            );
+          });
+        })()}
       </group>
     </>
   );
@@ -348,12 +410,12 @@ export default function HomeCloud3D(props: HomeCloud3DProps) {
             RMB
           </span>
           <span>
-            <b>Right Drag:</b> Orbit Around Space
+            <b>Right Drag:</b> Full Orbit
           </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="px-1 py-0.5 bg-white/10 rounded text-[7px] font-bold">
-            CTRL + �️
+            CTRL + 🖱️
           </span>
           <span>
             <b>Ctrl + Drag:</b> Rotate Space
@@ -361,18 +423,10 @@ export default function HomeCloud3D(props: HomeCloud3DProps) {
         </div>
         <div className="flex items-center gap-2">
           <span className="px-1 py-0.5 bg-white/10 rounded text-[7px] font-bold">
-            CTRL + �🔍
+            CTRL + 🔍
           </span>
           <span>
             <b>Ctrl + Scroll:</b> Quick Orbit
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-4 h-4 flex items-center justify-center bg-white/10 rounded text-[8px]">
-            RMB
-          </span>
-          <span>
-            <b>Right Drag:</b> Full Orbit
           </span>
         </div>
       </div>

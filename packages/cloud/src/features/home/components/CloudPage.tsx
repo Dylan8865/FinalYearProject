@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
@@ -21,21 +21,40 @@ function CloudContent({ className }: CloudPageProps) {
   const { topics, loading, error } = useHomeContext();
 
   const [searchValue, setSearchValue] = useState("");
+  const [matchIndex, setMatchIndex] = useState(0);
 
   // Filter topics based on search
   const filteredTopics = useMemo(() => {
-    if (!searchValue.trim()) return topics;
-    const search = searchValue.toLowerCase();
+    const search = searchValue.trim().toLowerCase();
+    if (!search) return [];
     return topics.filter((t) => t.text.toLowerCase().includes(search));
   }, [topics, searchValue]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const search = searchValue.trim().toLowerCase();
+    if (!search) return;
+
+    const matches = topics.filter((t) => t.text.toLowerCase().includes(search));
+
+    if (matches.length > 0) {
+      const nextIndex = (matchIndex + 1) % matches.length;
+      console.log(
+        `🔍 Submission: Cycling to match ${nextIndex + 1} of ${matches.length}`
+      );
+      setMatchIndex(nextIndex);
+    }
   };
 
   const handleClear = () => {
     setSearchValue("");
+    setMatchIndex(0);
   };
+
+  // Reset match index only when the trimmed search value changes
+  useEffect(() => {
+    setMatchIndex(0);
+  }, [searchValue.trim()]);
 
   return (
     <div
@@ -47,11 +66,12 @@ function CloudContent({ className }: CloudPageProps) {
       <div className="absolute inset-0 z-0">
         {!loading && !error && (
           <HomeCloud3D
-            topics={filteredTopics}
+            topics={topics}
             onTopicClick={(word) =>
               router.push(`/knowledge-graph?topic=${encodeURIComponent(word)}`)
             }
             activeSearch={searchValue}
+            searchMatchIndex={matchIndex}
           />
         )}
       </div>
