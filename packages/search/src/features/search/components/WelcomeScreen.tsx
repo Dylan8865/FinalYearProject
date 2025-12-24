@@ -18,6 +18,7 @@ function getGreeting(): string {
 export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps) {
   const { theme } = useTheme();
   const [input, setInput] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const greeting = getGreeting();
 
@@ -41,11 +42,22 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
     }
   }, [input]);
 
-  const handleSubmit = () => {
-    if (input.trim()) {
-      onSuggestionClick(input.trim());
-      setInput("");
+  // Clear error when user starts typing
+  useEffect(() => {
+    if (error && input.trim()) {
+      setError(null);
     }
+  }, [input, error]);
+
+  const handleSubmit = () => {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      setError("Please enter a search query to begin.");
+      return;
+    }
+    setError(null);
+    onSuggestionClick(trimmed);
+    setInput("");
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -62,7 +74,17 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
 
       {/* Search Input */}
       <div className="w-full max-w-2xl">
-        <div className={`relative flex items-center gap-4 rounded-full border ${borderColor} bg-transparent px-6 py-4 transition-colors focus-within:border-teal-400`}>
+        {/* Error Message */}
+        {error && (
+          <div className="mb-3 flex items-center gap-2 rounded-lg bg-red-500/10 px-4 py-2 text-sm text-red-500">
+            <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div className={`relative flex items-center gap-4 rounded-full border ${error ? 'border-red-500' : borderColor} bg-transparent px-6 py-4 transition-colors focus-within:border-teal-400`}>
           {/* Search Icon */}
           <svg
             className={`h-6 w-6 shrink-0 ${mutedTextColor}`}
