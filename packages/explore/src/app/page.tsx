@@ -8,6 +8,7 @@ import CloseIcon from "@/icons/CloseIcon";
 import CloudIcon from "@/icons/CloudIcon";
 import ExploreIcon from "@/icons/ExploreIcon";
 import { supabase } from "@/lib/supabase";
+import { NAV_URLS } from "@/utils/navigation";
 
 export default function Explore() {
   const router = useRouter();
@@ -31,7 +32,9 @@ export default function Explore() {
       try {
         let query = supabase
           .from("island")
-          .select("id, name, description, theme, created_at, last_updated_at, level");
+          .select(
+            "id, name, description, theme, created_at, last_updated_at, level"
+          );
 
         // Search filter
         if (queryParam) {
@@ -83,7 +86,7 @@ export default function Explore() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    // Determine searching state based on input presence? 
+    // Determine searching state based on input presence?
     // User wants "start searching" on enter even if empty.
   };
 
@@ -95,26 +98,26 @@ export default function Explore() {
       <header className="flex items-center justify-between px-8 py-6">
         <div className="flex items-center gap-8">
           {/* Island Icon - Links to Island Game Page */}
-          <button
-            onClick={() => router.push("/mike/island")}
-            className="text-white hover:text-gray-300 transition-colors transform scale-125 ml-2"
+          <a
+            href={NAV_URLS.ISLAND}
+            className="text-white hover:text-gray-300 transition-colors"
           >
             <IslandIcon />
-          </button>
+          </a>
 
-          <nav className="hidden md:flex gap-6">
-            <button
-              onClick={() => router.push("/home")}
+          <nav className="flex gap-6">
+            <a
+              href={NAV_URLS.SEARCH}
               className="text-gray-400 hover:text-white transition-colors"
             >
               Search
-            </button>
-            <button
-              onClick={() => router.push("/cloud")}
+            </a>
+            <a
+              href={NAV_URLS.CLOUD}
               className="text-gray-400 hover:text-white transition-colors"
             >
               Cloud
-            </button>
+            </a>
             <button className="text-white font-medium border-b-2 border-white">
               Explore
             </button>
@@ -208,120 +211,165 @@ export default function Explore() {
             </div>
           </form>
 
-          {/* Filters Container */}
-          <div className="flex gap-4 w-full md:w-auto">
-            {/* Category Filter Button */}
-            <div className="relative flex-1 md:flex-initial">
-              <button
-                onClick={() => {
-                  setShowCategoryDropdown(!showCategoryDropdown);
-                  setShowSortDropdown(false);
-                }}
-                className="flex items-center justify-between md:justify-start gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors w-full md:w-auto"
+          {/* Category Filter Button */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setShowCategoryDropdown(!showCategoryDropdown);
+                setShowSortDropdown(false);
+              }}
+              className="flex items-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                    />
-                  </svg>
-                  <span className="capitalize truncate">
-                    {selectedCategory === "all" ? "Category Filter" : selectedCategory}
-                  </span>
-                </div>
-                <svg
-                  className={`w-4 h-4 transition-transform flex-shrink-0 ${showCategoryDropdown ? "rotate-180" : ""}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
+              </svg>
+              <span className="capitalize">
+                {selectedCategory === "all" ? "Theme Filter" : selectedCategory}
+              </span>
+              <svg
+                className={`w-4 h-4 transition-transform ${
+                  showCategoryDropdown ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
 
-              {/* Category Dropdown */}
-              {showCategoryDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-full md:w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
+            {/* Category Dropdown */}
+            {showCategoryDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
+                <button
+                  onClick={() => {
+                    setSelectedCategory("all");
+                    setShowCategoryDropdown(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 capitalize hover:bg-gray-700 transition-colors rounded-t-lg ${
+                    selectedCategory === "all"
+                      ? "bg-gray-700 text-blue-400"
+                      : "text-white"
+                  }`}
+                >
+                  All Themes
+                </button>
+                {categories.map((category) => (
                   <button
+                    key={category}
                     onClick={() => {
-                      setSelectedCategory("all");
+                      setSelectedCategory(category);
                       setShowCategoryDropdown(false);
                     }}
-                    className={`w-full text-left px-4 py-3 capitalize hover:bg-gray-700 transition-colors rounded-t-lg ${selectedCategory === "all" ? "bg-gray-700 text-blue-400" : "text-white"
-                      }`}
+                    className={`w-full text-left px-4 py-3 capitalize hover:bg-gray-700 transition-colors ${
+                      selectedCategory === category
+                        ? "bg-gray-700 text-blue-400"
+                        : "text-white"
+                    }`}
                   >
-                    All Themes
+                    {category}
                   </button>
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => {
-                        setSelectedCategory(category);
-                        setShowCategoryDropdown(false);
-                      }}
-                      className={`w-full text-left px-4 py-3 capitalize hover:bg-gray-700 transition-colors ${selectedCategory === category ? "bg-gray-700 text-blue-400" : "text-white"
-                        }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-            {/* Sort By Button */}
-            <div className="relative flex-1 md:flex-initial">
-              <button
-                onClick={() => {
-                  setShowSortDropdown(!showSortDropdown);
-                  setShowCategoryDropdown(false);
-                }}
-                className="flex items-center justify-between md:justify-start gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors w-full md:w-auto"
+          {/* Sort By Button */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setShowSortDropdown(!showSortDropdown);
+                setShowCategoryDropdown(false);
+              }}
+              className="flex items-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-                    />
-                  </svg>
-                  <span className="capitalize">{sortBy === "newest" ? "Sort By" : sortBy.replace('-', ' ')}</span>
-                </div>
-                <svg
-                  className={`w-4 h-4 transition-transform flex-shrink-0 ${showSortDropdown ? "rotate-180" : ""}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+                />
+              </svg>
+              <span className="capitalize">{sortBy.replace("-", " ")}</span>
+              <svg
+                className={`w-4 h-4 transition-transform ${
+                  showSortDropdown ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
 
-              {/* Sort Dropdown */}
-              {showSortDropdown && (
-                <div className="absolute top-full right-0 md:left-0 mt-2 w-full md:w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
-                  <button onClick={() => { setSortBy("newest"); setShowSortDropdown(false); }} className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-t-lg text-white">Newest First</button>
-                  <button onClick={() => { setSortBy("oldest"); setShowSortDropdown(false); }} className="w-full text-left px-4 py-3 hover:bg-gray-700 text-white">Oldest First</button>
-                  <button onClick={() => { setSortBy("title-asc"); setShowSortDropdown(false); }} className="w-full text-left px-4 py-3 hover:bg-gray-700 text-white">Title A-Z</button>
-                  <button onClick={() => { setSortBy("title-desc"); setShowSortDropdown(false); }} className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-b-lg text-white">Title Z-A</button>
-                </div>
-              )}
-            </div>
+            {/* Sort Dropdown */}
+            {showSortDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
+                <button
+                  onClick={() => {
+                    setSortBy("newest");
+                    setShowSortDropdown(false);
+                  }}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-t-lg text-white"
+                >
+                  Newest First
+                </button>
+                <button
+                  onClick={() => {
+                    setSortBy("oldest");
+                    setShowSortDropdown(false);
+                  }}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-700 text-white"
+                >
+                  Oldest First
+                </button>
+                <button
+                  onClick={() => {
+                    setSortBy("title-asc");
+                    setShowSortDropdown(false);
+                  }}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-700 text-white"
+                >
+                  Title A-Z
+                </button>
+                <button
+                  onClick={() => {
+                    setSortBy("title-desc");
+                    setShowSortDropdown(false);
+                  }}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-700 rounded-b-lg text-white"
+                >
+                  Title Z-A
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -329,9 +377,11 @@ export default function Explore() {
       {/* Results Header */}
       <div className="px-8 py-4">
         <h2 className="text-lg font-semibold">
-          {loading ? "Loading..." : (
-            isSearching && queryParam ? `${content.length} matching results` : "All Results"
-          )}
+          {loading
+            ? "Loading..."
+            : isSearching && queryParam
+            ? `${content.length} matching results`
+            : "All Results"}
         </h2>
       </div>
 
@@ -348,24 +398,30 @@ export default function Explore() {
               <div className="aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gradient-to-b from-sky-300 to-sky-400 relative">
                 {/* Mock visual for theme */}
                 <div className="absolute inset-0 flex items-center justify-center text-sky-900/20 font-bold text-4xl uppercase tracking-widest">
-                  {item.theme || 'ISLAND'}
+                  {item.theme || "ISLAND"}
                 </div>
               </div>
 
               {/* Card Info */}
               <div className="flex flex-col gap-1">
                 <h3 className="text-white font-medium truncate">{item.name}</h3>
-                <p className="text-gray-400 text-xs line-clamp-2 min-h-[2.5em]">{item.description}</p>
+                <p className="text-gray-400 text-xs line-clamp-2 min-h-[2.5em]">
+                  {item.description}
+                </p>
               </div>
 
               {/* Footer */}
               <div className="flex items-center justify-between mt-3 text-gray-500 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="bg-gray-800 px-2 py-1 rounded uppercase tracking-wider">{item.theme || 'island'}</span>
+                  <span className="bg-gray-800 px-2 py-1 rounded uppercase tracking-wider">
+                    {item.theme || "island"}
+                  </span>
                   <span>Level {item.level}</span>
                 </div>
                 <div>
-                  {new Date(item.last_updated_at || item.created_at).toLocaleDateString()}
+                  {new Date(
+                    item.last_updated_at || item.created_at
+                  ).toLocaleDateString()}
                 </div>
               </div>
             </div>

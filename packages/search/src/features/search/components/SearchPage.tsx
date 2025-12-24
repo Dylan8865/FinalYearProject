@@ -9,6 +9,7 @@ import UserMenu from "./UserMenu";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "../context/ThemeContext";
 import type { User } from "@supabase/supabase-js";
+import { NAV_URLS } from "@/utils/navigation";
 
 export interface SearchSource {
   id: string;
@@ -45,7 +46,8 @@ interface SearchPageProps {
 export default function SearchPage({ user, profile }: SearchPageProps) {
   const { theme } = useTheme();
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
+  const [activeConversation, setActiveConversation] =
+    useState<Conversation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,66 +83,83 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
         if (data.success && data.chats) {
           // Load each chat with its messages
           const loadedConversations = await Promise.all(
-            data.chats.map(async (chat: { id: string; title: string; created_at: string; is_favorite?: boolean }) => {
-              const historyResponse = await fetch(`/api/history?chatId=${chat.id}`);
-              const historyData = await historyResponse.json();
+            data.chats.map(
+              async (chat: {
+                id: string;
+                title: string;
+                created_at: string;
+                is_favorite?: boolean;
+              }) => {
+                const historyResponse = await fetch(
+                  `/api/history?chatId=${chat.id}`
+                );
+                const historyData = await historyResponse.json();
 
-              // Fetch feedback for this chat
-              const feedbackResponse = await fetch(`/api/feedback/messages?chatId=${chat.id}&profileId=${user.id}`);
-              const feedbackData = await feedbackResponse.json();
-              const feedbackMap = feedbackData.success ? feedbackData.feedback : {};
+                // Fetch feedback for this chat
+                const feedbackResponse = await fetch(
+                  `/api/feedback/messages?chatId=${chat.id}&profileId=${user.id}`
+                );
+                const feedbackData = await feedbackResponse.json();
+                const feedbackMap = feedbackData.success
+                  ? feedbackData.feedback
+                  : {};
 
-              const messages: Message[] = [];
-              
-              if (historyData.success && historyData.history) {
-                historyData.history.forEach((entry: { 
-                  id: string;
-                  prompt_text: string; 
-                  result_text: string; 
-                  created_at: string;
-                }) => {
-                  // Add user message - use history ID + 'user' suffix
-                  messages.push({
-                    id: `${entry.id}-user`,
-                    role: "user",
-                    content: entry.prompt_text,
-                    timestamp: new Date(entry.created_at),
-                  });
-                  
-                  // Add assistant message - use history ID as message ID for feedback matching
-                  messages.push({
-                    id: entry.id,
-                    role: "assistant",
-                    content: entry.result_text,
-                    timestamp: new Date(entry.created_at),
-                    feedback: feedbackMap[entry.id] || null,
-                  });
-                });
+                const messages: Message[] = [];
+
+                if (historyData.success && historyData.history) {
+                  historyData.history.forEach(
+                    (entry: {
+                      id: string;
+                      prompt_text: string;
+                      result_text: string;
+                      created_at: string;
+                    }) => {
+                      // Add user message - use history ID + 'user' suffix
+                      messages.push({
+                        id: `${entry.id}-user`,
+                        role: "user",
+                        content: entry.prompt_text,
+                        timestamp: new Date(entry.created_at),
+                      });
+
+                      // Add assistant message - use history ID as message ID for feedback matching
+                      messages.push({
+                        id: entry.id,
+                        role: "assistant",
+                        content: entry.result_text,
+                        timestamp: new Date(entry.created_at),
+                        feedback: feedbackMap[entry.id] || null,
+                      });
+                    }
+                  );
+                }
+
+                return {
+                  id: chat.id,
+                  title: chat.title,
+                  messages,
+                  createdAt: new Date(chat.created_at),
+                  isFavorite: chat.is_favorite || false,
+                };
               }
-
-              return {
-                id: chat.id,
-                title: chat.title,
-                messages,
-                createdAt: new Date(chat.created_at),
-                isFavorite: chat.is_favorite || false,
-              };
-            })
+            )
           );
 
           setConversations(loadedConversations);
 
           // Check if there's a chatId in URL query params (from analytics revisit)
           const urlParams = new URLSearchParams(window.location.search);
-          const chatIdFromUrl = urlParams.get('chatId');
-          
+          const chatIdFromUrl = urlParams.get("chatId");
+
           if (chatIdFromUrl) {
-            const chatToOpen = loadedConversations.find(c => c.id === chatIdFromUrl);
+            const chatToOpen = loadedConversations.find(
+              (c) => c.id === chatIdFromUrl
+            );
             if (chatToOpen) {
               setActiveConversation(chatToOpen);
             }
             // Clear the URL parameter
-            window.history.replaceState({}, '', '/search');
+            window.history.replaceState({}, "", "/search");
           }
         }
       } catch (error) {
@@ -203,15 +222,15 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
 
     // Call search API
     try {
-      const searchPayload = { 
+      const searchPayload = {
         query: content,
         chatId: conversation.id,
         userId: user?.id,
-        promptOrder: conversation.messages.length
+        promptOrder: conversation.messages.length,
       };
-      
+
       console.log("Sending search request:", searchPayload);
-      
+
       const response = await fetch("/api/search", {
         method: "POST",
         headers: {
@@ -229,14 +248,17 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
         assistantContent = `Sorry, there was an error processing your request: ${data.error}`;
       } else if (!data.hasResults) {
         // No results found (A3 flow)
-        assistantContent = data.answer || "I couldn't find any knowledge matching your query.";
-        
+        assistantContent =
+          data.answer || "I couldn't find any knowledge matching your query.";
+
         if (data.suggestions && data.suggestions.length > 0) {
-          assistantContent += "\n\n---\n\n**Suggestions(If didn't find what you were looking for):**\n\n";
+          assistantContent +=
+            "\n\n---\n\n**Suggestions(If didn't find what you were looking for):**\n\n";
           data.suggestions.forEach((suggestion: string) => {
             assistantContent += `- ${suggestion}\n`;
           });
-          assistantContent += "\nYou can also try browsing the Knowledge Repository or contribute your own knowledge (if registered).";
+          assistantContent +=
+            "\nYou can also try browsing the Knowledge Repository or contribute your own knowledge (if registered).";
         }
       } else {
         // Success with results
@@ -244,13 +266,22 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
       }
 
       // Map API results to sources
-      const sources: SearchSource[] = data.results?.map((result: { id: string; source: string; content: string; validityScore: number; created_at?: string }) => ({
-        id: result.id,
-        title: result.source,
-        content: result.content,
-        validityScore: result.validityScore,
-        createdAt: result.created_at || new Date().toISOString(),
-      })) || [];
+      const sources: SearchSource[] =
+        data.results?.map(
+          (result: {
+            id: string;
+            source: string;
+            content: string;
+            validityScore: number;
+            created_at?: string;
+          }) => ({
+            id: result.id,
+            title: result.source,
+            content: result.content,
+            validityScore: result.validityScore,
+            createdAt: result.created_at || new Date().toISOString(),
+          })
+        ) || [];
 
       // Use historyId from API response if available, otherwise generate UUID
       const messageId = data.historyId || crypto.randomUUID();
@@ -275,11 +306,12 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
       );
     } catch (error) {
       console.error("Search error:", error);
-      
+
       const errorMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Sorry, I encountered an error while searching. Please try again.",
+        content:
+          "Sorry, I encountered an error while searching. Please try again.",
         timestamp: new Date(),
       };
 
@@ -306,14 +338,14 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
     const confirmed = window.confirm(
       "Are you sure you want to delete this conversation? All search history will be lost and cannot be recovered."
     );
-    
+
     if (!confirmed) {
       return;
     }
 
     try {
       console.log("Deleting conversation:", id);
-      
+
       // Call API to delete from database
       const response = await fetch(`/api/chat?chatId=${id}`, {
         method: "DELETE",
@@ -361,10 +393,15 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
       if (data.success) {
         // Update local state
         setConversations((prev) =>
-          prev.map((c) => (c.id === id ? { ...c, isFavorite: newFavoriteState } : c))
+          prev.map((c) =>
+            c.id === id ? { ...c, isFavorite: newFavoriteState } : c
+          )
         );
         if (activeConversation?.id === id) {
-          setActiveConversation({ ...activeConversation, isFavorite: newFavoriteState });
+          setActiveConversation({
+            ...activeConversation,
+            isFavorite: newFavoriteState,
+          });
         }
       }
     } catch (error) {
@@ -373,10 +410,17 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
   };
 
   // Handle feedback submission
-  const handleFeedback = async (messageId: string, type: "positive" | "negative") => {
+  const handleFeedback = async (
+    messageId: string,
+    type: "positive" | "negative"
+  ) => {
     try {
-      console.log('[SearchPage] handleFeedback called:', { messageId, type, currentConversation: activeConversation?.id });
-      
+      console.log("[SearchPage] handleFeedback called:", {
+        messageId,
+        type,
+        currentConversation: activeConversation?.id,
+      });
+
       const response = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -389,21 +433,27 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
       });
 
       const result = await response.json();
-      console.log('[SearchPage] API response:', result);
+      console.log("[SearchPage] API response:", result);
 
       // Update message feedback state locally
       if (activeConversation) {
-        console.log('[SearchPage] Updating local state to:', type);
+        console.log("[SearchPage] Updating local state to:", type);
         const updatedMessages = activeConversation.messages.map((msg) =>
           msg.id === messageId ? { ...msg, feedback: type } : msg
         );
-        const updatedConversation = { ...activeConversation, messages: updatedMessages };
+        const updatedConversation = {
+          ...activeConversation,
+          messages: updatedMessages,
+        };
         setActiveConversation(updatedConversation);
         setConversations((prev) =>
-          prev.map((c) => (c.id === activeConversation.id ? updatedConversation : c))
+          prev.map((c) =>
+            c.id === activeConversation.id ? updatedConversation : c
+          )
         );
-        console.log('[SearchPage] State updated, new feedback:', 
-          updatedMessages.find(m => m.id === messageId)?.feedback
+        console.log(
+          "[SearchPage] State updated, new feedback:",
+          updatedMessages.find((m) => m.id === messageId)?.feedback
         );
       }
     } catch (error) {
@@ -414,11 +464,16 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
   // Handle canceling feedback
   const handleCancelFeedback = async (messageId: string) => {
     try {
-      console.log(`[Cancel Feedback] Calling DELETE for messageId: ${messageId}, profileId: ${user?.id}`);
-      
-      const response = await fetch(`/api/feedback?messageId=${messageId}&profileId=${user?.id}`, {
-        method: "DELETE",
-      });
+      console.log(
+        `[Cancel Feedback] Calling DELETE for messageId: ${messageId}, profileId: ${user?.id}`
+      );
+
+      const response = await fetch(
+        `/api/feedback?messageId=${messageId}&profileId=${user?.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       const result = await response.json();
       console.log(`[Cancel Feedback] DELETE response:`, result);
@@ -428,10 +483,15 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
         const updatedMessages = activeConversation.messages.map((msg) =>
           msg.id === messageId ? { ...msg, feedback: null } : msg
         );
-        const updatedConversation = { ...activeConversation, messages: updatedMessages };
+        const updatedConversation = {
+          ...activeConversation,
+          messages: updatedMessages,
+        };
         setActiveConversation(updatedConversation);
         setConversations((prev) =>
-          prev.map((c) => (c.id === activeConversation.id ? updatedConversation : c))
+          prev.map((c) =>
+            c.id === activeConversation.id ? updatedConversation : c
+          )
         );
       }
     } catch (error) {
@@ -517,27 +577,26 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
                 </svg>
               </button>
             )}
-            
+
             {/* Title with navigation links */}
             <div className="flex items-center gap-8">
-              <span className={`text-lg font-medium ${textColor}`}>Wisdom Search</span>
-              
+              <span className={`text-lg font-medium ${textColor}`}>
+                Wisdom Search
+              </span>
+
               {/* Navigation Links */}
               <nav className="flex items-center gap-6">
-                <a
-                  href="/search"
-                  className="text-base text-teal-400 hover:text-teal-300"
-                >
+                <button className="text-base text-teal-400 font-medium">
                   Search
-                </a>
+                </button>
                 <a
-                  href="/cloud"
+                  href={NAV_URLS.CLOUD}
                   className={`text-base ${mutedTextColor} hover:${textColor}`}
                 >
                   Cloud
                 </a>
                 <a
-                  href="/explore"
+                  href={NAV_URLS.EXPLORE}
                   className={`text-base ${mutedTextColor} hover:${textColor}`}
                 >
                   Explore
@@ -550,11 +609,18 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             {user ? (
-              <UserMenu email={profile?.email || user.email || ""} name={profile?.name} />
+              <UserMenu
+                email={profile?.email || user.email || ""}
+                name={profile?.name}
+              />
             ) : (
               <a
                 href="/login"
-                className={`rounded-full border ${isDark ? "border-gray-600 text-gray-300 hover:border-teal-400 hover:text-white" : "border-gray-400 text-gray-700 hover:border-teal-500 hover:text-gray-900"} px-5 py-2 text-base transition-colors`}
+                className={`rounded-full border ${
+                  isDark
+                    ? "border-gray-600 text-gray-300 hover:border-teal-400 hover:text-white"
+                    : "border-gray-400 text-gray-700 hover:border-teal-500 hover:text-gray-900"
+                } px-5 py-2 text-base transition-colors`}
               >
                 Sign in
               </a>
@@ -569,9 +635,9 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
           ) : (
             <div className="mx-auto max-w-3xl px-4 py-8">
               {activeConversation.messages.map((message) => (
-                <ChatMessage 
-                  key={message.id} 
-                  message={message} 
+                <ChatMessage
+                  key={message.id}
+                  message={message}
                   onRelatedTopicClick={handleSendMessage}
                   onFeedback={handleFeedback}
                   onCancelFeedback={handleCancelFeedback}
@@ -584,7 +650,9 @@ export default function SearchPage({ user, profile }: SearchPageProps) {
 
         {/* Input Area - Only show after first message */}
         {activeConversation && activeConversation.messages.length > 0 && (
-          <div className={`border-t ${borderColor} ${bgColor} p-4 transition-colors duration-300`}>
+          <div
+            className={`border-t ${borderColor} ${bgColor} p-4 transition-colors duration-300`}
+          >
             <div className="mx-auto max-w-3xl">
               <ChatInput onSend={handleSendMessage} isLoading={isLoading} />
             </div>
