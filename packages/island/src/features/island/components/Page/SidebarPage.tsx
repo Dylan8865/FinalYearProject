@@ -7,7 +7,7 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { useToast } from "../../contexts/ToastContext";
 import { useIslandItemsContext } from "../../contexts/IslandItemsContext";
 import { useItemData } from "../../hooks/useItemData";
-import { BlockEditorContainer } from "../NotionBlock";
+import { BlockEditorContainer } from "../DataBlock";
 import LoadingScreen from "../Shared/LoadingScreen";
 import { useTheme } from "../../contexts/ThemeContext";
 
