@@ -12,13 +12,11 @@ export async function proxy(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    // If no profile or not an island account, redirect to login and clear session
     if (!profile || profile.type !== "island") {
       const url = new URL("/login", request.url);
 
       const newResponse = NextResponse.redirect(url);
 
-      // Clear all auth-related cookies
       request.cookies.getAll().forEach((cookie) => {
         if (cookie.name.includes("supabase") || cookie.name.includes("auth")) {
           newResponse.cookies.set({
