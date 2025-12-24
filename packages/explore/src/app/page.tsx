@@ -64,9 +64,20 @@ export default function Explore() {
         }
 
         const { data, error } = await query.limit(20);
-
         if (error) throw error;
-        setContent(data || []);
+
+        // Fetch item counts for each island
+        const dataWithCounts = await Promise.all(
+          (data || []).map(async (island) => {
+            const { count } = await supabase
+              .from("island-item")
+              .select("*", { count: "exact", head: true })
+              .eq("island_id", island.id);
+            return { ...island, itemCount: count || 0 };
+          })
+        );
+
+        setContent(dataWithCounts);
       } catch (err) {
         console.error("Error fetching islands:", err);
       } finally {
@@ -380,7 +391,9 @@ export default function Explore() {
           {loading
             ? "Loading..."
             : isSearching && queryParam
-            ? `${content.length} matching results`
+            ? `${
+                content.filter((item) => (item.itemCount || 0) > 0).length
+              } matching results`
             : "All Results"}
         </h2>
       </div>
@@ -388,44 +401,58 @@ export default function Explore() {
       {/* Content Grid */}
       <div className="px-8 pb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {content.map((item) => (
-            <div
-              key={item.id}
-              className="group cursor-pointer hover:bg-gray-800/50 rounded-xl p-2 transition-colors"
-              onClick={() => router.push(`/island/${item.id}`)}
-            >
-              {/* Card Image Placeholder */}
-              <div className="aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gradient-to-b from-sky-300 to-sky-400 relative">
-                {/* Mock visual for theme */}
-                <div className="absolute inset-0 flex items-center justify-center text-sky-900/20 font-bold text-4xl uppercase tracking-widest">
-                  {item.theme || "ISLAND"}
+          {content
+            .filter((item) => (item.itemCount || 0) > 0)
+            .map((item) => (
+              <div
+                key={item.id}
+                className="group cursor-pointer hover:bg-gray-800/50 rounded-xl p-2 transition-colors"
+                onClick={() => router.push(`/island/${item.id}`)}
+              >
+                {/* Card Image Placeholder */}
+                <div className="aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gradient-to-b from-sky-300 to-sky-400 relative">
+                  {/* Mock visual for theme */}
+                  <div className="absolute inset-0 flex items-center justify-center text-sky-900/20 font-bold text-4xl uppercase tracking-widest">
+                    {item.theme || "ISLAND"}
+                  </div>
                 </div>
-              </div>
 
-              {/* Card Info */}
-              <div className="flex flex-col gap-1">
-                <h3 className="text-white font-medium truncate">{item.name}</h3>
-                <p className="text-gray-400 text-xs line-clamp-2 min-h-[2.5em]">
-                  {item.description}
-                </p>
-              </div>
+                {/* Card Info */}
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-white font-medium truncate">
+                    {item.name}
+                  </h3>
+                  <p className="text-gray-400 text-xs line-clamp-2 min-h-[2.5em]">
+                    {item.description}
+                  </p>
+                </div>
 
-              {/* Footer */}
-              <div className="flex items-center justify-between mt-3 text-gray-500 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="bg-gray-800 px-2 py-1 rounded uppercase tracking-wider">
-                    {item.theme || "island"}
-                  </span>
-                  <span>Level {item.level}</span>
-                </div>
-                <div>
-                  {new Date(
-                    item.last_updated_at || item.created_at
-                  ).toLocaleDateString()}
+                {/* Footer */}
+                <div className="flex items-center justify-between mt-3 text-gray-500 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-gray-800 px-2 py-1 rounded uppercase tracking-wider">
+                      {item.theme || "island"}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <svg
+                        className="w-3 h-3"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path>
+                      </svg>
+                      {item.itemCount || 0} items
+                    </span>
+                    <span>Level {item.level}</span>
+                  </div>
+                  <div>
+                    {new Date(
+                      item.last_updated_at || item.created_at
+                    ).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>

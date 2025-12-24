@@ -14,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head />
+      <head>
+        <link rel="icon" href="/assets/icon.svg" />
+      </head>
       <body className="antialiased m-0 p-0" suppressHydrationWarning>
         {/* TagCanvas library from official source */}
         <Script

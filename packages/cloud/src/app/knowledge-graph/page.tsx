@@ -48,7 +48,9 @@ export default function KnowledgeGraphPage() {
       n.name.toLowerCase().includes(search)
     );
     if (matches.length > 0) {
-      setMatchIndex((prev) => (prev + 1) % matches.length);
+      const nextIndex = (matchIndex + 1) % matches.length;
+      setMatchIndex(nextIndex);
+      setSelectedNode(matches[nextIndex]);
     }
   };
 
@@ -56,6 +58,11 @@ export default function KnowledgeGraphPage() {
     setSearchValue("");
     setMatchIndex(0);
   };
+
+  // Reset match index only when the trimmed search value changes
+  useEffect(() => {
+    setMatchIndex(0);
+  }, [searchValue.trim()]);
 
   // Navigation history stack for instant back navigation (Option 2)
   const [navigationHistory, setNavigationHistory] = useState<
@@ -104,6 +111,12 @@ export default function KnowledgeGraphPage() {
           const graphData = JSON.parse(cachedGraph);
           setGraphData(graphData);
           setLoading(false);
+
+          // Auto-select first node if none selected
+          if (!selectedNode && graphData.nodes.length > 0) {
+            setSelectedNode(graphData.nodes[0]);
+          }
+
           sessionStorage.removeItem("favorite-graph"); // Clean up
           return;
         } catch (e) {
@@ -181,6 +194,18 @@ export default function KnowledgeGraphPage() {
       const responseData = await response.json();
       const data: KnowledgeGraphData = responseData;
       setGraphData(data);
+
+      // Auto-select the first level node on initial load
+      if (!selectedNode && data.nodes.length > 0) {
+        if (topicId) {
+          const mainNode = data.nodes.find((n) => n.id === topicId);
+          if (mainNode) setSelectedNode(mainNode);
+        } else {
+          // On root view, select the most important (highest weight) node
+          const sorted = [...data.nodes].sort((a, b) => b.weight - a.weight);
+          setSelectedNode(sorted[0]);
+        }
+      }
 
       // Build initial breadcrumb ONLY if we don't have one yet
       // (Don't overwrite breadcrumb from drill-down navigation)
