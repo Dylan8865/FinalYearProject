@@ -7,6 +7,7 @@ import IslandIcon from "@/icons/IslandIcon";
 import { useTopics } from "@/features/home/hooks/useTopics";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import UserMenu from "@/components/UserMenu";
+import { NAV_URLS } from "@/utils/navigation";
 
 const HomeCloud3D = dynamic(
   () => import("@/features/home/components/HomeCloud3D"),
@@ -87,16 +88,16 @@ export default function Cloud() {
       {/* Glassmorphic Top Nav */}
       <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6 pointer-events-none">
         <div className="flex items-center gap-10 pointer-events-auto">
-          <button
-            onClick={() => router.push("/mike/island")}
-            className="text-white hover:text-purple-400 transition-all hover:scale-110"
+          <a
+            href={NAV_URLS.ISLAND}
+            className="text-white hover:text-purple-400 transition-all hover:scale-110 pointer-events-auto"
           >
             <IslandIcon />
-          </button>
+          </a>
 
           <nav className="flex gap-8 bg-white/5 backdrop-blur-md px-6 py-2 rounded-full border border-white/10">
             <a
-              href="http://localhost:3003"
+              href={NAV_URLS.SEARCH}
               className="text-gray-400 hover:text-white transition-colors text-sm font-medium"
             >
               Search
@@ -104,12 +105,12 @@ export default function Cloud() {
             <button className="text-white text-sm font-bold relative after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-px after:bg-white">
               Cloud
             </button>
-            <button
-              onClick={() => router.push("/explore")}
+            <a
+              href={NAV_URLS.EXPLORE}
               className="text-gray-400 hover:text-white transition-colors text-sm font-medium"
             >
               Explore
-            </button>
+            </a>
           </nav>
         </div>
 
