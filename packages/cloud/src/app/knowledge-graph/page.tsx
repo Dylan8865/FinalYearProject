@@ -406,210 +406,316 @@ export default function KnowledgeGraphPage() {
   };
 
   return (
-    <div className="relative w-screen h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-      {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6 bg-gray-900/50 backdrop-blur-sm border-b border-white/10">
-        <div className="flex items-center gap-8">
+    <div className="relative w-screen h-screen bg-[#030712] overflow-hidden font-sans">
+      {/* Immersive Background Canvas */}
+      <div className="absolute inset-0 z-0">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="relative">
+              <div className="absolute inset-0 blur-xl bg-purple-500/20 animate-pulse rounded-full" />
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 relative z-10" />
+            </div>
+            <p className="text-purple-300 mt-6 font-medium tracking-widest animate-pulse">
+              SYNTHESIZING KNOWLEDGE...
+            </p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <div className="text-6xl mb-4">🛸</div>
+            <p className="text-red-400 text-lg mb-6 font-medium">
+              Lost in Space: {error}
+            </p>
+            <button
+              onClick={() => fetchGraphData()}
+              className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/20"
+            >
+              Recalibrate
+            </button>
+          </div>
+        ) : graphData && graphData.nodes.length > 0 ? (
+          <KnowledgeGraph
+            nodes={graphData.nodes}
+            edges={graphData.edges}
+            onNodeClick={handleNodeClick}
+            selectedNodeId={
+              selectedNode?.id || searchParams?.get("topic") || undefined
+            }
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <div className="text-6xl mb-4">🌑</div>
+            <p className="text-gray-400 text-lg">
+              Void detected. No wisdom found here.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Modern Glassmorphic Header */}
+      <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6 pointer-events-none">
+        <div className="flex items-center gap-6 pointer-events-auto">
           <button
-            onClick={() => router.push("/mike/island")}
-            className="text-white hover:text-gray-300 transition-colors"
+            onClick={() => router.push("/")}
+            className="p-3 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl text-white transition-all group"
+            title="Return to Cloud"
           >
-            <IslandIcon />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5 group-hover:-translate-x-1 transition-transform"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
           </button>
 
-          <nav className="flex gap-6">
-            <button
-              onClick={() => router.push("/")}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              ← Back to Cloud
-            </button>
-            <button
-              onClick={() => router.push("/favorites")}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              ⭐ My Favorites
-            </button>
-          </nav>
+          <div className="flex flex-col">
+            <h1 className="text-white font-bold text-xl tracking-tight">
+              Wisdom Island
+            </h1>
+            <p className="text-purple-400/80 text-[10px] uppercase tracking-[0.2em] font-medium">
+              Neural Knowledge Graph
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 pointer-events-auto">
           {isProcessing && (
-            <div className="flex items-center gap-2 text-purple-400">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-400" />
-              <span className="text-sm">Analyzing connections...</span>
+            <div className="flex items-center gap-3 px-4 py-2 bg-purple-500/10 backdrop-blur-md rounded-full border border-purple-500/20">
+              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-400" />
+              <span className="text-[10px] text-purple-300 font-medium uppercase tracking-widest">
+                Analyzing...
+              </span>
             </div>
           )}
 
-          {searchParams?.get("topic") &&
-            graphData &&
-            // Option 2: Only show save button at initial page (no breadcrumb), show green indicator after drilling down
-            (breadcrumbPath.length === 0 ? (
-              // Initial page (no breadcrumb yet): Show full save functionality
-              user ? (
-                <button
-                  onClick={handleSaveFavorite}
-                  disabled={savingFavorite || isFavorited}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isFavorited
-                      ? "bg-green-600 text-white cursor-default"
-                      : "bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
-                  }`}
-                >
-                  {savingFavorite
-                    ? "Saving..."
-                    : isFavorited
-                    ? "✓ Favorited"
-                    : "⭐ Save to Favorites"}
-                </button>
-              ) : (
-                <button
-                  onClick={() => router.push("/login")}
-                  className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-600 hover:bg-gray-700 text-white transition-colors"
-                >
-                  🔒 Sign in to Save
-                </button>
-              )
-            ) : (
-              // After drilling down (Level 1, 2, 3...): Only show green indicator if main topic is favorited
-              isFavorited &&
-              user && (
-                <div className="px-4 py-2 rounded-lg text-sm font-medium bg-green-600 text-white cursor-default">
-                  ✓ Favorited
-                </div>
-              )
-            ))}
+          {isFavorited && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 backdrop-blur-md rounded-full border border-green-500/20">
+              <span className="text-green-400 text-xs">✓ Saved</span>
+            </div>
+          )}
 
-          {/* Quick back to main topic button - shows when at Level 1+ */}
-          {breadcrumbPath.length > 1 && (
+          {!isFavorited && user && !loading && graphData && (
             <button
-              onClick={() => handleBreadcrumbNavigate(breadcrumbPath[0].id)}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
-              title={`Back to ${breadcrumbPath[0].name}`}
+              onClick={handleSaveFavorite}
+              disabled={savingFavorite}
+              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-full transition-all hover:scale-105 disabled:opacity-50 shadow-lg shadow-purple-500/20"
             >
-              ← {breadcrumbPath[0].name}
+              {savingFavorite ? "Saving..." : "Save to Favorites"}
             </button>
           )}
         </div>
       </header>
 
-      {/* Breadcrumb Navigation */}
+      {/* Floating Breadcrumb */}
       {breadcrumbPath.length > 0 && (
-        <div className="absolute top-20 left-0 right-0 z-10 bg-black/50 backdrop-blur-sm px-6 py-3 border-b border-white/10">
-          <Breadcrumb
-            path={breadcrumbPath}
-            onNavigate={handleBreadcrumbNavigate}
-          />
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-10 pointer-events-auto">
+          <div className="bg-black/20 backdrop-blur-xl px-6 py-3 border border-white/10 rounded-full shadow-2xl">
+            <Breadcrumb
+              path={breadcrumbPath}
+              onNavigate={handleBreadcrumbNavigate}
+            />
+          </div>
         </div>
       )}
 
-      {/* Main Content */}
-      <div
-        className={`absolute inset-0 ${
-          breadcrumbPath.length > 0 ? "pt-32" : "pt-20"
-        }`}
-      >
-        {loading ? (
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mb-4" />
-            <p className="text-white text-lg">Loading knowledge graph...</p>
-          </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center h-full">
-            <p className="text-red-400 text-lg mb-4">❌ {error}</p>
-            <button
-              onClick={() => fetchGraphData()}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-            >
-              Retry
-            </button>
-          </div>
-        ) : graphData && graphData.nodes.length > 0 ? (
-          <>
-            <KnowledgeGraph
-              nodes={graphData.nodes}
-              edges={graphData.edges}
-              onNodeClick={handleNodeClick}
-              selectedNodeId={searchParams?.get("topic") || undefined}
-            />
-
-            {/* Stats Panel */}
-            <div className="absolute bottom-4 left-4 bg-gray-900/90 backdrop-blur-sm border border-white/20 rounded-lg p-4 max-w-sm">
-              <h3 className="text-white font-bold mb-2">Graph Statistics</h3>
-              <div className="text-sm text-gray-300 space-y-1">
-                <p>📊 Topics: {graphData.stats.totalNodes}</p>
-                <p>🔗 Connections: {graphData.stats.totalEdges}</p>
-                <p>📈 Avg Connections: {graphData.stats.avgConnections}</p>
+      {/* Stats Panel - Floating Minimal Design */}
+      {graphData && !loading && (
+        <div className="absolute bottom-8 left-8 z-10 w-64 pointer-events-auto">
+          <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-purple-500/20 rounded-xl">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-4 h-4 text-purple-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
               </div>
-              {graphData.stats.mostConnected.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-white/10">
-                  <p className="text-xs text-gray-400 mb-2">Most Connected:</p>
+              <h3 className="text-white font-semibold text-sm">
+                Ecosystem Stats
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">
+                  Nodes
+                </span>
+                <span className="text-white text-lg font-mono">
+                  {graphData.stats.totalNodes}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">
+                  Links
+                </span>
+                <span className="text-white text-lg font-mono">
+                  {graphData.stats.totalEdges}
+                </span>
+              </div>
+            </div>
+
+            {graphData.stats.mostConnected.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-white/5">
+                <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider mb-4">
+                  Dominant Topics
+                </p>
+                <div className="space-y-3">
                   {graphData.stats.mostConnected
                     .slice(0, 3)
                     .map((item, idx) => (
-                      <p key={idx} className="text-xs text-gray-300">
-                        {idx + 1}. {item.name} ({item.connections})
-                      </p>
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between group cursor-pointer"
+                      >
+                        <span className="text-gray-300 text-xs truncate max-w-[120px] group-hover:text-purple-400 transition-colors">
+                          {item.name}
+                        </span>
+                        <span className="text-purple-500/60 text-[10px] font-mono">
+                          {item.connections} 🔗
+                        </span>
+                      </div>
                     ))}
                 </div>
-              )}
-            </div>
-
-            {/* Back Button - Shows when we have navigation history */}
-            {navigationHistory.length > 0 && (
-              <button
-                onClick={() => {
-                  // Pop the last item from history and restore it
-                  const lastHistory =
-                    navigationHistory[navigationHistory.length - 1];
-                  console.log(`⬅️ Going back one step in history`);
-
-                  setGraphData(lastHistory.graph);
-                  setBreadcrumbPath(lastHistory.breadcrumb);
-                  setSelectedNode(lastHistory.node);
-
-                  // Remove the last item from history
-                  setNavigationHistory((prev) => prev.slice(0, -1));
-                }}
-                className="absolute bottom-4 left-96 px-6 py-3 rounded-lg text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2 shadow-lg border-2 border-blue-400"
-                title="Go back one level"
-              >
-                ← Back
-              </button>
-            )}
-
-            {/* Selected Node Details */}
-            {selectedNode && (
-              <div className="absolute top-32 right-4 bg-gray-900/90 backdrop-blur-sm border border-white/20 rounded-lg p-4 max-w-xs">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-white font-bold text-lg">
-                    {selectedNode.name}
-                  </h3>
-                  <button
-                    onClick={() => setSelectedNode(null)}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    ×
-                  </button>
-                </div>
-                <p className="text-gray-400 text-sm mb-3">
-                  {selectedNode.category}
-                </p>
-                <p className="text-xs text-gray-500">
-                  Weight: {selectedNode.weight}
-                </p>
               </div>
             )}
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full">
-            <p className="text-white text-lg mb-4">No topics found</p>
-            <p className="text-gray-400 text-sm">
-              Go back to Cloud page and click a topic to explore its connections
-            </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Back Button - Floating Round Design */}
+      {navigationHistory.length > 0 && (
+        <button
+          onClick={() => {
+            const lastHistory = navigationHistory[navigationHistory.length - 1];
+            setGraphData(lastHistory.graph);
+            setBreadcrumbPath(lastHistory.breadcrumb);
+            setSelectedNode(lastHistory.node);
+            setNavigationHistory((prev) => prev.slice(0, -1));
+          }}
+          className="absolute bottom-8 left-80 z-10 p-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-all hover:scale-110 active:scale-95 shadow-xl shadow-blue-600/20 border border-blue-400/30"
+          title="Go back one level"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7 7-7m8 14l-7-7 7-7"
+            />
+          </svg>
+        </button>
+      )}
+
+      {/* Selected Node Details - Floating Glass Sidebar */}
+      {selectedNode && (
+        <div className="absolute inset-y-0 right-0 z-20 w-80 p-8 pointer-events-none">
+          <div className="h-full bg-white/[0.03] backdrop-blur-2xl border-l border-white/10 rounded-l-[40px] p-8 shadow-2xl pointer-events-auto flex flex-col">
+            <div className="flex justify-between items-start mb-8">
+              <div className="p-3 bg-purple-500/20 rounded-2xl">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-6 h-6 text-purple-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <button
+                onClick={() => setSelectedNode(null)}
+                className="p-2 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <h3 className="text-white font-bold text-2xl mb-2">
+              {selectedNode.name}
+            </h3>
+            <span className="inline-block px-3 py-1 bg-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-wider rounded-lg mb-6">
+              {selectedNode.category || "General"}
+            </span>
+
+            <div className="space-y-6 flex-grow overflow-y-auto pr-2 custom-scrollbar">
+              <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                <p className="text-gray-400 text-xs leading-relaxed">
+                  Discover deep connections and explore the orbital topics
+                  around{" "}
+                  <span className="text-white font-medium">
+                    {selectedNode.name}
+                  </span>
+                  . Click on surrounding nodes to specialize further.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">
+                  Knowledge Weight
+                </span>
+                <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-600 to-blue-500 transition-all duration-1000"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        (selectedNode.weight / 100) * 100
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleNodeClick(selectedNode)}
+              className="mt-8 w-full py-4 bg-white text-black font-bold rounded-2xl transition-all hover:bg-purple-100 hover:scale-[1.02] active:scale-[0.98] shadow-xl"
+            >
+              Drill Deeper
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

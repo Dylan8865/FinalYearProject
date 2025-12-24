@@ -2,58 +2,54 @@
 
 import React, { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { CameraControls, Line, Float, Html } from "@react-three/drei";
+import { CameraControls, Float, Html } from "@react-three/drei";
 import * as THREE from "three";
-import type { GraphNode, GraphEdge } from "@/app/api/knowledge-graph/route";
 import {
   SpaceBackground,
   FloatingParticles,
   FloatingClouds,
 } from "@/components/three/Environment3D";
+import { CloudTopic } from "../hooks/useTopics";
 
-interface KnowledgeGraph3DProps {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
-  onNodeClick?: (node: GraphNode) => void;
-  selectedNodeId?: string;
+interface HomeCloud3DProps {
+  topics: CloudTopic[];
+  onTopicClick?: (topic: string) => void;
+  activeSearch?: string;
 }
 
-// Individual node component with interactive text
-function Node({
-  node,
+function TopicNode({
+  topic,
   position,
-  isSelected,
+  isHighlighted,
   onClick,
 }: {
-  node: GraphNode;
+  topic: CloudTopic;
   position: [number, number, number];
-  isSelected: boolean;
+  isHighlighted: boolean;
   onClick: () => void;
 }) {
   const [hovered, setHovered] = React.useState(false);
-  const [justClicked, setJustClicked] = React.useState(false);
 
-  const handleClick = (e: any) => {
-    e.stopPropagation();
-    setJustClicked(true);
-    onClick();
-    setTimeout(() => setJustClicked(false), 200);
-  };
-
-  const textColor = justClicked ? "#ef4444" : isSelected ? "#a855f7" : "white";
-  const fontSize = isSelected ? 0.4 : 0.25;
+  // Scale based on weight
+  const weightScale = Math.max(0.2, (topic.weight || 50) / 100);
+  const fontSize =
+    (0.2 + weightScale * 0.4) * (hovered || isHighlighted ? 1.2 : 1);
+  const textColor = isHighlighted ? "#a855f7" : hovered ? "#3b82f6" : "white";
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
       <group position={position}>
         <Html
           center
-          distanceFactor={10}
+          distanceFactor={15}
           zIndexRange={[100, 0]}
           style={{ pointerEvents: "auto" }}
         >
           <div
-            onClick={handleClick}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
             onMouseEnter={() => {
               setHovered(true);
               document.body.style.cursor = "pointer";
@@ -64,116 +60,74 @@ function Node({
             }}
             style={{
               color: textColor,
-              fontSize: isSelected ? "24px" : "16px",
-              fontWeight: isSelected ? "800" : "500",
+              // Distance-based sizing is handled by distanceFactor,
+              // but we can add weight-based base sizing
+              fontSize: `${14 + weightScale * 12}px`,
+              fontWeight: isHighlighted ? "800" : "500",
               whiteSpace: "nowrap",
               userSelect: "none",
               textShadow: "0 2px 10px rgba(0,0,0,0.9)",
               cursor: "pointer",
               transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-              transform: hovered ? "scale(1.2)" : "scale(1)",
-              padding: "4px 12px",
-              background: isSelected
+              transform: hovered || isHighlighted ? "scale(1.2)" : "scale(1)",
+              opacity: isHighlighted ? 1 : 0.8,
+              padding: "4px 10px",
+              background: isHighlighted
                 ? "rgba(168, 85, 247, 0.2)"
                 : "transparent",
-              borderRadius: "8px",
-              border: isSelected ? "1px solid rgba(168, 85, 247, 0.4)" : "none",
-              backdropFilter: isSelected ? "blur(4px)" : "none",
+              borderRadius: "6px",
+              border: isHighlighted
+                ? "1px solid rgba(168, 85, 247, 0.4)"
+                : "none",
+              backdropFilter: isHighlighted ? "blur(4px)" : "none",
             }}
           >
-            {node.name}
+            {topic.text}
           </div>
         </Html>
 
-        {/* Interactive glow sphere - kept in 3D for depth reference */}
-        <mesh onClick={handleClick} scale={hovered || isSelected ? 1.5 : 1}>
+        {/* Interactive glow sphere - remains 3D for depth reference */}
+        <mesh
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+          scale={hovered ? 1.5 : 1}
+        >
           <sphereGeometry args={[0.2, 16, 16]} />
           <meshBasicMaterial
             color={textColor}
             transparent
-            opacity={hovered ? 0.4 : isSelected ? 0.3 : 0.15}
+            opacity={hovered ? 0.3 : 0.1}
           />
         </mesh>
-
-        {/* Subtle particle ring for selected node */}
-        {isSelected && (
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.3, 0.35, 32]} />
-            <meshBasicMaterial color="#a855f7" transparent opacity={0.6} />
-          </mesh>
-        )}
       </group>
     </Float>
   );
 }
 
-// Edge component with glowing aesthetic
-function Edge({
-  start,
-  end,
-  strength,
-}: {
-  start: [number, number, number];
-  end: [number, number, number];
-  strength: number;
-}) {
-  const points = useMemo(() => {
-    return [new THREE.Vector3(...start), new THREE.Vector3(...end)];
-  }, [start, end]);
-
-  return (
-    <Line
-      points={points}
-      color="#3b82f6"
-      lineWidth={strength * 1.5}
-      transparent
-      opacity={0.2}
-      dashed={false}
-    />
-  );
-}
-
-// Main 3D scene
-function Scene({
-  nodes,
-  edges,
-  onNodeClick,
-  selectedNodeId,
-}: KnowledgeGraph3DProps) {
-  const { camera } = useThree();
+function Scene({ topics, onTopicClick, activeSearch }: HomeCloud3DProps) {
   const controlsRef = useRef<CameraControls>(null);
 
-  // Categorical Clustered Layout Logic
-  const nodePositions = useMemo(() => {
+  const topicPositions = useMemo(() => {
     const positions = new Map<string, [number, number, number]>();
-
-    const centerNodeId =
-      selectedNodeId || (nodes.length > 0 ? nodes[0].id : undefined);
-    if (!centerNodeId) return positions;
 
     // Group nodes by category
     const categoryGroups = new Map<string, string[]>();
-    nodes.forEach((node) => {
-      const cat = node.category || "General";
+    topics.forEach((topic) => {
+      const cat = topic.category || "General";
       if (!categoryGroups.has(cat)) categoryGroups.set(cat, []);
-      categoryGroups.get(cat)!.push(node.id);
+      categoryGroups.get(cat)!.push(topic.id);
     });
 
     const categories = Array.from(categoryGroups.keys());
     const catPositions = new Map<string, THREE.Vector3>();
 
-    // Assign a center for each category arranged in a large 3D sphere
+    // Assign cluster centers in a 3D distribution with more space between them
     categories.forEach((cat, index) => {
-      // The category containing the selected node stays at the center region
-      if (nodes.find((n) => n.id === centerNodeId)?.category === cat) {
-        catPositions.set(cat, new THREE.Vector3(0, 0, 0));
-        return;
-      }
-
-      // Fibonacci sphere for category centers
       const phi = Math.acos(1 - (2 * (index + 0.5)) / categories.length);
       const theta = Math.PI * (1 + Math.sqrt(5)) * index;
-      const radius = 35; // Significant distance between unrelated groups
+      const radius = 25; // Increased from 8 to 25 for obvious distance
 
       catPositions.set(
         cat,
@@ -185,53 +139,48 @@ function Scene({
       );
     });
 
-    nodes.forEach((node) => {
-      if (node.id === centerNodeId) {
-        positions.set(node.id, [0, 0, 0]);
-        return;
-      }
-
-      const catCenter = catPositions.get(node.category || "General")!;
-      // Tight clumping for related nodes (reduced offset from 5 to 1.5)
-      const offsetRadius = 1 + Math.random() * 2;
+    topics.forEach((topic) => {
+      const catCenter = catPositions.get(topic.category || "General")!;
+      // Tighten the cluster volume (offsetRadius decreased from 3-5 to 1.5-3)
+      const offsetRadius = 1.5 + Math.random() * 1.5;
       const u = Math.random();
       const v = Math.random();
       const theta = 2 * Math.PI * u;
       const phi = Math.acos(2 * v - 1);
 
-      const pos = catCenter
-        .clone()
-        .add(
-          new THREE.Vector3(
-            offsetRadius * Math.sin(phi) * Math.cos(theta),
-            offsetRadius * Math.sin(phi) * Math.sin(theta),
-            offsetRadius * Math.cos(phi)
-          )
-        );
+      const x = offsetRadius * Math.sin(phi) * Math.cos(theta);
+      const y = offsetRadius * Math.sin(phi) * Math.sin(theta);
+      const z = offsetRadius * Math.cos(phi);
 
-      positions.set(node.id, [pos.x, pos.y, pos.z]);
+      const pos = catCenter.clone().add(new THREE.Vector3(x, y, z));
+      positions.set(topic.id, [pos.x, pos.y, pos.z]);
     });
 
     return positions;
-  }, [nodes, selectedNodeId]);
+  }, [topics]);
 
-  // Smooth camera transition when selected node changes
+  // Center on high-priority match if searching
   useEffect(() => {
-    if (controlsRef.current && selectedNodeId) {
-      const pos = nodePositions.get(selectedNodeId);
-      if (pos) {
-        controlsRef.current.setLookAt(
-          pos[0],
-          pos[1],
-          pos[2] + 8, // Camera Position
-          pos[0],
-          pos[1],
-          pos[2], // Target
-          true // Animate
-        );
+    if (activeSearch && controlsRef.current) {
+      const match = topics.find(
+        (t) => t.text.toLowerCase() === activeSearch.toLowerCase()
+      );
+      if (match) {
+        const pos = topicPositions.get(match.id);
+        if (pos) {
+          controlsRef.current.setLookAt(
+            pos[0],
+            pos[1],
+            pos[2] + 10,
+            pos[0],
+            pos[1],
+            pos[2],
+            true
+          );
+        }
       }
     }
-  }, [selectedNodeId, nodePositions]);
+  }, [activeSearch, topics, topicPositions]);
 
   // Configure controls for map-like navigation (Left Click Pan)
   useEffect(() => {
@@ -239,9 +188,9 @@ function Scene({
       // 1: Rotate, 2: Truck (Pan), 4: Dolly (Zoom), 8: Zoom
       controlsRef.current.mouseButtons.left = 2; // Default to Pan
       controlsRef.current.mouseButtons.right = 1; // Orbit
-      controlsRef.current.mouseButtons.middle = 0; // Disable middle click pan/orbit
+      controlsRef.current.mouseButtons.middle = 0;
 
-      // Also adjust touch controls for consistency
+      // Also adjust touch controls
       controlsRef.current.touches.one = 32; // TRUCK (Pan)
       controlsRef.current.touches.two = 512; // TOUCH_ZOOM_ROTATE
     }
@@ -293,43 +242,32 @@ function Scene({
     <>
       <CameraControls
         ref={controlsRef}
-        minDistance={2}
-        maxDistance={40}
+        minDistance={5}
+        maxDistance={50}
         makeDefault
         smoothTime={0.25}
       />
 
       <SpaceBackground />
-      <FloatingParticles count={200} />
+      <FloatingParticles count={300} />
       <FloatingClouds />
 
       <group>
-        {/* Render all edges first */}
-        {edges.map((edge, index) => {
-          const startPos = nodePositions.get(edge.source);
-          const endPos = nodePositions.get(edge.target);
-          if (!startPos || !endPos) return null;
-          return (
-            <Edge
-              key={`edge-${index}`}
-              start={startPos}
-              end={endPos}
-              strength={edge.strength}
-            />
-          );
-        })}
-
-        {/* Render all nodes */}
-        {nodes.map((node) => {
-          const position = nodePositions.get(node.id);
+        {topics.map((topic) => {
+          const position = topicPositions.get(topic.id);
           if (!position) return null;
+
+          const isHighlighted = activeSearch
+            ? topic.text.toLowerCase().includes(activeSearch.toLowerCase())
+            : false;
+
           return (
-            <Node
-              key={node.id}
-              node={node}
+            <TopicNode
+              key={topic.id}
+              topic={topic}
               position={position}
-              isSelected={node.id === selectedNodeId}
-              onClick={() => onNodeClick?.(node)}
+              isHighlighted={isHighlighted}
+              onClick={() => onTopicClick?.(topic.text)}
             />
           );
         })}
@@ -338,7 +276,7 @@ function Scene({
   );
 }
 
-export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
+export default function HomeCloud3D(props: HomeCloud3DProps) {
   const [hasError, setHasError] = useState(false);
 
   const handleCreated = ({ gl }: { gl: THREE.WebGLRenderer }) => {
@@ -358,14 +296,14 @@ export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
 
   return (
     <div
-      className="w-full h-full relative overflow-hidden"
+      className="w-full h-full relative"
       style={{
         background:
           "linear-gradient(to bottom, #020617 0%, #0f172a 50%, #1e1b4b 100%)",
       }}
     >
       <Canvas
-        camera={{ position: [0, 0, 15], fov: 50 }}
+        camera={{ position: [0, 0, 20], fov: 45 }}
         dpr={[1, 1.5]}
         gl={{
           antialias: true,
@@ -377,7 +315,7 @@ export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
       </Canvas>
 
       {hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-950/90 z-20 backdrop-blur-md">
+        <div className="absolute inset-0 flex items-center justify-center bg-[#030712]/90 z-20 backdrop-blur-md">
           <div className="text-center p-8 bg-gray-900 border border-purple-500/30 rounded-2xl shadow-2xl">
             <h3 className="text-white font-bold text-xl mb-4">
               Graphics Context Lost
@@ -386,11 +324,14 @@ export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
               onClick={() => window.location.reload()}
               className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold"
             >
-              Reload Page
+              Recover
             </button>
           </div>
         </div>
       )}
+
+      {/* Visual background gradient overlay to blend UI */}
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-[#030712]/50" />
 
       {/* Modern UI overlay for navigation hints */}
       <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-black/40 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-[10px] text-gray-400 pointer-events-none">
@@ -412,7 +353,15 @@ export default function KnowledgeGraph3D(props: KnowledgeGraph3DProps) {
         </div>
         <div className="flex items-center gap-2">
           <span className="px-1 py-0.5 bg-white/10 rounded text-[7px] font-bold">
-            CTRL + 🔍
+            CTRL + �️
+          </span>
+          <span>
+            <b>Ctrl + Drag:</b> Rotate Space
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="px-1 py-0.5 bg-white/10 rounded text-[7px] font-bold">
+            CTRL + �🔍
           </span>
           <span>
             <b>Ctrl + Scroll:</b> Quick Orbit
