@@ -15,29 +15,6 @@ function getGreeting(): string {
   return "Good Night";
 }
 
-const suggestions = [
-  {
-    icon: "🏝️",
-    title: "Explore Islands",
-    prompt: "What islands are available on Wisdom Island?",
-  },
-  {
-    icon: "📚",
-    title: "Learn Something",
-    prompt: "Teach me something interesting today",
-  },
-  {
-    icon: "🎯",
-    title: "Get Started",
-    prompt: "How do I get started with Wisdom Island?",
-  },
-  {
-    icon: "💡",
-    title: "Tips & Tricks",
-    prompt: "What are some tips for using Wisdom Island effectively?",
-  },
-];
-
 export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps) {
   const { theme } = useTheme();
   const [input, setInput] = useState("");
@@ -49,9 +26,6 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
   const mutedTextColor = isDark ? "text-gray-400" : "text-gray-600";
   const placeholderColor = isDark ? "placeholder:text-gray-500" : "placeholder:text-gray-400";
   const borderColor = isDark ? "border-gray-600" : "border-gray-400";
-  const cardBg = isDark ? "bg-gray-800/50" : "bg-white";
-  const cardBorder = isDark ? "border-gray-700" : "border-gray-300";
-  const cardHoverBg = isDark ? "hover:bg-gray-800" : "hover:bg-gray-100";
   const kbdBg = isDark ? "bg-gray-800 text-gray-400" : "bg-gray-200 text-gray-600";
 
   useEffect(() => {
@@ -88,10 +62,10 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
 
       {/* Search Input */}
       <div className="w-full max-w-2xl">
-        <div className={`relative flex items-end rounded-full border ${borderColor} bg-transparent px-6 py-4 transition-colors focus-within:border-teal-400`}>
+        <div className={`relative flex items-center gap-4 rounded-full border ${borderColor} bg-transparent px-6 py-4 transition-colors focus-within:border-teal-400`}>
           {/* Search Icon */}
           <svg
-            className={`mb-1 mr-4 h-6 w-6 shrink-0 ${mutedTextColor}`}
+            className={`h-6 w-6 shrink-0 ${mutedTextColor}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -119,7 +93,7 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
           {input.trim() && (
             <button
               onClick={handleSubmit}
-              className="ml-3 text-teal-400 hover:text-teal-300"
+              className="shrink-0 text-teal-400 hover:text-teal-300"
             >
               <svg
                 className="h-6 w-6"
@@ -137,27 +111,6 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
             </button>
           )}
         </div>
-      </div>
-
-      {/* Suggestions Grid */}
-      <div className="mt-12 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
-        {suggestions.map((suggestion, index) => (
-          <button
-            key={index}
-            onClick={() => onSuggestionClick(suggestion.prompt)}
-            className={`group flex flex-col items-start gap-3 rounded-xl border ${cardBorder} ${cardBg} p-5 text-left transition-all hover:border-teal-500/50 ${cardHoverBg}`}
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-3xl">{suggestion.icon}</span>
-              <span className={`text-lg font-medium ${textColor} group-hover:text-teal-400`}>
-                {suggestion.title}
-              </span>
-            </div>
-            <p className={`text-base ${mutedTextColor} line-clamp-2`}>
-              {suggestion.prompt}
-            </p>
-          </button>
-        ))}
       </div>
 
       {/* Bottom hint */}
