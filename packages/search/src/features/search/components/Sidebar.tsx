@@ -174,6 +174,26 @@ export default function Sidebar({
           </button>
         )}
 
+        {/* Error message when no conversations to search */}
+        {isOpen && isSearchActive && isLoggedIn && conversations.length === 0 && !searchQuery && (
+          <div className="px-4">
+            <div className={`flex items-start justify-between gap-3 rounded-lg bg-red-500/10 px-4 py-3`}>
+              <p className={`flex-1 text-sm text-red-500`}>
+                No conversations to search. Please start a chat first.
+              </p>
+              <button
+                onClick={onToggleSearch}
+                className="shrink-0 text-red-500 hover:text-red-600"
+                title="Close search"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Search Input - Only show when expanded and search is active */}
         {isOpen && isSearchActive && isLoggedIn && (
           <div className="px-2">
@@ -250,11 +270,20 @@ export default function Sidebar({
               </a>
             </div>
           ) : conversations.length === 0 ? (
-            <p className={`px-4 py-6 text-center text-base ${mutedTextColor}`}>
-              No conversations yet
-            </p>
+            <div className="px-4 py-3">
+              {searchQuery ? (
+                <p className={`text-center text-sm ${mutedTextColor}`}>
+                  No conversations match your search
+                </p>
+              ) : (
+                <p className={`text-center text-base ${mutedTextColor}`}>
+                  No conversations yet
+                </p>
+              )}
+            </div>
           ) : (
-            Object.entries(groupedConversations).map(
+            <>
+              {Object.entries(groupedConversations).map(
               ([group, convs]) =>
                 convs.length > 0 && (
                   <div key={group} className="mb-5">
@@ -328,7 +357,8 @@ export default function Sidebar({
                     ))}
                   </div>
                 )
-            )
+            )}
+            </>
           )}
         </div>
       )}

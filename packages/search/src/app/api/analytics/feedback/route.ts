@@ -66,12 +66,18 @@ export async function GET(request: Request) {
             .single();
           
           return {
-            ...feedback,
+            id: feedback.id,
+            feedback_type: feedback.feedback_type,
+            created_at: feedback.created_at,
+            chatId: feedback.chat_id,
             chatTitle: chat?.title || "Unknown Chat",
           };
         }
         return {
-          ...feedback,
+          id: feedback.id,
+          feedback_type: feedback.feedback_type,
+          created_at: feedback.created_at,
+          chatId: feedback.chat_id,
           chatTitle: "Unknown Chat",
         };
       })
