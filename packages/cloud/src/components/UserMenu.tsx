@@ -34,7 +34,9 @@ export default function UserMenu({ name, email }: UserMenuProps) {
   };
 
   // Get first letter of name for avatar
-  const avatarLetter = name ? name.charAt(0).toUpperCase() : email.charAt(0).toUpperCase();
+  const avatarLetter = name
+    ? name.charAt(0).toUpperCase()
+    : email.charAt(0).toUpperCase();
 
   return (
     <div className="relative" ref={menuRef}>

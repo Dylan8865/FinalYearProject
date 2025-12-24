@@ -49,7 +49,7 @@ export default function SearchBar({
           <button
             type="button"
             onClick={onClear}
-            className="ml-2 text-gray-400 hover:text-white transition-colors"
+            className="ml-2 absolute right-4 text-gray-400 hover:text-white transition-colors"
           >
             <svg
               className="w-5 h-5"
