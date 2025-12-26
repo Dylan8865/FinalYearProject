@@ -6,7 +6,13 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin-client";
 
-export async function deleteAccount() {
+export async function deleteAccount(formData: FormData) {
+  const password = formData.get("password") as string;
+
+  if (!password) {
+    return { error: "Password is required" };
+  }
+
   const supabase = await createClient();
 
   const {
@@ -14,8 +20,18 @@ export async function deleteAccount() {
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  if (authError || !user || !user.email) {
     return { error: "Unauthorized" };
+  }
+
+  // Verify password
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: password,
+  });
+
+  if (signInError) {
+    return { error: "Incorrect password" };
   }
 
   try {
