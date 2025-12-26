@@ -12,3 +12,6 @@ This project is the assignment system prototype for TARUMT 2025 Nov Semester BMS
 
 ## Tutor  
 Ts. Mohn Ridzuan Bin Ahmad  
+
+## Abstract
+Wisdom Island is a web-based platform designed to preserve and share the valuable knowledge and life experiences of the elderly with younger generations. Partly inspired by the games “Stardew Valley” by ConcernedApe, "Minecraft" by Mojang and "Plants vs Zombies" by Popcap, the system combines an AI-powered knowledge repository with a gamified interactive virtual island, turning wisdom-sharing into an engaging experience.
