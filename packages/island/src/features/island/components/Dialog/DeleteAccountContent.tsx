@@ -11,18 +11,21 @@ interface DeleteAccountContentProps {
 }
 
 const DeleteAccountContent = ({ onClose }: DeleteAccountContentProps) => {
-  const [confirmText, setConfirmText] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = () => {
-    if (confirmText !== "DELETE") {
-      setError('Please type "DELETE" to confirm');
+    if (!password) {
+      setError("Please enter your password");
       return;
     }
 
     startTransition(async () => {
-      const result = await deleteAccount();
+      const formData = new FormData();
+      formData.append("password", password);
+
+      const result = await deleteAccount(formData);
       if (result?.error) {
         setError(result.error);
       }
@@ -59,15 +62,16 @@ const DeleteAccountContent = ({ onClose }: DeleteAccountContentProps) => {
           {/* Confirmation input */}
           <div className="space-y-2">
             <label className="block text-center text-sm text-white">
-              Type <span className="font-bold text-[#ff6b6b]">DELETE</span> to
+              Enter your{" "}
+              <span className="font-bold text-[#ff6b6b]">PASSWORD</span> to
               confirm:
             </label>
             <input
-              type="text"
-              value={confirmText}
-              onChange={(e) => setConfirmText(e.target.value)}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full border-2 border-[#5a1a1a] bg-[#1a0a0a] p-3 text-center text-white placeholder-[#5a3a3a] focus:border-[#8B0000] focus:outline-none disabled:opacity-50"
-              placeholder="DELETE"
+              placeholder="Enter Password"
               disabled={isPending}
             />
           </div>
@@ -84,17 +88,18 @@ const DeleteAccountContent = ({ onClose }: DeleteAccountContentProps) => {
             <Button
               className="cursor-pointer border border-transparent bg-[#4a4a4a] transition hover:border-[#5a5a5a]"
               onClick={onClose}
+              disabled={isPending}
             >
               Cancel
             </Button>
             <Button
               className={`border border-transparent transition ${
-                isPending || confirmText !== "DELETE"
+                isPending || !password
                   ? "cursor-not-allowed bg-[#4a1a1a] opacity-50"
                   : "cursor-pointer bg-[#8B0000] hover:border-[#a00000]"
               }`}
               onClick={handleDelete}
-              disabled={isPending || confirmText !== "DELETE"}
+              disabled={isPending || !password}
             >
               Delete
             </Button>
