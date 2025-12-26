@@ -43,8 +43,8 @@ export async function updateUser(userId: string, data: UpdateUserData) {
   
   // Sanitize name (trim and limit length)
   const sanitizedName = data.name.trim();
-  if (sanitizedName.length > 100) {
-    throw new Error("Username is too long (max 100 characters)");
+  if (sanitizedName.length > 50) {
+    throw new Error("Username is too long (max 50 characters)");
   }
 
   // Validate mana
