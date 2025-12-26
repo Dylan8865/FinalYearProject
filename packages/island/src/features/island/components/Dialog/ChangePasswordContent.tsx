@@ -11,11 +11,19 @@ interface ChangePasswordContentProps {
 const ChangePasswordContent = ({
   setIsDialogOpen,
 }: ChangePasswordContentProps) => {
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  const handleChangeCurrentPassword = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setCurrentPassword(e.target.value);
+    setError("");
+  };
 
   const handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
@@ -34,7 +42,7 @@ const ChangePasswordContent = ({
     setError("");
     setSuccess("");
 
-    if (!password || !confirmPassword) {
+    if (!currentPassword || !password || !confirmPassword) {
       setError("Please fill in all fields");
       return;
     }
@@ -49,8 +57,14 @@ const ChangePasswordContent = ({
       return;
     }
 
+    if (currentPassword === password) {
+      setError("New password cannot be the same as current password");
+      return;
+    }
+
     startTransition(async () => {
       const formData = new FormData();
+      formData.append("currentPassword", currentPassword);
       formData.append("password", password);
       formData.append("confirmPassword", confirmPassword);
 
@@ -82,6 +96,18 @@ const ChangePasswordContent = ({
         </div>
 
         <div className="space-y-4">
+          <AddIslandInput
+            id="currentPassword"
+            name="currentPassword"
+            type="password"
+            placeholder="Current Password"
+            color="#6d3f33"
+            width="100%"
+            value={currentPassword}
+            handleChange={handleChangeCurrentPassword}
+            error={""}
+          />
+
           <AddIslandInput
             id="password"
             name="password"
