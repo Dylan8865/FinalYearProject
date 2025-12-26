@@ -1,6 +1,6 @@
 # wisdom-island
 
-This project is the assignment system prototype for TARUMT 2025 Nov Semester BMSE3004 Collaborative Development `/island`.  
+This project is the assignment system prototype for TARUMT 2025 Nov Semester BMSE3004 Collaborative Development.  
 
 ## Team Structure
 **Project Manager:** Kok Xiang Yue  
@@ -8,4 +8,7 @@ This project is the assignment system prototype for TARUMT 2025 Nov Semester BMS
 **Design Lead:** Isaac Liong Xiao Yi  
 **Coding Lead:** Chao Juin Yong  
 **Testing Lead:** Harry Liow Siang Yi  
-**Programmer:** Harry Liow Siang Yi, Kok Xiang Yue, Benjamin Yee Jun Yi, Chao Juin Yong, Isaac Liong Xiao Yi
+**Programmer:** Harry Liow Siang Yi, Kok Xiang Yue, Benjamin Yee Jun Yi, Chao Juin Yong, Isaac Liong Xiao Yi  
+
+## Tutor  
+Ts. Mohn Ridzuan Bin Ahmad  
