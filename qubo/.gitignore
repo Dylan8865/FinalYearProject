@@ -1,0 +1,45 @@
+# Frontend
+/frontend/node_modules/
+/frontend/.env
+/frontend/.env.local
+/frontend/dist/
+/frontend/build/
+/frontend/.DS_Store
+/frontend/.vscode/
+/frontend/package-lock.json
+/frontend/yarn.lock
+
+# Backend
+/backend/__pycache__/
+/backend/.venv/
+/backend/.env
+/backend/.env.local
+/backend/*.pyc
+/backend/.pytest_cache/
+/backend/.coverage
+/backend/venv/
+/backend/env/
+/backend/.vscode/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+.supabase/
+.env.supabase
+
+# OS
+.DS_Store
+Thumbs.db

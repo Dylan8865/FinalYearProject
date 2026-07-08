@@ -1,0 +1,2 @@
+-- Database schema will be stored here
+-- See Qubo Schema attachment for full schema

@@ -1,0 +1,2068 @@
+AI-Powered Personalized
+Learning Platform (Qubo)
+By
+Benjamin Yee Jun Yi
+FACULTY OF COMPUTING AND
+INFORMATION TECHNOLOGY
+TUNKU ABDUL RAHMAN UNIVERSITY OF
+MANAGEMENT AND TECHNOLOGY
+KUALA LUMPUR
+ACADEMIC YEAR
+2025/26
+AI-Powered Personalized Learning Platform
+By
+Benjamin Yee Jun Yi
+Supervisor: Ts.Ten Shai Cheong
+A project report submitted to the
+Faculty of Computing and Information Technology
+in partial fulfillment of the requirement for the
+Bachelor of Software Engineering (Honours).
+Faculty of Computing and Information Technology
+Tunku Abdul Rahman University of Management and Technology
+Kuala Lumpur
+Copyright by Tunku Abdul Rahman University of Management and
+Technology.
+All rights reserved. No part of this project documentation may be reproduced,
+stored in retrieval system, or transmitted in any form or by any means without
+prior permission of Tunku Abdul Rahman University of Management and
+Technology.
+Qubo Declaration
+Declaration
+The project submitted herewith is a result of my own efforts in totality and in every aspect of the
+project works. All information that has been obtained from other sources had been fully
+acknowledged. I understand that any plagiarism, cheating or collusion or any sorts constitutes a
+breach of TAR University rules and regulations and would be subjected to disciplinary actions.
+__________________________
+BENJAMIN YEE JUN YI
+Bachelor of of Software Engineering (Honours)
+ID: 24WMR07974
+BMCS3403 Project I 2
+Qubo Abstract
+Abstract
+Malaysian SPM students often face challenges in identifying learning gaps and optimizing
+study strategies, leading to inefficient preparation and academic underperformance. This
+project proposes a Smart Learning Analytics Dashboard that monitors learning patterns and
+analyzes academic performance using machine learning techniques. The system incorporates
+spaced repetition algorithms, predictive analytics, and natural language processing to support
+automated quiz generation from textbook content.
+The platform consists of several modules, including performance analytics, personalized
+study recommendations, content generation, and a lightweight gamification module designed
+primarily to help students relax and reduce study stress rather than serve as a core learning or
+practice mechanism. This relaxation-focused mini-game aims to maintain motivation and
+mental well-being while studying core SPM subjects, particularly those in the science stream.
+The system is developed using an Agile software development methodology with iterative
+testing to ensure reliability, usability, and prediction accuracy. The expected outcome is an
+intelligent learning companion that assists students in improving engagement, identifying
+at-risk learners early, and providing data-driven insights to enhance study efficiency.
+Ultimately, the system aims to improve SPM examination performance and promote
+self-directed learning among Malaysian secondary school students.
+BMCS3413 Project I 3
+Qubo Acknowledgement
+Acknowledgement
+First and foremost, we would like to express our deepest gratitude to our project supervisor,
+Mr. Ten Shai Cheong, for his invaluable guidance, unwavering support, and expert
+mentorship throughout this journey. His insightful feedback and constant encouragement
+enabled us to navigate challenges and deepen our understanding of the project's complexities.
+We are truly thankful for the time and dedication he invested in steering our work to
+completion.
+We are also profoundly grateful to our families for their unconditional support and patience
+during this intensive period. Their belief in our abilities and their emotional encouragement
+provided us with the resilience and motivation needed to persevere.
+Furthermore, we extend our sincere thanks to our classmates and friends who offered
+valuable perspectives, engaged in thoughtful discussions, and provided assistance whenever
+needed. Their camaraderie and collaborative spirit enriched our project experience.
+Lastly, I wish to acknowledge my partner—Yong Chao Juin. This project was a true
+collaborative effort, and our mutual dedication, shared responsibility, and constructive
+teamwork were fundamental to its successful outcome.
+Without the generous contributions and support from all these individuals, our final year
+project would not have been realized. To each of you, we offer our heartfelt appreciation.
+Thank you.
+`
+BMCS3413 Project I 4
+Qubo Table of Content
+Table of Contents
+Declaration 2
+Abstract 3
+Acknowledgement 4
+Table of Contents 5
+1 Introduction 2
+1.1 Objectives 3
+1.2 Background 5
+1.3 Target Market 8
+1.4 Problem Statement 10
+1.4.1 Problems 10
+1.4.2 Solutions 11
+1.5 Advantages and Contributions 13
+1.5.1 Advantages 13
+1.5.2 Contributions 14
+1.6 Project Plan 16
+1.6.1 Project Scope 16
+1.6.2 Milestone 18
+1.6.3 Project Schedule Plan (Gantt Chart) 21
+1.7 Chapter Summary and Evaluation 22
+2 Literature Review 25
+2.1 Project Background 25
+2.1.1 SPM Education Landscape and Student Challenges 26
+2.2 Literature Review 27
+2.2.1 Machine Learning and Learning Analytics 27
+2.2.2 Spaced Repetition Algorithm 28
+2.2.3 Natural Language Processing for Automated Quiz Generation 29
+2.2.4 Predictive Analytics in Education 30
+2.3 Feasibility Study 31
+Technical Feasibility 31
+Economic Feasibility 31
+Operational Feasibility 31
+2.4 Chapter Summary and Evaluation 32
+3 Methodology and Requirements Analysis 34
+3.1 Methodology 34
+3.1.1 Software Development Model 34
+3.1.2 AI Quiz Generation Using Gemini Flash API 36
+3.1.3 Pre-processing 36
+3.1.4 Post-processing 37
+3.1.5 Machine Learning-Based Analytics Engine 38
+3.1.6 Integration and Evaluation of the AI Pipeline 39
+3.2 Requirement Analysis 40
+3.2.1 Functional Requirement 40
+BMCS3413 Project I 5
+Qubo Table of Content
+3.2.2 Non-Functional Requirements 43
+3.3 Chapter Summary and Evaluation 46
+4 System Design 48
+4.1 User Interface 48
+4.2 Use Case Diagram 55
+4.2.1 User Authentication and Profile Management Module 55
+4.2.2 Performance Tracking and Analytics Dashboard Module 56
+4.2.3 AI-powered Quiz Generation and Practice Management Module 57
+4.3 Sequence Diagram 58
+4.3.1 User Authentication and Profile Management Module 58
+4.3.2 Performance Tracking and Analytics Dashboard Module 60
+4.3.3 AI-powered Quiz Generation and Practice Management Module 65
+4.4 Entity Relationship Diagram 67
+4.5 Class Diagram 68
+4.6 Deployment Diagram 69
+4.7 Chapter Summary and Evaluation 70
+5 Implementation and Testing 72
+5.1 Sub-section 1 Heading 72
+5.1.1 Sub-subsection Heading 72
+5.2 Sub-section 2 Heading 72
+5.3 Sub-section 1 Heading 72
+5.3.1 Sub-subsection Heading 72
+5.4 Sub-section 1 Heading 73
+5.4.1 Sub-subsection Heading 73
+5.5 Chapter Summary and Evaluation 73
+6 System Deployment 75
+System Backup and Risk Management 75
+On-site Setup 75
+Training Procedure 75
+Follow-up 75
+Chapter Summary and Evaluation 75
+7 Discussions and Conclusion 77
+Summary 77
+Achievements 77
+Contributions 77
+Limitations and Future Improvements 77
+Issues and Solutions 77
+References 78
+Appendices 79
+BMCS3413 Project I 6
+Qubo Chapter 1
+Chapter 1
+Introduction
+BMCS3413 Project I 1
+Qubo Chapter 1
+1 Introduction
+The Sijil Pelajaran Malaysia (SPM) examination represents a critical milestone in the
+Malaysian education system, serving as a gateway to tertiary education and career
+opportunities. However, students preparing for this high-stakes examination face
+numerous challenges that impede their learning effectiveness and academic success.
+Traditional learning approaches often fail to provide the personalized support and
+real-time feedback necessary for students to identify and address their knowledge gaps
+effectively.
+In today's digital age, artificial intelligence and machine learning technologies offer
+unprecedented opportunities to transform education through personalization and
+data-driven insights. Qubo is designed to leverage these technologies to create an
+AI-powered personalized learning platform specifically tailored for SPM students. The
+platform aims to address the fundamental challenge of inefficient learning by providing
+intelligent analytics, personalized study recommendations, and automated content
+generation tools.
+This project introduces a comprehensive learning analytics dashboard that employs
+spaced repetition algorithms, predictive analytics, and natural language processing to
+help students maximize their learning efficiency. By tracking performance patterns and
+analyzing learning behaviors, Qubo empowers students to take control of their academic
+journey and achieve better outcomes in their SPM examinations.
+BMCS3413 Project I 2
+Qubo Chapter 1
+1.1 Objectives
+1.1.1 To develop a system that identifies individual students knowledges gaps
+and learning patterns through comprehensive performance tracking and
+data analysis
+In the current educational landscape, students often struggle to identify their specific areas of
+weakness until examination results reveal the extent of their knowledge gaps that is too late
+for effective remediation. Qubo addresses this critical challenge by implementing a
+sophisticated analytics engine that continuously monitors student performance across all SPM
+subjects. The system tracks multiple dimensions of learning, including quiz scores, time spent
+on topics, question difficulty ratings, and study session patterns using Pomodoro-style
+tracking methodologies.
+By analyzing this multifaceted data, the platform creates a comprehensive learning profile for
+each student, enabling precise identification of knowledge gaps at both macro (subject-level)
+and micro (topic-level) granularities. This objective ensures that students gain complete
+visibility into their strengths and weaknesses, allowing them to prioritize their study efforts
+effectively and address problem areas before they impact examination performance.
+1.1.2 To implement AI-powered personalized learning recommendations that
+adapt to individual learning styles and optimize study efficiency through
+data-driven insights
+Traditional study approaches often fail to accommodate the diverse learning styles and paces
+of individual students. Qubo employs advanced machine learning algorithms to generate
+personalized study recommendations tailored to each student's unique learning profile. The
+system analyzes performance data, learning velocity metrics, and behavioral patterns to
+provide customized guidance on optimal study time allocation, topic prioritization, and
+resource selection.
+BMCS3413 Project I 3
+Qubo Chapter 1
+The platform categorizes students into visual, auditory, and kinesthetic learning styles,
+subsequently curating resources that align with their preferred learning modalities. By
+leveraging predictive analytics, Qubo forecasts examination performance based on current
+learning trajectories and provides early risk alerts for potential academic difficulties. This
+proactive approach enables students to make informed decisions about their study strategies
+and adjust their learning approaches to maximize efficiency and outcomes.
+1.1.3 To create an automated quiz generation system using natural language
+processing that transforms textbook content into targeted practice
+assessments, enabling unlimited customized practice opportunities
+Access to quality practice materials remains a significant barrier for many SPM students,
+particularly those from under-resourced backgrounds. Qubo revolutionizes practice
+assessment creation by implementing an NLP-powered quiz generation engine that
+automatically extracts key concepts from user-uploaded textbook pages and transforms them
+into targeted practice questions. This innovative feature eliminates the limitation of pre-made
+question banks and provides students with unlimited practice opportunities directly aligned
+with their study materials.
+Students can simply upload images or PDFs of textbook pages, and the system intelligently
+generates multiple-choice questions, fill-in-the-blank exercises, and short-answer prompts
+based on the content. All generated quizzes are automatically saved to a personal library,
+enabling repeated practice and spaced repetition—a proven technique for long-term retention.
+This objective ensures that every student, regardless of their access to commercial study
+materials, can practice extensively and build confidence in their subject mastery.
+BMCS3413 Project I 4
+Qubo Chapter 1
+1.2 Background
+Malaysian secondary school students face significant challenges in managing their learning
+effectively across multiple subjects as they prepare for the Sijil Pelajaran Malaysia (SPM)
+examination. According to the 2024 SPM Results Analysis Report published by the
+Malaysian Examinations Board (Lembaga Peperiksaan Malaysia), while the overall pass rate
+remained stable at 97.5%, there are concerning trends in subject-specific performance that
+highlight the need for personalized learning interventions. For instance, Additional
+Mathematics recorded an alarming 24.9% failure rate with a GPMP of 5.62 despite having
+19.9% of students achieving excellence grades. GPMP (Gred Purata Mata Pelajaran) means
+average subject grede point. Lower GPMP values (1.00 - 3.00) mean better overall
+performance (more students getting A+, A, A- grades) while higher GPMP values (4.00 -
+7.00) mean weaker overall performance (more students getting lower grades like C, D, E, G).
+These statistics reveal a significant performance gap, suggesting that students struggle with
+identifying their knowledge gaps and allocating study time efficiently across different
+subjects.
+The 2024 report further reveals critical disparities in academic achievement that underscore
+the inadequacy of one-size-fits-all teaching approaches. In core subjects like Bahasa Melayu
+and Bahasa Inggeris, the average grade points were 3.72 and 4.75 respectively, indicating
+room for improvement in language proficiency. More concerning is the performance in
+Science subjects: Physics recorded a failure rate of 0.4% with GPMP of 3.94, Chemistry
+showed 1.6% failure with GPMP of 4.52, and Biology had 0.8% failure with GPMP of 4.12.
+These varying performance levels across subjects demonstrate that students require
+differentiated support and personalized learning strategies to address their individual
+weaknesses effectively, particularly in subjects requiring higher-order analytical and
+problem-solving skills.
+BMCS3413 Project I 5
+Qubo Chapter 1
+Furthermore, another research indicates that Malaysian students experience high academic
+stress, with 49.5% reporting moderate to high stress levels related to examinations (Ang &
+Huan, 2006). This stress is compounded by the traditional classroom approach that fails to
+accommodate diverse learning styles and paces (Ministry of Education Malaysia, 2013).
+Moreover, educators lack real-time visibility into individual student progress, limiting their
+ability to provide timely interventions. The 2024 analysis reveals that while urban schools
+generally perform better, rural students face additional challenges, with the urban-rural
+performance gap remaining significant across most subjects. For instance, in subjects like
+Ekonomi (GPMP 5.44) and Prinsip Perakaunan (GPMP 3.93), there is substantial variation in
+student performance, indicating that some students grasp concepts quickly while others
+struggle without adequate personalized support.
+The COVID-19 pandemic has exacerbated these challenges, with the shift to online and
+hybrid learning exposing gaps in self-regulated learning skills (UNESCO, 2021). Current
+educational technology solutions in Malaysia are fragmented, focusing on either content
+delivery or assessment without integrating comprehensive analytics and personalized learning
+pathways (Ahmad et al., 2022). The 2024 SPM results demonstrate that students need more
+than just access to content, they require intelligent systems that can track their performance
+across multiple subjects, identify patterns in their learning behavior, and provide data-driven
+recommendations for improvement. With subjects ranging from core requirements to
+technical vocational courses showing varied performance outcomes, there is a clear need for
+an integrated platform that combines performance tracking, intelligent analytics, and
+personalized recommendations to support SPM students in their learning journey while
+providing educators with actionable insights for targeted interventions.
+BMCS3413 Project I 6
+Qubo Chapter 1
+1.2.1 Comparision
+Recent data from the Malaysian Ministry of Education reveals that only 31% of government
+schools have implemented any form of learning analytics system, and most of these are
+limited to basic attendance and grade tracking. Furthermore, SPM students have access to
+smartphones, only a few use educational apps regularly for exam preparation, citing lack of
+personalized content and engagement as primary barriers.
+Table 1.1 below presents a comparative analysis of existing learning platforms available to
+Malaysian students, highlighting their strengths and limitations in addressing SPM
+preparation needs.
+Table 1.1: Comparison of Existing Educational Platforms
+Platform Wayground
+(Old name:
+Quizizz)
+Kahoot Duolingo Qubo
+(Proposed)
+Analytics Dashboard Basic Limited ✔️ ✔️
+AI-Powered Quiz
+Generation
+Pre-made only Pre-made only Adaptive ✔️ Generated
+from user content
+Predictive Analytics ✖️ ✖️ ✖️ ✔️
+Personalized
+Recommendations
+Limited ✖️ Algorithm-based ✔️ Learning
+style-based
+SPM-Specific
+Content
+✖️ ✖️ ✖️ ✔️
+Gamification ✔️ ✔️ ✔️ ✔️
+This table 1.1 reveals that while existing platforms offer certain features, none provide the
+comprehensive, AI-driven, SPM-focused solution that Qubo delivers. The integration of
+advanced analytics, personalized recommendations, automated content generation, and
+predictive insights positions Qubo as a transformative tool for SPM preparation.
+BMCS3413 Project I 7
+Qubo Chapter 1
+1.3 Target Market
+1.3.1 Primary End User: SPM Students (Form 4 and Form 5)
+The primary stakeholders are Malaysian secondary school students aged 16-17 preparing for
+their SPM examinations. With approximately 400,000 students taking the SPM annually, this
+represents a substantial user base with critical educational needs. These students will use the
+platform daily to complete AI-generated quizzes tailored to their current study materials,
+track their performance across all SPM subjects through comprehensive analytics dashboards,
+receive personalized study recommendations based on their learning patterns and
+performance data and access curated learning resources matched to their individual learning
+styles (visual, auditory, kinesthetic). Students benefit from enhanced self-awareness about
+their learning patterns, improved time management capabilities, and reduced examination
+anxiety through predictive insights and data-driven preparation strategies. The platform
+empowers them to take ownership of their learning journey and optimize their study
+efficiency.
+1.3.2 Secondary End User: Educator and Teacher
+Teachers and school administrators will utilize the platform to monitor class-wide
+performance trends and identify systemic knowledge gaps, identify at-risk students requiring
+immediate intervention through early warning alerts, access aggregated analytics to inform
+and refine teaching strategies, evaluate the effectiveness of different instructional approaches
+through performance metrics and provide targeted support and personalized interventions
+based on data-driven insights. Educators gain unprecedented visibility into learning outcomes
+beyond traditional assessments, enabling proactive rather than reactive teaching
+interventions. The platform reduces the administrative burden of manual progress tracking
+while providing sophisticated tools for differentiated instruction
+1.3.3 Secondary End User: Parents and Guardians
+As supportive stakeholders, parents can monitor their child's study habits, consistency, and
+overall progress, understand specific subject areas requiring additional support or resources,
+receive timely alerts about performance concerns or significant improvements, support
+effective goal-setting and maintain productive study routines at home. Parents gain
+transparent access to their child's academic progress, enabling them to provide appropriate
+support, encouragement, and resources to facilitate successful SPM preparation.
+BMCS3413 Project I 8
+Qubo Chapter 1
+1.4 Problem Statement
+1.4.1 Problems
+1. Inability to Identify Knowledge Gaps and Optimize Study Strategies
+Malaysian SPM students face a critical challenge in identifying their specific knowledge gaps
+across the broad SPM curriculum. Traditional learning approaches lack sophisticated
+feedback mechanisms that can pinpoint exactly where students struggle. Without real-time
+analytics and performance tracking, students often discover their weaknesses only after
+receiving examination results. Students struggle significantly with self-regulated learning,
+particularly in identifying areas requiring focused attention. (Chung, Noor, and Mathew ,
+2020)
+The absence of data-driven insights forces students to rely on intuition rather than evidence
+when allocating study time, frequently resulting in inefficient preparation strategies. Students
+may spend excessive time on topics they have already mastered while neglecting areas of
+genuine weakness. This inefficiency is compounded by the lack of personalized study
+recommendations, leaving students without clear guidance on how to optimize their learning
+approach. The one-size-fits-all nature of traditional classroom instruction fails to
+accommodate individual learning paces and styles, further exacerbating the problem of
+ineffective study strategies.
+2. High Academic Stress and Lack of Personalized Support
+Malaysian students experience alarmingly high levels of academic stress, with Ang and Huan
+(2006) reporting that 49.5% of students suffer moderate to high stress levels related to
+examinations. This psychological burden stems partly from uncertainty about their academic
+readiness and the high-stakes nature of the SPM examination. The traditional classroom
+model, constrained by large student-teacher ratios and fixed curricula, cannot provide the
+individualized attention each student requires.
+Students with diverse learning styles like visual, auditory, or kinesthetic are able to receive
+identical instruction and resources, regardless of their individual preferences and needs. This
+generic approach leaves many students disengaged and struggling to comprehend material
+presented in formats incompatible with their learning style. Furthermore, educators lack
+real-time visibility into individual student progress, limiting their ability to provide timely,
+BMCS3413 Project I 9
+Qubo Chapter 1
+targeted interventions. The absence of personalized support systems means that struggling
+students often fall further behind before their difficulties are recognized and addressed.
+3. Limited Access to Quality Practice Materials and Adaptive Learning
+Resources
+Access to comprehensive, high-quality practice materials remains a significant barrier for
+many SPM students, particularly those from under-resourced schools or economically
+disadvantaged backgrounds. Commercial test preparation resources can be prohibitively
+expensive, creating educational inequity. Even when practice materials are available, they are
+typically generic and not tailored to individual student needs or aligned with specific
+textbooks being used in different schools across Malaysia.
+Current educational technology solutions in Malaysia are fragmented, focusing on either
+content delivery or assessment without integrating comprehensive analytics, adaptive
+learning, and personalized resource curation. Students lack tools that can automatically
+generate practice questions from their own textbooks or dynamically adjust difficulty based
+on performance. The COVID-19 pandemic has further exposed gaps in digital learning
+resources and students' self-regulated learning capabilities, with many struggling to
+effectively utilize available online materials.
+1.4.2 Solutions
+1. Intelligent Performance Tracking and Analytics System
+Qubo implements a comprehensive performance tracking system that captures
+multidimensional learning data, including quiz scores, time spent on topics, question
+difficulty ratings, and study session patterns using Pomodoro-style tracking. This creates a
+complete learning profile for each student, enabling the platform to identify knowledge gaps
+with precision at both subject and topic levels.
+The AI-powered analytics engine processes this data to provide interactive visualizations
+through dashboards showing subject-wise performance, learning velocity metrics, and
+comparisons with anonymized peer averages. Students gain immediate, actionable insights
+into their strengths and weaknesses, allowing them to make informed decisions about study
+time allocation and topic prioritization. The predictive analytics module forecasts
+BMCS3413 Project I 10
+Qubo Chapter 1
+examination performance based on current learning trajectories, provides early risk alerts for
+potential difficulties, and recommends optimal study strategies to maximize results.
+2. Personalized Learning Recommendations and Adaptive Resource Curation
+The platform employs advanced machine learning algorithms to generate personalized study
+recommendations tailored to each student's unique learning profile. By analyzing
+performance data, behavioral patterns, and learning styles, Qubo provides customized
+guidance on topic prioritization, study time allocation, and optimal learning strategies.
+The intelligent resource recommendation engine categorizes students into visual, auditory,
+and kinesthetic learning styles, then curates learning resources (YouTube videos, articles,
+practice problems) that align with their preferred learning modalities and address specific
+performance gaps. The spaced repetition algorithm ensures that topics requiring
+reinforcement are presented at optimal intervals for long-term retention. The gamification
+framework incorporates streak tracking, achievement badges, and milestone celebrations to
+maintain engagement and build consistent study habits, reducing examination anxiety
+through structured, data-driven preparation.
+3. NLP-Powered Automated Quiz Generation and Comprehensive SPM
+Coverage
+Qubo revolutionizes practice assessment creation through its NLP-powered quiz generation
+engine that automatically extracts key concepts from user-uploaded textbook pages and
+transforms them into targeted practice questions. Students can upload images or PDFs of any
+textbook content, and the system intelligently generates multiple-choice questions,
+fill-in-the-blank exercises, and comprehension prompts aligned with SPM examination
+formats.
+All generated quizzes are automatically saved to a personal library, enabling unlimited
+repeated practice and spaced repetition—a proven technique for long-term knowledge
+retention. This feature eliminates the limitation of pre-made question banks and ensures every
+student, regardless of economic background or school resources, has access to unlimited,
+high-quality practice materials directly aligned with their study content. The platform
+provides comprehensive coverage of all SPM subjects (Bahasa Melayu, English,
+BMCS3413 Project I 11
+Qubo Chapter 1
+Mathematics, Sciences, and electives), with subject-specific resource curation and culturally
+relevant content tailored to the Malaysian educational context.
+1.5 Advantages and Contributions
+1.5.1 Advantages
+1. Integrated Analytics-First Approach
+Unlike competitors such as Quizizz and Kahoot that focus primarily on gamified quizzing, or
+SchoolOnline Malaysia that emphasizes content delivery, Qubo prioritizes comprehensive
+learning analytics and actionable insights. Data serves as the core driver of personalized
+learning, with every feature designed to capture, analyze, and act upon student performance
+information. This analytics-first philosophy ensures that students receive evidence-based
+recommendations rather than generic study advice, fundamentally transforming how they
+approach SPM preparation.
+2. SPM-Specific Optimization and Localization
+Qubo is specifically tailored for the Malaysian education system and SPM curriculum,
+providing comprehensive coverage of all 17 SPM subjects with localized content
+recommendations and culturally relevant gamification elements. Unlike generic international
+platforms that lack awareness of Malaysian educational contexts, Qubo understands SPM
+examination formats, grading rubrics, and subject-specific requirements. This specialization
+ensures maximum relevance and effectiveness for Malaysian students, teachers, and parents.
+3. Revolutionary AI-Powered Quiz Generation
+The ability to transform any textbook page into targeted practice quizzes using natural
+language processing represents a significant technological advancement unavailable in
+competing platforms. This feature democratizes access to quality practice materials, ensuring
+that students from all socioeconomic backgrounds can generate unlimited, personalized
+assessments directly aligned with their study materials. The technology eliminates
+dependence on expensive commercial test preparation resources and pre-made question banks
+that may not align with specific textbook content.
+BMCS3413 Project I 12
+Qubo Chapter 1
+4. Predictive Analytics and Early Intervention
+Qubo's predictive analytics capabilities enable proactive rather than reactive educational
+interventions. By forecasting examination performance based on current learning trajectories
+and providing early risk alerts, the platform allows students, teachers, and parents to address
+potential difficulties before they become critical. This forward-looking approach, absent in
+competing platforms, transforms examination preparation from a reactive scramble into a
+strategic, data-informed process.
+5. Learning Style Personalization
+The explicit accommodation of visual, auditory, and kinesthetic learning preferences in
+resource recommendations creates genuinely personalized learning experiences. By matching
+content delivery formats to individual learning styles, Qubo enhances comprehension and
+retention more effectively than one-size-fits-all platforms. This personalization extends
+beyond content to include review frequency, and practice difficulty—all calibrated to
+individual student profiles.
+6. Holistic Integration of Multiple Learning Dimensions
+Qubo combines performance tracking, behavioral analytics, gamification, predictive insights,
+and automated content generation in a single, cohesive platform. This integration eliminates
+the need for students to juggle multiple disconnected tools, reducing cognitive load and
+improving efficiency. The platform's holistic approach ensures that all aspects of effective
+learning of assessment, feedback, practice, motivation, and planning work synergistically to
+optimize student outcomes.
+1.5.2 Contributions
+To Students:
+1. Empowers self-directed learning through comprehensive, data-driven insights into
+personal strengths, weaknesses, and learning patterns
+2. Significantly reduces examination anxiety through predictive performance tracking
+and evidence-based preparation strategies
+3. Builds crucial metacognitive skills and learning awareness that extend beyond SPM to
+higher education and lifelong learning
+BMCS3413 Project I 13
+Qubo Chapter 1
+4. Increases engagement and motivation through gamification elements that make
+studying rewarding and habit-forming
+5. Provides equitable access to high-quality learning resources regardless of
+socioeconomic background or school location
+To Educators:
+1. Provides evidence-based decision-making tools that inform instructional strategies
+and resource allocation
+2. Enables early intervention for struggling students through automated risk detection
+and performance alerts
+3. Dramatically reduces the administrative burden of manual progress tracking and
+report generation
+4. Facilitates differentiated instruction by providing detailed insights into individual
+student needs and learning profiles
+5. Improves teaching effectiveness through granular performance analytics and feedback
+on instructional impact
+To Community and Society:
+1. Addresses educational equity by providing personalized, high-quality support
+regardless of school resources or geographic location
+2. Contributes to improved SPM pass rates and academic outcomes at national level,
+supporting Malaysia's educational development goals
+3. Aligns with Malaysia's aspiration toward data-driven education transformation as
+outlined in the Education Blueprint 2013-2025
+4. Promotes lifelong learning habits through enhanced self-awareness and metacognitive
+skill development
+5. Reduces educational stress and improves student mental health and well-being
+through structured, confidence-building preparation
+BMCS3413 Project I 14
+Qubo Chapter 1
+1.6 Project Plan
+1.6.1 Project Scope
+Figure 1.1: Modules of Qubo
+The Qubo platform encompasses Three primary modules, each designed to address specific
+aspects of SPM preparation and learning optimization:
+Module 1: User Authentication and Profile Management
+This foundational module handles user registration, authentication, and role-based access
+control for students and educators. It manages secure storage of personal information,
+preferences, and account settings. Features include profile customization, learning style
+assessment, and privacy controls. The module ensures data security through encryption and
+implements OAuth-based authentication for seamless, secure access.
+Module 2: Performance Tracking and Analytics Dashboard
+The core analytics module captures comprehensive learning data including quiz performance,
+study session duration, topic difficulty ratings, and Pomodoro-style activity tracking. It
+processes this data through machine learning algorithms to identify knowledge gaps, learning
+velocity, and performance trends. The interactive dashboard visualizes subject-wise
+performance, progress over time, comparison with class averages, and predictive examination
+score forecasts. Real-time analytics provide immediate feedback on study effectiveness and
+learning patterns.
+BMCS3413 Project I 15
+Qubo Chapter 1
+Module 3: AI-Powered Quiz Generation and Practice Management
+This innovative module leverages natural language processing to automatically generate
+practice quizzes from user-uploaded textbook content. Students can photograph or upload
+PDF pages, and the NLP engine extracts key concepts, generates multiple-choice questions,
+and creates targeted assessments. The system implements spaced repetition algorithms to
+schedule review sessions optimally. All generated quizzes are stored in a personal library
+with performance tracking, enabling students to identify weak areas and practice repeatedly
+until mastery is achieved.
+BMCS3413 Project I 16
+Qubo Chapter 1
+1.6.2 Milestone
+Table 1.2: Project Milestones
+ACTIVITIES MILESTONE GOAL START
+DATE
+COMPL
+ETION
+DATE
+Approach and confirm project
+supervisor
+Supervisor assigned and project
+scope confirmed
+10/11/20
+25
+19/11/20
+25
+Prepare project proposal
+documentation
+Complete proposal 20/11/20
+25
+19/12/20
+25
+Submit Individual Project
+Proposal
+Approved proposal (Form 1, Form
+2, Form 3)
+10/11/20
+25
+26/12/20
+25
+Conduct literature review on
+AI/ML algorithms, learning
+analytics platforms, NLP for
+quiz generation, and EdTech
+solutions
+Understanding of existing
+technologies and research gaps
+27/12/20
+25
+30/01/20
+26
+Write Chapter 1: Introduction Finalized introduction with
+problem statement, objectives,
+background, target market, and
+project scope
+26/01/20
+26
+06/02/20
+26
+Research existing quiz
+generation systems and
+competitive landscape
+Completed literature review
+covering AI/ML algorithms,
+learning analytics platforms, NLP
+for quiz generation, spaced
+repetition techniques, and existing
+EdTech solutions
+09/02/20
+26
+20/02/20
+26
+Write Chapter 2: Research
+Background
+Complete Chapter 2: Literature
+Review
+09/02/20
+26
+23/02/20
+26
+BMCS3413 Project I 17
+Qubo Chapter 1
+Define system requirements
+and use cases
+Defined Agile development
+process, technology stack
+(Python/TensorFlow, React,
+Supabase), hardware/software
+requirements, and detailed
+functional specifications for all
+modules
+02/03/20
+26
+05/03/20
+26
+Develop project methodology Clear development approach and
+analysis techniques defined
+02/03/20
+26
+10/03/20
+26
+Write Chapter 3: Methodology
+and Requirements Analysis
+Complete Chapter 3:
+Methodology and Requirements
+Analysis
+02/03/20
+26
+15/03/20
+26
+Design system architecture
+and database schema
+Finalized UI/UX wireframes,
+system architecture diagrams (API
+pipeline, database schema), API
+design specifications, and data
+flow documentation
+16/03/20
+26
+17/03/20
+26
+Create UI/UX mockups and
+interface designs
+Complete interface designs for all
+app screens
+18/03/20
+26
+27/03/20
+26
+Write Chapter 4: System
+Design
+Complete Chapter 4: System
+Design
+16/03/20
+26
+30/03/20
+26
+Combine and format all
+chapters with cover page
+Comprehensive compilation of
+Chapters 1-4 with proper
+formatting, references, and
+documentation
+31/03/20
+26
+13/04/20
+26
+Setup development
+environment and project
+structure
+Basic application framework
+ready
+14/04/20
+26
+20/04/20
+26
+Develop quiz generation
+module
+Functional quiz generation using
+AI/ML algorithms
+21/04/20
+26
+10/05/20
+26
+BMCS3413 Project I 18
+Qubo Chapter 1
+Implement analytics
+dashboard
+Working analytics dashboard
+displaying student performance
+metrics
+11/05/20
+26
+25/05/20
+26
+Develop recommendation
+system
+Recommendation system
+providing personalized learning
+paths
+26/05/20
+26
+05/06/20
+26
+Integrate all modules into
+prototype
+Functional prototype with core
+features (quiz generation,
+analytics dashboard) and
+documentation
+06/06/20
+26
+13/06/20
+26
+Prepare test plan and test cases Complete testing documentation
+and test cases for system
+validation
+14/04/20
+26
+18/06/20
+26
+System preview with
+supervisor
+Supervisor approval on system
+progress
+14/04/20
+26
+26/06/20
+26
+Conduct final system testing Fully integrated system with all
+modules (authentication,
+analytics, quiz generation,
+recommendations) verified and
+validated by supervisor
+27/06/20
+26
+10/07/20
+26
+Submit draft FYP report First draft documenting complete
+system implementation, testing
+results, analysis, and preliminary
+conclusions
+11/07/20
+26
+07/08/20
+26
+Submission of Final FYP
+report and deliverables
+Final report, complete source
+code, user documentation,
+deployment guide, and all digital
+deliverables submitted
+08/08/20
+26
+21/08/20
+26
+BMCS3413 Project I 19
+Qubo Chapter 1
+1.6.3 Project Schedule Plan (Gantt Chart)
+Project_Milestone_Gant t_Chart (2).xlsx
+Figure 1.2: Gantt Chart of Qubo
+BMCS3413 Project I 20
+Qubo Chapter 1
+1.7 Chapter Summary and Evaluation
+This chapter has provided a comprehensive introduction to the Qubo AI-Powered
+Personalized Learning Platform, establishing the foundation for the project's development.
+The chapter began by contextualizing the challenges faced by Malaysian SPM students in an
+education system that increasingly demands personalized, data-driven approaches to learning.
+The three primary objectives were articulated: developing an intelligent analytics system for
+identifying knowledge gaps, implementing AI-powered personalized recommendations, and
+creating an NLP-based automated quiz generation engine. Each objective addresses specific
+deficiencies in current educational technology offerings and directly responds to documented
+challenges in SPM preparation.
+The background section established the educational context, highlighting research findings on
+student stress levels, self-regulated learning difficulties, and the impact of COVID-19 on
+educational delivery. The comparative analysis of existing platforms demonstrated that while
+various solutions offer individual features, none provides the comprehensive, integrated,
+SPM-specific approach that Qubo delivers.
+The target market analysis identified primary users (Form 4 and Form 5 SPM students) and
+secondary stakeholders (educators and parents), detailing how each group will benefit from
+the platform's capabilities. The problem statement section systematically documented three
+critical challenges: inability to identify knowledge gaps, high academic stress with lack of
+personalized support, and limited access to quality practice materials. For each problem,
+corresponding solutions were proposed, demonstrating how Qubo's technological approach
+addresses these educational challenges.
+The advantages and contributions section highlighted Qubo's distinctive features, its
+analytics-first approach, SPM-specific optimization, revolutionary quiz generation capability,
+predictive analytics, learning style personalization, and holistic integration that demonstrates
+clear differentiation from competing platforms. The contributions to students, educators, and
+society were articulated, emphasizing both immediate benefits and long-term educational
+impact.
+BMCS3413 Project I 21
+Qubo Chapter 1
+Finally, the project plan section defined the scope through three primary modules
+(authentication, analytics,and quiz generation) and outlined eleven critical system functions.
+The milestone table provides a clear timeline for project execution, from proposal approval
+through final deliverable submission, ensuring accountability and systematic progress
+tracking.
+This chapter successfully establishes the rationale, scope, and strategic direction for the Qubo
+project, providing a solid foundation for the detailed technical and methodological
+discussions that will follow in subsequent chapters. The comprehensive nature of this
+introduction ensures that all stakeholders (students, educators, supervisors, and evaluators)
+understand the project's significance, approach, and anticipated outcomes.
+BMCS3413 Project I 22
+Qubo Chapter 2
+Chapter 2
+Literature Review
+BMCS3413 Project I 23
+Qubo Chapter 2
+2 Literature Review
+2.1 Project Background
+The Malaysian education system places significant emphasis on the Sijil Pelajaran Malaysia
+(SPM) examination, a high-stakes national assessment taken by Form 5 students that largely
+determines their academic and career trajectories. With over 400,000 candidates sitting for
+the SPM annually, the pressure surrounding this examination has given rise to widespread
+academic stress among secondary school students. A study by Ramli et al. (2018) published
+in the Asian Journal of Psychiatry found that approximately 49.5% of Malaysian secondary
+school students reported moderate to high levels of academic stress, with examination
+preparation cited as the primary stressor. This psychological burden is further compounded
+by students' limited ability to self-assess their own knowledge gaps, often resulting in
+inefficient and unstructured study habits.
+Traditional classroom instruction in Malaysia operates predominantly within a
+one-size-fits-all framework, leaving little room for individualized learning. Hattie (2009), in
+his landmark meta-analysis Visible Learning, established that personalized, feedback-driven
+instruction produces among the highest effect sizes on student achievement, yet such
+approaches remain largely inaccessible in resource-constrained public school environments.
+This disparity is particularly acute in rural and semi-urban Malaysia, where students from
+lower-income households face additional barriers to quality supplementary educational
+resources. According to the World Bank, Malaysia's learning poverty rate stated that the
+proportion of children unable to read and understand a simple text by age 10 stood at
+approximately 48%, highlighting systemic gaps in foundational learning outcomes that
+persist into secondary education.
+The rapid advancement of artificial intelligence and machine learning technologies has
+opened new possibilities for addressing these challenges through intelligent educational
+systems. Adaptive learning platforms powered by machine learning algorithms have
+demonstrated measurable improvements in student outcomes by dynamically tailoring
+content difficulty, pacing, and resource recommendations to individual learners. AI-driven
+personalization in education could improve learning efficiency by up to 20–40% compared to
+traditional instruction, underscoring the transformative potential of these technologies at
+scale.
+BMCS3413 Project I 24
+Qubo Chapter 2
+Complementing adaptive learning, spaced repetition is a well-established cognitive science
+technique research on the forgetting curve, which demonstrates that information is retained
+more effectively when reviewed at systematically increasing intervals. Platforms such as
+Anki and Duolingo have successfully commercialized spaced repetition at scale; however,
+their content is largely generic and not aligned with the specific demands of the Malaysian
+SPM curriculum. This represents a critical gap in the current edtech landscape for Malaysian
+students.
+Natural Language Processing (NLP) has similarly matured to a point where automated
+question generation from unstructured text is increasingly viable. Kurdi et al. (2020), in a
+systematic review of automatic question generation published in the International Journal of
+Artificial Intelligence in Education, found that NLP-based systems could generate
+educationally valid questions from textual sources with increasing accuracy, reducing the
+time educators spend on assessment creation and enabling scalable personalized practice.
+Despite this progress, no widely adopted platform currently enables Malaysian SPM students
+to generate curriculum-aligned practice questions directly from their own textbooks.
+It is within this confluence of factors such as high examination pressure, inequitable access to
+personalized learning support, and the maturation of AI-driven educational technologies that
+Qubo is conceptualized. Qubo aims to bridge the gap between the advanced capabilities of
+modern edtech and the specific, underserved needs of Malaysian SPM students by integrating
+intelligent analytics, personalized recommendations, NLP-powered quiz generation, and
+lightweight gamification into a single, cohesive platform.
+2.1.1 SPM Education Landscape and Student Challenges
+Malaysian SPM examination system, enrollment statistics, subject requirements, and the
+documented academic pressures students face. Covers research on self-regulated learning
+deficiencies among Malaysian secondary students and how the lack of personalized feedback
+contributes to inefficient study habits and under performance.
+BMCS3413 Project I 25
+Qubo Chapter 2
+2.2 Literature Review
+2.2.1 Machine Learning and Learning Analytics
+Machine learning (ML) is a subset of artificial intelligence that enables systems to learn from
+data and improve their performance over time without being explicitly programmed. In
+educational contexts, ML has been widely applied to analyze student performance data,
+identify learning patterns, and generate actionable insights through learning analytics
+dashboards.
+One of the most influential ML models in education is Bayesian Knowledge Tracing
+(BKT), introduced by Corbett and Anderson (1994), which models a student's knowledge
+state as a hidden variable that updates dynamically based on their quiz responses. This allows
+the system to estimate the probability that a student has mastered a particular concept at any
+given point in time. Building on this, Deep Knowledge Tracing (DKT), proposed by Piech
+et al. (2015) from Stanford University, applied Long Short-Term Memory (LSTM) recurrent
+neural networks to knowledge tracing and achieved significantly higher prediction accuracy
+than BKT across large-scale datasets from Khan Academy and ASSISTments.
+In practice, platforms like Knewton (now integrated into Wiley) and Carnegie Learning's
+MATHia use ML-driven adaptive engines to continuously adjust content difficulty and
+pacing based on individual student performance. Carnegie Learning reported in a 2019 study
+that students using MATHia outperformed control groups by 23 percentile points in algebra
+assessments, demonstrating measurable ML-driven learning gains (Carnegie Learning, 2019).
+Limitation: A key challenge is that ML models require large volumes of training data to
+perform accurately. For a new platform like Qubo with a limited initial user base, cold start
+problems may reduce early prediction accuracy.
+How Qubo addresses this: Qubo mitigates this by incorporating rule-based heuristics during
+the early stages of a student's usage, gradually transitioning to ML-driven recommendations
+as sufficient performance data is accumulated.
+BMCS3413 Project I 26
+Qubo Chapter 2
+2.2.2 Spaced Repetition Algorithm
+Spaced repetition is a learning technique grounded in cognitive psychology, specifically in
+Ebbinghaus's (1885) research on the forgetting curve, which demonstrated that memory
+retention decays exponentially over time unless information is reviewed at strategically
+spaced intervals. Ebbinghaus found that approximately 56% of newly learned information is
+forgotten within one hour, and up to 66% within one day without reinforcement, establishing
+the scientific basis for systematic review scheduling.
+The most widely implemented spaced repetition algorithm is SM-2, developed by Piotr
+Wozniak in 1987 for the SuperMemo software. The SM-2 algorithm calculates the optimal
+interval between reviews based on the student's self-reported difficulty rating after each card
+review, using the formula:
+I(n) = I(n-1) × EF
+where I is the inter-repetition interval in days and EF (ease factor) is a difficulty modifier that
+adjusts based on student performance. This algorithm forms the backbone of Anki, one of the
+most widely used spaced repetition platforms globally, with over 10 million active users
+(Anki, 2023).
+Research by Cepeda et al. (2008), published in Psychological Science, conducted a
+large-scale study involving over 1,350 participants and found that spaced practice produced
+retention rates up to 64% higher than massed practice (cramming) across a one-month
+retention interval. This is particularly relevant for SPM students who commonly resort to
+last-minute intensive cramming before examinations.
+Limitation: Existing platforms like Anki are content-agnostic and require students to
+manually create their own flashcard decks, which is time-consuming and does not guarantee
+alignment with the SPM syllabus.
+How Qubo addresses this: Qubo automates flashcard and quiz generation directly from SPM
+textbook content using NLP, and schedules reviews using spaced repetition intervals,
+removing the manual burden from students while ensuring curriculum alignment.
+BMCS3413 Project I 27
+Qubo Chapter 2
+2.2.3 Natural Language Processing for Automated Quiz Generation
+Natural Language Processing (NLP) is a branch of artificial intelligence concerned with
+enabling computers to understand, interpret, and generate human language (Jurafsky &
+Martin, 2023). In educational technology, one of the most impactful NLP applications is
+Automatic Question Generation (AQG), which involves generating meaningful and
+educationally valid questions from unstructured textual content such as textbooks or lecture
+notes.
+Kurdi et al. (2020) conducted a systematic review of 93 studies on AQG published in the
+International Journal of Artificial Intelligence in Education, concluding that
+transformer-based models significantly outperform earlier rule-based and template-based
+approaches in generating grammatically correct and contextually relevant questions.
+Specifically, the T5 (Text-to-Text Transfer Transformer) model developed by Google (Raffel
+et al., 2020) has demonstrated strong performance on question generation benchmarks,
+treating the task as a text-to-text problem where the input is a passage and the output is a
+generated question-answer pair.
+A real-world example is Quizbot, a platform developed by researchers at the National
+University of Singapore, which uses NLP to generate multiple-choice questions from
+uploaded lecture slides and has been tested with over 500 university students, reporting 78%
+question acceptability from educator evaluators (Gao et al., 2018).
+Another relevant example is Khanmigo, Khan Academy's AI-powered tutor built on GPT-4,
+which demonstrates that large language models can generate contextually appropriate
+educational questions from curriculum content at scale (Khan Academy, 2023).
+Limitation: A key challenge in AQG is distractor quality — the incorrect answer choices in
+multiple-choice questions are often too obviously wrong, reducing the diagnostic value of the
+quiz. Additionally, OCR accuracy when processing textbook images can introduce errors into
+the input text, degrading question quality.
+How Qubo addresses this: Qubo implements a preprocessing pipeline that cleans OCR output
+before passing it to the NLP model, and uses semantic similarity measures to generate
+plausible distractors that are meaningfully related to the correct answer but distinctly
+incorrect.
+BMCS3413 Project I 28
+Qubo Chapter 2
+2.2.4 Predictive Analytics in Education
+Predictive analytics involves applying statistical algorithms and machine learning techniques
+to historical data in order to forecast future outcomes (Siemens & Long, 2011). In education,
+predictive analytics has been extensively studied within the field of Learning Analytics,
+defined by the Society for Learning Analytics Research (SOLAR) as "the measurement,
+collection, analysis and reporting of data about learners and their contexts, for purposes of
+understanding and optimizing learning and the environments in which it occurs."
+One of the most well-documented applications is early warning systems (EWS) within
+Learning Management Systems (LMS). Macfadyen and Dawson (2010) analyzed data from
+118 students using Blackboard LMS and identified that just three behavioral variables —
+total number of discussion posts, messages sent, and assessments completed — could predict
+final grades with 81% accuracy. This demonstrated that even relatively simple behavioral
+signals carry strong predictive power for academic outcomes.
+The Open University Learning Analytics Dataset (OULAD), one of the largest publicly
+available educational datasets, contains data from over 32,000 students across 22 courses.
+Multiple studies using OULAD have achieved over 80% accuracy in predicting student
+dropout and final grade classification using gradient boosting and random forest algorithms
+(Hlosta et al., 2017).
+In the Malaysian context, Affendi et al. (2021) applied predictive analytics to secondary
+school student data and found that attendance patterns, assignment submission rates, and
+formative assessment scores were the strongest predictors of SPM performance, with their
+model achieving 76% classification accuracy.
+Limitation: Predictive models can produce false positives, incorrectly flagging students as
+at-risk, which may cause unnecessary anxiety. Additionally, models trained on historical data
+may not generalize well to new student cohorts with different behavioral patterns.
+How Qubo addresses this: Qubo presents predictions as performance trend indicators rather
+than definitive risk labels, framing insights positively as areas for improvement rather than
+warnings of failure, reducing potential negative psychological impact.
+BMCS3413 Project I 29
+Qubo Chapter 2
+2.3 Feasibility Study
+Technical Feasibility
+State that Qubo will be developed using React (frontend), Python with TensorFlow (AI/ML
+backend), and Supabase (database). Justify each choice: React is widely adopted and
+well-documented, TensorFlow has proven ML model support, Supabase offers real-time data
+sync at low cost. Mention that NLP libraries such as HuggingFace Transformers are
+open-source and well-validated in research. Conclude that the technology stack is technically
+feasible.
+Economic Feasibility
+All core technologies (Python, TensorFlow, React, Supabase free tier, HuggingFace) are
+open-source or freemium. Development hardware is already owned. No licensing costs are
+required. Therefore the project is economically feasible with minimal overhead.
+Operational Feasibility
+Qubo only requires a smartphone or computer with internet access and a browser. Students
+can upload textbook images using their phone camera. The platform is designed to integrate
+naturally into existing study routines rather than replacing them. Therefore it is operationally
+feasible for the target user group.
+BMCS3413 Project I 30
+Qubo Chapter 2
+2.4 Chapter Summary and Evaluation
+This chapter provided a comprehensive review of the literature and foundational concepts
+underpinning the development of Qubo. The project background established the academic
+challenges faced by Malaysian SPM students, including high examination stress, limited
+access to personalized learning support, and the inability to accurately self-identify
+knowledge gaps. The literature review examined four core technologies: machine learning,
+spaced repetition, natural language processing and predictive analytics, each supported by
+established academic research demonstrating their effectiveness in educational contexts. A
+comparative analysis of existing platforms further revealed that no current solution
+adequately addresses the specific needs of SPM students in terms of curriculum alignment,
+intelligent analytics, and automated content generation. The feasibility study confirmed that
+Qubo is technically, economically, and operationally viable given the open-source nature of
+its technology stack and the accessibility of modern mobile devices. These findings
+collectively establish the theoretical and practical foundation for the system design and
+development decisions presented in the subsequent chapters.
+BMCS3413 Project I 31
+Qubo Chapter 3
+Chapter 3
+Methodology and Requirements
+Analysis
+BMCS3413 Project I 32
+Qubo Chapter 3
+3 Methodology and Requirements Analysis
+This chapter presents the methodology and requirements analysis for Qubo, an AI-powered
+personalized learning platform designed for Malaysian SPM students. It outlines the
+software development model chosen for the project and explains how it is applied across the
+three core modules of the platform. The chapter also discusses the technical approaches
+employed to implement the platform’s AI-powered capabilities, including the Gemini Flash
+API-powered quiz generation pipeline for automated quiz generation and the machine
+learning-based analytics engine. Following this, the chapter presents a comprehensive
+requirements analysis covering both functional and non-functional requirements across all
+modules. Finally, the development environment and tools used throughout the project are
+summarized.
+3.1 Methodology
+3.1.1 Software Development Model
+The Agile Software Development Methodology is chosen to develop Qubo, an AI-Powered
+Personalized Learning Platform. Agile is selected because the platform is designed around
+iterative delivery and continuous feedback, both of which are essential for building and
+validating AI-driven features that depend on evolving user requirements and model
+performance. Unlike a rigid sequential approach, Agile allows each module to be developed,
+tested, and refined in short sprints before it is integrated with the rest of the platform,
+ensuring that the system grows in a controlled and responsive manner.
+The platform is decomposed into three primary modules, each developed as a distinct
+increment. These modules are developed in the following order:
+1.User Authentication and Profile Management Module’
+2.Performance Tracking and Analytics Dashboard Module
+3.AI-Powered Quiz Generation and Practice Management Module
+BMCS3413 Project I 33
+Qubo Chapter 3
+Each module goes through four Agile phases: Requirements Analysis, Design,
+Implementation, and Testing, before it is integrated with all previously completed modules.
+For example, once the User Authentication and Profile Management Module is completed
+and tested, it is integrated as the foundation for the next sprint. When the Performance
+Tracking and Analytics Dashboard Module is ready, it is merged with the authentication
+module. The Quiz Generation Module is then integrated with both, and so on. This
+incremental integration ensures that each new layer of functionality is verified to work
+correctly with everything already built.
+Once all three modules are completed and individually tested, they are brought together and
+the full platform undergoes end-to-end integration testing. This final testing phase checks that
+all modules communicate and function correctly as one complete system. Any cross-module
+issues discovered during this phase are identified and resolved before the project is submitted.
+Figure 3.1: Agile for Qubo Development
+BMCS3413 Project I 34
+Qubo Chapter 3
+3.1.2 AI Quiz Generation Using Gemini Flash API
+The core innovation of Qubo is an automated quiz generation engine powered by Google
+Gemini Flash API (gemini-2.0-flash), a multimodal large language model that forms the
+backbone of the AI-Powered Quiz Generation and Practice Management Module. When a
+student uploads a textbook page as an image or PDF, the system sends the content directly to
+the Gemini Flash API along with a structured prompt instructing the model to generate
+SPM-format practice questions. Since Gemini Flash has built-in vision capability, no separate
+OCR step is required, the model reads the image directly and understands both printed text
+and diagrams.
+The API is called with a structured prompt specifying the question types required
+(multiple-choice with 4 options, fill-in-the-blank, and short-answer), the target format
+(JSON), and the educational context (SPM examination). Gemini Flash returns a structured
+JSON response containing the generated questions, answer choices, and correct answers,
+which the backend parses, validates, and stores in Supabase.
+3.1.3 Pre-processing
+Before textbook content is fed into the NLP model, it passes through a pre-processing
+pipeline designed to standardize and clean the input. Raw images and PDF scans can vary
+significantly in quality, orientation, and formatting, and feeding them directly into the model
+without preparation would reduce the accuracy of the generated questions.
+The pre-processing steps applied are:
+1. Image and document preparation — resize/compress images before sending
+to the API to reduce payload size and API cost. PDFs are split into individual
+pages and converted to JPEG before upload.
+2. Prompt construction — a structured prompt is built dynamically, injecting
+the subject context (e.g. "Physics SPM") and question format requirements.
+The prompt instructs Gemini to respond strictly in JSON format.
+BMCS3413 Project I 35
+Qubo Chapter 3
+3.1.4 Post-processing
+After the Gemini Flash API returns a response, a post-processing stage is performed before
+the generated questions are presented to the student or stored in the quiz library.
+The API is prompted to return its output strictly in JSON format, where each question object
+contains four fields: the question text, an array of four answer options, the correct answer key,
+and the question type (multiple-choice, fill-in-the-blank, or short-answer). The first
+post-processing step is JSON schema validation, which checks that every question object
+returned by the API contains all required fields and that none of the fields are empty or
+malformed. Any question object that fails this validation is discarded automatically without
+being shown to the student.
+Following schema validation, a question completeness check is applied. This check verifies
+that the question text is meaningful and not a repetition of another question in the same batch,
+that each multiple-choice question contains four distinct answer options with no duplicates,
+and that the correct answer key corresponds to one of the provided options. Questions that
+fail the completeness check are also discarded.
+A minimum threshold of three valid questions per upload is enforced. If the number of
+questions that pass both the schema validation and completeness check falls below three, the
+system notifies the student that the uploaded content did not produce enough valid questions
+and prompts them to upload a clearer or more content-rich page.
+Once questions pass all post-processing checks, they are tagged with metadata including the
+subject, topic, and question type before being stored in the student's personal quiz library in
+Supabase. The spaced repetition scheduler then assigns each accepted question an initial
+review date based on the SM-2 algorithm, which determines when the question should next
+appear in the student's practice queue to maximize long-term retention.
+BMCS3413 Project I 36
+Qubo Chapter 3
+3.1.5 Machine Learning-Based Analytics Engine
+The Performance Tracking and Analytics Dashboard Module relies on a machine
+learning-based analytics engine to process raw learning data into actionable insights. As
+students complete quizzes, log study sessions, and interact with the platform, data points
+including quiz scores, time-on-task, question difficulty ratings, error patterns, and session
+frequency are continuously captured and stored in Supabase.
+The analytics engine applies supervised and unsupervised learning techniques to this data. A
+classification model identifies each student’s learning style (visual, auditory, or kinesthetic)
+based on their interaction patterns and self-assessment responses collected during
+onboarding. A regression model trained on historical performance data predicts future
+examination scores based on current learning trajectories, providing early risk alerts when a
+student’s projected grade falls below their target. Clustering algorithms group students by
+performance profiles, enabling comparison with anonymized peer averages and identification
+of common knowledge gap patterns across a class.
+The analytics engine recalculates predictions each time new quiz or session data is submitted
+by the student within the platform, improving its accuracy over time. All model inferences
+are performed server-side through a Python backend API using TensorFlow for lightweight
+ML inference ensuring that the mobile frontend remains lightweight and responsive.
+3.1.6 Integration and Evaluation of the AI Pipeline
+The Gemini Flash API quiz generation pipeline and the ML analytics engine are integrated
+into a unified AI backend deployed as a RESTful API. The React-based web frontend and
+mobile interface communicate with this backend to submit images to the Gemini Flash API,
+retrieve generated questions, receive analytics insights, and fetch personalized study
+recommendations. The Supabase database serves as the central data store for user profiles,
+quiz libraries, performance records, and session history.
+The complete pipeline is evaluated on two key metrics: quiz generation accuracy (measured
+by the percentage of questions rated as relevant and well-formed by test users) and analytics
+prediction accuracy (measured by the mean absolute error between predicted and actual quiz
+performance). These metrics are tracked during development and testing to ensure that the AI
+components meet the quality thresholds defined in the non-functional requirements.
+BMCS3413 Project I 37
+Qubo Chapter 3
+3.2 Requirement Analysis
+3.2.1 Functional Requirement
+Table 3.1: Functional Requirements
+Module Functional Requirement
+1.0 User
+Authentication
+and Profile
+Management
+1.1 The system shall allow user to register an account
+1.2 The system shall allow the user to reset their password.
+1.3 The system shall allow the user to login to his/her respective account.
+1.4 The system shall allow the user to logout his/her account.
+1.5 The system shall allow the user to update their profile information
+(username, profile picture, and target subjects)
+1.6 The system shall support role-based access control for student and educator
+roles.
+1.7 The system shall allow students to input personal academic details (form
+level, school, target SPM grade).
+1.8 The system shall allow students to select the SPM subjects they are
+studying.
+1.9 The system shall allow students to set a target examination date and study
+goal
+1.10 The system shall temporarily lock the account after 5 consecutive failed
+login attempts.
+Performance
+Tracking and
+Analytics
+Dashboard
+2.1 The system shall record study sessions with subject, topic, duration, and
+Pomodoro cycles completed
+2.2 The system shall record quiz attempt results including score, time taken,
+and per-question correctness.
+2.3 The system shall provide an interactive dashboard displaying learning
+analytics visualizations including bar charts, radar charts, and trend lines.
+BMCS3413 Project I 38
+Qubo Chapter 3
+2.4 The system shall identify and highlight the student’s weakest topics based
+on quiz performance data.
+2.5 The system shall generate predictive exam score forecasts based on current
+learning trajectories, updated after each quiz attempt.
+2.6 The system shall issue early-warning notifications to students whose
+predicted exam scores fall below a configurable threshold (default: 50%).
+2.7 The system shall display a learning velocity metric showing rate of topic
+mastery improvement over time
+2.8 The system shall allow educators to view class-wide analytics and
+individual student performance summaries.
+2.9 The system shall allow users to filter analytics by subject, date range, or
+topic.
+2.10 The system shall generate and export a student progress report in PDF
+format.
+AI-Powered
+Quiz Generation
+and Practice
+Management
+3.1 The system shall allow students to upload textbook page images
+(JPEG/PNG) or PDF for quiz generation.
+3.2 The system shall send the uploaded content to the Gemini Flash API to
+extract key concepts and generate practice questions.
+3.3 The system shall generate multiple-choice questions with plausible
+distractors from the extracted content.
+3.4 The system shall generate fill-in-the-blank and short-answer questions from
+the extracted content.
+3.5 The system shall display the generated quiz for the student to attempt
+immediately or save for later.
+3.6 The system shall automatically save all generated quizzes to the student’s
+personal quiz library.
+3.7 The system shall display instant feedback and correct answers after each
+quiz attempt.
+BMCS3413 Project I 39
+Qubo Chapter 3
+3.8 The system shall implement a spaced repetition algorithm to schedule topic
+review intervals based on recall performance.
+3.9 The system shall allow students to search and filter their quiz library by
+subject or topic.
+3.10 The system shall allow students to delete quizzes from their personal
+library.
+BMCS3413 Project I 40
+Qubo Chapter 3
+3.2.2 Non-Functional Requirements
+Table 3.2: Non-Functional Requirement
+Non-Functional Requirements
+1.0 Reliability 1.1 The system shall achieve a minimum system uptime of 98% availability to
+ensure consistent access for students and educators at all times.
+1.2 The system shall display a clear and informative error message instead of
+crashing or freezing when an unexpected error occurs.
+1.3 The system shall ensure that no user data, quiz records, or study progress is lost
+in the event of an unexpected shutdown or network failure.
+1.4 The Gemini Flash API quiz generation pipeline shall return a result or an
+appropriate error notification within 30 seconds of a student uploading content.
+2.0 Performance 2.1 Every dashboard screen and page shall fully load within 5 seconds
+under normal network conditions.
+2.2 The quiz generation pipeline shall produce at least three questions
+within 30 seconds of a content upload.
+2.3 Analytics charts and visualizations shall finish rendering within 10
+seconds after the user navigates to the dashboard.
+2.4 The predicted examination score and risk alerts shall update within 10
+seconds after a new quiz attempt is completed.
+2.5 The Gemini Flash API response shall achieve a minimum valid
+question acceptance rate of 75% based on JSON schema validation and
+question completeness checks.
+2.6 The predictive analytics model shall achieve a mean absolute error
+(MAE) of no greater than 10 percentage points when predicting quiz
+performance
+BMCS3413 Project I 41
+Qubo Chapter 3
+3.0 Security 3.1 User authentication shall enforce a maximum of five (5) failed login
+attempts
+3.2 Each user’s personal data and quiz library stored in Supabase shall only
+be accessible to that specific user.
+4.0 Usability 4.1 The platform shall be usable by students without any technical
+experience, requiring no onboarding tutorial to navigate core features.
+4.2 The platform shall support both Bahasa Melayu and English language
+interfaces.
+4.3 The platform shall display a clear confirmation message after every
+significant user action such as saving a quiz, completing a study session, or
+updating a profile.
+5.0 Maintainability 5.1 The codebase shall follow a clean architecture pattern separating
+frontend, backend API, and AI pipeline layers.
+5.2 Each of the three modules shall be independently deployable so that
+one module can be updated or patched without affecting the others.
+BMCS3413 Project I 42
+Qubo Chapter 3
+3.2.3 Development Environment
+Table 3.3: Development Environment
+Resources Tools
+Hardware Laptop Specification:
+● I7-10750H CPU
+● NVIDIA GeForce GTX 1650 with Max-Q Design
+● 16 GB RAM
+● 512 GB SSD
+Peripheral
+● Mouse
+● Keyboard
+Development IDE ● Visual Studio Code
+Programming Language ● React (frontend)
+● Tailwind CSS (CSS framework )
+● Python with TensorFlow (AI/ML backend)
+Database ● Supabase
+API ● Gemini Flash API
+Version Control ● Git / GitHub
+Operating System ● Windows 11
+BMCS3413 Project I 43
+Qubo Chapter 3
+3.3 Chapter Summary and Evaluation
+This chapter presented the methodology and system requirements for the development of the
+Qubo AI-Powered Personalized Learning Platform. It began by introducing the Agile
+Software Development Methodology as the chosen development approach, explaining how
+each of the three modules is developed, tested, and integrated in iterative sprints to ensure
+that the platform grows in a structured, feedback-driven, and manageable manner.
+The AI pipeline sections described the two core technical components of the platform. The
+Gemini Flash API-powered quiz generation pipeline was outlined in detail, covering image
+pre-processing before API submission, the Gemini Flash API call for question generation,
+and covering image pre-processing before API submission, the Gemini Flash API call for
+question generation, and the post-processing JSON validation mechanism that ensures only
+well-formed questions reach the student’s quiz library. The machine learning analytics engine
+was also described, including how it processes raw performance data to identify learning
+patterns, predict examination scores, and generate early risk alerts.
+The functional requirements section defined the expected behaviour of all three modules,
+covering user authentication and profile management, performance tracking and analytics and
+AI-powered quiz generation and practice management. Thirty functional requirements in total
+were specified across the three modules, ensuring comprehensive coverage of all user
+interactions and system behaviours. The non-functional requirements established quality
+standards across five dimensions: reliability, performance, security, usability, and
+maintainability.
+Finally, the development environment section outlined the Hardware, Development IDE,
+Programming Language, Database, API, Version Control, Operating System and supporting
+tools used throughout the project. Overall, this chapter establishes a clear and technically
+grounded methodology that serves as a solid foundation for the system design and
+implementation work in the subsequent chapters.
+BMCS3413 Project I 44
+Qubo Chapter 4
+Chapter 4
+System Design
+BMCS3413 Project I 45
+Qubo Chapter 4
+4 System Design
+4.1 User Interface Design
+Figure 4.1: Main Page (Student Dashboard)
+BMCS3413 Project I 46
+Qubo Chapter 4
+Figure 4.2: Main Page (Educator Dashboard)
+BMCS3413 Project I 47
+Qubo Chapter 4
+Figure 4.3: Performance Tracking and Analytics Page
+BMCS3413 Project I 48
+Qubo Chapter 4
+Figure 4.4: AI Quiz Generation Page
+BMCS3413 Project I 49
+Qubo Chapter 4
+Figure 4.5: Quiz Experience
+BMCS3413 Project I 50
+Qubo Chapter 4
+Figure 4.6: Library Page
+BMCS3413 Project I 51
+Qubo Chapter 4
+Figure 4.7: Profile and Setting Page
+BMCS3413 Project I 52
+Qubo Chapter 4
+4.2 Use Case Diagram
+4.2.1 User Authentication and Profile Management Module
+Figure 4.8: Use case of User Authentication and Profile Management Module
+BMCS3413 Project I 53
+Qubo Chapter 4
+Table 4.1: Use Case Description of Module 1
+BMCS3413 Project I 54
+Use Case Name UC100 User Registration
+Objectives Allow a new user to create a Qubo account by providing their
+personal details and role (Student / Educator ).
+Actor / Activator Unregistered User, System
+Pre-Conditions 1. The registration page is accessible.
+2.The user does not already have an account linked to the
+provided email.
+Basic Flows
+Actor System
+1. The user navigates to the registration
+page.
+2. The system displays a registration form with
+fields: Full Name, Email, Password, Confirm
+Password, and Role.
+3. The user fills in all required fields and
+selects a role.
+4. System validates input in real-time [A1:
+Invalid Input]
+5.. The user clicks the 'Register' button. 6. System checks for duplicate email addresses.
+[A2: Email Already Exists]
+7. The system hashes passwords and creates
+user records in the database.
+8. The system sends a verification email to the
+registered address.
+9. The system displays a confirmation message
+[M1: Registration Success]
+10. Redirects the user to the login page.
+Alternate Flow
+A1 : Invalid Input
+A1.1 System detects missing or incorrectly formatted field(s).
+A1.2 System highlights the invalid field(s) and displays inline error messages [M2: Validation
+Error].
+A1.3 Return to BF:2.
+A2: Email Already Exists
+A2.1 System detects that the email is already registered.
+A2.2 System displays an error message [M3: Email Taken].
+A2.3 Return to BF:2.
+Messages [M]
+Qubo Chapter 4
+BMCS3413 Project I 55
+M1: Msg Registration Success = {'Account created successfully!’ }
+M2: Err Validation = { 'Password must be at least 8 characters and contain one uppercase letter, one
+number, and one symbol.'}
+M3: Msg Email Taken = {‘ An account with this email address already exists. Please log in or use a
+different email’}
+Post-Conditions 1. User is registered to the system
+Qubo Chapter 4
+Table 4.2: Use Case Description of Module 1
+BMCS3413 Project I 56
+Use Case Name UC200 User Login
+Objectives Allow a registered and verified user to authenticate and access
+their personalised dashboard.
+Actor / Activator Registered User, System
+Pre-Conditions 1. The user has a verified Qubo account..
+2. The login page is accessible.
+Basic Flows
+Actor System
+1. The user navigates to the login page. 2. The system displays login form with Email
+and Password fields.
+3. The user enters their registered email
+and password.
+4. System validates input format [A1: Invalid
+Format]
+5.. The user clicks the 'Login' button. 6. System verifies credentials against the
+database [A2: Wrong Credentials] [A3:Account
+Not Verified]
+7. The system generates a session token and
+records login timestamp.
+8. System redirects users to their role-specific
+dashboard (Student / Educator / Admin).
+9. The system displays a personalized welcome
+message [M1: Welcome Back].
+Alternate Flow
+A1 : Invalid Format
+A1.1 System detects malformed email or empty fields.
+A1.2 System displays inline error [M2: Invalid Format].
+A1.3 Return to BF:2.
+A2: Wrong Credentials
+A2.1 System detects email/password mismatch.
+A2.2 System increments failed-login counter.
+A2.3 System displays an error message [M3: Wrong Credentials].
+A2.4 If counter >= 5, the system locks the account temporarily [M4: Account Locked] and sends an
+unlock email.
+A2.5 Return to BF:2.
+Messages [M]
+Qubo Chapter 4
+4.2.2 Performance Tracking and Analytics Dashboard Module
+Figure 4.9: Use case of Performance Tracking and Analytics Dashboard Module
+BMCS3413 Project I 57
+M1: Msg Welcome Back = {'Welcome back, [Name]! Ready to continue learning?' }
+M2: Err Invalid Format = { 'Please enter a valid email address.'}
+M3: Err Wrong Credentials = {‘ 'Incorrect email or password. Please try again’}
+M4: Msg Account Lock = {'Your account has been temporarily locked due to multiple failed login
+attempts. Please check your email.'}
+Post-Conditions 1. The user is authenticated and a valid session is active.
+2. The user is directed to the appropriate role-based dashboard.
+Qubo Chapter 4
+Table 4.3: Use Case Description of Module 2
+BMCS3413 Project I 58
+Use Case Name UC300 Log Study Session
+Objectives Allow a Student to record a study session including subject, duration (via
+Pomodoro timer), and self-rated difficulty to build their learning profile.
+Actor / Activator Student (Registered User), System
+Pre-Conditions 1. Student is logged in.
+2. Student has at least one subject configured in their profile.
+Basic Flows
+Actor System
+1. The student navigates to the 'Study Room'. 2. The system displays the study session interface
+with subject selector and Pomodoro timer.
+3. The student selects a subject and topic. 4. The system loads topic list for the selected subject
+from the curriculum database.
+5.. Students click 'Start Session'. 6. The system starts the Pomodoro timer (default: 15
+minutes) and begins recording session data.
+7. Student studies; timer runs in foreground.[A1:
+Session Interrupted]
+8. The system counts down and triggers short break
+reminders at Pomodoro intervals. [M1: Break
+Reminder]
+9. Students click 'End Session'. 10. System stops the timer and records total
+duration.
+11. Students rate the session difficulty (Easy /
+Medium / Hard).
+12. The system captures difficulty rating and saves
+the complete session record.
+13. System updates the student's learning profile,
+streak counter, and gamification points.
+14. System displays session summary. [M2: Session
+Saved]
+Alternate Flow
+A1 : Session Interrupted
+A1.1 Student closes the browser or loses internet connection mid-session.
+A1.2 System auto-saves partial session data upon reconnection.
+A1.3 System prompts students to resume or discard. [M3: Resume Session]
+A1.4 Return to BF:9.
+Messages [M]
+Qubo Chapter 4
+Table 4.4: Use Case Description of Module 2
+Use Case Name UC400 View Performance Analytics Dashboard
+Objectives Allow a Student to view comprehensive learning
+analytics including subject performance, study
+trends, predicted exam scores, and AI-generated
+study recommendations.
+Actor / Activator Student (Registered User), AI Processing
+Engine, System
+Pre-Conditions 1. The student is logged in.
+2. Students has at least one completed study
+session or quiz attempt recorded.
+Basic Flows
+Actor System
+1. Student navigates to 'My Dashboard'. 2. System retrieves all study session records,
+quiz scores, and engagement data for the student.
+3. AI Engine processes data and computes
+performance metrics (subject scores, learning
+velocity, weak topics).
+4. System renders analytics dashboard with
+interactive charts: subject-wise performance,
+study time trends, and anonymised class average
+comparison.
+BMCS3413 Project I 59
+M1: Msg Break Reminder: = { 'Great work! Time for a 5-minute break. You have completed [N]
+Pomodoros today.' }
+M2: Msg Session Saved: = { 'Session recorded: [Subject] – [Duration] mins. Keep it up! You have earned
+[X] XP.' }
+M3: Msg Resume Session: = { 'It looks like your last session was interrupted. Would you like to resume or
+start fresh?' }
+Constraint[C]
+C1: Session Minimum
+A session must have a minimum duration of 5 minutes to be counted towards analytics and streak tracking.
+Post-Conditions
+1. Study session record is persisted in the database.
+2. Student's learning profile, streak, and XP are updated accordingly.
+Qubo Chapter 4
+5. System displays Predicted Exam Score widget
+with confidence interval for each SPM subject.
+[C1: Prediction Algorithm]
+6. AI Engine generates personalised study
+recommendations. [C2: Recommendation Logic]
+7. System displays at-risk alerts for subjects with
+predicted performance below 60%. [M1: At-Risk
+Alert]
+8. Student clicks on a subject for a drill-down
+view.
+9. System loads subject-specific analytics: topic
+breakdown, time invested, and quiz history.
+10. Student clicks 'Generate Study Plan'. 11. AI Engine creates a weekly study plan based
+on weaknesses and upcoming exam date. [A1:
+Insufficient Data]
+12. System displays generated study plan. [M2:
+Study Plan Ready]
+Alternate Flow
+A1: Insufficient Data
+A1.1 AI Engine determines data points are insufficient for reliable predictions (< 3 sessions).
+A1.2 System displays placeholder with guidance. [M3: More Data Needed]
+A1.3 Skip to BF:8.
+Messages [M]
+M1: Msg At-Risk Alert: = { 'Warning: Based on current performance, you are at risk of
+underperforming in [Subject]. Consider increasing study time and reviewing flagged topics.' }
+M2: Msg Study Plan Ready: = { 'Your personalised study plan for the next 7 days has been
+generated. View it under Study Plans.' }
+M3: Msg More Data Needed: = { 'Complete at least 3 study sessions to unlock full analytics and
+predictions.' }
+Constraint [C]
+BMCS3413 Project I 60
+Qubo Chapter 4
+C1: Prediction Algorithm
+Predicted Score = (Quiz Score Weight x 0.5) + (Study Time Weight x 0.3) + (Recency Weight x
+0.2)
+Confidence increases with more data points; displayed as a percentage alongside the predicted
+score.
+Predictions are recalculated after each new quiz attempt or study session.
+C2: Recommendation Logic
+Topics with quiz accuracy < 60% are flagged as high-priority review items.
+Recommendations include: videos (YouTube), articles, or practice problems matched to the
+student's learning style (Visual / Auditory / Kinesthetic).
+Maximum of 5 recommendations displayed per session to avoid overwhelming the student.
+Post-Conditions
+1. Dashboard is rendered with up-to-date analytics.
+2. Study plan (if generated) is saved to the student's profile.
+Table 4.5: Use Case Description of Module 2
+Use Case Name UC500 Monitor Student Progress (Educator)
+Objectives Allow an Educator to monitor class-wide and
+individual student performance, identify at-risk
+learners, and access aggregated analytics to
+inform teaching strategies.
+Actor / Activator Educator (Registered User), System
+Pre-Conditions 1. Educator is logged in with the 'Educator' role.
+2. At least one student has been enrolled in the
+educator's class.
+Basic Flows
+Actor System
+1. Educator navigates to 'Class Dashboard'. 2. System retrieves aggregated performance data
+for all students in the educator's class.
+3. System renders class-wide analytics: average
+scores by subject, participation rates, and study
+time distribution.
+BMCS3413 Project I 61
+Qubo Chapter 4
+4. System highlights at-risk students (predicted
+performance < 60%) with a red indicator. [M1:
+At-Risk Students]
+5. Educator clicks on an individual student. 6. System loads the student's detailed
+performance profile: quiz scores, study sessions,
+topic weaknesses, and trend lines.
+7. Educator optionally applies subject or date
+filters.
+8. System refreshes analytics based on applied
+filters.
+9. Educator clicks 'Export Report'. 10. System generates a PDF progress report for
+the selected student or the entire class. [A1: No
+Data Available]
+11. System confirms report generation [M2:
+Report Ready] and provides a download link.
+Alternate Flow
+A1: No Data Available
+A1.1 System detects no activity records for the selected student or time range.
+A1.2 System displays informational message. [M3: No Data]
+A1.3 Return to BF:5.
+Messages [M]
+M1: Msg At-Risk Students: = { 'The following students may need additional support: [Student
+Name(s)]. Click to view their profiles.' }
+M2: Msg Report Ready: = { 'Progress report has been generated. Click here to download.' }
+M3: Msg No Data: = { 'No activity data is available for the selected criteria. Encourage the student
+to log study sessions.' }
+Post-Conditions
+1. Educator has reviewed class and individual performance data.
+2. Generated report (if requested) is available for download.
+BMCS3413 Project I 62
+Qubo Chapter 4
+4.2.3 AI-powered Quiz Generation and Practice Management Module
+Figure 4.10: Use case of AI-powered Quiz Generation and Practice Management Module
+BMCS3413 Project I 63
+Qubo Chapter 4
+Table 4.6: Use Case Description of Module 3
+BMCS3413 Project I 64
+Use Case Name UC600 Generate AI Quiz from Textbook Content
+Objectives Allow a Student to upload a textbook image or PDF page and have the AI engine
+auto-generate a quiz, which is then saved to the student's quiz library.
+Actor / Activator Student (Registered User), AI Processing Engine, System
+Pre-Conditions 1. The student is logged in.
+2. The AI NLP quiz generation service is operational.
+Basic Flows
+Actor System
+1. Student navigates to 'Quiz Generator'. 2. System displays the upload interface.
+3. Students upload an image (JPG/PNG) or PDF
+page from their textbook.
+4. System validates file format and size. [A1:
+Unsupported Format] [A2: File Too Large]
+5. System sends the uploaded content to the AI
+Processing Engine for text extraction and analysis.
+6. AI Engine extracts key concepts, facts, and
+relationships from the content using NLP.
+7. Student selects quiz type (MCQ / Short Answer /
+True-False) and number of questions (5–20).
+8. System forwards configuration to AI Engine.
+9. AI Engine generates quiz questions with answer
+keys.
+10. System displays generated quiz for student
+preview. [M1: Quiz Ready] [A3: Poor Content
+Quality]
+11. Student reviews, optionally edits questions, then
+clicks 'Save to Library'.
+12. System saves the quiz to the student's personal
+quiz library.
+13. System confirms save [M2: Quiz Saved] and
+offers option to attempt the quiz immediately.
+Alternate Flow
+A1: Unsupported Format
+A1.1 System detects unsupported file type.
+A1.2 System displays error. [M3: Unsupported Format]
+A1.3 Return to BF:3.
+A2: File Too Large
+A2.1 System detects files that exceed the 10 MB limit.
+A2.2 System displays error. [M4: File Too Large]
+A2.3 Return to BF:3.
+A3: Poor Content Quality
+A3.1 AI Engine determines insufficient extractable content (e.g., blurry image).
+Qubo Chapter 4
+Table 4.7: Use Case Description of Module 3
+Use Case Name UC700 Attempt a Practice Quiz
+Objectives Allow a Student to attempt a saved or
+AI-recommended quiz and receive immediate
+feedback with performance scores.
+Actor / Activator Student (Registered User), System
+Pre-Conditions 1. The student is logged in.
+2. At least one quiz exists in the student's library
+or in the recommended quiz pool.
+Basic Flows
+Actor System
+BMCS3413 Project I 65
+A3.2 System notifies student [M5: Low Quality Warning] and recommends re-upload.
+A3.3 Return to BF:3.
+Messages [M]
+M1: Msg Quiz Ready: = { 'Your quiz has been generated! Review the questions below before saving.' }
+M2: Msg Quiz Saved: = { '[Quiz Title] has been saved to your library. Start now?' }
+M3: Err Unsupported Format: = { 'Please upload a JPG, PNG, or PDF file.' }
+M4: Err File Too Large: = { 'File size must not exceed 10 MB. Please compress or crop the image and try
+again.' }
+M5: Err Low Quality Warning: = { 'The image quality is too low to extract meaningful content. Please
+upload a clearer image.' }
+Constraint[C]
+C1: Question Generation
+Minimum: 5 questions; Maximum: 20 questions per generation request.
+Supported quiz types: Multiple Choice (MCQ), Short Answer, True/False.
+AI uses semantic similarity >= 70% to avoid duplicate questions within the same quiz.
+Post-Conditions 1. Generated quiz is stored in the student's personal quiz library.
+2. Quiz metadata (subject, topic, date created, question count) is indexed for
+analytics.
+Qubo Chapter 4
+1. Student navigates to 'Quiz Library' or
+'Recommended Quizzes'.
+2. System displays available quizzes with
+metadata (subject, difficulty, estimated time).
+3. Student selects a quiz and clicks 'Start Quiz'. 4. System loads quiz questions and starts a
+session timer.
+5. Student answers each question sequentially. 6. System records each response and moves to
+the next question.
+7. Student submits the quiz. 8. System evaluates responses against answer
+keys and calculates the score. [A1: Time Expired]
+9. System updates spaced repetition schedule for
+topics based on performance. [C1: Spaced
+Repetition Update]
+10. System awards XP and updates gamification
+metrics.
+11. System displays detailed results page [M1:
+Quiz Results] with score, correct/incorrect
+breakdown, and explanations.
+12. Student reviews results and can click 'Retry'
+or 'Back to Library'.
+13. System logs quiz attempt to performance
+analytics.
+Alternate Flow
+A1: Time Expired
+A1.1 Quiz timer reaches zero.
+A1.2 System auto-submits any answered questions.
+A1.3 System displays [M2: Time Expired] before showing results.
+A1.4 Skip to BF:9.
+A2: Exit Mid-Quiz
+A2.1 Student clicks 'Exit' during an ongoing quiz.
+A2.2 System prompts confirmation. [M3: Confirm Exit]
+A2.3 If confirmed, system discards the current attempt (no score recorded).
+A2.4 Return to quiz library.
+Messages [M]
+BMCS3413 Project I 66
+Qubo Chapter 4
+M1: Msg Quiz Results: = { 'You scored [X]% on [Quiz Title]. Review your answers below and see
+where to improve.' }
+M2: Msg Time Expired: = { 'Time is up! Your answers have been submitted automatically.' }
+M3: Msg Confirm Exit: = { 'Are you sure you want to exit? Your current progress will not be saved.'
+}
+Constraint [C]
+C1: Spaced Repetition Update
+Topics scored < 60%: scheduled for review within 1–3 days.
+Topics scored 60%–79%: scheduled for review within 5–7 days.
+Topics scored >= 80%: scheduled for review within 14 days.
+Post-Conditions
+1. Quiz attempt is persisted with score, timestamp, and per-question breakdown.
+2. Spaced repetition schedule is updated for affected topics.
+3. Student XP and gamification badges are updated.
+BMCS3413 Project I 67
+Qubo Chapter 4
+4.3 Sequence Diagram
+4.3.1 User Authentication and Profile Management Module
+Figure 4.11: Sequence Diagram of User Authentication and Profile Management Module
+BMCS3413 Project I 68
+Qubo Chapter 4
+Figure 4.12: Sequence Diagram of User Authentication and Profile Management Module
+BMCS3413 Project I 69
+Qubo Chapter 4
+4.3.2 Performance Tracking and Analytics Dashboard Module
+Figure 4.13: Sequence Diagram of Performance Tracking and Analytics Dashboard Module
+BMCS3413 Project I 70
+Qubo Chapter 4
+Figure 4.14: Sequence Diagram of Performance Tracking and Analytics Dashboard Module
+BMCS3413 Project I 71
+Qubo Chapter 4
+Figure 4.15: Sequence Diagram of Performance Tracking and Analytics Dashboard Module
+BMCS3413 Project I 72
+Qubo Chapter 4
+Figure 4.16: Sequence Diagram of Performance Tracking and Analytics Dashboard Module
+BMCS3413 Project I 73
+Qubo Chapter 4
+Figure 4.17: Sequence Diagram of Performance Tracking and Analytics Dashboard Module
+BMCS3413 Project I 74
+Qubo Chapter 4
+4.3.3 AI-powered Quiz Generation and Practice Management Module
+Figure 4.18: Sequence diagram of AI-powered Quiz Generation and Practice Management Module
+BMCS3413 Project I 75
+Qubo Chapter 4
+Figure 4.19: Sequence diagram of AI-powered Quiz Generation and Practice Management Modul
+BMCS3413 Project I 76
+Qubo Chapter 4
+4.4 Entity Relationship Diagram
+BMCS3413 Project I 77
+Qubo Chapter 4
+4.5 Class Diagram
+BMCS3413 Project I 78
+Qubo Chapter 4
+4.6 Deployment Diagram
+BMCS3413 Project I 79
+Qubo Chapter 4
+4.7 Chapter Summary and Evaluation
+This chapter presented the complete system design for Qubo, the AI-Powered Personalized Learning
+Platform. The chapter was structured across six sections, covering the user interface design, use case
+diagrams, sequence diagrams, entity relationship diagram, class diagram, and deployment diagram.
+Section 4.1 introduced the User Interface designs, showcasing wireframes for the Student Dashboard,
+Educator Dashboard, Performance Tracking and Analytics Page, AI Quiz Generation Page, Quiz
+Experience, Library Page, and Profile and Settings Page. These mockups illustrate the overall look
+and flow of the application, ensuring a student-centred and intuitive user experience.
+Sections 4.2 through 4.3 documented the system's behavioural design. Use case diagrams were
+produced for the three core modules that are User Authentication and Profile Management,
+Performance Tracking and Analytics Dashboard, and the AI-Powered Quiz Generation and Practice
+Management module. To define the interactions between users and the system. Sequence diagrams
+then elaborated on the step-by-step message flow within each module, particularly capturing the
+multi-step interactions involved in analytics processing and AI quiz generation.
+Sections 4.4 to 4.6 addressed the structural and deployment aspects of the system. The Entity
+Relationship Diagram defined the data model and relationships between key entities such as users,
+quizzes, sessions, and performance records. The Class Diagram outlined the internal object structure
+of the application. The Deployment Diagram illustrates how the system's components including the
+React frontend, Python/AI backend, and Supabase database, are distributed across the deployment
+environment.
+Collectively, the design artefacts in this chapter provide a comprehensive blueprint for the
+implementation phase. The designs confirm that all functional and non-functional requirements
+defined in Chapter 3 are architecturally supported, and they serve as the foundation for the
+development work to be carried out in Project II.
+BMCS3413 Project I 80
+Project Title Chapter 5
+Chapter 5
+Implementation and Testing
+BMCS3413 Project I 81
+Project Title Chapter 5
+5 Implementation and Testing
+A short introduction that describes what will be included in this chapter.
+IMPORTANT NOTE TO STUDENTS: Include details about:
+● Implementation
+A detailed description of how you actually carried out the implementation
+(e.g., coding, etc.) of your system/prototype.
+- Include code snippets and descriptions to show how the requirements of
+the application/prototype have been met –
+o For Smart Campus projects, code snippets of the MQTT protocol for
+both client side and server side has to be included with explanation.
+- Include descriptions of important settings - Setting for server, network
+protocol, IP, database, security
+- Note: this should not be a chronological account of the work you carried
+out.
+● Testing
+All test cases that have been carried out must be provided - To tabulate
+the test cases in tables
+Note: Students may also opt to split Implementation and Testing into 2 separate
+chapters.
+5.1 Sub-section 1 Heading
+Sub-sections should be used to divide the chapter into logical parts.
+5.1.1 Sub-subsection Heading
+Sub-section numbering should be limited to a maximum of 3 levels (e.g. 5.3.1) in order to
+avoid confusion.
+5.2 Sub-section 2 Heading
+5.3 Sub-section 1 Heading
+Sub-sections should be used to divide the chapter into logical parts.
+5.3.1 Sub-subsection Heading
+Sub-section numbering should be limited to a maximum of 3 levels (e.g. 5.3.1) in order to
+avoid confusion.
+BMCS3413 Project I 82
+Project Title Chapter 5
+5.4 Sub-section 1 Heading
+Sub-sections should be used to divide the chapter into logical parts.
+5.4.1 Sub-subsection Heading
+Sub-section numbering should be limited to a maximum of 3 levels (e.g. 5.3.1) in order to
+avoid confusion.
+5.5 Chapter Summary and Evaluation
+At the end of each chapter, evaluate the contents stated or discussed in the relevant
+sub-sections.
+BMCS3413 Project I 83
+Project Title Chapter 6
+Chapter 6 (if applicable)
+System Deployment
+BMCS3413 Project I 84
+Project Title Chapter 6
+6 System Deployment
+This chapter would be applicable for students who have embarked on a real-life industrial
+project. Students in this case would need to describe how the deployment has been carried out.
+Some of implementation tasks which need to be described include: training, file conversion or
+creation, and changeovers.
+System Backup and Risk Management
+Describe the procedures to backup the existing system for changeover purpose. Discuss the potential
+risk(s) for the changeovers and the solution.
+On-site Setup
+Describe the preparations to be done prior to the setup of the new system on client’s site. Discuss the
+procedures to setup the new system, schedule, etc.
+Training Procedure
+Describe the procedures on the training procedures, contents, schedule, etc.
+Follow-up
+Describe the plan or procedures to follow up with the client (company) to verify the system reliability.
+Chapter Summary and Evaluation
+At the end of each chapter, evaluate the contents stated or discussed in the relevant sub-sections. For
+example,
+6. Problems faced. Describe the various problems faced by students in the course of doing the
+project.
+7. Solutions. What have been done to solve the problems?
+8. What tools and techniques have been used and reasons for using them.
+BMCS3413 Project I 85
+Project Title Chapter 7
+Chapter 7
+Discussions and Conclusion
+BMCS3413 Project I 86
+Project Title Chapter 7
+7 Discussions and Conclusion
+Each student is required to make an evaluation of the project he/she has embarked on. The
+project evaluation may include the following sections.
+IMPORTANT NOTE TO STUDENTS: In this chapter, for problems related to
+code, hardware, internet connection, etc (where applicable):
+o List the technical problems faced and state how they were resolved
+o List the unsolved technical problems for future enhancement
+o List the achieved objectives/modules
+o List the incomplete parts for future enhancement - this is regardless the
+parts listed in the pre-determined scope. Suggestions for future
+improvement
+Summary
+Summarize the project including the problem and proposed solutions, justification of the choice of
+tools, techniques and methodologies used in this project.
+Achievements
+Students are required to evaluate the project’s achievement against project objectives, completion of
+the project, students’ view of the strengths and weaknesses of the work done.
+Contributions
+Discuss the creativity, innovativeness, contribution of the proposed system. Explain why the proposed
+system is necessary. Describe the marketability of the system.
+Limitations and Future Improvements
+Identify the limitations of the research or project. Provide suggestions for improvement or further
+development of the system or research in the future.
+Issues and Solutions
+Students are required to describe the various problems faced by students during the project
+development and explain what has been done to solve the problems. The valuable experiences gained
+or lessons learnt through the project as a whole. The issues may include technical issues, project
+management issues, team dynamics problems, and other difficulties encountered and lessons learnt.
+How the issues are solved or can be solved to ensure the project can be completed on time or to be
+improved in the future.
+BMCS3413 Project I 87
+Project Title Chapter 7
+References
+Ahmad, N. A., Murad, M., & Othman, N. (2022). Educational technology adoption in Malaysian
+secondary schools: Challenges and opportunities. Journal of Educational Technology & Society,
+25(2), 45–58.
+Ang, R. P., & Huan, V. S. (2006). Relationship between academic stress and suicidal ideation: Testing
+for depression as a mediator using multiple regression. Child Psychiatry & Human Development,
+37(2), 133–143. https://doi.org/10.1007/s10578-006-0023-8
+Chung, E., Noor, N. M., & Mathew, V. N. (2020). Are you ready? An assessment of online learning
+readiness among university students. International Journal of Academic Research in Progressive
+Education and Development. https://doi.org/10.17509/ijal.v10i3.31270
+Khurana, D., Koli, A., Khatter, K., & Singh, S. (2022). Natural language processing: State of the art,
+current trends and challenges. Multimedia Tools and Applications, 82, 3713–3744.
+https://doi.org/10.1007/s11042-022-13428-4
+Kurdi, G., Leo, J., Parsia, B., Sattler, U., & Al-Emari, S. (2023). Automatic question generation: A
+review of methodologies, datasets, evaluation metrics, and applications. Progress in Artificial
+Intelligence, 12(1), 1–32. https://doi.org/10.1007/s13748-023-00295-9
+Tabibian, B., Upadhyay, U., De, A., Zarezade, A., Schölkopf, B., & Gomez-Rodriguez, M. (2019).
+Enhancing human learning via spaced repetition optimization. Proceedings of the National Academy
+of Sciences, 116(10), 3988–3993. https://doi.org/10.1073/pnas.1815156116
+UNESCO. (2021). When schools shut: Gendered impacts of COVID-19 school closures. UNESCO.
+https://unesdoc.unesco.org/ark:/48223/pf0000379270
+Wang, X., et al. (2023). A personalized learning path recommendation method incorporating
+multi-algorithm. Applied Sciences, 13(10), 5946. https://doi.org/10.3390/app13105946 MDPI
+BMCS3413 Project I 88
+Project Title Appendices
+Appendices
+In order to enhance better understanding of the project, students should as far as possible
+include all directly relevant materials, figures or diagrams in the main body rather than in the
+Appendix. The appendix is reserved only for items which may not directly be relevant or
+essential to enhance a reader’s understanding of the project, or which may interrupt the
+smooth reading of the project document (for example being too voluminous).
+Appendices should only include supportive materials directly referred to in the writing and
+should be kept to a minimum, e.g. selected pages of an annual report, not the entire
+document. Examples of items included in Appendices are:
+● Company’s report and documentation, such as sample invoice, purchase order form, etc.
+● Project meeting documentation e.g. minutes of meetings, tracking documents, memos etc.
+● Questionnaires and results, interview questions and results, pilot test and results,
+observation sheet and results, experiment test plan and results, etc.
+● Analysis/design diagrams (only those not incorporated in the main body of the report).
+If there is more than one appendix, they should be identified as A, B, etc (e.g. Appendix A).
+Formulae and equations in appendices should be given separate numbering: Eq. (A.1), Eq.
+(A.2), etc.; in a subsequent appendix, Eq. (B.1) and so on. Similarly for tables and figures:
+Table A.1; Fig. A.1, etc.
+IMPORTANT NOTE TO STUDENTS
+APPENDIX n User Guide
+● List the username and password of multiple roles (if applicable)
+● Provide clear screen shots of each page, explain the functions of each
+button
+As a rough guide, the user guide should include the following sections:
+System Document
+In this section, students should provide the following pieces of information:
+● System (hardware and software requirements). Students should describe the
+minimum hardware and software requirements to install the software application which
+has been developed by the students, for example, DBMS, OS, program development
+tools etc.
+● Installation. Under this section, students should create an ‘installation’ CD and
+provide a brief step-by-step guide on how a new user can install the software on a
+computer system. Students should indicate any special setup information, such as the
+specific location of placing the database files, the SQL statements to add tables, etc.
+Software source code should also be included in this CD. Students are not required to
+print out the software code.
+BMCS3413 Project I 89
+Project Title Appendices
+Operation Document
+Under this section, students are required to provide a brief step-by-step guide on how to use
+the installed software. The guides should teach the user how to run the software and use its
+major functions and features. For example, steps show guide the users on how to run the
+system, e.g. to use an executable file or to use the IDE. The login information such as
+username and password for each of the different users (or roles) must be provided. Some
+screen interfaces would be useful.
+APPENDIX n+1 Developer Guide*
+*To be included for Smart Campus Projects and Real-Life Projects. This
+section should include the following:
+● List the necessary software, installer, API, library that must be installed
+● List the authentication details, such as username and password for all
+security
+Other Appendices:
+● Supporting documents
+● Non-disclosure agreement (if applicable)
+● Other detailed documentation, such as important references, interview
+results, survey results, etc.
+BMCS3413 Project I 90
