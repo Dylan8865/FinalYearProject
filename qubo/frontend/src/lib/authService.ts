@@ -5,6 +5,8 @@ import {
   AuthResponse, 
   ProfileUpdateRequest,
   LearningStyleAssessment,
+  Subject,
+  PasswordChangeRequest,
   User 
 } from '@/types/auth';
 
@@ -78,6 +80,28 @@ class AuthService {
   async logout(): Promise<void> {
     await this.api.post('/auth/logout');
     this.clearTokens();
+  }
+
+  async changePassword(data: PasswordChangeRequest): Promise<any> {
+    const response = await this.api.post('/auth/change-password', data);
+    return response.data;
+  }
+
+  async getSubjects(): Promise<Subject[]> {
+    const response = await this.api.get<Subject[]>('/auth/subjects');
+    return response.data;
+  }
+
+  async getStudentSubjects(): Promise<Subject[]> {
+    const response = await this.api.get<Subject[]>('/auth/profile/subjects');
+    return response.data;
+  }
+
+  async updateStudentSubjects(subjectIds: string[]): Promise<Subject[]> {
+    const response = await this.api.post<Subject[]>('/auth/profile/subjects', {
+      subject_ids: subjectIds,
+    });
+    return response.data;
   }
 
   private storeTokens(tokens: { access_token: string; refresh_token: string }) {

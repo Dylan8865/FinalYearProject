@@ -46,6 +46,7 @@ export interface LoginRequest {
 export interface ProfileUpdateRequest {
   username?: string;
   full_name?: string;
+  profile_picture_url?: string;
   learning_style?: LearningStyle;
   form_level?: string;
   school?: string;
@@ -57,4 +58,20 @@ export interface LearningStyleAssessment {
   visual_score: number;
   auditory_score: number;
   kinesthetic_score: number;
+}
+
+export interface Subject {
+  id: string;
+  subject_name: string;
+  category?: string;
+}
+
+export interface StudentSubjectsUpdateRequest {
+  subject_ids: string[];
+}
+
+export interface PasswordChangeRequest {
+  old_password: string;
+  new_password: string;
+  confirm_password: string;
 }

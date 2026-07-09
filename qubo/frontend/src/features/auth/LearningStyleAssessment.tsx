@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 
 export default function LearningStyleAssessment() {
-  const [scores, setScores] = useState({
-    visual: 0,
-    auditory: 0,
-    kinesthetic: 0,
-  });
+  const [questionAnswers, setQuestionAnswers] = useState<
+    Array<{ visual: number; auditory: number; kinesthetic: number }>
+  >(
+    Array(5).fill(null).map(() => ({
+      visual: 50,
+      auditory: 50,
+      kinesthetic: 50,
+    }))
+  );
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuthStore();
 
   const questions = [
     {
@@ -57,11 +59,15 @@ export default function LearningStyleAssessment() {
     },
   ];
 
-  const handleScoreChange = (style: keyof typeof scores, value: number) => {
-    setScores((prev) => ({
-      ...prev,
-      [style]: Math.min(100, Math.max(0, prev[style] + value)),
-    }));
+  const handleScoreChange = (style: 'visual' | 'auditory' | 'kinesthetic', value: number) => {
+    setQuestionAnswers((prev) => {
+      const updated = [...prev];
+      updated[currentQuestion] = {
+        ...updated[currentQuestion],
+        [style]: value,
+      };
+      return updated;
+    });
   };
 
   const handleNext = async () => {
@@ -70,12 +76,19 @@ export default function LearningStyleAssessment() {
     } else {
       // Submit assessment
       setIsLoading(true);
+      const totalVisual = questionAnswers.reduce((sum, q) => sum + q.visual, 0);
+      const totalAuditory = questionAnswers.reduce((sum, q) => sum + q.auditory, 0);
+      const totalKinesthetic = questionAnswers.reduce((sum, q) => sum + q.kinesthetic, 0);
+
+      const numQuestions = questions.length;
+      const finalScores = {
+        visual_score: Math.round(totalVisual / numQuestions),
+        auditory_score: Math.round(totalAuditory / numQuestions),
+        kinesthetic_score: Math.round(totalKinesthetic / numQuestions),
+      };
+
       try {
-        const result = await authService.setLearningStyle({
-          visual_score: scores.visual,
-          auditory_score: scores.auditory,
-          kinesthetic_score: scores.kinesthetic,
-        });
+        const result = await authService.setLearningStyle(finalScores);
         console.log('Learning style set:', result);
         navigate('/dashboard');
       } catch (error) {
@@ -89,6 +102,7 @@ export default function LearningStyleAssessment() {
 
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const currentAnswers = questionAnswers[currentQuestion];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-4">
@@ -117,19 +131,19 @@ export default function LearningStyleAssessment() {
           <h2 className="text-lg font-semibold text-gray-900 mb-6">{question.text}</h2>
 
           <div className="space-y-4">
-            {(Object.keys(question.styles) as Array<keyof typeof question.styles>).map((style) => (
+            {(Object.keys(question.styles) as Array<'visual' | 'auditory' | 'kinesthetic'>).map((style) => (
               <div key={style} className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <label className="capitalize font-medium text-gray-900">{style}</label>
-                  <span className="text-sm font-semibold text-primary">{scores[style]}</span>
+                  <span className="text-sm font-semibold text-primary">{currentAnswers[style]}</span>
                 </div>
                 <p className="text-sm text-gray-600 mb-3">{question.styles[style]}</p>
                 <input
                   type="range"
                   min="0"
                   max="100"
-                  value={scores[style]}
-                  onChange={(e) => handleScoreChange(style, parseInt(e.target.value) - scores[style])}
+                  value={currentAnswers[style]}
+                  onChange={(e) => handleScoreChange(style, parseInt(e.target.value))}
                   className="w-full"
                 />
               </div>

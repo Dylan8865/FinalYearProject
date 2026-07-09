@@ -1,6 +1,7 @@
 from typing import Optional
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi.security import HTTPBearer
+from fastapi.security.http import HTTPAuthorizationCredentials
 from app.core.security import verify_token
 from app.db.supabase import get_supabase
 
@@ -8,7 +9,7 @@ security = HTTPBearer()
 
 
 async def get_current_user(
-    credentials: HTTPAuthCredentials = Depends(security),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
     """Get current authenticated user from token"""
     token = credentials.credentials

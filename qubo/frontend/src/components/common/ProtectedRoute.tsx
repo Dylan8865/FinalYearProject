@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuthStore } from '@/contexts/authStore';
+import { Navigate } from 'react-router-dom';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuthStore();
@@ -16,14 +17,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
-          <p className="text-gray-600">Please log in to access this page.</p>
-        </div>
-      </div>
-    );
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

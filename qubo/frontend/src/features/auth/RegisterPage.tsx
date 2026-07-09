@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/contexts/authStore';
-import { FiMail, FiLock, FiUser, FiAlertCircle } from 'react-icons/fi';
+import { FiMail, FiLock, FiUser, FiAlertCircle, FiEye, FiEyeOff } from 'react-icons/fi';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +14,8 @@ export default function RegisterPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const { register, isLoading, error, setError } = useAuthStore();
 
@@ -32,10 +34,11 @@ export default function RegisterPage() {
       newErrors.email = 'Invalid email format';
     }
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+    } else if (!passwordRegex.test(formData.password)) {
+      newErrors.password = 'Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&#)';
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -48,6 +51,8 @@ export default function RegisterPage() {
 
     if (!formData.full_name) {
       newErrors.full_name = 'Full name is required';
+    } else if (!/^[A-Za-z\s'-]+$/.test(formData.full_name)) {
+      newErrors.full_name = 'Full name must contain only letters and spaces';
     }
 
     return newErrors;
@@ -154,14 +159,21 @@ export default function RegisterPage() {
             <div className="relative">
               <FiLock className="absolute left-3 top-3 text-gray-400" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                 disabled={isLoading}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
             </div>
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
           </div>
@@ -173,14 +185,21 @@ export default function RegisterPage() {
             <div className="relative">
               <FiLock className="absolute left-3 top-3 text-gray-400" />
               <input
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                 disabled={isLoading}
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
             </div>
             {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
           </div>

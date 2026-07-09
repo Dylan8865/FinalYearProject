@@ -20,6 +20,8 @@ create type risk_level as enum ('low', 'medium', 'high');
 create table profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   username text not null unique,
+  full_name text,
+  email text,
   role user_role not null default 'student',
   profile_picture_url text,
   learning_style text,                 -- visual / auditory / kinesthetic
@@ -195,8 +197,14 @@ create index idx_educator_students_educator on educator_students(educator_id);
 create function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, username, role)
-  values (new.id, coalesce(new.raw_user_meta_data->>'username', new.email), 'student');
+  insert into public.profiles (id, username, full_name, email, role)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1)),
+    coalesce(new.raw_user_meta_data->>'full_name', ''),
+    new.email,
+    coalesce(new.raw_user_meta_data->>'role', 'student')::user_role
+  );
   return new;
 end;
 $$ language plpgsql security definer;

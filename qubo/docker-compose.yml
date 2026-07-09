@@ -23,7 +23,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/qubo
+      - DATABASE_URL=postgresql://qubo_user:qubo_password@postgres:5432/qubo
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_KEY=${SUPABASE_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}

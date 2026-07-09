@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
 from app.schemas.auth import (
     UserRegisterRequest,
     UserLoginRequest,
     ProfileUpdateRequest,
     LearningStyleAssessmentRequest,
+    PasswordChangeRequest,
+    SubjectResponse,
+    StudentSubjectsUpdateRequest,
     AuthResponse,
     UserResponse,
 )
@@ -54,6 +58,48 @@ async def set_learning_style(
         assessment.auditory_score,
         assessment.kinesthetic_score,
     )
+
+
+@router.post("/change-password")
+async def change_password(
+    password_data: PasswordChangeRequest,
+    current_user = Depends(get_current_user),
+):
+    """Change user password"""
+    if password_data.new_password != password_data.confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match",
+        )
+    user_id = current_user.get("id")
+    return AuthService.change_password(
+        user_id,
+        password_data.old_password,
+        password_data.new_password
+    )
+
+
+@router.get("/subjects", response_model=List[SubjectResponse])
+async def get_subjects():
+    """Get all available subjects"""
+    return AuthService.get_subjects()
+
+
+@router.get("/profile/subjects", response_model=List[SubjectResponse])
+async def get_student_subjects(current_user = Depends(get_current_user)):
+    """Get selected subjects for the student"""
+    user_id = current_user.get("id")
+    return AuthService.get_student_subjects(user_id)
+
+
+@router.post("/profile/subjects", response_model=List[SubjectResponse])
+async def update_student_subjects(
+    subjects_data: StudentSubjectsUpdateRequest,
+    current_user = Depends(get_current_user),
+):
+    """Update student's selected subjects"""
+    user_id = current_user.get("id")
+    return AuthService.update_student_subjects(user_id, subjects_data.subject_ids)
 
 
 @router.post("/logout")
