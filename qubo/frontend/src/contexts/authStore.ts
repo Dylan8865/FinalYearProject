@@ -20,6 +20,19 @@ interface AuthState {
   fetchProfile: () => Promise<void>;
 }
 
+const getApiErrorMessage = (error: any, fallback: string) => {
+  if (!error.response) {
+    return 'Cannot connect to backend. Please start the FastAPI server on http://127.0.0.1:8001';
+  }
+
+  const detail = error.response.data?.detail;
+  if (Array.isArray(detail)) {
+    return detail.map((item) => item.msg).join(', ');
+  }
+
+  return detail || fallback;
+};
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   tokens: null,
@@ -42,7 +55,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (error: any) {
       set({ 
-        error: error.response?.data?.detail || 'Login failed',
+        error: getApiErrorMessage(error, 'Login failed'),
         isLoading: false 
       });
       throw error;
@@ -66,7 +79,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (error: any) {
       set({ 
-        error: error.response?.data?.detail || 'Registration failed',
+        error: getApiErrorMessage(error, 'Registration failed'),
         isLoading: false 
       });
       throw error;
@@ -90,7 +103,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user, isLoading: false });
     } catch (error: any) {
       set({ 
-        error: error.response?.data?.detail || 'Failed to fetch profile',
+        error: getApiErrorMessage(error, 'Failed to fetch profile'),
         isLoading: false 
       });
     }

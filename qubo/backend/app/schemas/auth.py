@@ -25,6 +25,16 @@ class UserRegisterRequest(BaseModel):
     full_name: str = Field(..., max_length=100)
     role: UserRole = UserRole.STUDENT
 
+    @field_validator("email")
+    @classmethod
+    def normalize_register_email(cls, v: EmailStr) -> str:
+        return str(v).strip().lower()
+
+    @field_validator("username")
+    @classmethod
+    def normalize_username(cls, v: str) -> str:
+        return v.strip()
+
     @field_validator("full_name")
     @classmethod
     def validate_full_name(cls, v: str) -> str:
@@ -52,6 +62,11 @@ class UserLoginRequest(BaseModel):
     """User login request"""
     email: EmailStr
     password: str
+
+    @field_validator("email")
+    @classmethod
+    def normalize_login_email(cls, v: EmailStr) -> str:
+        return str(v).strip().lower()
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -89,6 +104,38 @@ class PasswordChangeRequest(BaseModel):
     @field_validator("new_password")
     @classmethod
     def validate_new_password_strength(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if not any(c.isupper() for c in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(c.islower() for c in v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Password must contain at least one number")
+        if not any(c in "@$!%*?&#" for c in v):
+            raise ValueError("Password must contain at least one special character (@$!%*?&#)")
+        return v
+
+
+class PasswordResetRequest(BaseModel):
+    """Password reset email request"""
+    email: EmailStr
+
+
+class PasswordRecoveryRequest(BaseModel):
+    """Direct password recovery request for the local prototype"""
+    email: EmailStr
+    new_password: str = Field(..., min_length=8)
+    confirm_password: str
+
+    @field_validator("email")
+    @classmethod
+    def normalize_recovery_email(cls, v: EmailStr) -> str:
+        return str(v).strip().lower()
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_recovery_password_strength(cls, v: str) -> str:
         if len(v) < 8:
             raise ValueError("Password must be at least 8 characters long")
         if not any(c.isupper() for c in v):

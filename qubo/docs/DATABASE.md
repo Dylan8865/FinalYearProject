@@ -10,7 +10,7 @@ Qubo uses PostgreSQL (via Supabase) as the primary database. The schema is desig
 ## Key Tables
 
 ### Core Tables
-- `profiles` - User profiles and account info
+- `profiles` - Public user profile and account metadata. Passwords are handled by Supabase Auth, not stored here.
 - `subjects` - SPM subjects
 - `topics` - Topics within subjects
 - `student_subjects` - Student enrollment in subjects
@@ -57,3 +57,9 @@ All tables have RLS policies enforced to ensure:
 - Shared resources are accessible as intended
 
 For detailed schema, see `Qubo Schema` file.
+
+## Authentication Storage
+
+Qubo uses Supabase Auth for credentials. Registration creates the secure auth user in Supabase's protected `auth.users` schema, while `public.profiles` stores application profile fields such as username, full name, role, learning style, school, and target grade.
+
+Do not add a password column to `public.profiles`.

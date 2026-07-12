@@ -21,6 +21,9 @@ from app.schemas.auth import (
 class AuthService:
     """Authentication business logic"""
 
+    MAX_FAILED_LOGIN_ATTEMPTS = 5
+    LOCKOUT_MINUTES = 15
+
     @staticmethod
     def register(user_data: UserRegisterRequest) -> AuthResponse:
         """Register a new user"""
@@ -32,7 +35,7 @@ class AuthService:
                 supabase.table("profiles")
                 .select("id")
                 .eq("email", user_data.email)
-                .single()
+                .limit(1)
                 .execute()
             )
             if existing_user.data:
@@ -40,10 +43,13 @@ class AuthService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Email already registered",
                 )
+        except HTTPException:
+            raise
         except Exception as e:
-            # Email doesn't exist (expected)
-            if "No rows found" not in str(e):
-                raise
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to check existing email: {e}",
+            )
 
         # Check if username already exists
         try:
@@ -51,7 +57,7 @@ class AuthService:
                 supabase.table("profiles")
                 .select("id")
                 .eq("username", user_data.username)
-                .single()
+                .limit(1)
                 .execute()
             )
             if existing_username.data:
@@ -59,15 +65,28 @@ class AuthService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Username already taken",
                 )
+        except HTTPException:
+            raise
         except Exception as e:
-            if "No rows found" not in str(e):
-                raise
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to check existing username: {e}",
+            )
 
-        # Sign up with Supabase Auth
+        # Create confirmed Supabase Auth user for local development.
+        # Passwords are still stored by Supabase Auth, not public.profiles.
         try:
-            auth_response = supabase.auth.sign_up(
-                email=user_data.email,
-                password=user_data.password,
+            auth_response = supabase.auth.admin.create_user(
+                {
+                    "email": user_data.email,
+                    "password": user_data.password,
+                    "email_confirm": True,
+                    "user_metadata": {
+                        "username": user_data.username,
+                        "full_name": user_data.full_name,
+                        "role": user_data.role.value,
+                    },
+                }
             )
             user_id = auth_response.user.id
 
@@ -113,36 +132,48 @@ class AuthService:
         """Login user"""
         supabase = get_supabase()
 
-        # Check if email is temporarily locked
+        # Fetch profile first so the API can give useful login feedback.
         try:
             profile_response = (
                 supabase.table("profiles")
                 .select("*")
                 .eq("email", credentials.email)
-                .single()
+                .limit(1)
                 .execute()
             )
-            profile = profile_response.data
-            if profile and profile.get("locked_until"):
-                locked_until_str = profile.get("locked_until")
-                clean_str = locked_until_str.replace("Z", "+00:00")
-                locked_until = datetime.fromisoformat(clean_str)
-                if locked_until > datetime.now(timezone.utc):
-                    diff_mins = int((locked_until - datetime.now(timezone.utc)).total_seconds() / 60) + 1
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail=f"Account is temporarily locked. Try again in {diff_mins} minutes.",
-                    )
+            profile = profile_response.data[0] if profile_response.data else None
         except HTTPException:
             raise
-        except Exception:
-            profile = None
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to check account: {e}",
+            )
+
+        if not profile:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No account found with this email. Please register first.",
+            )
+
+        if profile.get("locked_until"):
+            locked_until_str = profile.get("locked_until")
+            clean_str = locked_until_str.replace("Z", "+00:00")
+            locked_until = datetime.fromisoformat(clean_str)
+            if locked_until > datetime.now(timezone.utc):
+                diff_mins = int((locked_until - datetime.now(timezone.utc)).total_seconds() / 60) + 1
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Account is temporarily locked. Try again in {diff_mins} minutes.",
+                )
 
         try:
             # Authenticate with Supabase Auth
             auth_response = supabase.auth.sign_in_with_password(
-                email=credentials.email,
-                password=credentials.password,
+                {
+                    "email": credentials.email,
+                    "password": credentials.password,
+                }
             )
             user_id = auth_response.user.id
 
@@ -187,35 +218,44 @@ class AuthService:
             )
 
         except Exception as e:
+            error_message = str(e).lower()
+            if "email not confirmed" in error_message or "confirm" in error_message:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Please confirm your email before logging in.",
+                )
+            if "email link" in error_message or "verification" in error_message:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Please verify your email before logging in.",
+                )
+
             # Handle failed attempt
-            if credentials.email:
-                try:
-                    profile_resp = (
-                        supabase.table("profiles")
-                        .select("*")
-                        .eq("email", credentials.email)
-                        .single()
-                        .execute()
-                    )
-                    p = profile_resp.data
-                    if p:
-                        attempts = p.get("failed_login_attempts", 0) + 1
-                        lock_until = None
-                        if attempts >= 5:
-                            lock_until = (
-                                datetime.now(timezone.utc) + timedelta(minutes=15)
-                            ).isoformat()
-                        
-                        supabase.table("profiles").update({
-                            "failed_login_attempts": attempts,
-                            "locked_until": lock_until
-                        }).eq("id", p["id"]).execute()
-                except Exception:
-                    pass
+            attempts = profile.get("failed_login_attempts", 0) + 1
+            remaining_attempts = max(AuthService.MAX_FAILED_LOGIN_ATTEMPTS - attempts, 0)
+            lock_until = None
+            if attempts >= AuthService.MAX_FAILED_LOGIN_ATTEMPTS:
+                lock_until = (
+                    datetime.now(timezone.utc) + timedelta(minutes=AuthService.LOCKOUT_MINUTES)
+                ).isoformat()
+
+            try:
+                supabase.table("profiles").update({
+                    "failed_login_attempts": attempts,
+                    "locked_until": lock_until
+                }).eq("id", profile["id"]).execute()
+            except Exception:
+                pass
+
+            if lock_until:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Incorrect password. Account locked for {AuthService.LOCKOUT_MINUTES} minutes.",
+                )
 
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
+                detail=f"Incorrect password. {remaining_attempts} login attempts remaining.",
             )
 
     @staticmethod
@@ -265,7 +305,7 @@ class AuthService:
                     .select("id")
                     .eq("username", update_data.username)
                     .neq("id", user_id)
-                    .single()
+                    .limit(1)
                     .execute()
                 )
                 if existing.data:
@@ -273,7 +313,9 @@ class AuthService:
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Username already taken",
                     )
-            except:
+            except HTTPException:
+                raise
+            except Exception:
                 pass
             update_dict["username"] = update_data.username
 
@@ -353,7 +395,10 @@ class AuthService:
             email = profile["email"]
 
             # Verify old password
-            supabase.auth.sign_in_with_password(email=email, password=old_password)
+            supabase.auth.sign_in_with_password({
+                "email": email,
+                "password": old_password,
+            })
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -368,6 +413,83 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(e),
+            )
+
+    @staticmethod
+    def send_password_reset(email: str) -> dict:
+        """Send a Supabase password reset email if the account exists"""
+        supabase = get_supabase()
+        try:
+            profile_response = (
+                supabase.table("profiles")
+                .select("id")
+                .eq("email", email)
+                .limit(1)
+                .execute()
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to check account: {e}",
+            )
+
+        if not profile_response.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No account found with this email. Please register first.",
+            )
+
+        try:
+            supabase.auth.reset_password_email(email)
+            return {"message": "Password reset email sent. Please check your inbox."}
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to send reset email: {e}",
+            )
+
+    @staticmethod
+    def recover_password(email: str, new_password: str) -> dict:
+        """Reset a user's password directly for the local prototype"""
+        supabase = get_supabase()
+        try:
+            profile_response = (
+                supabase.table("profiles")
+                .select("id")
+                .eq("email", email)
+                .limit(1)
+                .execute()
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to check account: {e}",
+            )
+
+        if not profile_response.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No account found with this email. Please register first.",
+            )
+
+        user_id = profile_response.data[0]["id"]
+        try:
+            supabase.auth.admin.update_user_by_id(
+                user_id,
+                {
+                    "password": new_password,
+                    "email_confirm": True,
+                },
+            )
+            supabase.table("profiles").update({
+                "failed_login_attempts": 0,
+                "locked_until": None,
+            }).eq("id", user_id).execute()
+            return {"message": "Password updated successfully. You can log in with your new password."}
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to reset password: {e}",
             )
 
     @staticmethod

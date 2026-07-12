@@ -4,7 +4,10 @@
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
+    "moduleResolution": "Bundler",
     "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["vite/client"],
 
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

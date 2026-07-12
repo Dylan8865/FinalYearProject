@@ -36,7 +36,9 @@ class AuthService {
     this.api.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (error.response?.status === 401) {
+        const requestUrl = error.config?.url || '';
+        const isAuthAttempt = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+        if (error.response?.status === 401 && !isAuthAttempt) {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           window.location.href = '/login';
@@ -84,6 +86,24 @@ class AuthService {
 
   async changePassword(data: PasswordChangeRequest): Promise<any> {
     const response = await this.api.post('/auth/change-password', data);
+    return response.data;
+  }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const response = await this.api.post<{ message: string }>('/auth/forgot-password', { email });
+    return response.data;
+  }
+
+  async recoverPassword(
+    email: string,
+    newPassword: string,
+    confirmPassword: string
+  ): Promise<{ message: string }> {
+    const response = await this.api.post<{ message: string }>('/auth/recover-password', {
+      email,
+      new_password: newPassword,
+      confirm_password: confirmPassword,
+    });
     return response.data;
   }
 

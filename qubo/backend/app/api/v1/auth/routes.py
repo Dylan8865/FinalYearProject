@@ -6,6 +6,8 @@ from app.schemas.auth import (
     ProfileUpdateRequest,
     LearningStyleAssessmentRequest,
     PasswordChangeRequest,
+    PasswordResetRequest,
+    PasswordRecoveryRequest,
     SubjectResponse,
     StudentSubjectsUpdateRequest,
     AuthResponse,
@@ -76,6 +78,26 @@ async def change_password(
         user_id,
         password_data.old_password,
         password_data.new_password
+    )
+
+
+@router.post("/forgot-password")
+async def forgot_password(reset_data: PasswordResetRequest):
+    """Send password reset email"""
+    return AuthService.send_password_reset(reset_data.email)
+
+
+@router.post("/recover-password")
+async def recover_password(recovery_data: PasswordRecoveryRequest):
+    """Reset password directly for the local prototype"""
+    if recovery_data.new_password != recovery_data.confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match",
+        )
+    return AuthService.recover_password(
+        recovery_data.email,
+        recovery_data.new_password,
     )
 
 

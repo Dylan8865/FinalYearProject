@@ -15,6 +15,23 @@ qubo/
 
 ## Quick Start
 
+### Start Frontend + Backend Together
+From the `FinalYearProject` folder:
+
+```powershell
+.\start-dev.bat
+```
+
+Or from the `qubo` folder:
+
+```powershell
+.\start-dev.bat
+```
+
+This opens:
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8000`
+
 ### Frontend
 ```bash
 cd frontend
@@ -59,6 +76,9 @@ Follow setup instructions in docs/DATABASE.md
 | Backend | Python 3.8+, FastAPI |
 | Database | PostgreSQL (Supabase) |
 | ML/AI | TensorFlow, HuggingFace Transformers, Scikit-learn |
+
+> Backend Supabase operations need `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env`.
+> Keep this key backend-only. Do not put it in frontend `.env` files.
 | NLP | Google Gemini Flash API, T5 Transformer |
 
 ## Documentation

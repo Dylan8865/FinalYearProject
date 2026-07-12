@@ -8,6 +8,23 @@
 
 ## Frontend Setup
 
+## One-Command Development Startup
+
+On Windows, from the `FinalYearProject` folder:
+
+```powershell
+.\start-dev.bat
+```
+
+Or from the `qubo` folder:
+
+```powershell
+.\start-dev.bat
+```
+
+This starts FastAPI on `http://localhost:8000` and Vite on `http://localhost:3000`.
+Open the frontend URL; frontend API calls are proxied through Vite from `/api/v1` to the backend.
+
 ### 1. Install Dependencies
 ```bash
 cd frontend
@@ -62,7 +79,8 @@ cp .env.example .env
 
 Edit `.env` with your configuration:
 - `DATABASE_URL` - Database connection string
-- `SUPABASE_URL` and `SUPABASE_KEY` - Supabase credentials
+- `SUPABASE_URL` and `SUPABASE_KEY` - Supabase project URL and anon key
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key for backend-only database/auth operations
 - `GEMINI_API_KEY` - Google Gemini API key
 - `SECRET_KEY` - Application secret (change in production!)
 
@@ -77,7 +95,8 @@ Backend will be available at `http://localhost:8000`
 ### Using Supabase
 1. Create a Supabase project
 2. Run the schema.sql file in the Supabase SQL editor
-3. Update credentials in `.env` files
+3. If you are testing Module 1 only, run `database/module1_schema_fix.sql` in the Supabase SQL editor
+4. Update credentials in `.env` files
 
 ### Using Local PostgreSQL
 ```bash
@@ -106,7 +125,7 @@ curl http://localhost:3000
 
 ### Check Backend
 ```bash
-curl http://localhost:8000/api/v1/health
+curl http://localhost:8000/health
 ```
 
 ### Check Database
