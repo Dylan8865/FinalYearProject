@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "gladekit-unity": {
+      "command": "uvx",
+      "args": [
+        "gladekit-mcp"
+      ]
+    },
+    "mcp-unity": {
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/Library/PackageCache/com.gamelovers.mcp-unity@cce8b57de9cb/Server~/build/index.js"
+      ]
+    },
+    "agnes-ai": {
+      "command": "node",
+      "args": [
+        "c:/Users/Yong Chao Juin/Unity Project/Tester/mcp-server/index.js"
+      ]
+    },
+    "qwen-vision": {
+      "command": "C:/Python314/python.exe",
+      "args": [
+        "c:/Users/Yong Chao Juin/Unity Project/Tester/mcp-qwen-vision/server.py"
+      ]
+    }
+  }
+}

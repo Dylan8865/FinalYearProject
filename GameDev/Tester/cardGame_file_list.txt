@@ -1,0 +1,1960 @@
+Assets/Arts
+Assets/Arts/AurynSky
+Assets/Arts/AurynSky/Dungeon Pack
+Assets/Arts/AurynSky/Dungeon Pack/Animation
+Assets/Arts/AurynSky/Dungeon Pack/Animation/BannerDAnim.controller
+Assets/Arts/AurynSky/Dungeon Pack/Animation/ChestAnimD.anim
+Assets/Arts/AurynSky/Dungeon Pack/Animation/ChestD.controller
+Assets/Arts/AurynSky/Dungeon Pack/Animation/SpikeTrapAnimD.anim
+Assets/Arts/AurynSky/Dungeon Pack/Animation/SpikeTrapD.controller
+Assets/Arts/AurynSky/Dungeon Pack/Animation/SwingTrapAnimD.anim
+Assets/Arts/AurynSky/Dungeon Pack/Animation/SwingTrapD.controller
+Assets/Arts/AurynSky/Dungeon Pack/Animation/TrapDoorAnimD.anim
+Assets/Arts/AurynSky/Dungeon Pack/Animation/TrapDoorD.controller
+Assets/Arts/AurynSky/Dungeon Pack/Materials
+Assets/Arts/AurynSky/Dungeon Pack/Materials/ColorPaletteBLUE.mat
+Assets/Arts/AurynSky/Dungeon Pack/Materials/ColorPaletteRED.mat
+Assets/Arts/AurynSky/Dungeon Pack/Materials/CubeParticlesDungeon.mat
+Assets/Arts/AurynSky/Dungeon Pack/Materials/DemoGround.mat
+Assets/Arts/AurynSky/Dungeon Pack/Materials/FireCube.mat
+Assets/Arts/AurynSky/Dungeon Pack/Materials/Grey.mat
+Assets/Arts/AurynSky/Dungeon Pack/Materials/SlimeRiver.mat
+Assets/Arts/AurynSky/Dungeon Pack/Materials/SlimeStill.mat
+Assets/Arts/AurynSky/Dungeon Pack/Models
+Assets/Arts/AurynSky/Dungeon Pack/Models/BannerD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BannerHolderLD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BannerHolderSD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BarrelD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Blade01D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BlockL01D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BlockL02D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BlockS01D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BlockS02D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BlockSpike01D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BlockSpike02D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BrazzierD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/BridgeD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/CageD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/CastleD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/ChainD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/ChainTopD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/ChestBD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/ChestTD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/CoinD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/DoorLD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/DoorRD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Floor01D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Floor02D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/GrateD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/GrateTrapD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/LadderD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/LadderTopD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Pillar01D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Pillar02D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Pole01D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Pole02D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Skull0ClosedD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/SkullOpenD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/SpearD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/StatueD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Steps01D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/Steps02D.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/TowerD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/TrapDoorLD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/TrapDoorRD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Models/WindowD.fbx
+Assets/Arts/AurynSky/Dungeon Pack/Particles
+Assets/Arts/AurynSky/Dungeon Pack/Particles/FireD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Particles/SmokeD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Particles/WaterFallSlime.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Particles/WaterPixiesSlime.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/BannerHangingBlue.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/BannerStandingBlue.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/BluePieces
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/BluePieces/BannerBlueD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/BluePieces/DoorLBlue.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/BluePieces/DoorMiddle.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/BluePieces/DoorRBlue.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/BrazBlue.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/CastleBlueD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/Pillar01Blue.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Blue/Pillar02Blue.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/BannerHolderLD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/BannerHolderSD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/BarrelD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/BlockS01D.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/BlockS02D.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/BlockSpike01D.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/BlockSpike02D.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/CageCompleteD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/CageD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/Castle.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/ChainD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/ChainTopD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/ChestBD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/ChestCompleteD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/ChestTD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/CoinD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/FireD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/Floor01D.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/Floor02D.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/GrateD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/GrateTrapD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/Pole01D.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/Pole02D.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/Skull0ClosedD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/SkullOpenD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/SmokeD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/StatueD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/TowerD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/TowerWindows.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/WaterQuadD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/General/Window.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/BannerHangingRed.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/BannerStandingRed.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/BrazRedD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/CastleRedD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/Pillar01RedD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/Pillar02RedD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/RedPieces
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/RedPieces/BannerRedD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/RedPieces/DoorLRedD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/RedPieces/DoorMiddle.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Red/RedPieces/DoorRRedD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Traps
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Traps/Blade01D.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Traps/SpearD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Traps/SpikeTrapD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Traps/SwingTrapD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Traps/TrapDoor.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Traps/TrapDoorLD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/Prefabs/Traps/TrapDoorRD.prefab
+Assets/Arts/AurynSky/Dungeon Pack/READ ME.txt
+Assets/Arts/AurynSky/Dungeon Pack/Scenes
+Assets/Arts/AurynSky/Dungeon Pack/Scenes/DemoScene_Dungeon.unity
+Assets/Arts/AurynSky/Dungeon Pack/Scenes/InventoryScene_Dungeon.unity
+Assets/Arts/AurynSky/Dungeon Pack/Scripts
+Assets/Arts/AurynSky/Dungeon Pack/Scripts/SpikeTrapDemo.cs
+Assets/Arts/AurynSky/Dungeon Pack/Scripts/TrapDoorDemo.cs
+Assets/Arts/AurynSky/Dungeon Pack/Textures
+Assets/Arts/AurynSky/Dungeon Pack/Textures/ColorPaletteBLUE.png
+Assets/Arts/AurynSky/Dungeon Pack/Textures/ColorPaletteRED.png
+Assets/Arts/AurynSky/Dungeon Pack/Textures/CubeParticleDungeon.psd
+Assets/Arts/AurynSky/Dungeon Pack/Textures/Water.png
+Assets/Arts/Epic Toon FX
+Assets/Arts/Epic Toon FX/Demo
+Assets/Arts/Epic Toon FX/Demo/Demo Prefabs
+Assets/Arts/Epic Toon FX/Demo/Demo Prefabs/CameraRig.prefab
+Assets/Arts/Epic Toon FX/Demo/Demo Prefabs/GUI Prefabs
+Assets/Arts/Epic Toon FX/Demo/Demo Prefabs/GUI Prefabs/CanvasSceneSelect.prefab
+Assets/Arts/Epic Toon FX/Demo/Demo Prefabs/GUI Prefabs/Main Camera.prefab
+Assets/Arts/Epic Toon FX/Demo/Demo Prefabs/GUI Prefabs/SceneSelect.prefab
+Assets/Arts/Epic Toon FX/Demo/Demo Prefabs/GUI Prefabs/Slider.prefab
+Assets/Arts/Epic Toon FX/Demo/Demo Prefabs/GUI Prefabs/Speed.prefab
+Assets/Arts/Epic Toon FX/Demo/Materials
+Assets/Arts/Epic Toon FX/Demo/Materials/Skybox
+Assets/Arts/Epic Toon FX/Demo/Materials/Skybox/BlueSkybox.mat
+Assets/Arts/Epic Toon FX/Demo/Materials/Skybox/PurpleSkybox.mat
+Assets/Arts/Epic Toon FX/Demo/Materials/dev.mat
+Assets/Arts/Epic Toon FX/Demo/Materials/dev2.mat
+Assets/Arts/Epic Toon FX/Demo/Materials/dev_half.mat
+Assets/Arts/Epic Toon FX/Demo/Materials/dev_small.mat
+Assets/Arts/Epic Toon FX/Demo/Materials/devcrate.mat
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Bullet
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Bullet/BulletSmallBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Bullet/BulletSmallFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Bullet/BulletSmallGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Bullet/BulletSmallPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/BulletFat
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/BulletFat/BulletFatBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/BulletFat/BulletFatFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/BulletFat/BulletFatGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/BulletFat/BulletFatPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNova
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNova/NovaBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNova/NovaFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNova/NovaGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNova/NovaPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNovaSmall
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNovaSmall/NovaSmallBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNovaSmall/NovaSmallFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNovaSmall/NovaSmallGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/EnergyNovaSmall/NovaSmallPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Fireball
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Fireball/FireBallBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Fireball/FireBallFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Fireball/FireBallGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Fireball/FireBallPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Frost
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Frost/FrostMissileOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Laser
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Laser/LaserBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Laser/LaserFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Laser/LaserGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Laser/LaserPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Laser/LaserRedOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Lightning
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Lightning/LightningBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Lightning/LightningGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Lightning/LightningPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Lightning/LightningYellowOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Magic
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Magic/MagicBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Magic/MagicFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Magic/MagicGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Magic/MagicPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/MagicSoft
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/MagicSoft/MagicSoftBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/MagicSoft/MagicSoftFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/MagicSoft/MagicSoftGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/MagicSoft/MagicSoftPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Mystic
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Mystic/MysticGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Mystic/MysticOrangeOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Mystic/MysticPurpleOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Mystic/MysticWhiteOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Nuke
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Nuke/NukeBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Nuke/NukeFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Nuke/NukeGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Nuke/NukePinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Rocket
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Rocket/RocketBlueOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Rocket/RocketFireOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Rocket/RocketGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Rocket/RocketPinkOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Soul
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Soul/SoulCrimsonOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Soul/SoulGreenOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Soul/SoulOrangeOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Soul/SoulPurpleOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Storm
+Assets/Arts/Epic Toon FX/Demo/Missile Prefabs/Storm/StormMissileOBJ.prefab
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Prefabs
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Prefabs/MainUICanvas.prefab
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Prefabs/ParticleEffectsLibrary.prefab
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Prefabs/ParticleEffectsLibraryETFX.prefab
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Prefabs/SamplePE01Prefab.prefab
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Prefabs/SamplePE02Prefab.prefab
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Prefabs/SamplePE03Prefab.prefab
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Scenes
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Scenes/PEDemoScene.unity
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Scenes/PEDemoSceneSettings.lighting
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Scripts
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Scripts/PEButtonScript.cs
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Scripts/PEDestoryTimed.cs
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Scripts/ParticleEffectsLibrary.cs
+Assets/Arts/Epic Toon FX/Demo/ParticleEffectsShowcase/Scripts/UICanvasManager.cs
+Assets/Arts/Epic Toon FX/Demo/Scripts
+Assets/Arts/Epic Toon FX/Demo/Scripts/ETFXButtonScript.cs
+Assets/Arts/Epic Toon FX/Demo/Scripts/ETFXFireProjectile.cs
+Assets/Arts/Epic Toon FX/Demo/Scripts/ETFXLoopScript.cs
+Assets/Arts/Epic Toon FX/Demo/Scripts/ETFXMouseOrbit.cs
+Assets/Arts/Epic Toon FX/Demo/Scripts/ETFXProjectileScript.cs
+Assets/Arts/Epic Toon FX/Demo/Scripts/ETFXSceneManager.cs
+Assets/Arts/Epic Toon FX/Demo/Textures
+Assets/Arts/Epic Toon FX/Demo/Textures/Skybox
+Assets/Arts/Epic Toon FX/Demo/Textures/Skybox/1.png
+Assets/Arts/Epic Toon FX/Demo/Textures/Skybox/2.png
+Assets/Arts/Epic Toon FX/Demo/Textures/Skybox/3.png
+Assets/Arts/Epic Toon FX/Demo/Textures/Skybox/4.png
+Assets/Arts/Epic Toon FX/Demo/Textures/Skybox/5.png
+Assets/Arts/Epic Toon FX/Demo/Textures/Skybox/6.png
+Assets/Arts/Epic Toon FX/Demo/Textures/dev.png
+Assets/Arts/Epic Toon FX/Demo/Textures/devcrate.png
+Assets/Arts/Epic Toon FX/Demo/Textures/devsprite.png
+Assets/Arts/Epic Toon FX/ETFX Readme.txt
+Assets/Arts/Epic Toon FX/Materials
+Assets/Arts/Epic Toon FX/Materials/Bubbles
+Assets/Arts/Epic Toon FX/Materials/Bubbles/bubble.mat
+Assets/Arts/Epic Toon FX/Materials/Bubbles/bubble2.mat
+Assets/Arts/Epic Toon FX/Materials/Bubbles/bubble_round.mat
+Assets/Arts/Epic Toon FX/Materials/Bubbles/bubble_round2.mat
+Assets/Arts/Epic Toon FX/Materials/Clouds
+Assets/Arts/Epic Toon FX/Materials/Clouds/cloud.mat
+Assets/Arts/Epic Toon FX/Materials/Clouds/cloud_2x2_hard.mat
+Assets/Arts/Epic Toon FX/Materials/Clouds/cloud_2x2_hardshadow.mat
+Assets/Arts/Epic Toon FX/Materials/Clouds/cloud_2x2_soft.mat
+Assets/Arts/Epic Toon FX/Materials/Clouds/cloud_2x2_softshadow.mat
+Assets/Arts/Epic Toon FX/Materials/Clouds/cloud_magic.mat
+Assets/Arts/Epic Toon FX/Materials/Clouds/cloud_soft.mat
+Assets/Arts/Epic Toon FX/Materials/Confetti
+Assets/Arts/Epic Toon FX/Materials/Confetti/confetti.mat
+Assets/Arts/Epic Toon FX/Materials/Confetti/confetti_blur.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons
+Assets/Arts/Epic Toon FX/Materials/Emoticons/angry.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/bigsmile.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/cool.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/cry.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/disappoint.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/drool.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/haha.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/happy.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/kiss.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/sad.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/shocked.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/sick.mat
+Assets/Arts/Epic Toon FX/Materials/Emoticons/silly.mat
+Assets/Arts/Epic Toon FX/Materials/Fire
+Assets/Arts/Epic Toon FX/Materials/Fire/candle.mat
+Assets/Arts/Epic Toon FX/Materials/Fire/candle_soft.mat
+Assets/Arts/Epic Toon FX/Materials/Fire/candle_soft2.mat
+Assets/Arts/Epic Toon FX/Materials/Fire/fire2x2.mat
+Assets/Arts/Epic Toon FX/Materials/Fire/fire_ground3x3.mat
+Assets/Arts/Epic Toon FX/Materials/Fire/fire_ground_soft3x3.mat
+Assets/Arts/Epic Toon FX/Materials/Fire/fire_soft.mat
+Assets/Arts/Epic Toon FX/Materials/Fire/fire_soft_blank.mat
+Assets/Arts/Epic Toon FX/Materials/Fire/fire_soft_blank_additive.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric
+Assets/Arts/Epic Toon FX/Materials/Geometric/circle.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/circle_additive.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/circlecurve.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/circlecurve2.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/circlecurve_magic.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/circlestretchy.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/drop.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/rectangle.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/spiky circular.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/spiky.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/triangle.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/triangle_curve.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/triangle_soft.mat
+Assets/Arts/Epic Toon FX/Materials/Geometric/triangle_soft_centered.mat
+Assets/Arts/Epic Toon FX/Materials/Glows
+Assets/Arts/Epic Toon FX/Materials/Glows/glow.mat
+Assets/Arts/Epic Toon FX/Materials/Glows/glow2.mat
+Assets/Arts/Epic Toon FX/Materials/Glows/glow3.mat
+Assets/Arts/Epic Toon FX/Materials/Glows/glow4.mat
+Assets/Arts/Epic Toon FX/Materials/Glows/glowALPHABLEND.mat
+Assets/Arts/Epic Toon FX/Materials/Glows/lightray.mat
+Assets/Arts/Epic Toon FX/Materials/Glows/lightray2.mat
+Assets/Arts/Epic Toon FX/Materials/Hearts
+Assets/Arts/Epic Toon FX/Materials/Hearts/heart.mat
+Assets/Arts/Epic Toon FX/Materials/Hearts/heart2.mat
+Assets/Arts/Epic Toon FX/Materials/Hearts/heart2broken.mat
+Assets/Arts/Epic Toon FX/Materials/Hearts/heart2broken_blue.mat
+Assets/Arts/Epic Toon FX/Materials/Magic
+Assets/Arts/Epic Toon FX/Materials/Magic/aura_slam.mat
+Assets/Arts/Epic Toon FX/Materials/Magic/aura_vertical.mat
+Assets/Arts/Epic Toon FX/Materials/Magic/magic_blast.mat
+Assets/Arts/Epic Toon FX/Materials/Magic/magic_line.mat
+Assets/Arts/Epic Toon FX/Materials/Magic/magic_orb.mat
+Assets/Arts/Epic Toon FX/Materials/Magic/magic_orb2.mat
+Assets/Arts/Epic Toon FX/Materials/Magic/magic_runecircle.mat
+Assets/Arts/Epic Toon FX/Materials/Magic/orb.mat
+Assets/Arts/Epic Toon FX/Materials/Misc
+Assets/Arts/Epic Toon FX/Materials/Misc/aura_punch.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/aura_vertical_soft.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/evil_spirit.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/evil_spirit2.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/explosion.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/explosion_spritesheet_2x2.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/explosion_spritesheet_3x3.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/explosionring.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/feather.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/grab1.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/grab2.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/healing.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/ice_spikes.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/lightning1.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/lightning2.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/lightning_spritesheet_3x3.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/line_sharp.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/notes.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/nova_2x2_spritesheet.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/nova_3x3_spritesheet.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/ring (additive).mat
+Assets/Arts/Epic Toon FX/Materials/Misc/ring (alphablended).mat
+Assets/Arts/Epic Toon FX/Materials/Misc/slash.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/snowflake.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/talkbubble.mat
+Assets/Arts/Epic Toon FX/Materials/Misc/wave2.mat
+Assets/Arts/Epic Toon FX/Materials/Portals
+Assets/Arts/Epic Toon FX/Materials/Portals/portal_glow.mat
+Assets/Arts/Epic Toon FX/Materials/Portals/portal_glow_add.mat
+Assets/Arts/Epic Toon FX/Materials/Portals/portal_stripes.mat
+Assets/Arts/Epic Toon FX/Materials/Portals/portal_stripes2.mat
+Assets/Arts/Epic Toon FX/Materials/Portals/portal_stripes3.mat
+Assets/Arts/Epic Toon FX/Materials/Portals/portal_stripes4.mat
+Assets/Arts/Epic Toon FX/Materials/Shield
+Assets/Arts/Epic Toon FX/Materials/Shield/etfx_shield.mat
+Assets/Arts/Epic Toon FX/Materials/Shield/shield_magic.mat
+Assets/Arts/Epic Toon FX/Materials/Shield/shield_magic2.mat
+Assets/Arts/Epic Toon FX/Materials/Shield/shield_magic3.mat
+Assets/Arts/Epic Toon FX/Materials/Skulls
+Assets/Arts/Epic Toon FX/Materials/Skulls/skull.mat
+Assets/Arts/Epic Toon FX/Materials/Skulls/skull2.mat
+Assets/Arts/Epic Toon FX/Materials/Skulls/skull3.mat
+Assets/Arts/Epic Toon FX/Materials/Skulls/skull4.mat
+Assets/Arts/Epic Toon FX/Materials/Skulls/skull_evil.mat
+Assets/Arts/Epic Toon FX/Materials/Skulls/skull_love.mat
+Assets/Arts/Epic Toon FX/Materials/Sparkle
+Assets/Arts/Epic Toon FX/Materials/Sparkle/sparkle2.mat
+Assets/Arts/Epic Toon FX/Materials/Sparkle/sparkle_AB.mat
+Assets/Arts/Epic Toon FX/Materials/Sparkle/sparkle_ADD.mat
+Assets/Arts/Epic Toon FX/Materials/Splat
+Assets/Arts/Epic Toon FX/Materials/Splat/splat01.mat
+Assets/Arts/Epic Toon FX/Materials/Splat/splat02.mat
+Assets/Arts/Epic Toon FX/Materials/Splat/splat03.mat
+Assets/Arts/Epic Toon FX/Materials/Splat/splat_animated.mat
+Assets/Arts/Epic Toon FX/Materials/Stars
+Assets/Arts/Epic Toon FX/Materials/Stars/star_AB.mat
+Assets/Arts/Epic Toon FX/Materials/Stars/star_ADD.mat
+Assets/Arts/Epic Toon FX/Materials/Stars/star_outline.mat
+Assets/Arts/Epic Toon FX/Materials/Stars/star_outlined.mat
+Assets/Arts/Epic Toon FX/Materials/Stars/star_outlined_colored.mat
+Assets/Arts/Epic Toon FX/Materials/Water
+Assets/Arts/Epic Toon FX/Materials/Water/waterspray.mat
+Assets/Arts/Epic Toon FX/Materials/Water/wave.mat
+Assets/Arts/Epic Toon FX/Materials/Water/wave2.mat
+Assets/Arts/Epic Toon FX/Materials/Water/wave3.mat
+Assets/Arts/Epic Toon FX/Materials/money
+Assets/Arts/Epic Toon FX/Materials/money/coins.mat
+Assets/Arts/Epic Toon FX/Materials/money/moneybills.mat
+Assets/Arts/Epic Toon FX/Materials/numbers.mat
+Assets/Arts/Epic Toon FX/Models
+Assets/Arts/Epic Toon FX/Models/ETFX_AuraVertical.FBX
+Assets/Arts/Epic Toon FX/Models/ETFX_AuraVerticalCentered.FBX
+Assets/Arts/Epic Toon FX/Models/ETFX_Shield.FBX
+Assets/Arts/Epic Toon FX/Models/Materials
+Assets/Arts/Epic Toon FX/Models/Materials/ARPG FX.mat
+Assets/Arts/Epic Toon FX/Models/Materials/Material #30.mat
+Assets/Arts/Epic Toon FX/Models/Materials/sphereshield.mat
+Assets/Arts/Epic Toon FX/Models/Materials/verticalglow02.mat
+Assets/Arts/Epic Toon FX/Models/Materials/verticalgradient2.mat
+Assets/Arts/Epic Toon FX/Models/aura_flat.FBX
+Assets/Arts/Epic Toon FX/Models/aura_inward.FBX
+Assets/Arts/Epic Toon FX/Models/aura_straight.FBX
+Assets/Arts/Epic Toon FX/Models/toon_shield.FBX
+Assets/Arts/Epic Toon FX/Prefabs
+Assets/Arts/Epic Toon FX/Prefabs 2D
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Green
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Green/GreenBloodDripping2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Green/GreenBloodExplosion2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Green/GreenBloodShowerLoop2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Green/GreenBloodSplatCritical2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Green/GreenBloodSplatDirectional2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Red
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Red/BloodDripping2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Red/BloodExplosion2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Red/BloodShowerLoop2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Red/BloodSplatCritical2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Red/BloodSplatDirectional2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Yellow
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Yellow/YellowBloodDripping2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Yellow/YellowBloodExplosion2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Yellow/YellowBloodShowerLoop2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Yellow/YellowBloodSplatCritical2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Blood/Yellow/YellowBloodSplatDirectional2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Explosions
+Assets/Arts/Epic Toon FX/Prefabs 2D/Explosions/MetalHit2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Explosions/SparkExplosion2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Explosions/StarBurst2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Water
+Assets/Arts/Epic Toon FX/Prefabs 2D/Water/Flowing
+Assets/Arts/Epic Toon FX/Prefabs 2D/Water/Flowing/WaterDripping2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Water/Flowing/WaterDrippingHeavy2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Water/Flowing/WaterFall2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs 2D/Weather
+Assets/Arts/Epic Toon FX/Prefabs 2D/Weather/Rain2D.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Cardboard
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Cardboard/BloodSplatDirectionalCardboard.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Cardboard/BloodSplatWideCardboard.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Green
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Green/GreenBloodDripping.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Green/GreenBloodExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Green/GreenBloodPoolGrowing.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Green/GreenBloodShowerLoop.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Green/GreenBloodSplatCritical.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Green/GreenBloodSplatDirectional.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Green/GreenBloodSplatWide.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Red
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Red/BloodDripping.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Red/BloodExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Red/BloodPoolGrowing.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Red/BloodShowerLoop.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Red/BloodSplatCritical.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Red/BloodSplatDirectional.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Red/BloodSplatWide.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Yellow
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Yellow/YellowBloodDripping.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Yellow/YellowBloodExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Yellow/YellowBloodPoolGrowing.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Yellow/YellowBloodShowerLoop.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Yellow/YellowBloodSplatCritical.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Yellow/YellowBloodSplatDirectional.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Blood/Yellow/YellowBloodSplatWide.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/BombFuse
+Assets/Arts/Epic Toon FX/Prefabs/Combat/BombFuse/BombFuse.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/BombFuse/BombFuse2.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Cartoony
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Cartoony/CartoonyBodySlam.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Cartoony/CartoonyFightAction.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Cartoony/CartoonyFightAction2.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Cartoony/CartoonyPunchExtreme.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Cartoony/CartoonyPunchHeavy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Cartoony/CartoonyPunchLight.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Cartoony/CartoonyPunchMedium.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/RoundHit
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/RoundHit/RoundHitBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/RoundHit/RoundHitGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/RoundHit/RoundHitRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/RoundHit/RoundHitYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Soft
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Soft/SoftBodySlam.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Soft/SoftFightAction.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Soft/SoftFightAction2.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Soft/SoftPunchExtreme.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Soft/SoftPunchHeavy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Soft/SoftPunchLight.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/Soft/SoftPunchMedium.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Brawling/StunnedCirclingStars.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Combat FX.txt
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/CuteDeath.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/ElectricDeathBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/ElectricDeathYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/EvilDeath.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/FireDeath.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/FrostDeath.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/GenericDeath.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/MysticDeath.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/PoisonDeath.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Death/SuperEvilDeath.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/BalloonPopExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/CloudExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/CloudExplosionGreenSkull.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/FlashBomb.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/FlashBomb2.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/MetalHit.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/SparkExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/StarBurst.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/StunExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/- Misc/StunExplosion2.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletExplosion/BulletExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletExplosion/BulletExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletExplosion/BulletExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletExplosion/BulletExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletFatExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletFatExplosion/BulletFatExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletFatExplosion/BulletFatExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletFatExplosion/BulletFatExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/BulletFatExplosion/BulletFatExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/FireballExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/FireballExplosion/ExplosionFireballBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/FireballExplosion/ExplosionFireballFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/FireballExplosion/ExplosionFireballGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/FireballExplosion/ExplosionFireballPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/FrostExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/FrostExplosion/FrostExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LaserExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LaserExplosion/LaserExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LaserExplosion/LaserExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LaserExplosion/LaserExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LaserExplosion/LaserExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LaserExplosion/LaserExplosionRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LightningExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LightningExplosion/LightningExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LightningExplosion/LightningExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LightningExplosion/LightningExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/LightningExplosion/LightningExplosionYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicExplosion/MagicExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicExplosion/MagicExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicExplosion/MagicExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicExplosion/MagicExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicSoftExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicSoftExplosion/MagicSoftExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicSoftExplosion/MagicSoftExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicSoftExplosion/MagicSoftExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicSoftExplosion/MagicSoftExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MagicSoftExplosion/MagicSoftExplosionYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MysticExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MysticExplosion/MysticExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MysticExplosion/MysticExplosionOrange.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MysticExplosion/MysticExplosionPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/MysticExplosion/MysticExplosionWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaExplosion/ExplosionNovaBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaExplosion/ExplosionNovaFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaExplosion/ExplosionNovaGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaExplosion/ExplosionNovaPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaSmallExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaSmallExplosion/ExplosionNovaSmallBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaSmallExplosion/ExplosionNovaSmallFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaSmallExplosion/ExplosionNovaSmallGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NovaSmallExplosion/ExplosionNovaSmallPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeExplosion/NukeExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeExplosion/NukeExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeExplosion/NukeExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeExplosion/NukeExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeVerticalExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeVerticalExplosion/NukeVerticalExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeVerticalExplosion/NukeVerticalExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeVerticalExplosion/NukeVerticalExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/NukeVerticalExplosion/NukeVerticalExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/RoundExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/RoundExplosion/ExplosionRoundBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/RoundExplosion/ExplosionRoundFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/RoundExplosion/ExplosionRoundGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/RoundExplosion/ExplosionRoundPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SmallExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SmallExplosion/SmallExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SmallExplosion/SmallExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SmallExplosion/SmallExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SmallExplosion/SmallExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SoulExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SoulExplosion/SoulExplosionCrimson.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SoulExplosion/SoulExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SoulExplosion/SoulExplosionOrange.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SoulExplosion/SoulExplosionPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SpikyExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SpikyExplosion/SpikyExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SpikyExplosion/SpikyExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SpikyExplosion/SpikyExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/SpikyExplosion/SpikyExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/StarExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/StarExplosion/StarExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/StarExplosion/StarExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/StarExplosion/StarExplosionOrange.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/StarExplosion/StarExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/StormExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/StormExplosion/StormExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/TallExplosion
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/TallExplosion/TallExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/TallExplosion/TallExplosionFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/TallExplosion/TallExplosionGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Explosions/TallExplosion/TallExplosionPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Cartoon
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Cartoon/FlamethrowerCartoonyBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Cartoon/FlamethrowerCartoonyFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Cartoon/FlamethrowerCartoonyGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Cartoon/FlamethrowerCartoonyPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Additive
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Additive/FlamethrowerAdditiveBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Additive/FlamethrowerAdditiveGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Additive/FlamethrowerAdditivePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Additive/FlamethrowerAdditiveRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Alpha Blend
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Alpha Blend/FlamethrowerAlphaBlendBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Alpha Blend/FlamethrowerAlphaBlendGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Alpha Blend/FlamethrowerAlphaBlendPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Flamethrower/Soft/Alpha Blend/FlamethrowerAlphaBlendRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Aura
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Aura/MagicAuraBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Aura/MagicAuraGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Aura/MagicAuraYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Buff
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Buff/MagicBuffBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Buff/MagicBuffGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Buff/MagicBuffYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Charge
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Charge/MagicChargeBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Charge/MagicChargeGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Charge/MagicChargeYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Circle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Circle/MagicCircleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Circle/MagicCircleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Circle/MagicCircleYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Enchant
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Enchant/MagicEnchantBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Enchant/MagicEnchantGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Enchant/MagicEnchantYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Field
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Field/MagicFieldBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Field/MagicFieldGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Field/MagicFieldWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Field/MagicFieldYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Nova
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Nova/MagicNovaBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Nova/MagicNovaGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Nova/MagicNovaYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/PillarBlast
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/PillarBlast/MagicPillarBlastBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/PillarBlast/MagicPillarBlastGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/PillarBlast/MagicPillarBlastYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Shield
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Shield/ShieldBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Shield/ShieldGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Shield/ShieldPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Shield/ShieldYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Sphere
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Sphere/MagicSphereBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Sphere/MagicSphereGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Magic/Sphere/MagicSphereYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Bullet
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Bullet/BulletSmallBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Bullet/BulletSmallFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Bullet/BulletSmallGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Bullet/BulletSmallPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/FatBullet
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/FatBullet/BulletFatBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/FatBullet/BulletFatFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/FatBullet/BulletFatGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/FatBullet/BulletFatPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Fireball
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Fireball/FireballMissileBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Fireball/FireballMissileFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Fireball/FireballMissileGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Fireball/FireballMissilePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Frost
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Frost/FrostMissileBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Laser
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Laser/LaserMissileBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Laser/LaserMissileFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Laser/LaserMissileGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Laser/LaserMissilePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Laser/LaserMissileRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Lightning
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Lightning/LightningMissileBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Lightning/LightningMissileGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Lightning/LightningMissilePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Lightning/LightningMissileYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Magic
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Magic/MagicMissileBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Magic/MagicMissileFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Magic/MagicMissileGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Magic/MagicMissilePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/MagicSoft
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/MagicSoft/MagicMissileSoftBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/MagicSoft/MagicMissileSoftFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/MagicSoft/MagicMissileSoftGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/MagicSoft/MagicMissileSoftPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Mystic
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Mystic/MysticMissileGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Mystic/MysticMissileOrange.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Mystic/MysticMissilePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Mystic/MysticMissileWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaMissile
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaMissile/NovaMissileBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaMissile/NovaMissileFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaMissile/NovaMissileGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaMissile/NovaMissilePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaSmall
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaSmall/NovaMissileSmallBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaSmall/NovaMissileSmallFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaSmall/NovaMissileSmallGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/NovaSmall/NovaMissileSmallPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Nuke
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Nuke/NukeMissileBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Nuke/NukeMissileFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Nuke/NukeMissileGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Nuke/NukeMissilePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Rocket
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Rocket/RocketMissileBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Rocket/RocketMissileFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Rocket/RocketMissileGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Rocket/RocketMissilePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Soul
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Soul/SoulMissileCrimson.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Soul/SoulMissileGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Soul/SoulMissileOrange.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Soul/SoulMissilePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Storm
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Missiles/Storm/StormMissile.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/- Misc
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/- Misc/GunFire
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/- Misc/GunFire/GunFireBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/- Misc/GunFire/GunFireGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/- Misc/GunFire/GunFirePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/- Misc/GunFire/GunFireYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletFatMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletFatMuzzle/BulletFatMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletFatMuzzle/BulletFatMuzzleFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletFatMuzzle/BulletFatMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletFatMuzzle/BulletFatMuzzlePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletMuzzle/BulletMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletMuzzle/BulletMuzzleFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletMuzzle/BulletMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/BulletMuzzle/BulletMuzzlePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaMuzzle/EnergyNovaMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaMuzzle/EnergyNovaMuzzleFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaMuzzle/EnergyNovaMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaMuzzle/EnergyNovaMuzzlePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaSmallMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaSmallMuzzle/EnergyNovaMuzzleSmallBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaSmallMuzzle/EnergyNovaMuzzleSmallFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaSmallMuzzle/EnergyNovaMuzzleSmallGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/EnergyNovaSmallMuzzle/EnergyNovaMuzzleSmallPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/FireballMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/FireballMuzzle/MuzzleFireballBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/FireballMuzzle/MuzzleFireballFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/FireballMuzzle/MuzzleFireballGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/FireballMuzzle/MuzzleFireballPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/FrostMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/FrostMuzzle/FrostMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LaserMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LaserMuzzle/LaserMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LaserMuzzle/LaserMuzzleFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LaserMuzzle/LaserMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LaserMuzzle/LaserMuzzlePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LaserMuzzle/LaserMuzzleRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LightningMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LightningMuzzle/LightningMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LightningMuzzle/LightningMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LightningMuzzle/LightningMuzzlePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/LightningMuzzle/LightningMuzzleYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicMuzzle/MagicMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicMuzzle/MagicMuzzleFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicMuzzle/MagicMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicMuzzle/MagicMuzzlePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicSoftMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicSoftMuzzle/MagicSoftMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicSoftMuzzle/MagicSoftMuzzleFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicSoftMuzzle/MagicSoftMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MagicSoftMuzzle/MagicSoftMuzzlePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MysticMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MysticMuzzle/MysticMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MysticMuzzle/MysticMuzzleOrange.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MysticMuzzle/MysticMuzzlePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/MysticMuzzle/MysticMuzzleWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/NukeMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/NukeMuzzle/NukeMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/NukeMuzzle/NukeMuzzleFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/NukeMuzzle/NukeMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/NukeMuzzle/NukeMuzzlePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/RocketMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/RocketMuzzle/RocketMuzzleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/RocketMuzzle/RocketMuzzleFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/RocketMuzzle/RocketMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/RocketMuzzle/RocketMuzzlePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/SoulMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/SoulMuzzle/SoulMuzzleCrimson.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/SoulMuzzle/SoulMuzzleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/SoulMuzzle/SoulMuzzleOrange.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/SoulMuzzle/SoulMuzzlePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/StormMuzzle
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Muzzleflash/StormMuzzle/StormMuzzle.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Nova
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Nova/NovaBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Nova/NovaFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Nova/NovaGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Nova/NovaPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/Legacy
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/Legacy/SwordHitCriticalLegacy
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/Legacy/SwordHitCriticalLegacy/SwordHitBlueCriticalLegacy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/Legacy/SwordHitCriticalLegacy/SwordHitRedCriticalLegacy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/Legacy/SwordHitCriticalLegacy/SwordHitYellowCriticalLegacy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/Legacy/SwordHitLegacy
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/Legacy/SwordHitLegacy/SwordHitBlueLegacy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/Legacy/SwordHitLegacy/SwordHitRedLegacy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/Legacy/SwordHitLegacy/SwordHitYellowLegacy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/MagicSwordHit
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/MagicSwordHit/MagicSwordHitBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/MagicSwordHit/MagicSwordHitGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/MagicSwordHit/MagicSwordHitRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/MagicSwordHit/MagicSwordHitYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHit
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHit/SwordHitBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHit/SwordHitGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHit/SwordHitRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHit/SwordHitYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHitCritical
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHitCritical/SwordHitBlueCritical.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHitCritical/SwordHitGreenCritical.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHitCritical/SwordHitRedCritical.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordHitCritical/SwordHitYellowCritical.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSlash
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSlash/SwordSlashBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSlash/SwordSlashGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSlash/SwordSlashRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSlash/SwordSlashYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSpin
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSpin/SwordSpinBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSpin/SwordSpinGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSpin/SwordSpinRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Sword/SwordSpin/SwordSpinYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Text
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Text/KaPow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Text/Pow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Combat/Text/Zap.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Blast
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Blast/ConfettiBlastBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Blast/ConfettiBlastGreenYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Blast/ConfettiBlastOrangeGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Blast/ConfettiBlastOrangePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Blast/ConfettiBlastRainbow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Blast/ConfettiBlastRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Directional
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Directional/ConfettiDirectionalBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Directional/ConfettiDirectionalGreenYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Directional/ConfettiDirectionalOrangeGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Directional/ConfettiDirectionalOrangePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Directional/ConfettiDirectionalRainbow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Directional/ConfettiDirectionalRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Shower
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Shower/ConfettiShowerBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Shower/ConfettiShowerGreenYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Shower/ConfettiShowerOrangeGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Shower/ConfettiShowerOrangePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Shower/ConfettiShowerRainbow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Confetti/Shower/ConfettiShowerRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Dust
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Dust/DustDirtyPoof.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Dust/DustDirtyPoofSoft.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Dust/DustMotesCalm.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Dust/DustMotesLively.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Environment FX.txt
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/CandleLight.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Field
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Field/FireFieldBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Field/FireFieldGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Field/FireFieldPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Field/FireFieldRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Torch
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Torch/CartoonFireTorchBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Torch/CartoonFireTorchGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Torch/CartoonFireTorchPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Cartoon/Torch/CartoonFireTorchRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Additive
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Additive/SoftFireAdditiveBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Additive/SoftFireAdditiveGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Additive/SoftFireAdditivePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Additive/SoftFireAdditiveRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Additive/SoftFireAdditiveYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Alpha Blend
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Alpha Blend/SoftFireABBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Alpha Blend/SoftFireABGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Alpha Blend/SoftFireABPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Alpha Blend/SoftFireABRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/Soft/Alpha Blend/SoftFireABRedSmall.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/TallFire
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/TallFire/TallBlueFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/TallFire/TallGreenFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/TallFire/TallPurpleFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fire/TallFire/TallRedFire.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fireflies
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fireflies/FireFliesBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fireflies/FireFliesGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fireflies/FireFliesPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fireflies/FireFliesRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fireflies/FireFliesYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkBlueCluster.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkGreenCluster.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkPurpleCluster.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkRedCluster.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Firework/FireworkYellowCluster.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/Black
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/Black/FogCalm.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/Black/FogHeavy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/Black/FogLively.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/Grey
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/Grey/FogCalm.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/Grey/FogHeavy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/Grey/FogLively.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/White
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/White/FogCalm.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/White/FogHeavy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Fog/White/FogLively.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Sharp
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Sharp/LightningOrbSharp.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Sharp/LightningStrikePinkSharp.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Sharp/LightningStrikeSharp.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Sharp/LightningStrikeSharpTall.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Soft
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Soft/LightningBlast.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Soft/LightningBlastPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Soft/LightningOrb.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Soft/LightningStrike.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Soft/LightningStrikePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Lightning/Soft/LightningStrikeTall.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Liquid
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Liquid/AcidBoiling.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Liquid/LavaBoiling.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Liquid/WaterBoiling.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/Dark
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/Dark/SmokeBurstDark.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/Dark/SmokeDark.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/Dark/SmokeDarkSoft.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/Dark/SmokeDarkSoftTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/Dark/SmokeDarkTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/Dark/SmokeExplosionDark.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/StinkyCloud.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/StinkyCloudTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/White
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/White/SmokeBurstWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/White/SmokeExplosionWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/White/SmokeWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/White/SmokeWhiteSoft.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/White/SmokeWhiteSoftTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Smoke/White/SmokeWhiteTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Sparks
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Sparks/SparkExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Sparks/SparkExplosionYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Sparks/SparkLoopBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Sparks/SparkLoopYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Sparks/SparkRadialExplosionBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Sparks/SparkRadialExplosionYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFieldSimple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFog
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFog/StarFogBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFog/StarFogGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFog/StarFogRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFog/StarFogYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFogFlow
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFogFlow/StarFogFlowBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFogFlow/StarFogFlowGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFogFlow/StarFogFlowRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarFogFlow/StarFogFlowYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Stars/StarVortex.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Underwater
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Underwater/BubbleBlastUnderwater.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Underwater/BubbleStreamUnderwater.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Flowing
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Flowing/WaterDripping.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Flowing/WaterDrippingDynamic.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Flowing/WaterDrippingHeavy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Flowing/WaterFall.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Flowing/WaterFallBig.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Flowing/WaterGeysir.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Other
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Other/WaterRainRipples.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Other/WaterRipple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Other/WaterSurfaceSplash.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Water/Other/WaterSurfaceSplashSmall.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/BlowingLeaves.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Rain
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Rain/RainHard.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Rain/RainLight.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Rain/RainMedium.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Rain/RainSimple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Snow
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Snow/SnowHard.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Snow/SnowLight.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Snow/SnowMedium.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Snow/SnowSpinny.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Environment/Weather/Whirlwind.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiAngry.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiClenchTeeth.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiCool.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiCry.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiCute.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiDerp.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiDisappointed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiDrool.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiHappy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiHeart.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiKiss.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiLaughCry.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiLaughSweatdrop.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiNervous.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiPoop.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiPuke.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiQueasy.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiSad.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiShocked.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiSick.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiSilly.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiSmile.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Emojis/EmojiTearyEyes.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Feathers
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Feathers/FeatherExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Feathers/FeatherShower.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Flares
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Flares/FlareBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Flares/FlareGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Flares/FlarePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Flares/FlareRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Flares/FlareYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Healing
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Healing/HealBig.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Healing/HealField.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Healing/HealNova.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Healing/HealOnce.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Healing/HealOnceLoop.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Healing/HealStream.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Healing/HealStream2.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Healing/HealStream3.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Hearts
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Hearts/HeartBreak.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Hearts/HeartExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Hearts/HeartPoof.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Hearts/HeartStream.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Hearts/HeartTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Interactive FX.txt
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ChestAppear
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ChestAppear/ChestAppearBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ChestAppear/ChestAppearPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ChestAppear/ChestAppearWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ChestAppear/ChestAppearYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/GlowOrb
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/GlowOrb/GlowOrbBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/GlowOrb/GlowOrbGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/GlowOrb/GlowOrbPink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/GlowOrb/GlowOrbYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ItemSparkle
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ItemSparkle/ItemSparkleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ItemSparkle/ItemSparkleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ItemSparkle/ItemSparklePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/ItemSparkle/ItemSparkleYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/TreasureChestGlowRays.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Loot/TreasureVerticalGlowRays.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Money
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Money/MoneyCoinBlast.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Money/MoneyCoinDirectional.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Money/MoneyCoinFountain.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Money/MoneyCoinShower.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Money/MoneyDollarbillBlast.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Money/MoneyDollarbillDirectional.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Money/MoneyDollarbillFountain.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Money/MoneyDollarbillShower.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SimplePortal
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SimplePortal/SimplePortalBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SimplePortal/SimplePortalGold.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SimplePortal/SimplePortalGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SimplePortal/SimplePortalPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SimplePortal/SimplePortalRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SpinPortal
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SpinPortal/SpinPortalBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SpinPortal/SpinPortalGold.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SpinPortal/SpinPortalPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Portals/SpinPortal/SpinPortalRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrb
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrb/PowerOrbBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrb/PowerOrbGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrb/PowerOrbPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrb/PowerOrbRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrb/PowerOrbYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbElemental
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbElemental/PowerOrbFireElemental.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbElemental/PowerOrbFrostElemental.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbElemental/PowerOrbLightningElemental.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbElemental/PowerOrbStormElemental.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbElemental/PowerOrbWaterElemental.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSciFi
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSciFi/PowerOrbSciFi01.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSciFi/PowerOrbSciFi02.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSciFi/PowerOrbSciFi03.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSciFi/PowerOrbSciFi04.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSmall
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSmall/PowerOrbSmallBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSmall/PowerOrbSmallGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSmall/PowerOrbSmallPurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSmall/PowerOrbSmallRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerOrbSmall/PowerOrbSmallYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupActivate
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupActivate/PowerupActivateBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupActivate/PowerupActivateGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupActivate/PowerupActivatePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupActivate/PowerupActivateRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupActivate/PowerupActivateYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupGlow
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupGlow/PowerupGlow1.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupGlow/PowerupGlow2.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupGlow/PowerupGlow3.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupGlow/PowerupGlow4.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupGlow/PowerupGlow5.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Powerups/PowerupGlow/PowerupGlow6.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Sparkle
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Sparkle/SparkleBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Sparkle/SparkleGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Sparkle/SparkleWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Sparkle/SparkleYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Sparkle/TinySparkle.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Stars
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Stars/BigStarFilled.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Stars/StarExplosion.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Stars/StarPoof.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Stars/StarStream.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Stars/StarTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Trails
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Trails/FireFloorTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Trails/IceFloorTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Trails/LightningFloorBlueTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Trails/LightningFloorPurpleTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Trails/LightningFloorYellowTrail.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/BasicZone
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/BasicZone/BasicZoneBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/BasicZone/BasicZoneGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/BasicZone/BasicZonePurple.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/BasicZone/BasicZoneRed.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/BasicZone/BasicZoneWhite.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/BasicZone/BasicZoneYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/MagicZone
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/MagicZone/MagicZoneBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/MagicZone/MagicZoneGreen.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/MagicZone/MagicZonePink.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/MagicZone/MagicZoneYellow.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/SpinZone
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/SpinZone/SpinZoneBlue.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Interactive/Zone/SpinZone/SpinZoneOrange.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Misc
+Assets/Arts/Epic Toon FX/Prefabs/Misc/CurvySmoke.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Misc/MusicalNotes.prefab
+Assets/Arts/Epic Toon FX/Prefabs/Misc/TypingMessage.prefab
+Assets/Arts/Epic Toon FX/Scripts
+Assets/Arts/Epic Toon FX/Scripts/ETFXLightFade.cs
+Assets/Arts/Epic Toon FX/Scripts/ETFXPitchRandomizer.cs
+Assets/Arts/Epic Toon FX/Scripts/ETFXRotation.cs
+Assets/Arts/Epic Toon FX/Sound
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_bullet.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_fireball.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_frost.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_laser.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_lightning.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_magic.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_mystic.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_mystic02.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_nuke.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_plasma.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_rocket.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_soul.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_explosion_storm.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_energy01.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_energy02.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_energybig.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_fireball.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_frost.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_laser.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_lightning.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_lightning2.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_magic.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_mystic.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_nuke.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_nuke02.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_pistol01.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_pistol02.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_pistol03.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_rocket.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_rocket02.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_rocket03.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_soul.wav
+Assets/Arts/Epic Toon FX/Sound/etfx_shoot_storm.wav
+Assets/Arts/Epic Toon FX/Textures
+Assets/Arts/Epic Toon FX/Textures/Emoticons
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/clenchteeth.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/clenchteeth2.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/cute.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/derp.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/heart.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/laughcry.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/laughsweatdrop.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/poop.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/sick2.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/sick3.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/Materials/tearyeyes.mat
+Assets/Arts/Epic Toon FX/Textures/Emoticons/angry.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/bigsmile.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/clenchteeth.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/clenchteeth2.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/cool.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/cry.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/cute.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/derp.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/disappoint.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/disappoint2.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/drool.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/happy.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/heart.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/kiss.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/laugh.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/laughcry.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/laughsweatdrop.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/poop.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/sad.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/shocked.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/sick.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/sick2.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/sick3.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/silly.png
+Assets/Arts/Epic Toon FX/Textures/Emoticons/tearyeyes.png
+Assets/Arts/Epic Toon FX/Textures/Text
+Assets/Arts/Epic Toon FX/Textures/Text/Materials
+Assets/Arts/Epic Toon FX/Textures/Text/Materials/flash_white.mat
+Assets/Arts/Epic Toon FX/Textures/Text/Materials/ka-pow.mat
+Assets/Arts/Epic Toon FX/Textures/Text/Materials/pow.mat
+Assets/Arts/Epic Toon FX/Textures/Text/Materials/sharp_blue.mat
+Assets/Arts/Epic Toon FX/Textures/Text/Materials/sharp_red.mat
+Assets/Arts/Epic Toon FX/Textures/Text/Materials/sharp_yellow.mat
+Assets/Arts/Epic Toon FX/Textures/Text/Materials/smack.mat
+Assets/Arts/Epic Toon FX/Textures/Text/Materials/zzzap.mat
+Assets/Arts/Epic Toon FX/Textures/Text/blam.png
+Assets/Arts/Epic Toon FX/Textures/Text/boom.png
+Assets/Arts/Epic Toon FX/Textures/Text/clunk.png
+Assets/Arts/Epic Toon FX/Textures/Text/crack.png
+Assets/Arts/Epic Toon FX/Textures/Text/crash.png
+Assets/Arts/Epic Toon FX/Textures/Text/crit.png
+Assets/Arts/Epic Toon FX/Textures/Text/critical.png
+Assets/Arts/Epic Toon FX/Textures/Text/flash_white.png
+Assets/Arts/Epic Toon FX/Textures/Text/hit.png
+Assets/Arts/Epic Toon FX/Textures/Text/ka-pow.png
+Assets/Arts/Epic Toon FX/Textures/Text/kick.png
+Assets/Arts/Epic Toon FX/Textures/Text/ko.png
+Assets/Arts/Epic Toon FX/Textures/Text/poof.png
+Assets/Arts/Epic Toon FX/Textures/Text/pow.png
+Assets/Arts/Epic Toon FX/Textures/Text/punch.png
+Assets/Arts/Epic Toon FX/Textures/Text/sharp_blue.png
+Assets/Arts/Epic Toon FX/Textures/Text/sharp_green.png
+Assets/Arts/Epic Toon FX/Textures/Text/sharp_red.png
+Assets/Arts/Epic Toon FX/Textures/Text/sharp_yellow.png
+Assets/Arts/Epic Toon FX/Textures/Text/smack.png
+Assets/Arts/Epic Toon FX/Textures/Text/whammm.png
+Assets/Arts/Epic Toon FX/Textures/Text/zzzap.png
+Assets/Arts/Epic Toon FX/Textures/aura_punch.png
+Assets/Arts/Epic Toon FX/Textures/aura_slam.png
+Assets/Arts/Epic Toon FX/Textures/aura_vertical.png
+Assets/Arts/Epic Toon FX/Textures/aura_vertical_soft.png
+Assets/Arts/Epic Toon FX/Textures/bubble.png
+Assets/Arts/Epic Toon FX/Textures/bubble2.png
+Assets/Arts/Epic Toon FX/Textures/bubble_round.png
+Assets/Arts/Epic Toon FX/Textures/bubble_round2.png
+Assets/Arts/Epic Toon FX/Textures/candle.png
+Assets/Arts/Epic Toon FX/Textures/candle_soft.png
+Assets/Arts/Epic Toon FX/Textures/candle_soft2.png
+Assets/Arts/Epic Toon FX/Textures/circle.png
+Assets/Arts/Epic Toon FX/Textures/circlecurve.png
+Assets/Arts/Epic Toon FX/Textures/circlecurve2.png
+Assets/Arts/Epic Toon FX/Textures/circlestretchy.png
+Assets/Arts/Epic Toon FX/Textures/cloud.png
+Assets/Arts/Epic Toon FX/Textures/cloud_2x2_hard.png
+Assets/Arts/Epic Toon FX/Textures/cloud_2x2_hardshadow.png
+Assets/Arts/Epic Toon FX/Textures/cloud_2x2_soft.png
+Assets/Arts/Epic Toon FX/Textures/cloud_2x2_softshadow.png
+Assets/Arts/Epic Toon FX/Textures/cloud_magic.png
+Assets/Arts/Epic Toon FX/Textures/cloud_soft.png
+Assets/Arts/Epic Toon FX/Textures/coins.png
+Assets/Arts/Epic Toon FX/Textures/coins_outline.png
+Assets/Arts/Epic Toon FX/Textures/confetti.png
+Assets/Arts/Epic Toon FX/Textures/confetti_blur.png
+Assets/Arts/Epic Toon FX/Textures/drop.png
+Assets/Arts/Epic Toon FX/Textures/etfx_shield.png
+Assets/Arts/Epic Toon FX/Textures/evil_spirit.png
+Assets/Arts/Epic Toon FX/Textures/evil_spirit2.png
+Assets/Arts/Epic Toon FX/Textures/explosion.png
+Assets/Arts/Epic Toon FX/Textures/explosion_spritesheet.png
+Assets/Arts/Epic Toon FX/Textures/explosion_spritesheet_3x3.png
+Assets/Arts/Epic Toon FX/Textures/explosionring.png
+Assets/Arts/Epic Toon FX/Textures/feather.png
+Assets/Arts/Epic Toon FX/Textures/feather_outlined.png
+Assets/Arts/Epic Toon FX/Textures/fire2x2.png
+Assets/Arts/Epic Toon FX/Textures/fire_ground3x3.png
+Assets/Arts/Epic Toon FX/Textures/fire_ground_soft3x3.png
+Assets/Arts/Epic Toon FX/Textures/fire_soft.png
+Assets/Arts/Epic Toon FX/Textures/fire_soft_blank.png
+Assets/Arts/Epic Toon FX/Textures/glow.png
+Assets/Arts/Epic Toon FX/Textures/glow2.png
+Assets/Arts/Epic Toon FX/Textures/glow3.png
+Assets/Arts/Epic Toon FX/Textures/glow4.png
+Assets/Arts/Epic Toon FX/Textures/grab1.png
+Assets/Arts/Epic Toon FX/Textures/grab2.png
+Assets/Arts/Epic Toon FX/Textures/haha.png
+Assets/Arts/Epic Toon FX/Textures/healing.png
+Assets/Arts/Epic Toon FX/Textures/heart.png
+Assets/Arts/Epic Toon FX/Textures/heart2.png
+Assets/Arts/Epic Toon FX/Textures/heart2broken.png
+Assets/Arts/Epic Toon FX/Textures/heart2broken_blue.png
+Assets/Arts/Epic Toon FX/Textures/ice_spikes.png
+Assets/Arts/Epic Toon FX/Textures/lightning1.png
+Assets/Arts/Epic Toon FX/Textures/lightning2.png
+Assets/Arts/Epic Toon FX/Textures/lightning_spritesheet_3x3.png
+Assets/Arts/Epic Toon FX/Textures/lightray.png
+Assets/Arts/Epic Toon FX/Textures/lightray2.png
+Assets/Arts/Epic Toon FX/Textures/line_sharp.png
+Assets/Arts/Epic Toon FX/Textures/magic_blast.png
+Assets/Arts/Epic Toon FX/Textures/magic_line.png
+Assets/Arts/Epic Toon FX/Textures/magic_orb.png
+Assets/Arts/Epic Toon FX/Textures/magic_orb2.png
+Assets/Arts/Epic Toon FX/Textures/magic_orb3.png
+Assets/Arts/Epic Toon FX/Textures/magic_runecircle.png
+Assets/Arts/Epic Toon FX/Textures/moneybills.png
+Assets/Arts/Epic Toon FX/Textures/moneybillsv2.png
+Assets/Arts/Epic Toon FX/Textures/notes.png
+Assets/Arts/Epic Toon FX/Textures/nova_3x3_spritesheet.png
+Assets/Arts/Epic Toon FX/Textures/nova_spritesheet.png
+Assets/Arts/Epic Toon FX/Textures/numbers.png
+Assets/Arts/Epic Toon FX/Textures/portal_glow.png
+Assets/Arts/Epic Toon FX/Textures/portal_stripes.png
+Assets/Arts/Epic Toon FX/Textures/portal_stripes2.png
+Assets/Arts/Epic Toon FX/Textures/portal_stripes3.png
+Assets/Arts/Epic Toon FX/Textures/portal_stripes4.png
+Assets/Arts/Epic Toon FX/Textures/rectangle.png
+Assets/Arts/Epic Toon FX/Textures/ring.png
+Assets/Arts/Epic Toon FX/Textures/shield_magic.png
+Assets/Arts/Epic Toon FX/Textures/shield_magic2.png
+Assets/Arts/Epic Toon FX/Textures/shield_magic3.png
+Assets/Arts/Epic Toon FX/Textures/skull.png
+Assets/Arts/Epic Toon FX/Textures/skull2.png
+Assets/Arts/Epic Toon FX/Textures/skull3.png
+Assets/Arts/Epic Toon FX/Textures/skull4.png
+Assets/Arts/Epic Toon FX/Textures/skull_evil.png
+Assets/Arts/Epic Toon FX/Textures/skull_love.png
+Assets/Arts/Epic Toon FX/Textures/slash.png
+Assets/Arts/Epic Toon FX/Textures/snowflake.png
+Assets/Arts/Epic Toon FX/Textures/sparkle.png
+Assets/Arts/Epic Toon FX/Textures/sparkle2.png
+Assets/Arts/Epic Toon FX/Textures/spiky circular.png
+Assets/Arts/Epic Toon FX/Textures/spiky.png
+Assets/Arts/Epic Toon FX/Textures/splat01.png
+Assets/Arts/Epic Toon FX/Textures/splat02.png
+Assets/Arts/Epic Toon FX/Textures/splat03.png
+Assets/Arts/Epic Toon FX/Textures/splat_animated.png
+Assets/Arts/Epic Toon FX/Textures/square.png
+Assets/Arts/Epic Toon FX/Textures/star.png
+Assets/Arts/Epic Toon FX/Textures/star_outline.png
+Assets/Arts/Epic Toon FX/Textures/star_outlined.png
+Assets/Arts/Epic Toon FX/Textures/star_outlined_colored.png
+Assets/Arts/Epic Toon FX/Textures/talkbubble.png
+Assets/Arts/Epic Toon FX/Textures/triangle.png
+Assets/Arts/Epic Toon FX/Textures/triangle_curve.png
+Assets/Arts/Epic Toon FX/Textures/triangle_soft.png
+Assets/Arts/Epic Toon FX/Textures/triangle_soft_centered.png
+Assets/Arts/Epic Toon FX/Textures/waterspray.png
+Assets/Arts/Epic Toon FX/Textures/wave.png
+Assets/Arts/Epic Toon FX/Textures/wave2.png
+Assets/Arts/Epic Toon FX/Textures/wave3.png
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Animations
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Animations/Attack01.anim
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Animations/Attack02.anim
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Animations/Die.anim
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Animations/FreeGolem.controller
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Animations/GetHit.anim
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Animations/Idle.anim
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Animations/Victory.anim
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Animations/Walk.anim
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Materials
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Materials/HP_Golem.mat
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Materials/PBR_Golem.mat
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Materials/PolyartStandard.mat
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Materials/Skybox_Mat.mat
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Materials/Stage 1.mat
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Meshes
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Meshes/Golem.fbx
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Meshes/GolemPolyart.fbx
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Meshes/Rock.fbx
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Meshes/RockMesh.fbx
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Meshes/Stage.fbx
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Prefabs
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Prefabs/HP_Golem.prefab
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Prefabs/HP_Rock.prefab
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Prefabs/PBR_Golem.prefab
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Prefabs/PBR_Rock.prefab
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Prefabs/Polyart_Golem.prefab
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Prefabs/Polyart_Rock.prefab
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Scenes
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Scenes/Scene.unity
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Textures
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Textures/AOGolem.png
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Textures/AlbedoGolem.png
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Textures/EmissionGolem.png
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Textures/HP_Golem.png
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Textures/MRGolem.png
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Textures/NormalGolem.png
+Assets/Arts/Mini Legion Rock Golem PBR HP Polyart/Textures/PolyartStandard.png
+Assets/Arts/RPG Monster Duo PBR Polyart
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/Attack01_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/Attack02_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/Die_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/Dizzy_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/GetHit_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/IdleBattle_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/IdleNormal_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/Run_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/SenseSomethingRoutine_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/SenseSomethingStart_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/Taunt_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/Victory_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/WalkBack_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/WalkLeft_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/WalkRight_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/Slime/Walk_Slime_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/Attack01_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/Attack02_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/DefendHit_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/Defend_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/Die_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/Dizzy_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/GetHit_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/IdleBattle_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/IdleNormal_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/Run_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/SenseSomethingRT_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/SenseSomethingStart_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/Taunt_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/Victory_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/WalkBack_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/WalkLeft_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/WalkRight_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animations/TurtleShell/Walk_TurtleShell_Anim.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Animators
+Assets/Arts/RPG Monster Duo PBR Polyart/Animators/Slime.controller
+Assets/Arts/RPG Monster Duo PBR Polyart/Animators/TurtleShell.controller
+Assets/Arts/RPG Monster Duo PBR Polyart/Materials
+Assets/Arts/RPG Monster Duo PBR Polyart/Materials/PolyartDefault.mat
+Assets/Arts/RPG Monster Duo PBR Polyart/Materials/Skybox_Mat.mat
+Assets/Arts/RPG Monster Duo PBR Polyart/Materials/SlimePBR.mat
+Assets/Arts/RPG Monster Duo PBR Polyart/Materials/Stage.mat
+Assets/Arts/RPG Monster Duo PBR Polyart/Materials/TurtleShellPBR.mat
+Assets/Arts/RPG Monster Duo PBR Polyart/Meshes
+Assets/Arts/RPG Monster Duo PBR Polyart/Meshes/SlimeMesh.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Meshes/SlimeMeshPBR.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Meshes/StageMesh.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Meshes/TurtleShellMesh.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Meshes/TurtleShellMeshPBR.fbx
+Assets/Arts/RPG Monster Duo PBR Polyart/Prefabs
+Assets/Arts/RPG Monster Duo PBR Polyart/Prefabs/Slime.prefab
+Assets/Arts/RPG Monster Duo PBR Polyart/Prefabs/SlimePBR.prefab
+Assets/Arts/RPG Monster Duo PBR Polyart/Prefabs/TurtleShell.prefab
+Assets/Arts/RPG Monster Duo PBR Polyart/Prefabs/TurtleShellPBR.prefab
+Assets/Arts/RPG Monster Duo PBR Polyart/Promotion.jpg
+Assets/Arts/RPG Monster Duo PBR Polyart/Scenes
+Assets/Arts/RPG Monster Duo PBR Polyart/Scenes/DuoScene.unity
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures/PBRSlimeAO.png
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures/PBRSlimeAlbedo.png
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures/PBRSlimeMetallicSmoothness.png
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures/PBRSlimeNormal.png
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures/PBRTurtleShellAO.png
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures/PBRTurtleShellAlbedo.png
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures/PBRTurtleShellMetalicSmoothness.png
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures/PBRTurtleShellNormal.png
+Assets/Arts/RPG Monster Duo PBR Polyart/Textures/PolyartDefaultTex.png
+Assets/Arts/Simple Toon
+Assets/Arts/Simple Toon/Shaders
+Assets/Arts/Simple Toon/Shaders/STCore.cginc
+Assets/Arts/Simple Toon/Shaders/STDefault.shader
+Assets/Arts/Simple Toon/Shaders/STFunctions.cginc
+Assets/Arts/Simple Toon/Shaders/STOutline.shader
+Assets/Arts/Simple Toon/Shaders/STTransparent.shader
+Assets/Arts/StylizedHandPaintedDungeon(Free)
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Materials
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Materials/Dungeon_Mat_01.mat
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Materials/Dungeon_Mat_02.mat
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Originals
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Originals/Door.fbx
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Originals/Floor.fbx
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Originals/Lamp_01.fbx
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Originals/Lamp_02.fbx
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Originals/Pillar.fbx
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Originals/Wall.fbx
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Originals/Wall_Entrance.fbx
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Prefabs
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Prefabs/Door.prefab
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Prefabs/Floor.prefab
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Prefabs/Lamp_01.prefab
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Prefabs/Lamp_02.prefab
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Prefabs/Pillar.prefab
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Prefabs/Wall.prefab
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Prefabs/Wall_Entrance.prefab
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Textures
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Textures/Dungeon_01_Diffuse.tga
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Textures/Dungeon_02_Diffuse.tga
+Assets/Arts/StylizedHandPaintedDungeon(Free)/Textures/Dungeon_02_Emission.tga
+Assets/Arts/cursor.png
+Assets/Arts/gui
+Assets/Arts/gui/Animations
+Assets/Arts/gui/Animations/ClawScratch.png
+Assets/Arts/gui/Animations/ClawScratchMask.png
+Assets/Arts/gui/Animations/ClawScratchShine.png
+Assets/Arts/gui/Animations/Fragments.png
+Assets/Arts/gui/Animations/Heart.png
+Assets/Arts/gui/Animations/Shield.png
+Assets/Arts/gui/Animations/Square.png
+Assets/Arts/gui/Backgrounds
+Assets/Arts/gui/Backgrounds/Background.png
+Assets/Arts/gui/Cards
+Assets/Arts/gui/Cards/AttackIcon.png
+Assets/Arts/gui/Cards/DefenceIcon.png
+Assets/Arts/gui/Cards/Glow.png
+Assets/Arts/gui/Cards/HealthIcon.png
+Assets/Arts/gui/Cards/Mask.png
+Assets/Arts/gui/Cards/SpellIcon.png
+Assets/Arts/gui/SelectionBox
+Assets/Arts/gui/SelectionBox/BottomLeft.png
+Assets/Arts/gui/SelectionBox/BottomRight.png
+Assets/Arts/gui/SelectionBox/TopLeft.png
+Assets/Arts/gui/SelectionBox/TopRight.png
+Assets/Arts/gui/TargetingArrow
+Assets/Arts/gui/TargetingArrow/Body.png
+Assets/Arts/gui/TargetingArrow/Head.png
+Assets/Arts/gui/UI
+Assets/Arts/gui/UI/AmountCircle.png
+Assets/Arts/gui/UI/Button.png
+Assets/Arts/gui/UI/ButtonDisabled.png
+Assets/Arts/gui/UI/ButtonHover.png
+Assets/Arts/gui/UI/Deck.png
+Assets/Arts/gui/UI/DiscardPile.png
+Assets/Arts/gui/UI/EndBattleElement.png
+Assets/Arts/gui/UI/EndBattlePopup.png
+Assets/Arts/gui/UI/HpBar.png
+Assets/Arts/gui/UI/HpBarLights.png
+Assets/Arts/gui/UI/HpBarOutline.png
+Assets/Arts/gui/UI/Intents
+Assets/Arts/gui/UI/Intents/Attack.png
+Assets/Arts/gui/UI/Intents/Block.png
+Assets/Arts/gui/UI/Intents/Fire.png
+Assets/Arts/gui/UI/Intents/HeartIcon.png
+Assets/Arts/gui/UI/Intents/Poison.png
+Assets/Arts/gui/UI/Intents/Strength.png
+Assets/Arts/gui/UI/Intents/Weak.png
+Assets/Arts/gui/UI/Mana.png
+Assets/Arts/gui/UI/Shield.png
+Assets/Arts/gui2
+Assets/Arts/gui2/Keyboard
+Assets/Arts/gui2/Keyboard/Keyboard
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_A.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_B.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_C.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_D.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_E.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_F.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_G.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_H.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_I.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_J.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_K.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_L.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_M.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_N.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_O.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_P.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_Q.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_R.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_S.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_T.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_U.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_V.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_W.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_X.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_Y.png
+Assets/Arts/gui2/Keyboard/Keyboard/Alphabet/Keyboard_Black_Z.png
+Assets/Arts/gui2/Keyboard/Keyboard/Arrows
+Assets/Arts/gui2/Keyboard/Keyboard/Arrows/Keyboard_Black_Arrow_Down.png
+Assets/Arts/gui2/Keyboard/Keyboard/Arrows/Keyboard_Black_Arrow_Left.png
+Assets/Arts/gui2/Keyboard/Keyboard/Arrows/Keyboard_Black_Arrow_Right.png
+Assets/Arts/gui2/Keyboard/Keyboard/Arrows/Keyboard_Black_Arrow_Up.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_0.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_1.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_2.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_3.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_4.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_5.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_6.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_7.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_8.png
+Assets/Arts/gui2/Keyboard/Keyboard/Digits/Keyboard_Black_9.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F1.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F10.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F11.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F12.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F2.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F3.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F4.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F5.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F6.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F7.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F8.png
+Assets/Arts/gui2/Keyboard/Keyboard/F Keys/Keyboard_Black_F9.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Alt.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Asterisk.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_BackSlash.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Backquote.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Backspace_Alt.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Bracket_Left.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Bracket_Right.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Caps_Lock.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Comma.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Context.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Ctrl.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Del.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_End.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Enter_Alt.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Enter_Tall.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Equals.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Esc.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Home.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Insert.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Minus.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Null.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Num_Lock.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Page_Down.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Page_Up.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Period.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Plus.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Plus_Tall.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Print_Screen.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Question.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Quote.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Semicolon.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Shift.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Slash.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Space.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Tab.png
+Assets/Arts/gui2/Keyboard/Keyboard/Keyboard_Black_Tilda.png
+Assets/Arts/gui2/Keyboard/Keyboard/Special
+Assets/Arts/gui2/Keyboard/Keyboard/Special/Keyboard_Black_Command.png
+Assets/Arts/gui2/Keyboard/Keyboard/Special/Keyboard_Black_Win.png
+Assets/Arts/gui2/Keyboard/Mouse
+Assets/Arts/gui2/Keyboard/Mouse/Keyboard_Black_Mouse_Left.png
+Assets/Arts/gui2/Keyboard/Mouse/Keyboard_Black_Mouse_Middle.png
+Assets/Arts/gui2/Keyboard/Mouse/Keyboard_Black_Mouse_Right.png
+Assets/Arts/gui2/Keyboard/Mouse/Keyboard_Black_Mouse_Simple.png
+Assets/Arts/gui2/Keyboard/Xbox One
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_A.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_B.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Dpad.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Dpad_Down.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Dpad_Left.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Dpad_Right.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Dpad_Up.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_LB.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_LT.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Left_Stick.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Menu.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_RB.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_RT.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Right_Stick.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Windows.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_X.png
+Assets/Arts/gui2/Keyboard/Xbox One/XboxOne_Y.png
+Assets/Arts/gui2/UI
+Assets/Arts/gui2/UI/Elements
+Assets/Arts/gui2/UI/Elements/Arrow.psd
+Assets/Arts/gui2/UI/Elements/BoxStroke.png
+Assets/Arts/gui2/UI/Elements/Button.png
+Assets/Arts/gui2/UI/Elements/Checkmark.png
+Assets/Arts/gui2/UI/FloatingIcon
+Assets/Arts/gui2/UI/FloatingIcon/FloatingCircle.png
+Assets/Arts/gui2/UI/FloatingIcon/FloatingInteract.png
+Assets/Arts/gui2/UI/FloatingIcon/arrow.png
+Assets/Arts/gui2/UI/FloatingIcon/arrow_1.png
+Assets/Arts/gui2/UI/GameUI
+Assets/Arts/gui2/UI/GameUI/DownOverlay.png
+Assets/Arts/gui2/UI/GameUI/DownOverlay1.png
+Assets/Arts/gui2/UI/GameUI/EdgesGradient.png
+Assets/Arts/gui2/UI/GameUI/EdgesGradient1.png
+Assets/Arts/gui2/UI/GameUI/EdgesGradient2.png
+Assets/Arts/gui2/UI/GameUI/EdgesGradientL.png
+Assets/Arts/gui2/UI/GameUI/Grunge
+Assets/Arts/gui2/UI/GameUI/Grunge/GrungeSquare.png
+Assets/Arts/gui2/UI/GameUI/Grunge/Misc.png
+Assets/Arts/gui2/UI/GameUI/Grunge/UIGrungeButton.png
+Assets/Arts/gui2/UI/GameUI/Grunge/UIGrungeButton1.png
+Assets/Arts/gui2/UI/GameUI/Grunge/UIGrungeButton12.png
+Assets/Arts/gui2/UI/GameUI/Grunge/UIGrungeLabel.png
+Assets/Arts/gui2/UI/GameUI/Grunge/UIGrungeMask.png
+Assets/Arts/gui2/UI/GameUI/Grunge/UIGrungeRectangle.png
+Assets/Arts/gui2/UI/GameUI/Grunge/UIGrungeRectangle1.png
+Assets/Arts/gui2/UI/GameUI/Grunge/UIGrungeRectangle2.png
+Assets/Arts/gui2/UI/GameUI/Grunge/UIGrungeRightMask.png
+Assets/Arts/gui2/UI/GameUI/Inventory
+Assets/Arts/gui2/UI/GameUI/Inventory/Circle.png
+Assets/Arts/gui2/UI/GameUI/Inventory/Contex
+Assets/Arts/gui2/UI/GameUI/Inventory/Contex/Combine.png
+Assets/Arts/gui2/UI/GameUI/Inventory/Contex/Exchange.png
+Assets/Arts/gui2/UI/GameUI/Inventory/Contex/Remove.png
+Assets/Arts/gui2/UI/GameUI/Inventory/Contex/Shortcut.png
+Assets/Arts/gui2/UI/GameUI/Inventory/Contex/Store.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Fills
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Fills/SlotFill_Item.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Fills/SlotFill_Selected.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Masks
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Masks/Slot2_Mask.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot0.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot1.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot1_X.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot2.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot2_X.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot3.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot3_X.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot_Normal.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot_Normal_X.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot_X.png
+Assets/Arts/gui2/UI/GameUI/Inventory/InventorySlots/Slots/Slot_X_1.png
+Assets/Arts/gui2/UI/GameUI/Inventory/bg
+Assets/Arts/gui2/UI/GameUI/Inventory/bg/InventoryUI.png
+Assets/Arts/gui2/UI/GameUI/Inventory/bg/InventoryUI1.png
+Assets/Arts/gui2/UI/GameUI/Inventory/bg/InventoryUI2.png
+Assets/Arts/gui2/UI/GameUI/Notifications
+Assets/Arts/gui2/UI/GameUI/Notifications/Notification.png
+Assets/Arts/gui2/UI/GameUI/Notifications/Warning.png
+Assets/Arts/gui2/UI/GameUI/Notifications/exclamination.png
+Assets/Arts/gui2/UI/GameUI/Player
+Assets/Arts/gui2/UI/GameUI/Player/HUD_Damage.png
+Assets/Arts/gui2/UI/GameUI/Player/HUD_Damage_Normal.png
+Assets/Arts/gui2/UI/GameUI/Reticles
+Assets/Arts/gui2/UI/GameUI/Reticles/CrossDot.png
+Assets/Arts/gui2/UI/GameUI/Reticles/CrossDotRedInteract.psd
+Assets/Arts/gui2/UI/GameUI/Reticles/DoorInteractHand.psd
+Assets/Arts/gui2/UI/GameUI/Reticles/Examine.png
+Assets/Arts/gui2/UI/GameUI/Reticles/GrabHand.psd
+Assets/Arts/gui2/UI/GameUI/Reticles/Hand.png
+Assets/Arts/gui2/UI/GameUI/Reticles/Hand1.png
+Assets/Arts/gui2/UI/GameUI/Reticles/LeverHand.psd
+Assets/Arts/gui2/UI/GameUI/RomboIcon.psd
+Assets/Arts/gui2/cover.png
+Assets/Arts/gui2/healthHolder.png
+Assets/Controllers
+Assets/Controllers/GolemController.controller
+Assets/Controllers/TurtleShellController.controller
+Assets/Controllers/slmController.controller
+Assets/Font
+Assets/Font/Arial.ttf
+Assets/Font/_Content.ttf
+Assets/Font/_TitleButton.ttf
+Assets/Font/cuyuan.ttf
+Assets/Plugins
+Assets/Plugins/DOTween
+Assets/Plugins/DOTween/DOTween.XML
+Assets/Plugins/DOTween/DOTween.dll
+Assets/Plugins/DOTween/DOTween.dll.mdb
+Assets/Plugins/DOTween/Editor
+Assets/Plugins/DOTween/Editor/DOTweenEditor.XML
+Assets/Plugins/DOTween/Editor/DOTweenEditor.dll
+Assets/Plugins/DOTween/Editor/DOTweenEditor.dll.mdb
+Assets/Plugins/DOTween/Editor/Imgs
+Assets/Plugins/DOTween/Editor/Imgs/DOTweenIcon.png
+Assets/Plugins/DOTween/Editor/Imgs/DOTweenMiniIcon.png
+Assets/Plugins/DOTween/Editor/Imgs/Footer.png
+Assets/Plugins/DOTween/Editor/Imgs/Footer_dark.png
+Assets/Plugins/DOTween/Editor/Imgs/Header.jpg
+Assets/Plugins/DOTween/Modules
+Assets/Plugins/DOTween/Modules/DOTweenModuleAudio.cs
+Assets/Plugins/DOTween/Modules/DOTweenModuleEPOOutline.cs
+Assets/Plugins/DOTween/Modules/DOTweenModulePhysics.cs
+Assets/Plugins/DOTween/Modules/DOTweenModulePhysics2D.cs
+Assets/Plugins/DOTween/Modules/DOTweenModuleSprite.cs
+Assets/Plugins/DOTween/Modules/DOTweenModuleUI.cs
+Assets/Plugins/DOTween/Modules/DOTweenModuleUnityVersion.cs
+Assets/Plugins/DOTween/Modules/DOTweenModuleUtils.cs
+Assets/Plugins/DOTween/readme.txt
+Assets/Plugins/ExcelResolutionForUnity
+Assets/Plugins/ExcelResolutionForUnity/Excel.dll
+Assets/Plugins/ExcelResolutionForUnity/ICSharpCode.SharpZipLib.dll
+Assets/Resources
+Assets/Resources/Effects
+Assets/Resources/Effects/GreenBloodExplosion.prefab
+Assets/Resources/Effects/HealOnce.prefab
+Assets/Resources/Effects/SmokeExplosionDark.prefab
+Assets/Resources/Effects/SpinZoneBlue.prefab
+Assets/Resources/Icon
+Assets/Resources/Icon/BlueCard.png
+Assets/Resources/Icon/GreenCard.png
+Assets/Resources/Icon/GreyCard.png
+Assets/Resources/Icon/RedCard.png
+Assets/Resources/Icon/armor_01a.png
+Assets/Resources/Icon/arrow_03e.png
+Assets/Resources/Icon/bone01a.png
+Assets/Resources/Icon/book_01a.png
+Assets/Resources/Icon/book_01g.png
+Assets/Resources/Icon/book_02f.png
+Assets/Resources/Icon/boots_01a.png
+Assets/Resources/Icon/bow_01a.png
+Assets/Resources/Icon/candle_01a.png
+Assets/Resources/Icon/coin_05d.png
+Assets/Resources/Icon/crystal_01j.png
+Assets/Resources/Icon/potion_01a.png
+Assets/Resources/Icon/ring_01a.png
+Assets/Resources/Icon/scroll_01a.png
+Assets/Resources/Icon/shard_01a.png
+Assets/Resources/Icon/spellbook_03e.png
+Assets/Resources/Icon/staff_01a.png
+Assets/Resources/Icon/stoneblock_01a.png
+Assets/Resources/Icon/sword_01a.png
+Assets/Resources/Icon/sword_03e.png
+Assets/Resources/Icon/wood_01a.png
+Assets/Resources/Map
+Assets/Resources/Map/Door.prefab
+Assets/Resources/Map/Floor.prefab
+Assets/Resources/Map/Wall.prefab
+Assets/Resources/Mats
+Assets/Resources/Mats/outline.mat
+Assets/Resources/Mats/toonAuryn.mat
+Assets/Resources/Mats/toonGolem.mat
+Assets/Resources/Mats/toonMiniModel.mat
+Assets/Resources/Mats/toonMiniModel2.mat
+Assets/Resources/Model
+Assets/Resources/Model/Barrel.prefab
+Assets/Resources/Model/Chest.prefab
+Assets/Resources/Model/Golem.prefab
+Assets/Resources/Model/Slime.prefab
+Assets/Resources/Model/TurtleShell.prefab
+Assets/Resources/Sounds
+Assets/Resources/Sounds/BGM
+Assets/Resources/Sounds/BGM/battle.wav
+Assets/Resources/Sounds/BGM/bgm1.mp3
+Assets/Resources/Sounds/Cards
+Assets/Resources/Sounds/Cards/cardPlace.wav
+Assets/Resources/Sounds/Cards/cardShove.wav
+Assets/Resources/Sounds/Cards/draw.wav
+Assets/Resources/Sounds/Effect
+Assets/Resources/Sounds/Effect/healspell.aif
+Assets/Resources/Sounds/Effect/lose.wav
+Assets/Resources/Sounds/Effect/sword.wav
+Assets/Resources/UI
+Assets/Resources/UI/BagUI.prefab
+Assets/Resources/UI/CardItem.prefab
+Assets/Resources/UI/FightUI.prefab
+Assets/Resources/UI/GameUI.prefab
+Assets/Resources/UI/HpItem.prefab
+Assets/Resources/UI/LineUI.prefab
+Assets/Resources/UI/LoginUI.prefab
+Assets/Resources/UI/SelectCardUI.prefab
+Assets/Resources/UI/Tips.prefab
+Assets/Resources/UI/actionIcon.prefab
+Assets/Resources/level
+Assets/Resources/level/level1.prefab
+Assets/Scenes
+Assets/Scenes/game
+Assets/Scenes/game.unity
+Assets/Scenes/game/LightingData.asset
+Assets/Scenes/game/Lightmap-0_comp_dir.png
+Assets/Scenes/game/Lightmap-0_comp_light.exr
+Assets/Shaders
+Assets/Shaders/outline.shader

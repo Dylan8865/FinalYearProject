@@ -1,0 +1,82 @@
+# ci/sync_mirror.psi
+# Syncs committed project files into the Tester_mirror directory.
+# Run this after every git commit, as required by AGENTS.md.
+#
+# HOW TO RUN (from the project root):
+#   powershell -ExecutionPolicy Bypass -NoProfile -File "ci\_run_sync.ps1"
+#
+# The canonical invocation helper is ci\_run_sync.ps1 which dot-sources this
+# file after setting $ProjectRoot and $MirrorRoot to absolute paths, so
+# this file can also be dot-sourced directly in a session where those
+# variables are already defined.
+
+$ErrorActionPreference = "Stop"
+
+# If called standalone (not dot-sourced with pre-set vars), derive paths from CWD.
+if (-not (Get-Variable -Name ProjectRoot -ErrorAction SilentlyContinue)) {
+    $ProjectRoot = (Get-Location).Path
+}
+if (-not (Get-Variable -Name MirrorRoot -ErrorAction SilentlyContinue)) {
+    $ProjectName = Split-Path $ProjectRoot -Leaf
+    $ProjectParent = Split-Path $ProjectRoot -Parent
+    $MirrorRoot = Join-Path $ProjectParent ($ProjectName + "_mirror")
+}
+
+Write-Host "=== sync_mirror ===" -ForegroundColor Cyan
+Write-Host "Source : $ProjectRoot"
+Write-Host "Mirror : $MirrorRoot"
+
+if (-not (Test-Path $MirrorRoot)) {
+    Write-Error "Mirror directory not found: $MirrorRoot"
+    exit 1
+}
+
+$fileList = (git -C $ProjectRoot ls-files) -split "`n" | Where-Object {
+    $path = $_.Trim().Replace("\", "/")
+    $path -ne "" -and
+    -not $path.StartsWith("Tester_mirror/") -and
+    -not $path.StartsWith("Library/") -and
+    -not $path.StartsWith("Temp/") -and
+    -not $path.StartsWith("Logs/") -and
+    -not $path.StartsWith("UserSettings/")
+}
+Write-Host "Files tracked by git: $($fileList.Count)"
+
+$copied  = 0
+$skipped = 0
+$errors  = 0
+
+foreach ($relPath in $fileList) {
+    $relPath = $relPath.Trim().Replace("/", "\")
+    $src     = Join-Path $ProjectRoot $relPath
+    $dst     = Join-Path $MirrorRoot  $relPath
+
+    if (-not (Test-Path $src -PathType Leaf)) {
+        Write-Warning "MISSING: $relPath"
+        $skipped++
+        continue
+    }
+
+    try {
+        $dstDir = Split-Path $dst -Parent
+        if (-not (Test-Path $dstDir)) {
+            New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
+        }
+        Copy-Item -Path $src -Destination $dst -Force
+        $copied++
+    }
+    catch {
+        Write-Warning "ERROR: $relPath -- $_"
+        $errors++
+    }
+}
+
+Write-Host ""
+Write-Host "Copied : $copied   Skipped: $skipped   Errors: $errors"
+
+if ($errors -gt 0) {
+    Write-Host "Mirror sync completed WITH ERRORS." -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Mirror sync complete. OK" -ForegroundColor Green
