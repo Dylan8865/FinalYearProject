@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f58006914f052c74aab01ebc496f2f09, type: 3}
+  m_Name: Ammonia
+  m_EditorClassIdentifier: Assembly-CSharp::CardData
+  <Description>k__BackingField: Apply Posion 3 round
+  <Mana>k__BackingField: 2
+  <Image>k__BackingField: {fileID: 21300000, guid: 2803bf783eab1574383db5e22ea4d538, type: 3}
+  <Formula>k__BackingField: NH<sub>3</sub>
+  <ManualTargetEffect>k__BackingField:
+    rid: -2
+  <OtherEffects>k__BackingField:
+  - <TargetMode>k__BackingField:
+      rid: 8809800207107883088
+    <Effect>k__BackingField:
+      rid: 8809800207107883089
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 8809800207107883088
+      type: {class: AllEnemiesTM, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 8809800207107883089
+      type: {class: AddStatusEffectEffect, ns: , asm: Assembly-CSharp}
+      data:
+        statusEffectType: 1
+        stackCount: 3
