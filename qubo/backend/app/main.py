@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.auth.routes import router as auth_router
+from app.api.v1.quiz.routes import router as quiz_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -19,8 +20,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routes
+# Include API routes
 app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(quiz_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

@@ -9,6 +9,7 @@ import {
   PasswordChangeRequest,
   User 
 } from '@/types/auth';
+import { GeneratedQuiz, QuizDifficulty, QuizQuestionType } from '@/types/quiz';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -72,6 +73,27 @@ class AuthService {
 
   async updateProfile(data: ProfileUpdateRequest): Promise<User> {
     const response = await this.api.put<User>('/auth/profile', data);
+    return response.data;
+  }
+
+  async generateQuiz(
+    files: File[],
+    questionType: QuizQuestionType,
+    difficulty: QuizDifficulty,
+    questionCount = 5
+  ): Promise<GeneratedQuiz> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+    formData.append('question_type', questionType);
+    formData.append('difficulty', difficulty);
+    formData.append('question_count', String(questionCount));
+
+    const response = await this.api.post<GeneratedQuiz>('/quiz/generate', formData, {
+      // Let the browser add the multipart boundary instead of inheriting the
+      // JSON content type configured for the rest of the API client.
+      headers: { 'Content-Type': undefined },
+      timeout: 150000,
+    });
     return response.data;
   }
 

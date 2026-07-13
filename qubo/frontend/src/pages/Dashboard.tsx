@@ -3,29 +3,14 @@ import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { Subject } from '@/types/auth';
 import { useNavigate } from 'react-router-dom';
-import {
-  FiArchive,
-  FiBookOpen,
-  FiFolder,
-  FiGrid,
-  FiHelpCircle,
-  FiLogOut,
-  FiPlayCircle,
-  FiSettings,
-  FiTarget,
-  FiUser,
-} from 'react-icons/fi';
+import { FiLogOut, FiSettings, FiTarget } from 'react-icons/fi';
+import AppSidebar from '@/components/layout/AppSidebar';
 
 export default function Dashboard() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [studentSubjects, setStudentSubjects] = useState<Subject[]>([]);
   const [subjectsError, setSubjectsError] = useState('');
-  const [profileImageFailed, setProfileImageFailed] = useState(false);
-
-  useEffect(() => {
-    setProfileImageFailed(false);
-  }, [user?.profile_picture_url]);
 
   useEffect(() => {
     const loadStudentSubjects = async () => {
@@ -98,55 +83,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
-      <aside className="hidden border-r border-slate-200/80 bg-[#f8fbff] px-5 py-7 lg:flex lg:flex-col">
-        <div className="mb-8 px-4">
-          <p className="text-xl font-extrabold tracking-tight text-primary">Qubo</p>
-          <p className="mt-1 text-xs font-bold text-slate-700">SPM Mastery</p>
-        </div>
-
-        <nav className="space-y-1 text-sm font-semibold text-slate-500">
-          {[
-            { icon: FiGrid, label: 'Dashboard', path: '/dashboard' },
-            { icon: FiBookOpen, label: 'Subjects' },
-            { icon: FiPlayCircle, label: 'Game Room' },
-            { icon: FiHelpCircle, label: 'Quizzes' },
-            { icon: FiArchive, label: 'Library' },
-            { icon: FiFolder, label: 'Resource' },
-            { icon: FiUser, label: 'Profile', path: '/profile' },
-          ].map((item) => (
-            <button
-              key={item.label}
-              onClick={() => item.path && navigate(item.path)}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition hover:bg-blue-50 hover:text-primary"
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="mt-auto rounded-[28px] border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Signed in as</p>
-          <div className="mt-3 flex items-center gap-3">
-            {user.profile_picture_url && !profileImageFailed ? (
-              <img
-                src={user.profile_picture_url}
-                alt={`${user.full_name} profile`}
-                onError={() => setProfileImageFailed(true)}
-                className="h-11 w-11 rounded-full border border-slate-200 object-cover"
-              />
-            ) : (
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                {user.full_name?.slice(0, 2).toUpperCase() || 'QB'}
-              </div>
-            )}
-            <div>
-              <p className="font-semibold text-slate-900">{user.full_name}</p>
-              <p className="text-sm text-slate-500 capitalize">{user.role}</p>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <AppSidebar />
 
       <div className="min-w-0">
         <header className="flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-5 py-4 backdrop-blur md:px-8">

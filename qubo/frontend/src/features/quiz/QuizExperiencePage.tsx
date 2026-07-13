@@ -1,0 +1,276 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AppSidebar from '@/components/layout/AppSidebar';
+import { useQuizStore } from '@/contexts/quizStore';
+import {
+  FiArrowRight,
+  FiCheck,
+  FiClock,
+  FiEdit3,
+  FiRefreshCw,
+  FiTarget,
+} from 'react-icons/fi';
+
+const formatTime = (totalSeconds: number) => {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+};
+
+const normalizeAnswer = (value: string) => value.trim().toLocaleLowerCase();
+
+export default function QuizExperiencePage() {
+  const navigate = useNavigate();
+  const quiz = useQuizStore((state) => state.generatedQuiz);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [writtenAnswer, setWrittenAnswer] = useState('');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    if (isComplete || !quiz) {
+      return;
+    }
+    const timer = window.setInterval(() => setElapsedSeconds((value) => value + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [isComplete, quiz]);
+
+  const questions = quiz?.questions ?? [];
+  const currentQuestion = questions[currentIndex];
+  const hasAnswered = Object.prototype.hasOwnProperty.call(answers, currentIndex);
+  const selectedAnswer = answers[currentIndex] ?? '';
+  const isCorrect = hasAnswered && currentQuestion
+    ? normalizeAnswer(selectedAnswer) === normalizeAnswer(currentQuestion.correct_answer)
+    : false;
+  const correctCount = useMemo(
+    () => Object.entries(answers).filter(([index, answer]) => {
+      const question = questions[Number(index)];
+      return question && normalizeAnswer(answer) === normalizeAnswer(question.correct_answer);
+    }).length,
+    [answers, questions]
+  );
+
+  const moveNext = () => {
+    setWrittenAnswer('');
+    if (currentIndex === questions.length - 1) {
+      setIsComplete(true);
+    } else {
+      setCurrentIndex((value) => value + 1);
+    }
+  };
+
+  const restartQuiz = () => {
+    setCurrentIndex(0);
+    setAnswers({});
+    setWrittenAnswer('');
+    setElapsedSeconds(0);
+    setIsComplete(false);
+  };
+
+  if (!quiz || questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+        <AppSidebar />
+        <main className="flex min-h-screen items-center justify-center px-5 py-10">
+          <div className="w-full max-w-lg rounded-[34px] border border-slate-200 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+            <FiEdit3 className="mx-auto h-10 w-10 text-slate-300" />
+            <h1 className="mt-5 text-3xl font-extrabold text-slate-950">No generated quiz</h1>
+            <p className="mt-3 text-sm leading-6 text-slate-500">Upload study material and generate questions before starting a quiz.</p>
+            <button
+              onClick={() => navigate('/quiz/create')}
+              className="mt-7 rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
+            >
+              Open Quiz Creator
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const score = Math.round((correctCount / questions.length) * 100);
+
+  if (isComplete) {
+    return (
+      <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+        <AppSidebar />
+        <main className="flex min-h-screen items-center justify-center px-5 py-10">
+          <div className="w-full max-w-xl rounded-[36px] border border-slate-200 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:p-10">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <FiTarget className="h-9 w-9" />
+            </div>
+            <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Quiz completed</p>
+            <h1 className="mt-2 text-4xl font-extrabold text-slate-950">{quiz.title}</h1>
+            <p className="mt-3 text-slate-500">You answered {correctCount} of {questions.length} questions correctly.</p>
+
+            <div className="mt-7 grid grid-cols-3 gap-3">
+              {[
+                ['Score', `${score}%`],
+                ['Time', formatTime(elapsedSeconds)],
+                ['Subject', quiz.subject],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{label}</p>
+                  <p className="mt-2 text-lg font-extrabold text-slate-900">{value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={restartQuiz}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 px-5 py-3 font-bold text-slate-700 hover:bg-slate-50"
+              >
+                <FiRefreshCw /> Retake quiz
+              </button>
+              <button
+                onClick={() => navigate('/quiz/create')}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
+              >
+                Create another <FiArrowRight />
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+      <AppSidebar />
+      <main className="mx-auto w-full max-w-6xl px-5 py-8 md:px-8 lg:py-10">
+        <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">{quiz.subject} · {quiz.difficulty}</p>
+            <h1 className="mt-1 text-3xl font-extrabold text-slate-950">Question {currentIndex + 1} of {questions.length}</h1>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm">
+            <FiClock className="text-slate-400" />
+            Time taken: {formatTime(elapsedSeconds)}
+          </div>
+        </div>
+
+        <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
+          <div
+            className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+            style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+          />
+        </div>
+
+        <div className="mt-7 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_430px]">
+          <div className="space-y-5">
+            <section className="rounded-[30px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] md:p-8">
+              <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-extrabold uppercase text-blue-700">
+                {currentQuestion.question_type}
+              </span>
+              <p className="mt-5 text-xl font-bold leading-8 text-slate-900 md:text-2xl">{currentQuestion.question}</p>
+              <p className="mt-8 text-xs font-semibold text-slate-400">Source: {quiz.source_files.join(', ')}</p>
+            </section>
+
+            {hasAnswered && (
+              <section className={`rounded-[26px] border p-5 ${isCorrect ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
+                <div className="flex items-start gap-3">
+                  <div className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-white ${isCorrect ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                    {isCorrect ? <FiCheck /> : <span className="font-extrabold">!</span>}
+                  </div>
+                  <div>
+                    <p className={`font-extrabold ${isCorrect ? 'text-emerald-800' : 'text-red-800'}`}>
+                      {isCorrect ? 'Correct!' : 'Not quite.'}
+                    </p>
+                    {!isCorrect && <p className="mt-1 text-sm font-semibold text-slate-700">Expected answer: {currentQuestion.correct_answer}</p>}
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{currentQuestion.explanation}</p>
+                  </div>
+                </div>
+              </section>
+            )}
+          </div>
+
+          <aside>
+            <p className="mb-4 text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">
+              {currentQuestion.question_type === 'mcq' ? 'Select an option' : 'Write your answer'}
+            </p>
+
+            {currentQuestion.question_type === 'mcq' ? (
+              <div className="space-y-3">
+                {currentQuestion.options.map((option, index) => {
+                  const isSelected = selectedAnswer === option;
+                  const isCorrectOption = hasAnswered && normalizeAnswer(option) === normalizeAnswer(currentQuestion.correct_answer);
+                  return (
+                    <button
+                      key={`${index}-${option}`}
+                      disabled={hasAnswered}
+                      onClick={() => setAnswers((current) => ({ ...current, [currentIndex]: option }))}
+                      className={`flex min-h-[62px] w-full items-center gap-4 rounded-2xl border-2 px-4 text-left font-bold shadow-sm ${
+                        isCorrectOption
+                          ? 'border-emerald-400 bg-emerald-50 text-emerald-800'
+                          : isSelected
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-transparent bg-white text-slate-700 hover:border-blue-300'
+                      }`}
+                    >
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        {String.fromCharCode(65 + index)}
+                      </span>
+                      <span className="flex-1">{option}</span>
+                      {isCorrectOption && <FiCheck className="text-emerald-600" />}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-white p-4 shadow-sm">
+                <textarea
+                  value={writtenAnswer}
+                  onChange={(event) => setWrittenAnswer(event.target.value)}
+                  disabled={hasAnswered}
+                  rows={currentQuestion.question_type === 'short' ? 5 : 2}
+                  placeholder={currentQuestion.question_type === 'fill' ? 'Enter the missing word or phrase' : 'Write a concise answer'}
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-800 outline-none focus:border-primary focus:bg-white"
+                />
+                <button
+                  disabled={!writtenAnswer.trim() || hasAnswered}
+                  onClick={() => setAnswers((current) => ({ ...current, [currentIndex]: writtenAnswer.trim() }))}
+                  className="mt-3 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-40"
+                >
+                  Submit answer
+                </button>
+              </div>
+            )}
+
+            <div className="mt-6 grid grid-cols-[1fr_1.4fr] gap-3">
+              <button
+                onClick={moveNext}
+                className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-bold text-slate-700 hover:bg-slate-300"
+              >
+                Skip question
+              </button>
+              <button
+                onClick={moveNext}
+                disabled={!hasAnswered}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 disabled:opacity-40"
+              >
+                {currentIndex === questions.length - 1 ? 'Finish quiz' : 'Next question'}
+                <FiArrowRight />
+              </button>
+            </div>
+
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-white p-4">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Current score</p>
+                <p className="mt-2 text-2xl font-extrabold text-slate-900">{score}%</p>
+              </div>
+              <div className="rounded-2xl bg-white p-4">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Average speed</p>
+                <p className="mt-2 text-2xl font-extrabold text-slate-900">
+                  {Object.keys(answers).length ? Math.round(elapsedSeconds / Object.keys(answers).length) : 0}s
+                </p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  );
+}
