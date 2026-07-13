@@ -1,53 +1,121 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { ProfileUpdateRequest, Subject } from '@/types/auth';
-import { FiEdit2, FiSave, FiX, FiLock } from 'react-icons/fi';
+import {
+  FiArrowLeft,
+  FiCalendar,
+  FiCheckCircle,
+  FiEdit2,
+  FiEye,
+  FiEyeOff,
+  FiImage,
+  FiLock,
+  FiSave,
+  FiUser,
+  FiX,
+} from 'react-icons/fi';
+
+const getApiErrorMessage = (requestError: any, fallback: string) => {
+  const detail = requestError.response?.data?.detail;
+
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => (typeof item === 'string' ? item : item?.msg))
+      .filter(Boolean)
+      .join(', ') || fallback;
+  }
+
+  return typeof detail === 'string' ? detail : fallback;
+};
+
+const getTodayDateString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export default function ProfileSettings() {
   const { user, setUser } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    full_name: user?.full_name || '',
-    school: user?.school || '',
-    form_level: user?.form_level || '',
-    target_grade: user?.target_grade || '',
-    profile_picture_url: user?.profile_picture_url || '',
-  });
-
-  // Subjects state
+  const [profileImageFailed, setProfileImageFailed] = useState(false);
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
-
-  // Password state
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     old_password: '',
     new_password: '',
     confirm_password: '',
   });
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordSuccess, setPasswordSuccess] = useState('');
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    old: false,
+    new: false,
+    confirm: false,
+  });
+  const [formData, setFormData] = useState({
+    username: user?.username || '',
+    full_name: user?.full_name || '',
+    profile_picture_url: user?.profile_picture_url || '',
+    school: user?.school || '',
+    form_level: user?.form_level || '',
+    target_grade: user?.target_grade || '',
+    target_exam_date: user?.target_exam_date || '',
+  });
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    setFormData({
+      username: user.username || '',
+      full_name: user.full_name || '',
+      profile_picture_url: user.profile_picture_url || '',
+      school: user.school || '',
+      form_level: user.form_level || '',
+      target_grade: user.target_grade || '',
+      target_exam_date: user.target_exam_date ? user.target_exam_date.slice(0, 10) : '',
+    });
+  }, [user]);
+
+  useEffect(() => {
+    setProfileImageFailed(false);
+  }, [formData.profile_picture_url]);
 
   useEffect(() => {
     const loadSubjects = async () => {
+      if (!user || user.role !== 'student') {
+        return;
+      }
+
       try {
-        const [all, selected] = await Promise.all([
+        const [allSubjects, selectedSubjects] = await Promise.all([
           authService.getSubjects(),
           authService.getStudentSubjects(),
         ]);
-        setAvailableSubjects(all);
-        setSelectedSubjectIds(selected.map((s) => s.id));
-      } catch (err) {
-        console.error('Failed to load subjects:', err);
+        setAvailableSubjects(allSubjects);
+        setSelectedSubjectIds(selectedSubjects.map((subject) => subject.id));
+      } catch (fetchError) {
+        console.error('Failed to load subjects:', fetchError);
       }
     };
-    if (user && user.role === 'student') {
-      loadSubjects();
-    }
+
+    loadSubjects();
   }, [user]);
+
+  const selectedSubjectLabels = useMemo(
+    () =>
+      availableSubjects
+        .filter((subject) => selectedSubjectIds.includes(subject.id))
+        .map((subject) => subject.subject_name),
+    [availableSubjects, selectedSubjectIds]
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -63,28 +131,39 @@ export default function ProfileSettings() {
   };
 
   const handleSave = async () => {
+    if (!user) {
+      return;
+    }
+
+    if (formData.target_exam_date && formData.target_exam_date < getTodayDateString()) {
+      setError('Target exam date cannot be in the past.');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
       const updateData: ProfileUpdateRequest = {
+        username: formData.username,
         full_name: formData.full_name,
+        profile_picture_url: formData.profile_picture_url,
         school: formData.school,
         form_level: formData.form_level,
         target_grade: formData.target_grade,
-        profile_picture_url: formData.profile_picture_url,
+        target_exam_date: formData.target_exam_date || undefined,
       };
 
       const updatedUser = await authService.updateProfile(updateData);
-      
-      if (user?.role === 'student') {
+
+      if (user.role === 'student') {
         await authService.updateStudentSubjects(selectedSubjectIds);
       }
 
       setUser(updatedUser);
       setIsEditing(false);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to update profile');
+    } catch (saveError: any) {
+      setError(getApiErrorMessage(saveError, 'Failed to update profile'));
     } finally {
       setIsLoading(false);
     }
@@ -104,260 +183,369 @@ export default function ProfileSettings() {
 
     try {
       await authService.changePassword(passwordForm);
-      setPasswordSuccess('Password changed successfully!');
+      setPasswordSuccess('Password changed successfully');
       setPasswordForm({ old_password: '', new_password: '', confirm_password: '' });
-    } catch (err: any) {
-      setPasswordError(err.response?.data?.detail || 'Failed to change password');
+      setPasswordVisibility({ old: false, new: false, confirm: false });
+    } catch (changeError: any) {
+      setPasswordError(getApiErrorMessage(changeError, 'Failed to change password'));
     } finally {
       setIsChangingPassword(false);
     }
   };
 
   if (!user) {
-    return <div>Loading...</div>;
+    return <div className="min-h-screen bg-[#f4f7fb]" />;
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
-      {/* Profile Info Card */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Profile Settings</h2>
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
-          >
-            {isEditing ? (
-              <>
-                <FiX /> Cancel
-              </>
-            ) : (
-              <>
-                <FiEdit2 /> Edit
-              </>
-            )}
-          </button>
-        </div>
+    <div className="min-h-screen bg-[#f4f7fb] text-slate-950">
+      <div className="mx-auto w-full max-w-7xl px-5 py-6 md:px-8 md:py-8">
+        <button
+          onClick={() => window.history.back()}
+          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900"
+        >
+          <FiArrowLeft className="h-4 w-4" />
+          Back
+        </button>
 
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            {error}
-          </div>
-        )}
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+          <section className="rounded-[32px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)] md:p-8">
+            <div className="flex flex-col gap-4 border-b border-slate-100 pb-6 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary">Profile settings</p>
+                <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">Manage your account</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                  Update your identity, academic details, and selected SPM subjects using data stored in the database.
+                </p>
+              </div>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                value={user.email}
-                disabled
-                className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-              <input
-                type="text"
-                value={user.username}
-                disabled
-                className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-            <input
-              type="text"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none disabled:bg-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture URL</label>
-            <input
-              type="text"
-              name="profile_picture_url"
-              value={formData.profile_picture_url}
-              onChange={handleChange}
-              disabled={!isEditing}
-              placeholder="https://example.com/avatar.jpg"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none disabled:bg-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">School</label>
-            <input
-              type="text"
-              name="school"
-              value={formData.school}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none disabled:bg-gray-100"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Form Level</label>
-              <select
-                name="form_level"
-                value={formData.form_level}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none disabled:bg-gray-100"
+              <button
+                onClick={() => setIsEditing((value) => !value)}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                <option value="">Select form level</option>
-                <option value="Form 4">Form 4</option>
-                <option value="Form 5">Form 5</option>
-              </select>
+                {isEditing ? <FiX className="h-4 w-4" /> : <FiEdit2 className="h-4 w-4" />}
+                {isEditing ? 'Cancel' : 'Edit profile'}
+              </button>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Target Grade</label>
-              <input
-                type="text"
-                name="target_grade"
-                value={formData.target_grade}
-                onChange={handleChange}
-                disabled={!isEditing}
-                placeholder="e.g., A, A+"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none disabled:bg-gray-100"
-              />
-            </div>
-          </div>
+            {error && (
+              <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Learning Style</label>
-            <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 capitalize">
-              {user.learning_style || 'Not set'}
-            </div>
-          </div>
+            <div className="mt-6 grid gap-5 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">Email</label>
+                <div className="rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-500">
+                  {user.email}
+                </div>
+              </div>
 
-          {/* SPM Subjects Multi-Select (Students Only) */}
-          {user.role === 'student' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">SPM Subjects</label>
-              <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                {availableSubjects.map((subject) => (
-                  <label
-                    key={subject.id}
-                    className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition select-none ${
-                      isEditing
-                        ? 'hover:bg-white'
-                        : 'pointer-events-none opacity-80'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedSubjectIds.includes(subject.id)}
-                      onChange={() => handleSubjectToggle(subject.id)}
-                      disabled={!isEditing}
-                      className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                    />
-                    <span className="text-sm text-gray-800 font-medium">
-                      {subject.subject_name}
-                    </span>
-                  </label>
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">Role</label>
+                <div className="rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold capitalize text-slate-500">
+                  {user.role}
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">Username</label>
+                <div className="relative">
+                  <FiUser className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">Full name</label>
+                <input
+                  type="text"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">Profile picture URL</label>
+                <div className="relative">
+                  <FiImage className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    name="profile_picture_url"
+                    value={formData.profile_picture_url}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    placeholder="https://..."
+                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                  />
+                </div>
+                {formData.profile_picture_url && (
+                  <div className="mt-3 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    {!profileImageFailed ? (
+                      <img
+                        src={formData.profile_picture_url}
+                        alt="Profile preview"
+                        onError={() => setProfileImageFailed(true)}
+                        className="h-14 w-14 rounded-full border border-slate-200 object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+                        <FiImage className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Preview</p>
+                      <p className={`mt-1 text-sm font-semibold ${profileImageFailed ? 'text-red-600' : 'text-slate-700'}`}>
+                        {profileImageFailed ? 'This image URL could not be loaded.' : 'Image loaded successfully.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">School</label>
+                <input
+                  type="text"
+                  name="school"
+                  value={formData.school}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">Form level</label>
+                <select
+                  name="form_level"
+                  value={formData.form_level}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                >
+                  <option value="">Select form level</option>
+                  <option value="Form 4">Form 4</option>
+                  <option value="Form 5">Form 5</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">Target grade</label>
+                <input
+                  type="text"
+                  name="target_grade"
+                  value={formData.target_grade}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  placeholder="A, A+, etc."
+                  className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">Target exam date</label>
+                <div className="relative">
+                  <FiCalendar className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="date"
+                    name="target_exam_date"
+                    value={formData.target_exam_date}
+                    onChange={handleChange}
+                    min={getTodayDateString()}
+                    disabled={!isEditing}
+                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
+              <div className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Learning style</p>
+                <p className="mt-2 text-sm font-semibold capitalize text-slate-700">
+                  {user.learning_style || 'Not set'}
+                </p>
+              </div>
+
+              {isEditing && (
+                <button
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <FiSave className="h-4 w-4" />
+                  {isLoading ? 'Saving...' : 'Save changes'}
+                </button>
+              )}
+            </div>
+
+            {user.role === 'student' && (
+              <div className="mt-8 rounded-[28px] border border-slate-100 bg-slate-50 p-5">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Target subjects</p>
+                    <h2 className="mt-2 text-xl font-extrabold text-slate-950">Subjects stored in the database</h2>
+                  </div>
+                  <p className="text-sm text-slate-500">
+                    {selectedSubjectLabels.length} selected
+                  </p>
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {availableSubjects.length > 0 ? (
+                    availableSubjects.map((subject) => (
+                      <label
+                        key={subject.id}
+                        className={`flex items-center gap-3 rounded-2xl border px-4 py-3 transition ${
+                          isEditing ? 'border-slate-200 bg-white' : 'border-slate-100 bg-white/70'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedSubjectIds.includes(subject.id)}
+                          onChange={() => handleSubjectToggle(subject.id)}
+                          disabled={!isEditing}
+                          className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                        />
+                        <div>
+                          <p className="text-sm font-bold text-slate-800">{subject.subject_name}</p>
+                          <p className="text-xs text-slate-500">{subject.category || 'Subject'}</p>
+                        </div>
+                      </label>
+                    ))
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500 sm:col-span-2">
+                      No subjects loaded from the database yet.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+
+          <aside className="space-y-6">
+            <div className="rounded-[32px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Account summary</p>
+              <h2 className="mt-2 text-2xl font-extrabold text-slate-950">Your profile data</h2>
+
+              <div className="mt-5 space-y-3">
+                {[
+                  ['Username', user.username],
+                  ['Full name', user.full_name],
+                  ['School', user.school || 'Not set'],
+                  ['Form level', user.form_level || 'Not set'],
+                  ['Target grade', user.target_grade || 'Not set'],
+                  ['Target exam date', user.target_exam_date ? user.target_exam_date.slice(0, 10) : 'Not set'],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                    <span className="text-sm font-semibold text-slate-500">{label}</span>
+                    <span className="text-sm font-bold text-slate-900">{value}</span>
+                  </div>
                 ))}
               </div>
             </div>
-          )}
 
-          {isEditing && (
-            <button
-              onClick={handleSave}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-success hover:bg-success/90 text-white font-semibold rounded-lg transition disabled:opacity-50"
-            >
-              <FiSave /> {isLoading ? 'Saving...' : 'Save Changes'}
-            </button>
-          )}
+            <div className="rounded-[32px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+              <h3 className="flex items-center gap-2 text-lg font-extrabold text-slate-950">
+                <FiLock className="h-5 w-5 text-primary" />
+                Change password
+              </h3>
+
+              {passwordError && (
+                <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+                  {passwordError}
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700">
+                  <FiCheckCircle className="mb-1 inline-block h-4 w-4" /> {passwordSuccess}
+                </div>
+              )}
+
+              <form onSubmit={handlePasswordChange} className="mt-5 space-y-4">
+                <div className="relative">
+                  <input
+                    type={passwordVisibility.old ? 'text' : 'password'}
+                    value={passwordForm.old_password}
+                    onChange={(e) => setPasswordForm((prev) => ({ ...prev, old_password: e.target.value }))}
+                    placeholder="Old password"
+                    required
+                    disabled={isChangingPassword}
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 pr-12 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPasswordVisibility((prev) => ({ ...prev, old: !prev.old }))}
+                    aria-label={passwordVisibility.old ? 'Hide old password' : 'Show old password'}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                  >
+                    {passwordVisibility.old ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type={passwordVisibility.new ? 'text' : 'password'}
+                    value={passwordForm.new_password}
+                    onChange={(e) => setPasswordForm((prev) => ({ ...prev, new_password: e.target.value }))}
+                    placeholder="New password"
+                    required
+                    disabled={isChangingPassword}
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 pr-12 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPasswordVisibility((prev) => ({ ...prev, new: !prev.new }))}
+                    aria-label={passwordVisibility.new ? 'Hide new password' : 'Show new password'}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                  >
+                    {passwordVisibility.new ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type={passwordVisibility.confirm ? 'text' : 'password'}
+                    value={passwordForm.confirm_password}
+                    onChange={(e) => setPasswordForm((prev) => ({ ...prev, confirm_password: e.target.value }))}
+                    placeholder="Confirm new password"
+                    required
+                    disabled={isChangingPassword}
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 pr-12 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPasswordVisibility((prev) => ({ ...prev, confirm: !prev.confirm }))}
+                    aria-label={passwordVisibility.confirm ? 'Hide password confirmation' : 'Show password confirmation'}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                  >
+                    {passwordVisibility.confirm ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+                <button
+                  type="submit"
+                  disabled={isChangingPassword}
+                  className="h-12 w-full rounded-full bg-slate-950 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isChangingPassword ? 'Updating password...' : 'Update password'}
+                </button>
+              </form>
+            </div>
+          </aside>
         </div>
-      </div>
-
-      {/* Change Password Card */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <FiLock /> Change Password
-        </h3>
-
-        {passwordError && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            {passwordError}
-          </div>
-        )}
-
-        {passwordSuccess && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-            {passwordSuccess}
-          </div>
-        )}
-
-        <form onSubmit={handlePasswordChange} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Old Password</label>
-            <input
-              type="password"
-              value={passwordForm.old_password}
-              onChange={(e) =>
-                setPasswordForm((prev) => ({ ...prev, old_password: e.target.value }))
-              }
-              placeholder="••••••••"
-              required
-              disabled={isChangingPassword}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-              <input
-                type="password"
-                value={passwordForm.new_password}
-                onChange={(e) =>
-                  setPasswordForm((prev) => ({ ...prev, new_password: e.target.value }))
-                }
-                placeholder="••••••••"
-                required
-                disabled={isChangingPassword}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-              <input
-                type="password"
-                value={passwordForm.confirm_password}
-                onChange={(e) =>
-                  setPasswordForm((prev) => ({ ...prev, confirm_password: e.target.value }))
-                }
-                placeholder="••••••••"
-                required
-                disabled={isChangingPassword}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isChangingPassword}
-            className="w-full py-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition disabled:opacity-50"
-          >
-            {isChangingPassword ? 'Updating Password...' : 'Update Password'}
-          </button>
-        </form>
       </div>
     </div>
   );

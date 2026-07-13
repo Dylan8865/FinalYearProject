@@ -3,9 +3,9 @@ import { useAuthStore } from '@/contexts/authStore';
 import { Navigate } from 'react-router-dom';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuthStore();
+  const { user, isLoading, isAuthInitialized } = useAuthStore();
 
-  if (isLoading) {
+  if (!isAuthInitialized || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

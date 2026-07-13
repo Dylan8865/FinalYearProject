@@ -6,12 +6,14 @@ interface AuthState {
   user: User | null;
   tokens: AuthTokens | null;
   isLoading: boolean;
+  isAuthInitialized: boolean;
   error: string | null;
   
   // Actions
   setUser: (user: User | null) => void;
   setTokens: (tokens: AuthTokens | null) => void;
   setLoading: (isLoading: boolean) => void;
+  setAuthInitialized: (isAuthInitialized: boolean) => void;
   setError: (error: string | null) => void;
   
   login: (email: string, password: string) => Promise<void>;
@@ -21,6 +23,10 @@ interface AuthState {
 }
 
 const getApiErrorMessage = (error: any, fallback: string) => {
+  if (error.code === 'ECONNABORTED') {
+    return 'The request timed out. Please check your connection and try again.';
+  }
+
   if (!error.response) {
     return 'Cannot connect to backend. Please start the FastAPI server on http://127.0.0.1:8001';
   }
@@ -37,11 +43,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   tokens: null,
   isLoading: false,
+  isAuthInitialized: false,
   error: null,
 
   setUser: (user) => set({ user }),
   setTokens: (tokens) => set({ tokens }),
   setLoading: (isLoading) => set({ isLoading }),
+  setAuthInitialized: (isAuthInitialized) => set({ isAuthInitialized }),
   setError: (error) => set({ error }),
 
   login: async (email, password) => {

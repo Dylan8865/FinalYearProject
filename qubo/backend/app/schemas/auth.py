@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional, List
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 import re
 
@@ -78,13 +78,20 @@ class ProfileUpdateRequest(BaseModel):
     form_level: Optional[str] = None  # Form 4 or Form 5
     school: Optional[str] = None
     target_grade: Optional[str] = None
-    target_exam_date: Optional[datetime] = None
+    target_exam_date: Optional[date] = None
 
     @field_validator("full_name")
     @classmethod
     def validate_optional_full_name(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and not re.match(r"^[A-Za-z\s'-]+$", v):
             raise ValueError("Full name must contain only letters, spaces, hyphens, and apostrophes")
+        return v
+
+    @field_validator("target_exam_date")
+    @classmethod
+    def validate_target_exam_date(cls, v: Optional[date]) -> Optional[date]:
+        if v is not None and v < date.today():
+            raise ValueError("Target exam date cannot be in the past")
         return v
 
 
@@ -181,7 +188,7 @@ class UserResponse(BaseModel):
     form_level: Optional[str] = None
     school: Optional[str] = None
     target_grade: Optional[str] = None
-    target_exam_date: Optional[datetime] = None
+    target_exam_date: Optional[date] = None
     created_at: datetime
 
     class Config:
@@ -206,7 +213,7 @@ class ProfileResponse(BaseModel):
     form_level: Optional[str] = None
     school: Optional[str] = None
     target_grade: Optional[str] = None
-    target_exam_date: Optional[datetime] = None
+    target_exam_date: Optional[date] = None
     created_at: datetime
 
     class Config:

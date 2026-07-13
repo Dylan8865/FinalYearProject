@@ -9,6 +9,8 @@ import RegisterPage from '@/features/auth/RegisterPage';
 import LearningStyleAssessment from '@/features/auth/LearningStyleAssessment';
 import Dashboard from '@/pages/Dashboard';
 import ProfileSettings from '@/features/profile/ProfileSettings';
+import QuizCreatorPage from '@/features/quiz/QuizCreatorPage';
+import QuizExperiencePage from '@/features/quiz/QuizExperiencePage';
 
 // Components
 import ProtectedRoute from '@/components/common/ProtectedRoute';
@@ -16,23 +18,25 @@ import ProtectedRoute from '@/components/common/ProtectedRoute';
 import '@/styles/global.css';
 
 export default function App() {
-  const { setUser, user } = useAuthStore();
+  const { setUser, setAuthInitialized, user, isAuthInitialized } = useAuthStore();
 
   useEffect(() => {
     // Check if user is already authenticated
     const checkAuth = async () => {
-      if (authService.isAuthenticated()) {
-        try {
+      try {
+        if (authService.isAuthenticated()) {
           const userProfile = await authService.getProfile();
           setUser(userProfile);
-        } catch (error) {
-          console.error('Failed to fetch user profile:', error);
         }
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+      } finally {
+        setAuthInitialized(true);
       }
     };
 
     checkAuth();
-  }, [setUser]);
+  }, [setAuthInitialized, setUser]);
 
   return (
     <Router>
@@ -68,11 +72,33 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/quiz/create"
+          element={
+            <ProtectedRoute>
+              <QuizCreatorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quiz/session"
+          element={
+            <ProtectedRoute>
+              <QuizExperiencePage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Default redirect */}
         <Route
           path="/"
-          element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />}
+          element={
+            isAuthInitialized ? (
+              user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+            ) : (
+              <div className="min-h-screen bg-slate-50" />
+            )
+          }
         />
       </Routes>
     </Router>
