@@ -7,7 +7,7 @@ from app.core.security import (
     create_access_token,
     create_refresh_token,
 )
-from app.db.supabase import get_supabase
+from app.db.supabase import create_supabase_auth_client, get_supabase
 from app.schemas.auth import (
     UserRegisterRequest,
     UserLoginRequest,
@@ -169,7 +169,8 @@ class AuthService:
 
         try:
             # Authenticate with Supabase Auth
-            auth_response = supabase.auth.sign_in_with_password(
+            auth_client = create_supabase_auth_client()
+            auth_response = auth_client.auth.sign_in_with_password(
                 {
                     "email": credentials.email,
                     "password": credentials.password,
@@ -332,7 +333,7 @@ class AuthService:
         if update_data.target_grade is not None:
             update_dict["target_grade"] = update_data.target_grade
         if update_data.target_exam_date is not None:
-            update_dict["target_exam_date"] = update_data.target_exam_date
+            update_dict["target_exam_date"] = update_data.target_exam_date.isoformat()
 
         if not update_dict:
             return AuthService.get_profile(user_id)
@@ -395,7 +396,8 @@ class AuthService:
             email = profile["email"]
 
             # Verify old password
-            supabase.auth.sign_in_with_password({
+            auth_client = create_supabase_auth_client()
+            auth_client.auth.sign_in_with_password({
                 "email": email,
                 "password": old_password,
             })

@@ -1,4 +1,7 @@
+import asyncio
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from starlette.concurrency import run_in_threadpool
 from typing import List
 from app.schemas.auth import (
     UserRegisterRequest,
@@ -17,12 +20,22 @@ from app.services.auth import AuthService
 from app.db.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+REGISTRATION_TIMEOUT_SECONDS = 15
 
 
 @router.post("/register", response_model=AuthResponse)
 async def register(user_data: UserRegisterRequest):
     """Register a new user"""
-    return AuthService.register(user_data)
+    try:
+        return await asyncio.wait_for(
+            run_in_threadpool(AuthService.register, user_data),
+            timeout=REGISTRATION_TIMEOUT_SECONDS,
+        )
+    except asyncio.TimeoutError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail="Registration timed out. Please try again.",
+        ) from exc
 
 
 @router.post("/login", response_model=AuthResponse)
