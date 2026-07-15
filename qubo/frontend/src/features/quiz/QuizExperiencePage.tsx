@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppSidebar from '@/components/layout/AppSidebar';
 import { useQuizStore } from '@/contexts/quizStore';
+import { authService } from '@/lib/authService';
+import { GeneratedQuestion } from '@/types/quiz';
 import {
+  FiAlertCircle,
+  FiArrowLeft,
   FiArrowRight,
   FiCheck,
   FiClock,
@@ -19,14 +23,44 @@ const formatTime = (totalSeconds: number) => {
 
 const normalizeAnswer = (value: string) => value.trim().toLocaleLowerCase();
 
+const shuffleOptions = (options: string[]) => {
+  const shuffled = [...options];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+  return shuffled;
+};
+
+const createOptionOrders = (questions: GeneratedQuestion[]) =>
+  Object.fromEntries(
+    questions.map((question, index) => [
+      index,
+      question.question_type === 'mcq' ? shuffleOptions(question.options) : question.options,
+    ])
+  );
+
 export default function QuizExperiencePage() {
   const navigate = useNavigate();
   const quiz = useQuizStore((state) => state.generatedQuiz);
+  const savedQuizId = useQuizStore((state) => state.savedQuizId);
+  const setSavedQuizId = useQuizStore((state) => state.setSavedQuizId);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [writtenAnswer, setWrittenAnswer] = useState('');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [showEndConfirmation, setShowEndConfirmation] = useState(false);
+  const [isSavingAttempt, setIsSavingAttempt] = useState(false);
+  const [attemptSaved, setAttemptSaved] = useState(false);
+  const [attemptError, setAttemptError] = useState('');
+  const [optionOrders, setOptionOrders] = useState<Record<number, string[]>>(
+    () => createOptionOrders(quiz?.questions ?? [])
+  );
+
+  useEffect(() => {
+    setOptionOrders(createOptionOrders(quiz?.questions ?? []));
+  }, [quiz]);
 
   useEffect(() => {
     if (isComplete || !quiz) {
@@ -51,13 +85,67 @@ export default function QuizExperiencePage() {
     [answers, questions]
   );
 
+  useEffect(() => {
+    setWrittenAnswer(answers[currentIndex] ?? '');
+  }, [answers, currentIndex]);
+
+  const score = questions.length ? Math.round((correctCount / questions.length) * 100) : 0;
+
+  const saveAttempt = async () => {
+    if (!quiz || isSavingAttempt || attemptSaved) return;
+
+    setIsSavingAttempt(true);
+    setAttemptError('');
+    try {
+      let quizId = savedQuizId;
+      if (!quizId) {
+        const savedQuiz = await authService.saveQuizToLibrary(quiz);
+        quizId = savedQuiz.id;
+        setSavedQuizId(quizId);
+      }
+      await authService.recordQuizAttempt(quizId, {
+        score,
+        total_questions: questions.length,
+        time_taken_seconds: elapsedSeconds,
+      });
+      setAttemptSaved(true);
+    } catch (requestError: any) {
+      const detail = requestError.response?.data?.detail;
+      setAttemptError(typeof detail === 'string' ? detail : 'Your quiz result could not be saved.');
+    } finally {
+      setIsSavingAttempt(false);
+    }
+  };
+
+  const finishQuiz = () => {
+    setIsComplete(true);
+    void saveAttempt();
+  };
+
   const moveNext = () => {
     setWrittenAnswer('');
     if (currentIndex === questions.length - 1) {
-      setIsComplete(true);
+      finishQuiz();
     } else {
       setCurrentIndex((value) => value + 1);
     }
+  };
+
+  const skipQuestion = () => {
+    setWrittenAnswer('');
+    if (currentIndex === questions.length - 1) {
+      if (Object.keys(answers).length === 0) {
+        setShowEndConfirmation(true);
+      } else {
+        finishQuiz();
+      }
+    } else {
+      setCurrentIndex((value) => value + 1);
+    }
+  };
+
+  const movePrevious = () => {
+    if (currentIndex > 0) setCurrentIndex((value) => value - 1);
   };
 
   const restartQuiz = () => {
@@ -66,6 +154,9 @@ export default function QuizExperiencePage() {
     setWrittenAnswer('');
     setElapsedSeconds(0);
     setIsComplete(false);
+    setAttemptSaved(false);
+    setAttemptError('');
+    setOptionOrders(createOptionOrders(questions));
   };
 
   if (!quiz || questions.length === 0) {
@@ -89,8 +180,6 @@ export default function QuizExperiencePage() {
     );
   }
 
-  const score = Math.round((correctCount / questions.length) * 100);
-
   if (isComplete) {
     return (
       <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
@@ -103,6 +192,21 @@ export default function QuizExperiencePage() {
             <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Quiz completed</p>
             <h1 className="mt-2 text-4xl font-extrabold text-slate-950">{quiz.title}</h1>
             <p className="mt-3 text-slate-500">You answered {correctCount} of {questions.length} questions correctly.</p>
+
+            <div className={`mt-5 rounded-2xl border px-4 py-3 text-sm font-semibold ${attemptError ? 'border-red-100 bg-red-50 text-red-700' : 'border-blue-100 bg-blue-50 text-blue-700'}`}>
+              {attemptError ? (
+                <div>
+                  <p>{attemptError}</p>
+                  <button type="button" onClick={() => void saveAttempt()} disabled={isSavingAttempt} className="mt-2 font-extrabold underline">
+                    {isSavingAttempt ? 'Saving…' : 'Try saving again'}
+                  </button>
+                </div>
+              ) : attemptSaved ? (
+                'Your result was saved to Module 2 analytics.'
+              ) : (
+                'Saving your quiz result…'
+              )}
+            </div>
 
             <div className="mt-7 grid grid-cols-3 gap-3">
               {[
@@ -159,6 +263,29 @@ export default function QuizExperiencePage() {
           />
         </div>
 
+        <div className="mt-4 flex flex-wrap gap-2" aria-label="Quiz question navigation">
+          {questions.map((_, index) => {
+            const answered = Object.prototype.hasOwnProperty.call(answers, index);
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => setCurrentIndex(index)}
+                className={`flex h-9 w-9 items-center justify-center rounded-lg text-xs font-extrabold ${
+                  currentIndex === index
+                    ? 'bg-blue-600 text-white'
+                    : answered
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-white text-slate-500 hover:bg-blue-50 hover:text-blue-600'
+                }`}
+                aria-label={`Go to question ${index + 1}${answered ? ', answered' : ', unanswered'}`}
+              >
+                {index + 1}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="mt-7 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_430px]">
           <div className="space-y-5">
             <section className="rounded-[30px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] md:p-8">
@@ -166,7 +293,9 @@ export default function QuizExperiencePage() {
                 {currentQuestion.question_type}
               </span>
               <p className="mt-5 text-xl font-bold leading-8 text-slate-900 md:text-2xl">{currentQuestion.question}</p>
-              <p className="mt-8 text-xs font-semibold text-slate-400">Source: {quiz.source_files.join(', ')}</p>
+              {quiz.source_files.length > 0 && (
+                <p className="mt-8 text-xs font-semibold text-slate-400">Source: {quiz.source_files.join(', ')}</p>
+              )}
             </section>
 
             {hasAnswered && (
@@ -180,7 +309,9 @@ export default function QuizExperiencePage() {
                       {isCorrect ? 'Correct!' : 'Not quite.'}
                     </p>
                     {!isCorrect && <p className="mt-1 text-sm font-semibold text-slate-700">Expected answer: {currentQuestion.correct_answer}</p>}
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{currentQuestion.explanation}</p>
+                    {currentQuestion.explanation && (
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{currentQuestion.explanation}</p>
+                    )}
                   </div>
                 </div>
               </section>
@@ -194,7 +325,7 @@ export default function QuizExperiencePage() {
 
             {currentQuestion.question_type === 'mcq' ? (
               <div className="space-y-3">
-                {currentQuestion.options.map((option, index) => {
+                {(optionOrders[currentIndex] ?? currentQuestion.options).map((option, index) => {
                   const isSelected = selectedAnswer === option;
                   const isCorrectOption = hasAnswered && normalizeAnswer(option) === normalizeAnswer(currentQuestion.correct_answer);
                   return (
@@ -239,9 +370,16 @@ export default function QuizExperiencePage() {
               </div>
             )}
 
-            <div className="mt-6 grid grid-cols-[1fr_1.4fr] gap-3">
+            <div className="mt-6 grid grid-cols-3 gap-3">
               <button
-                onClick={moveNext}
+                onClick={movePrevious}
+                disabled={currentIndex === 0}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-35"
+              >
+                <FiArrowLeft /> Previous
+              </button>
+              <button
+                onClick={skipQuestion}
                 className="rounded-2xl bg-slate-200 px-4 py-4 text-sm font-bold text-slate-700 hover:bg-slate-300"
               >
                 Skip question
@@ -271,6 +409,40 @@ export default function QuizExperiencePage() {
           </aside>
         </div>
       </main>
+
+      {showEndConfirmation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Confirm ending quiz">
+          <div className="w-full max-w-md rounded-[30px] bg-white p-7 text-center shadow-2xl">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+              <FiAlertCircle className="h-6 w-6" />
+            </div>
+            <h2 className="mt-5 text-2xl font-extrabold text-slate-950">End without answering?</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-500">You have skipped every question. Are you sure you want to end this quiz with no answers?</p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEndConfirmation(false);
+                  setCurrentIndex(0);
+                }}
+                className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Continue quiz
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEndConfirmation(false);
+                  finishQuiz();
+                }}
+                className="rounded-xl bg-red-600 px-4 py-3 text-sm font-extrabold text-white hover:bg-red-700"
+              >
+                End quiz
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

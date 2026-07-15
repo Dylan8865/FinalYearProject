@@ -4,14 +4,18 @@ import { GeneratedQuiz } from '@/types/quiz';
 
 interface QuizState {
   generatedQuiz: GeneratedQuiz | null;
+  savedQuizId: string | null;
   setGeneratedQuiz: (quiz: GeneratedQuiz | null) => void;
+  setSavedQuizId: (quizId: string | null) => void;
 }
 
 export const useQuizStore = create<QuizState>()(
   persist(
     (set) => ({
       generatedQuiz: null,
-      setGeneratedQuiz: (generatedQuiz) => set({ generatedQuiz }),
+      savedQuizId: null,
+      setGeneratedQuiz: (generatedQuiz) => set({ generatedQuiz, savedQuizId: null }),
+      setSavedQuizId: (savedQuizId) => set({ savedQuizId }),
     }),
     {
       name: 'qubo-generated-quiz',
