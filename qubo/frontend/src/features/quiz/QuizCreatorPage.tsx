@@ -8,6 +8,7 @@ import {
   FiCheck,
   FiFileText,
   FiInfo,
+  FiEye,
   FiPlus,
   FiSave,
   FiTrash2,
@@ -22,12 +23,18 @@ export default function QuizCreatorPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const generatedQuiz = useQuizStore((state) => state.generatedQuiz);
   const setGeneratedQuiz = useQuizStore((state) => state.setGeneratedQuiz);
+  const savedQuizId = useQuizStore((state) => state.savedQuizId);
+  const setSavedQuizId = useQuizStore((state) => state.setSavedQuizId);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [questionType, setQuestionType] = useState<QuizQuestionType>('mcq');
   const [difficulty, setDifficulty] = useState<QuizDifficulty>('Intermediate');
+  const [questionCount, setQuestionCount] = useState(5);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [generationError, setGenerationError] = useState('');
+  const [saveError, setSaveError] = useState('');
+  const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
   const [previewFile, setPreviewFile] = useState<File | null>(null);
 
   const filePreviews = useMemo(
@@ -39,6 +46,11 @@ export default function QuizCreatorPage() {
     () => () => filePreviews.forEach(({ url }) => URL.revokeObjectURL(url)),
     [filePreviews]
   );
+
+  useEffect(() => {
+    setRevealedAnswers(new Set());
+    setSaveError('');
+  }, [generatedQuiz]);
 
   const addFiles = (files: FileList | File[]) => {
     const supportedFiles = Array.from(files).filter((file) =>
@@ -84,7 +96,7 @@ export default function QuizCreatorPage() {
     setGenerationError('');
     setIsGenerating(true);
     try {
-      const quiz = await authService.generateQuiz(uploadedFiles, questionType, difficulty);
+      const quiz = await authService.generateQuiz(uploadedFiles, questionType, difficulty, questionCount);
       setGeneratedQuiz(quiz);
     } catch (requestError: any) {
       const detail = requestError.response?.data?.detail;
@@ -99,6 +111,35 @@ export default function QuizCreatorPage() {
       }
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const toggleAnswer = (questionIndex: number) => {
+    setRevealedAnswers((current) => {
+      const next = new Set(current);
+      if (next.has(questionIndex)) next.delete(questionIndex);
+      else next.add(questionIndex);
+      return next;
+    });
+  };
+
+  const handleSaveToLibrary = async () => {
+    if (!generatedQuiz || isSaving) return;
+    if (savedQuizId) {
+      navigate('/library');
+      return;
+    }
+
+    setSaveError('');
+    setIsSaving(true);
+    try {
+      const savedQuiz = await authService.saveQuizToLibrary(generatedQuiz);
+      setSavedQuizId(savedQuiz.id);
+    } catch (requestError: any) {
+      const detail = requestError.response?.data?.detail;
+      setSaveError(typeof detail === 'string' ? detail : 'Unable to save this quiz. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -214,7 +255,7 @@ export default function QuizCreatorPage() {
                     {generationError}
                   </div>
                 )}
-                <div className="mt-6 grid gap-7 md:grid-cols-2">
+                <div className="mt-6 grid gap-7 md:grid-cols-3">
                   <div>
                     <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Question type</p>
                     <div className="mt-3 space-y-3">
@@ -261,6 +302,30 @@ export default function QuizCreatorPage() {
                       ))}
                     </div>
                   </div>
+
+                  <div>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Number of questions</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[5, 10, 15, 20].map((count) => (
+                        <button
+                          key={count}
+                          type="button"
+                          onClick={() => {
+                            setQuestionCount(count);
+                            setGeneratedQuiz(null);
+                          }}
+                          className={`h-10 min-w-12 rounded-xl border px-3 text-sm font-bold ${
+                            questionCount === count
+                              ? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                              : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
+                          }`}
+                        >
+                          {count}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-xs leading-5 text-slate-400">More questions use more generation time and AI tokens.</p>
+                  </div>
                 </div>
               </section>
             </div>
@@ -280,24 +345,35 @@ export default function QuizCreatorPage() {
                 </div>
 
                 {generatedQuiz ? (
-                  <div className="mt-5 max-h-[520px] space-y-4 overflow-y-auto pr-1">
-                    {generatedQuiz.questions.slice(0, 3).map((item, index) => (
+                  <div className="mt-5 max-h-[58vh] space-y-4 overflow-y-scroll overscroll-contain pr-2 touch-pan-y" tabIndex={0}>
+                    {generatedQuiz.questions.map((item, index) => (
                       <div key={`${index}-${item.question}`} className="rounded-2xl bg-white p-4 shadow-sm">
                         <span className="rounded-md bg-emerald-100 px-2 py-1 text-[10px] font-extrabold uppercase text-emerald-700">
                           Question {index + 1} · {item.question_type}
                         </span>
                         <p className="mt-3 text-sm font-bold leading-5 text-slate-800">{item.question}</p>
-                        <div className="mt-3 flex items-start gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600">
-                          <FiCheck className="mt-0.5 flex-none text-emerald-500" />
-                          {item.correct_answer}
-                        </div>
+                        {revealedAnswers.has(index) ? (
+                          <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-3 text-xs font-semibold text-emerald-800">
+                            <div className="flex items-start gap-2">
+                              <FiCheck className="mt-0.5 flex-none" />
+                              <span>{item.correct_answer}</span>
+                            </div>
+                            <button type="button" onClick={() => toggleAnswer(index)} className="mt-2 text-[11px] font-extrabold text-emerald-700 hover:underline">
+                              Hide answer
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => toggleAnswer(index)}
+                            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-extrabold text-slate-600 hover:bg-blue-50 hover:text-blue-600"
+                          >
+                            <FiEye className="h-4 w-4" />
+                            Reveal answer
+                          </button>
+                        )}
                       </div>
                     ))}
-                    {generatedQuiz.questions.length > 3 && (
-                      <p className="py-2 text-center text-xs font-semibold text-slate-400">
-                        +{generatedQuiz.questions.length - 3} more questions
-                      </p>
-                    )}
                   </div>
                 ) : (
                   <div className="mt-5 flex min-h-[330px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 text-center">
@@ -309,15 +385,27 @@ export default function QuizCreatorPage() {
 
                 <button
                   onClick={handleGenerate}
-                  disabled={uploadedFiles.length === 0 || isGenerating}
+                  disabled={(!generatedQuiz && uploadedFiles.length === 0) || isGenerating}
                   className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 text-sm font-extrabold text-white shadow-xl shadow-blue-600/20 disabled:opacity-40"
                 >
                   {isGenerating ? 'Generating quiz…' : generatedQuiz ? 'Start quiz' : 'Generate full quiz'}
                   <FiZap className="h-4 w-4" />
                 </button>
-                <button disabled className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-200 text-sm font-bold text-slate-700 disabled:opacity-50">
-                  <FiSave className="h-4 w-4" />
-                  Save to library
+                {saveError && (
+                  <div className="mt-3 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                    {saveError}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={handleSaveToLibrary}
+                  disabled={!generatedQuiz || isSaving}
+                  className={`mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-bold disabled:opacity-50 ${
+                    savedQuizId ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  {savedQuizId ? <FiCheck className="h-4 w-4" /> : <FiSave className="h-4 w-4" />}
+                  {isSaving ? 'Saving…' : savedQuizId ? 'Saved — view library' : 'Save to library'}
                 </button>
               </section>
 

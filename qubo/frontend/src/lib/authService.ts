@@ -9,7 +9,16 @@ import {
   PasswordChangeRequest,
   User 
 } from '@/types/auth';
-import { GeneratedQuiz, QuizDifficulty, QuizQuestionType } from '@/types/quiz';
+import {
+  GeneratedQuiz,
+  LibraryQuiz,
+  QuizDifficulty,
+  QuizAttemptRequest,
+  QuizAttemptResponse,
+  QuizQuestionType,
+  SavedQuizResponse,
+} from '@/types/quiz';
+import { SubjectAnalytics } from '@/types/analytics';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -94,6 +103,36 @@ class AuthService {
       headers: { 'Content-Type': undefined },
       timeout: 150000,
     });
+    return response.data;
+  }
+
+  async getQuizLibrary(): Promise<LibraryQuiz[]> {
+    const response = await this.api.get<LibraryQuiz[]>('/quiz/library');
+    return response.data;
+  }
+
+  async saveQuizToLibrary(quiz: GeneratedQuiz): Promise<SavedQuizResponse> {
+    const response = await this.api.post<SavedQuizResponse>('/quiz/library', quiz);
+    return response.data;
+  }
+
+  async getSavedQuiz(quizId: string): Promise<GeneratedQuiz> {
+    const response = await this.api.get<GeneratedQuiz>(`/quiz/library/${quizId}`);
+    return response.data;
+  }
+
+  async deleteSavedQuiz(quizId: string): Promise<SavedQuizResponse> {
+    const response = await this.api.delete<SavedQuizResponse>(`/quiz/library/${quizId}`);
+    return response.data;
+  }
+
+  async getSubjectAnalytics(): Promise<SubjectAnalytics[]> {
+    const response = await this.api.get<SubjectAnalytics[]>('/analytics/subjects');
+    return response.data;
+  }
+
+  async recordQuizAttempt(quizId: string, attempt: QuizAttemptRequest): Promise<QuizAttemptResponse> {
+    const response = await this.api.post<QuizAttemptResponse>(`/quiz/${quizId}/attempt`, attempt);
     return response.data;
   }
 

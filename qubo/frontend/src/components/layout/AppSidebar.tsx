@@ -13,10 +13,10 @@ import {
 
 const navigationItems = [
   { icon: FiGrid, label: 'Dashboard', path: '/dashboard' },
-  { icon: FiBookOpen, label: 'Subjects' },
+  { icon: FiBookOpen, label: 'Subjects', path: '/subjects' },
   { icon: FiPlayCircle, label: 'Game Room' },
   { icon: FiHelpCircle, label: 'Quizzes', path: '/quiz/create' },
-  { icon: FiArchive, label: 'Library' },
+  { icon: FiArchive, label: 'Library', path: '/library' },
   { icon: FiFolder, label: 'Resource' },
   { icon: FiUser, label: 'Profile', path: '/profile' },
 ];

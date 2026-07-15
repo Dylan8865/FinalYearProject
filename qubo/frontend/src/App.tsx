@@ -11,6 +11,8 @@ import Dashboard from '@/pages/Dashboard';
 import ProfileSettings from '@/features/profile/ProfileSettings';
 import QuizCreatorPage from '@/features/quiz/QuizCreatorPage';
 import QuizExperiencePage from '@/features/quiz/QuizExperiencePage';
+import LibraryPage from '@/features/library/LibraryPage';
+import SubjectsPage from '@/features/analytics/SubjectsPage';
 
 // Components
 import ProtectedRoute from '@/components/common/ProtectedRoute';
@@ -85,6 +87,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <QuizExperiencePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/library"
+          element={
+            <ProtectedRoute>
+              <LibraryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subjects"
+          element={
+            <ProtectedRoute>
+              <SubjectsPage />
             </ProtectedRoute>
           }
         />

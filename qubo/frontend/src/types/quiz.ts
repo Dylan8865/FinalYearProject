@@ -18,3 +18,27 @@ export interface GeneratedQuiz {
   questions: GeneratedQuestion[];
 }
 
+export interface LibraryQuiz {
+  id: string;
+  title: string;
+  subject: string | null;
+  source_type: string;
+  created_at: string;
+}
+
+export interface SavedQuizResponse {
+  id: string;
+  message: string;
+}
+
+export interface QuizAttemptRequest {
+  score: number;
+  total_questions: number;
+  time_taken_seconds: number;
+}
+
+export interface QuizAttemptResponse {
+  id: string;
+  message: string;
+}
+
