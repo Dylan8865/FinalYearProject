@@ -18,7 +18,12 @@ import {
   QuizQuestionType,
   SavedQuizResponse,
 } from '@/types/quiz';
-import { SubjectAnalytics } from '@/types/analytics';
+import {
+  EducatorDashboard,
+  StudySession,
+  StudySessionCreate,
+  SubjectAnalytics,
+} from '@/types/analytics';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -85,6 +90,16 @@ class AuthService {
     return response.data;
   }
 
+  async uploadProfilePicture(file: File): Promise<User> {
+    const formData = new FormData();
+    formData.append('picture', file);
+    const response = await this.api.post<User>('/auth/profile/picture', formData, {
+      headers: { 'Content-Type': undefined },
+      timeout: 30000,
+    });
+    return response.data;
+  }
+
   async generateQuiz(
     files: File[],
     questionType: QuizQuestionType,
@@ -128,6 +143,41 @@ class AuthService {
 
   async getSubjectAnalytics(): Promise<SubjectAnalytics[]> {
     const response = await this.api.get<SubjectAnalytics[]>('/analytics/subjects');
+    return response.data;
+  }
+
+  async createStudySession(data: StudySessionCreate): Promise<StudySession> {
+    const response = await this.api.post<StudySession>('/analytics/study-sessions', data);
+    return response.data;
+  }
+
+  async getStudySessions(limit = 10): Promise<StudySession[]> {
+    const response = await this.api.get<StudySession[]>('/analytics/study-sessions', { params: { limit } });
+    return response.data;
+  }
+
+  async getPredictionThreshold(): Promise<number> {
+    const response = await this.api.get<{ threshold: number }>('/analytics/prediction-settings');
+    return response.data.threshold;
+  }
+
+  async updatePredictionThreshold(threshold: number): Promise<number> {
+    const response = await this.api.put<{ threshold: number }>('/analytics/prediction-settings', { threshold });
+    return response.data.threshold;
+  }
+
+  async getEducatorDashboard(): Promise<EducatorDashboard> {
+    const response = await this.api.get<EducatorDashboard>('/analytics/educator/dashboard');
+    return response.data;
+  }
+
+  async linkStudent(username: string): Promise<{ id: string; message: string }> {
+    const response = await this.api.post<{ id: string; message: string }>('/analytics/educator/students', { username });
+    return response.data;
+  }
+
+  async unlinkStudent(studentId: string): Promise<{ id: string; message: string }> {
+    const response = await this.api.delete<{ id: string; message: string }>(`/analytics/educator/students/${studentId}`);
     return response.data;
   }
 

@@ -3,11 +3,11 @@ import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { Subject } from '@/types/auth';
 import { useNavigate } from 'react-router-dom';
-import { FiLogOut, FiSettings, FiTarget } from 'react-icons/fi';
+import { FiTarget } from 'react-icons/fi';
 import AppSidebar from '@/components/layout/AppSidebar';
 
 export default function Dashboard() {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const [studentSubjects, setStudentSubjects] = useState<Subject[]>([]);
   const [subjectsError, setSubjectsError] = useState('');
@@ -28,11 +28,6 @@ export default function Dashboard() {
 
     loadStudentSubjects();
   }, [user]);
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
 
   const profileCompletion = useMemo(() => {
     if (!user) {
@@ -86,35 +81,16 @@ export default function Dashboard() {
       <AppSidebar />
 
       <div className="min-w-0">
-        <header className="flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-5 py-4 backdrop-blur md:px-8">
-          <div>
+        <main className="space-y-6 px-5 pb-6 pt-20 md:px-8 md:pb-8 md:pt-24">
+          <section>
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-primary">
               {isStudent ? 'Student dashboard' : 'Educator dashboard'}
             </p>
             <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">
               Good morning, {firstName}.
             </h1>
-          </div>
+          </section>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/profile')}
-              className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 md:flex"
-            >
-              <FiSettings className="h-4 w-4" />
-              Settings
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/10 transition hover:bg-slate-800"
-            >
-              <FiLogOut className="h-4 w-4" />
-              Logout
-            </button>
-          </div>
-        </header>
-
-        <main className="space-y-6 px-5 py-6 md:px-8 md:py-8">
           <section className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
             <div className="rounded-[32px] bg-gradient-to-br from-[#155dfc] via-[#2b7cff] to-[#1446d1] p-6 text-white shadow-[0_20px_60px_rgba(29,78,216,0.28)] md:p-8">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white/90">
@@ -139,8 +115,11 @@ export default function Dashboard() {
                 >
                   Open profile
                 </button>
-                <button className="rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/15">
-                  {isStudent ? 'View selected subjects' : 'Review class access'}
+                <button
+                  onClick={() => navigate(isStudent ? '/analytics' : '/educator/analytics')}
+                  className="rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/15"
+                >
+                  {isStudent ? 'Open study tracker' : 'Review class analytics'}
                 </button>
               </div>
 

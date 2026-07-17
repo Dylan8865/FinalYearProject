@@ -405,7 +405,27 @@ class QuizLibraryService:
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="Quiz attempt could not be saved.",
             )
-        return {"id": attempt_response.data[0]["id"], "message": "Quiz attempt saved"}
+        attempt_id = attempt_response.data[0]["id"]
+        prediction = None
+        prediction_message = "Quiz attempt saved"
+        try:
+            # Keep analytics generation server-side so it always runs for a
+            # completed attempt, regardless of which client submits it.
+            from app.services.analytics import AnalyticsService
+
+            prediction = AnalyticsService.generate_prediction_for_attempt(
+                user_id,
+                quiz_id,
+                attempt_id,
+            )
+            if prediction:
+                prediction_message = "Quiz attempt saved and exam forecast updated"
+        except Exception:
+            # The attempt is the student's source record and must never be
+            # discarded if a secondary forecast calculation is unavailable.
+            prediction_message = "Quiz attempt saved; forecast update is temporarily unavailable"
+
+        return {"id": attempt_id, "message": prediction_message, "prediction": prediction}
 
     @staticmethod
     def save_quiz(user_id: str, quiz: SaveQuizRequest):

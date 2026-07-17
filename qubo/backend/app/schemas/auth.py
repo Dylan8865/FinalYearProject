@@ -5,6 +5,9 @@ from enum import Enum
 import re
 
 
+VALID_SPM_GRADES = {"A+", "A", "A-", "B+", "B", "C+", "C", "D", "E", "G"}
+
+
 class UserRole(str, Enum):
     STUDENT = "student"
     EDUCATOR = "educator"
@@ -93,6 +96,17 @@ class ProfileUpdateRequest(BaseModel):
         if v is not None and v < date.today():
             raise ValueError("Target exam date cannot be in the past")
         return v
+
+    @field_validator("target_grade")
+    @classmethod
+    def validate_target_grade(cls, v: Optional[str]) -> Optional[str]:
+        if v is None or not v.strip():
+            return None
+
+        normalized_grade = v.strip().upper()
+        if normalized_grade not in VALID_SPM_GRADES:
+            raise ValueError("Target grade must be one of: A+, A, A-, B+, B, C+, C, D, E, G")
+        return normalized_grade
 
 
 class LearningStyleAssessmentRequest(BaseModel):

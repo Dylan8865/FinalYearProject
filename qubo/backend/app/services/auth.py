@@ -23,6 +23,7 @@ class AuthService:
 
     MAX_FAILED_LOGIN_ATTEMPTS = 5
     LOCKOUT_MINUTES = 15
+    PROFILE_PICTURE_BUCKET = "avatars"
 
     @staticmethod
     def register(user_data: UserRegisterRequest) -> AuthResponse:
@@ -345,6 +346,39 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(e),
+            )
+
+    @staticmethod
+    def upload_profile_picture(
+        user_id: str,
+        file_content: bytes,
+        content_type: str,
+    ) -> UserResponse:
+        """Upload and persist one user's profile picture."""
+        supabase = get_supabase()
+        object_path = f"{user_id}/avatar"
+
+        try:
+            bucket = supabase.storage.from_(AuthService.PROFILE_PICTURE_BUCKET)
+            bucket.upload(
+                object_path,
+                file_content,
+                {
+                    "content-type": content_type,
+                    "cache-control": "3600",
+                    "upsert": "true",
+                },
+            )
+            public_url = bucket.get_public_url(object_path).rstrip("?")
+            versioned_url = f"{public_url}?v={int(datetime.now(timezone.utc).timestamp())}"
+            supabase.table("profiles").update(
+                {"profile_picture_url": versioned_url}
+            ).eq("id", user_id).execute()
+            return AuthService.get_profile(user_id)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to upload profile picture: {e}",
             )
 
     @staticmethod

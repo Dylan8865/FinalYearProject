@@ -1,44 +1,335 @@
 from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+from typing import Dict, List, Optional
+
+from fastapi import HTTPException, status
 
 from app.db.supabase import get_supabase
+from app.schemas.analytics import StudySessionCreate
 
 
 class AnalyticsService:
-    """Build student subject analytics from stored learning records only."""
+    """Build learning analytics exclusively from persisted Supabase records."""
+
+    DEFAULT_ALERT_THRESHOLD = 50.0
+
+    @staticmethod
+    def _parse_datetime(value: str) -> datetime:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+    @staticmethod
+    def _calculate_learning_velocity(attempts: List[dict]) -> Optional[float]:
+        """Return score improvement in percentage points per week."""
+        if len(attempts) < 2:
+            return None
+
+        first = attempts[0]
+        last = attempts[-1]
+        elapsed_days = max(
+            (AnalyticsService._parse_datetime(last["attempted_at"]) - AnalyticsService._parse_datetime(first["attempted_at"])).total_seconds() / 86400,
+            1,
+        )
+        weeks = max(elapsed_days / 7, 1)
+        return round((float(last["score"]) - float(first["score"])) / weeks, 1)
+
+    @staticmethod
+    def _calculate_prediction(scores: List[float], study_minutes_14_days: int) -> float:
+        """Forecast from recency-weighted scores, recent trend, and study consistency."""
+        if not scores:
+            raise ValueError("At least one quiz score is required")
+
+        recent_scores = scores[-10:]
+        weights = list(range(1, len(recent_scores) + 1))
+        weighted_average = sum(score * weight for score, weight in zip(recent_scores, weights)) / sum(weights)
+
+        trend_adjustment = 0.0
+        if len(recent_scores) >= 2:
+            per_attempt_change = (recent_scores[-1] - recent_scores[0]) / (len(recent_scores) - 1)
+            trend_adjustment = max(-8.0, min(8.0, per_attempt_change * 1.5))
+
+        study_adjustment = min(4.0, max(0, study_minutes_14_days) / 75.0)
+        return round(max(0.0, min(100.0, weighted_average + trend_adjustment + study_adjustment)), 1)
+
+    @staticmethod
+    def get_prediction_settings(student_id: str):
+        supabase = get_supabase()
+        response = (
+            supabase.table("profiles")
+            .select("prediction_alert_threshold")
+            .eq("id", student_id)
+            .single()
+            .execute()
+        )
+        value = (response.data or {}).get("prediction_alert_threshold")
+        return {"threshold": float(value if value is not None else AnalyticsService.DEFAULT_ALERT_THRESHOLD)}
+
+    @staticmethod
+    def update_prediction_settings(student_id: str, threshold: float):
+        supabase = get_supabase()
+        response = (
+            supabase.table("profiles")
+            .update({"prediction_alert_threshold": round(threshold, 2)})
+            .eq("id", student_id)
+            .execute()
+        )
+        if not response.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student profile not found")
+        return {"threshold": float(response.data[0]["prediction_alert_threshold"])}
+
+    @staticmethod
+    def generate_prediction_for_attempt(student_id: str, quiz_id: str, attempt_id: str):
+        """Generate and persist one forecast immediately after a completed quiz."""
+        supabase = get_supabase()
+        quiz_rows = (
+            supabase.table("quizzes")
+            .select("subject_id")
+            .eq("id", quiz_id)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        if not quiz_rows or not quiz_rows[0].get("subject_id"):
+            return None
+        subject_id = quiz_rows[0]["subject_id"]
+
+        subject_quizzes = (
+            supabase.table("quizzes")
+            .select("id")
+            .eq("subject_id", subject_id)
+            .execute()
+            .data
+            or []
+        )
+        quiz_ids = [row["id"] for row in subject_quizzes]
+        attempts = (
+            supabase.table("quiz_attempts")
+            .select("score,attempted_at")
+            .eq("student_id", student_id)
+            .in_("quiz_id", quiz_ids)
+            .order("attempted_at")
+            .execute()
+            .data
+            or []
+        )
+        scores = [float(row["score"]) for row in attempts if row.get("score") is not None]
+        if not scores:
+            return None
+
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
+        recent_sessions = (
+            supabase.table("study_sessions")
+            .select("duration_minutes")
+            .eq("student_id", student_id)
+            .eq("subject_id", subject_id)
+            .gte("session_date", cutoff)
+            .execute()
+            .data
+            or []
+        )
+        study_minutes = sum(row.get("duration_minutes") or 0 for row in recent_sessions)
+        predicted_score = AnalyticsService._calculate_prediction(scores, study_minutes)
+        threshold = AnalyticsService.get_prediction_settings(student_id)["threshold"]
+        risk_level = "high" if predicted_score < threshold else "medium" if predicted_score < threshold + 10 else "low"
+
+        prediction_response = (
+            supabase.table("exam_predictions")
+            .insert({
+                "student_id": student_id,
+                "subject_id": subject_id,
+                "quiz_attempt_id": attempt_id,
+                "predicted_score": predicted_score,
+                "risk_level": risk_level,
+                "alert_threshold": threshold,
+                "is_warning": predicted_score < threshold,
+                "basis_attempt_count": len(scores),
+                "model_version": "weighted-trend-v1",
+            })
+            .execute()
+        )
+        if not prediction_response.data:
+            raise RuntimeError("Prediction record was not created")
+
+        subject_row = (
+            supabase.table("subjects")
+            .select("subject_name")
+            .eq("id", subject_id)
+            .single()
+            .execute()
+            .data
+        )
+        row = prediction_response.data[0]
+        return AnalyticsService._format_prediction(row, (subject_row or {}).get("subject_name", "Subject"))
+
+    @staticmethod
+    def _format_prediction(row: dict, subject_name: str):
+        threshold = float(row.get("alert_threshold") or AnalyticsService.DEFAULT_ALERT_THRESHOLD)
+        predicted_score = float(row["predicted_score"])
+        return {
+            "id": row["id"],
+            "subject_id": row["subject_id"],
+            "subject_name": subject_name,
+            "predicted_score": predicted_score,
+            "risk_level": row["risk_level"],
+            "threshold": threshold,
+            "is_warning": bool(row.get("is_warning", predicted_score < threshold)),
+            "basis_attempt_count": int(row.get("basis_attempt_count") or 1),
+            "generated_at": row["generated_at"],
+        }
+
+    @staticmethod
+    def create_study_session(student_id: str, payload: StudySessionCreate):
+        supabase = get_supabase()
+        selected = (
+            supabase.table("student_subjects")
+            .select("id")
+            .eq("student_id", student_id)
+            .eq("subject_id", payload.subject_id)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        if not selected:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Select this subject in Profile Settings before recording a session.",
+            )
+
+        subject_rows = (
+            supabase.table("subjects")
+            .select("subject_name")
+            .eq("id", payload.subject_id)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        if not subject_rows:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subject not found")
+
+        topic_rows = (
+            supabase.table("topics")
+            .select("id,topic_name")
+            .eq("subject_id", payload.subject_id)
+            .execute()
+            .data
+            or []
+        )
+        normalized_topic = payload.topic_name.casefold()
+        topic = next((row for row in topic_rows if row["topic_name"].casefold() == normalized_topic), None)
+        if not topic:
+            topic_response = (
+                supabase.table("topics")
+                .insert({"subject_id": payload.subject_id, "topic_name": payload.topic_name})
+                .execute()
+            )
+            if not topic_response.data:
+                raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Topic could not be saved")
+            topic = topic_response.data[0]
+
+        session_id = None
+        try:
+            session_response = (
+                supabase.table("study_sessions")
+                .insert({
+                    "student_id": student_id,
+                    "subject_id": payload.subject_id,
+                    "duration_minutes": payload.duration_minutes,
+                    "pomodoro_cycles": payload.pomodoro_cycles,
+                    "session_date": (payload.session_date or datetime.now(timezone.utc)).isoformat(),
+                    "notes": payload.notes.strip() if payload.notes and payload.notes.strip() else None,
+                })
+                .execute()
+            )
+            if not session_response.data:
+                raise RuntimeError("Study session was not created")
+            session = session_response.data[0]
+            session_id = session["id"]
+            supabase.table("session_topics").insert({
+                "session_id": session_id,
+                "topic_id": topic["id"],
+                "time_spent_minutes": payload.duration_minutes,
+            }).execute()
+            return {
+                **session,
+                "subject_name": subject_rows[0]["subject_name"],
+                "topic_id": topic["id"],
+                "topic_name": topic["topic_name"],
+            }
+        except HTTPException:
+            raise
+        except Exception as exc:
+            if session_id:
+                try:
+                    supabase.table("study_sessions").delete().eq("id", session_id).eq("student_id", student_id).execute()
+                except Exception:
+                    pass
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Study session could not be saved. Please try again.",
+            ) from exc
+
+    @staticmethod
+    def list_study_sessions(student_id: str, limit: int = 10):
+        supabase = get_supabase()
+        sessions = (
+            supabase.table("study_sessions")
+            .select("id,subject_id,duration_minutes,pomodoro_cycles,session_date,notes")
+            .eq("student_id", student_id)
+            .order("session_date", desc=True)
+            .limit(limit)
+            .execute()
+            .data
+            or []
+        )
+        if not sessions:
+            return []
+
+        subject_ids = list({row["subject_id"] for row in sessions})
+        subjects = (
+            supabase.table("subjects").select("id,subject_name").in_("id", subject_ids).execute().data or []
+        )
+        subject_names = {row["id"]: row["subject_name"] for row in subjects}
+
+        session_ids = [row["id"] for row in sessions]
+        session_topics = (
+            supabase.table("session_topics")
+            .select("session_id,topic_id")
+            .in_("session_id", session_ids)
+            .execute()
+            .data
+            or []
+        )
+        topic_ids = list({row["topic_id"] for row in session_topics})
+        topics = supabase.table("topics").select("id,topic_name").in_("id", topic_ids).execute().data if topic_ids else []
+        topic_names = {row["id"]: row["topic_name"] for row in (topics or [])}
+        topic_by_session = {row["session_id"]: row["topic_id"] for row in session_topics}
+
+        return [{
+            **session,
+            "subject_name": subject_names.get(session["subject_id"], "Subject"),
+            "topic_id": topic_by_session.get(session["id"], ""),
+            "topic_name": topic_names.get(topic_by_session.get(session["id"]), "General study"),
+        } for session in sessions]
 
     @staticmethod
     def get_subject_analytics(student_id: str):
         supabase = get_supabase()
 
         selected_rows = (
-            supabase.table("student_subjects")
-            .select("subject_id")
-            .eq("student_id", student_id)
-            .execute()
-            .data
-            or []
+            supabase.table("student_subjects").select("subject_id").eq("student_id", student_id).execute().data or []
         )
         subject_ids = [row["subject_id"] for row in selected_rows]
         if not subject_ids:
             return []
 
         subject_rows = (
-            supabase.table("subjects")
-            .select("id,subject_name,category")
-            .in_("id", subject_ids)
-            .order("subject_name")
-            .execute()
-            .data
-            or []
+            supabase.table("subjects").select("id,subject_name,category").in_("id", subject_ids).order("subject_name").execute().data or []
         )
+        subject_names = {row["id"]: row["subject_name"] for row in subject_rows}
         topic_rows = (
-            supabase.table("topics")
-            .select("id,subject_id,topic_name,difficulty_level")
-            .in_("subject_id", subject_ids)
-            .order("topic_name")
-            .execute()
-            .data
-            or []
+            supabase.table("topics").select("id,subject_id,topic_name,difficulty_level").in_("subject_id", subject_ids).order("topic_name").execute().data or []
         )
         topic_ids = [topic["id"] for topic in topic_rows]
 
@@ -49,50 +340,59 @@ class AnalyticsService:
                 .select("topic_id,score_percentage,sessions_count,last_updated")
                 .eq("student_id", student_id)
                 .in_("topic_id", topic_ids)
-                .execute()
-                .data
-                or []
+                .execute().data or []
             )
 
         session_rows = (
             supabase.table("study_sessions")
-            .select("subject_id,duration_minutes")
+            .select("id,subject_id,duration_minutes")
             .eq("student_id", student_id)
             .in_("subject_id", subject_ids)
-            .execute()
-            .data
-            or []
+            .execute().data or []
         )
+        session_ids = [row["id"] for row in session_rows]
+        session_topic_rows = (
+            supabase.table("session_topics").select("session_id,topic_id").in_("session_id", session_ids).execute().data or []
+        ) if session_ids else []
+
         attempt_rows = (
             supabase.table("quiz_attempts")
             .select("quiz_id,score,attempted_at")
             .eq("student_id", student_id)
             .order("attempted_at")
-            .execute()
-            .data
-            or []
+            .execute().data or []
         )
         attempted_quiz_ids = list({row["quiz_id"] for row in attempt_rows})
-        quiz_subjects = {}
+        quiz_subjects: Dict[str, str] = {}
         if attempted_quiz_ids:
-            quiz_rows = (
-                supabase.table("quizzes")
-                .select("id,subject_id")
-                .in_("id", attempted_quiz_ids)
-                .execute()
-                .data
-                or []
-            )
+            quiz_rows = supabase.table("quizzes").select("id,subject_id").in_("id", attempted_quiz_ids).execute().data or []
             quiz_subjects = {row["id"]: row.get("subject_id") for row in quiz_rows}
+
+        prediction_rows = (
+            supabase.table("exam_predictions")
+            .select("id,subject_id,predicted_score,risk_level,alert_threshold,is_warning,basis_attempt_count,generated_at")
+            .eq("student_id", student_id)
+            .in_("subject_id", subject_ids)
+            .order("generated_at", desc=True)
+            .execute().data or []
+        )
+        latest_prediction_by_subject = {}
+        for prediction in prediction_rows:
+            latest_prediction_by_subject.setdefault(prediction["subject_id"], prediction)
 
         topics_by_subject = defaultdict(list)
         for topic in topic_rows:
             topics_by_subject[topic["subject_id"]].append(topic)
-
         performance_by_topic = {row["topic_id"]: row for row in performance_rows}
+
         minutes_by_subject = defaultdict(int)
+        sessions_by_subject = defaultdict(int)
         for session in session_rows:
             minutes_by_subject[session["subject_id"]] += session.get("duration_minutes") or 0
+            sessions_by_subject[session["subject_id"]] += 1
+        topic_session_counts = defaultdict(int)
+        for session_topic in session_topic_rows:
+            topic_session_counts[session_topic["topic_id"]] += 1
 
         attempts_by_subject = defaultdict(list)
         for attempt in attempt_rows:
@@ -105,7 +405,6 @@ class AnalyticsService:
             subject_topics = topics_by_subject[subject["id"]]
             topic_performance = []
             measured_scores = []
-
             for topic in subject_topics:
                 performance = performance_by_topic.get(topic["id"])
                 score = float(performance["score_percentage"]) if performance else None
@@ -116,12 +415,13 @@ class AnalyticsService:
                     "topic_name": topic["topic_name"],
                     "difficulty_level": topic.get("difficulty_level"),
                     "score_percentage": score,
-                    "sessions_count": performance.get("sessions_count", 0) if performance else 0,
+                    "sessions_count": topic_session_counts[topic["id"]],
                     "last_updated": performance.get("last_updated") if performance else None,
                 })
 
             subject_attempts = attempts_by_subject[subject["id"]]
             mastery_scores = measured_scores or [float(attempt["score"]) for attempt in subject_attempts]
+            latest_prediction = latest_prediction_by_subject.get(subject["id"])
             result.append({
                 "id": subject["id"],
                 "subject_name": subject["subject_name"],
@@ -130,15 +430,104 @@ class AnalyticsService:
                 "topics_total": len(subject_topics),
                 "topics_measured": len(measured_scores),
                 "study_minutes": minutes_by_subject[subject["id"]],
+                "study_sessions": sessions_by_subject[subject["id"]],
                 "quizzes_completed": len(subject_attempts),
+                "learning_velocity": AnalyticsService._calculate_learning_velocity(subject_attempts),
                 "topic_performance": topic_performance,
-                "recent_quiz_scores": [
-                    {
-                        "score": float(attempt["score"]),
-                        "attempted_at": attempt["attempted_at"],
-                    }
-                    for attempt in subject_attempts[-12:]
-                ],
+                "recent_quiz_scores": [{"score": float(attempt["score"]), "attempted_at": attempt["attempted_at"]} for attempt in subject_attempts[-12:]],
+                "latest_prediction": AnalyticsService._format_prediction(latest_prediction, subject_names[subject["id"]]) if latest_prediction else None,
+            })
+        return result
+
+    @staticmethod
+    def link_student(educator_id: str, username: str):
+        supabase = get_supabase()
+        students = (
+            supabase.table("profiles")
+            .select("id,username,role")
+            .ilike("username", username)
+            .limit(1)
+            .execute().data or []
+        )
+        if not students or students[0].get("role") != "student":
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student username not found")
+        student_id = students[0]["id"]
+        existing = (
+            supabase.table("educator_students")
+            .select("id")
+            .eq("educator_id", educator_id)
+            .eq("student_id", student_id)
+            .limit(1)
+            .execute().data or []
+        )
+        if existing:
+            return {"id": existing[0]["id"], "message": "Student is already in your class"}
+        response = supabase.table("educator_students").insert({"educator_id": educator_id, "student_id": student_id}).execute()
+        if not response.data:
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Student could not be linked")
+        return {"id": response.data[0]["id"], "message": "Student added to your class"}
+
+    @staticmethod
+    def unlink_student(educator_id: str, student_id: str):
+        supabase = get_supabase()
+        existing = (
+            supabase.table("educator_students").select("id").eq("educator_id", educator_id).eq("student_id", student_id).limit(1).execute().data or []
+        )
+        if not existing:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student link not found")
+        supabase.table("educator_students").delete().eq("id", existing[0]["id"]).eq("educator_id", educator_id).execute()
+        return {"id": existing[0]["id"], "message": "Student removed from your class"}
+
+    @staticmethod
+    def get_educator_dashboard(educator_id: str):
+        supabase = get_supabase()
+        links = (
+            supabase.table("educator_students")
+            .select("student_id")
+            .eq("educator_id", educator_id)
+            .order("assigned_at")
+            .execute().data or []
+        )
+        student_ids = [row["student_id"] for row in links]
+        if not student_ids:
+            return {
+                "summary": {"linked_students": 0, "students_at_risk": 0, "average_prediction": None, "total_study_minutes": 0, "completed_quizzes": 0},
+                "students": [],
+            }
+        profiles = (
+            supabase.table("profiles")
+            .select("id,username,full_name,school,form_level,target_grade,profile_picture_url")
+            .in_("id", student_ids)
+            .execute().data or []
+        )
+
+        students = []
+        all_predictions = []
+        for profile in profiles:
+            subjects = AnalyticsService.get_subject_analytics(profile["id"])
+            mastery_values = [item["overall_mastery"] for item in subjects if item["overall_mastery"] is not None]
+            predictions = [item["latest_prediction"] for item in subjects if item["latest_prediction"]]
+            latest_prediction = max(predictions, key=lambda item: AnalyticsService._parse_datetime(item["generated_at"])) if predictions else None
+            all_predictions.extend(float(item["predicted_score"]) for item in predictions)
+            students.append({
+                **profile,
+                "full_name": profile.get("full_name") or profile["username"],
+                "subject_count": len(subjects),
+                "study_minutes": sum(item["study_minutes"] for item in subjects),
+                "quizzes_completed": sum(item["quizzes_completed"] for item in subjects),
+                "average_mastery": round(sum(mastery_values) / len(mastery_values), 1) if mastery_values else None,
+                "latest_prediction": float(latest_prediction["predicted_score"]) if latest_prediction else None,
+                "at_risk": any(item["is_warning"] for item in predictions),
+                "subjects": subjects,
             })
 
-        return result
+        return {
+            "summary": {
+                "linked_students": len(students),
+                "students_at_risk": sum(1 for student in students if student["at_risk"]),
+                "average_prediction": round(sum(all_predictions) / len(all_predictions), 1) if all_predictions else None,
+                "total_study_minutes": sum(student["study_minutes"] for student in students),
+                "completed_quizzes": sum(student["quizzes_completed"] for student in students),
+            },
+            "students": students,
+        }

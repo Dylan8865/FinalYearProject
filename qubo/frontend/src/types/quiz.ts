@@ -40,5 +40,7 @@ export interface QuizAttemptRequest {
 export interface QuizAttemptResponse {
   id: string;
   message: string;
+  prediction?: ExamPrediction | null;
 }
 
+import type { ExamPrediction } from '@/types/analytics';

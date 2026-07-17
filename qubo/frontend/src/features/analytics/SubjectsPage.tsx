@@ -95,7 +95,7 @@ export default function SubjectsPage() {
     <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
       <AppSidebar />
       <main className="min-w-0">
-        <div className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
+        <div className="mx-auto w-full max-w-7xl px-5 pb-8 pt-20 md:px-8 lg:pb-10 lg:pt-24">
           <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Module 2</p>

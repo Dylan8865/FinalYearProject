@@ -15,6 +15,91 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html.dark body {
+  background-color: #020617;
+  color: #e2e8f0;
+}
+
+/* Shared theme tokens keep existing screens readable without duplicating
+   dark-mode classes in every feature component. */
+.dark .bg-white {
+  background-color: #0f172a;
+}
+
+.dark .bg-gray-50,
+.dark .bg-slate-50,
+.dark .bg-\[\#f4f7fb\],
+.dark .bg-\[\#f6f8fb\],
+.dark .bg-\[\#f7f9fc\],
+.dark .bg-\[\#f8fbff\] {
+  background-color: #020617;
+}
+
+.dark .bg-slate-100 {
+  background-color: #1e293b;
+}
+
+.dark .bg-slate-200 {
+  background-color: #334155;
+}
+
+.dark .bg-blue-50 {
+  background-color: rgb(23 37 84 / 0.72);
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgb(2 44 34 / 0.72);
+}
+
+.dark .bg-purple-50 {
+  background-color: rgb(59 7 100 / 0.62);
+}
+
+.dark .bg-red-50 {
+  background-color: rgb(69 10 10 / 0.68);
+}
+
+.dark .bg-amber-50 {
+  background-color: rgb(69 26 3 / 0.68);
+}
+
+.dark .text-slate-950,
+.dark .text-slate-900 {
+  color: #f8fafc;
+}
+
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #e2e8f0;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #94a3b8;
+}
+
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-200\/80,
+.dark .border-slate-300 {
+  border-color: #334155;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  color: #e2e8f0;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
+}
+
+.dark .bg-white\/90 {
+  background-color: rgb(15 23 42 / 0.92);
+}
+
 button {
   @apply disabled:cursor-not-allowed;
 }
