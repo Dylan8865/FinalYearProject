@@ -11,6 +11,8 @@
 
 # Backend
 /backend/__pycache__/
+**/__pycache__/
+*.py[cod]
 /backend/.venv/
 /backend/.env
 /backend/.env.local

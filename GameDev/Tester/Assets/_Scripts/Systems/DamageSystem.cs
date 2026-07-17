@@ -44,7 +44,9 @@ public class DamageSystem : MonoBehaviour
                 }
                 else
                 {
-                    // DO some game over logic
+                    GameSessionReporter.Instance?.ReportMatchCompleted(
+                        "enemy",
+                        RunProgressionSystem.Instance != null ? RunProgressionSystem.Instance.TurnsUsed : 0);
                     if (UIManager.Instance != null)
                     {
                         UIManager.Instance.ShowUI<GameOverUI>("GameOverUI");

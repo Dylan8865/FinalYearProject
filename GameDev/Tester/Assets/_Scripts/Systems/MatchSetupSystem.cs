@@ -29,6 +29,7 @@ public class MatchSetupSystem : MonoBehaviour
         {
             AudioManager.Instance.PlayBGM("battle");
         }
+        GameSessionReporter.Instance?.ReportMatchStarted();
     }
 
     private bool CanStartMatch()
