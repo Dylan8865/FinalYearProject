@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d56dfa37c950f84590ae1aafff29f4f, type: 3}
+  m_Name: DefaultHero
+  m_EditorClassIdentifier: Assembly-CSharp::HeroData
+  <Image>k__BackingField: {fileID: 21300000, guid: 0fba594fe2ea94f46aef2d3dc5fafe36, type: 3}
+  <Health>k__BackingField: 60
+  <DropTable>k__BackingField:
+  - CardData: {fileID: 11400000, guid: 05077008956d9de45a57b89000d89d34, type: 2}
+    Weight: 22
+  - CardData: {fileID: 11400000, guid: 0bd7134adec9cb04eb8ad1483c564dd5, type: 2}
+    Weight: 22
+  - CardData: {fileID: 11400000, guid: 2eb547635624bb1488cc4dd601f8d580, type: 2}
+    Weight: 11
+  - CardData: {fileID: 11400000, guid: 0d655fba3daa0734b9bb189f6fdac357, type: 2}
+    Weight: 11
+  - CardData: {fileID: 11400000, guid: 921b1074813edca4bbfc44bd3c4ec2b5, type: 2}
+    Weight: 10
+  - CardData: {fileID: 11400000, guid: fa3af032b2beb4a458412bc0e412386e, type: 2}
+    Weight: 10
+  - CardData: {fileID: 11400000, guid: 738af32dcb0ceac4ca315de81389c49d, type: 2}
+    Weight: 7
+  - CardData: {fileID: 11400000, guid: 54eb4d5e68449a14b853ae391d06f1bd, type: 2}
+    Weight: 5
+  - CardData: {fileID: 11400000, guid: 2483af0fbf3d0684aabe1ed0814de460, type: 2}
+    Weight: 7
+  - CardData: {fileID: 11400000, guid: 783a4a0b36d6b4b45b462b6672fa06e5, type: 2}
+    Weight: 15

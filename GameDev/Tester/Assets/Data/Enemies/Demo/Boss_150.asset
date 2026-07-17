@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e7726afb849a9f438a59f49dad40d2a, type: 3}
+  m_Name: Boss_150
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyData
+  <Image>k__BackingField: {fileID: 0}
+  <ModelPrefab>k__BackingField: {fileID: 1774625739149480, guid: 38efdaadbfe1d624bbee439cb02e7661, type: 3}
+  <ModelMaterial>k__BackingField: {fileID: 2100000, guid: a35a12eeb85f35a409fea3b40ae68621, type: 2}
+  <ModelLocalPosition>k__BackingField: {x: 0, y: -0.35, z: 0.35}
+  <ModelLocalEulerAngles>k__BackingField: {x: 0, y: 180, z: 0}
+  <ModelLocalScale>k__BackingField: {x: 1.5, y: 1.5, z: 1.5}
+  <Health>k__BackingField: 150
+  <AttackPower>k__BackingField: 10
