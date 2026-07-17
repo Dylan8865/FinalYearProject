@@ -14,6 +14,7 @@ import QuizExperiencePage from '@/features/quiz/QuizExperiencePage';
 import LibraryPage from '@/features/library/LibraryPage';
 import SubjectsPage from '@/features/analytics/SubjectsPage';
 import ResourceHubPage from '@/features/resources/ResourceHubPage';
+import ExploreResourcesPage from '@/features/resources/ExploreResourcesPage';
 import GameRoomPage from '@/features/game/GameRoomPage';
 import TutorialVideoPage from '@/features/videos/TutorialVideoPage';
 import MyLearningPage from '@/features/learning/MyLearningPage';
@@ -110,6 +111,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ResourceHubPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/resources/explore"
+          element={
+            <ProtectedRoute>
+              <ExploreResourcesPage />
             </ProtectedRoute>
           }
         />

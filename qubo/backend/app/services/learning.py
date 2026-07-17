@@ -13,7 +13,7 @@ class LearningService:
 
     EVENT_TARGETS = {
         "opened": {"model", "video"}, "saved": {"model", "video"},
-        "unsaved": {"model", "video"}, "shared": {"video"},
+        "unsaved": {"model", "video"}, "shared": {"model", "video"},
         "completed": {"model", "video"}, "model_explored": {"model"}, "model_viewed": {"model"},
         "video_played": {"video"}, "video_paused": {"video"},
         "video_progress": {"video"}, "skipped_quickly": {"video"},

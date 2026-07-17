@@ -16,10 +16,12 @@ from app.schemas.resource import (
     ThreeDModelDetailResponse,
     ThreeDModelSummaryResponse,
 )
+from app.schemas.video import ContentShareCreate
 from app.services.activity import ActivityService
 from app.services.favourite import FavouriteService
 from app.services.resource import ResourceService
 from app.services.learning import LearningService
+from app.services.share import ContentShareService
 
 
 router = APIRouter(prefix="/resources", tags=["resources"])
@@ -103,6 +105,16 @@ async def get_3d_model(resource_id: str, current_user=Depends(get_current_user))
     model = ResourceService.get_3d_model(resource_id)
     ActivityService.record_resource_view(current_user["id"], resource_id)
     return model
+
+
+@router.post("/models/{resource_id}/share", status_code=status.HTTP_204_NO_CONTENT)
+async def share_3d_model(resource_id: str, payload: ContentShareCreate, current_user=Depends(get_current_user)):
+    ContentShareService.share("model", resource_id, current_user["id"], str(payload.recipient_email), payload.message)
+    LearningService.record(current_user["id"], {
+        "target_type": "model", "target_id": resource_id, "event_type": "shared",
+        "metadata": {"source": "in_app_share"},
+    })
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/models/{resource_id}/annotations", response_model=List[ModelAnnotationResponse])

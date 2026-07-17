@@ -5,9 +5,13 @@ export interface TutorialVideo {
   subject_tag?: string | null;
 }
 
-export interface SharedTutorialVideo extends TutorialVideo {
+export interface SharedLearningItem {
   share_id: string;
-  sender_username: string;
+  target_type: 'model' | 'video';
+  target_id: string;
+  title: string;
+  subject_name?: string | null;
+  sender_email: string;
   message?: string | null;
   shared_at: string;
 }

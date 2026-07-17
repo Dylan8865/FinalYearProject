@@ -61,6 +61,14 @@ class ActivityService:
     def record_video_view(cls, user_id: str, video_id: str) -> None:
         cls._record_view(user_id, "video_id", video_id)
 
+    @classmethod
+    def remove_recent_item(cls, user_id: str, target_type: str, target_id: str) -> None:
+        target_column = "resource_id" if target_type == "model" else "video_id"
+        try:
+            get_supabase().table("user_resources").delete().eq("user_id", user_id).eq(target_column, target_id).execute()
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail="Recent learning item could not be removed.") from exc
+
     @staticmethod
     def list_recent_learning(user_id: str, limit: int = 6) -> list[dict]:
         try:

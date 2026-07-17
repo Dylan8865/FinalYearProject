@@ -18,8 +18,13 @@ import {
   QuizQuestionType,
   SavedQuizResponse,
 } from '@/types/quiz';
-import { SubjectAnalytics } from '@/types/analytics';
-import { SharedTutorialVideo, TutorialVideo } from '@/types/video';
+import {
+  EducatorDashboard,
+  StudySession,
+  StudySessionCreate,
+  SubjectAnalytics,
+} from '@/types/analytics';
+import { SharedLearningItem, TutorialVideo } from '@/types/video';
 import { EducatorRecommendation, FavouriteItem, LearningRecommendation, ModelAnnotation, ModelAnnotationDraft, RecentLearningItem, ThreeDModelDetail, ThreeDModelSummary } from '@/types/resource';
 import { GameHistoryEvent, GameMatch } from '@/types/game';
 import { EducatorAnalytics, LearningEventInput } from '@/types/learning';
@@ -89,6 +94,16 @@ class AuthService {
     return response.data;
   }
 
+  async uploadProfilePicture(file: File): Promise<User> {
+    const formData = new FormData();
+    formData.append('picture', file);
+    const response = await this.api.post<User>('/auth/profile/picture', formData, {
+      headers: { 'Content-Type': undefined },
+      timeout: 30000,
+    });
+    return response.data;
+  }
+
   async generateQuiz(
     files: File[],
     questionType: QuizQuestionType,
@@ -132,6 +147,41 @@ class AuthService {
 
   async getSubjectAnalytics(): Promise<SubjectAnalytics[]> {
     const response = await this.api.get<SubjectAnalytics[]>('/analytics/subjects');
+    return response.data;
+  }
+
+  async createStudySession(data: StudySessionCreate): Promise<StudySession> {
+    const response = await this.api.post<StudySession>('/analytics/study-sessions', data);
+    return response.data;
+  }
+
+  async getStudySessions(limit = 10): Promise<StudySession[]> {
+    const response = await this.api.get<StudySession[]>('/analytics/study-sessions', { params: { limit } });
+    return response.data;
+  }
+
+  async getPredictionThreshold(): Promise<number> {
+    const response = await this.api.get<{ threshold: number }>('/analytics/prediction-settings');
+    return response.data.threshold;
+  }
+
+  async updatePredictionThreshold(threshold: number): Promise<number> {
+    const response = await this.api.put<{ threshold: number }>('/analytics/prediction-settings', { threshold });
+    return response.data.threshold;
+  }
+
+  async getEducatorDashboard(): Promise<EducatorDashboard> {
+    const response = await this.api.get<EducatorDashboard>('/analytics/educator/dashboard');
+    return response.data;
+  }
+
+  async linkStudent(username: string): Promise<{ id: string; message: string }> {
+    const response = await this.api.post<{ id: string; message: string }>('/analytics/educator/students', { username });
+    return response.data;
+  }
+
+  async unlinkStudent(studentId: string): Promise<{ id: string; message: string }> {
+    const response = await this.api.delete<{ id: string; message: string }>(`/analytics/educator/students/${studentId}`);
     return response.data;
   }
 
@@ -214,12 +264,16 @@ class AuthService {
     return response.data;
   }
 
-  async shareTutorialVideo(videoId: string, recipientUsername: string, message?: string): Promise<void> {
-    await this.api.post(`/videos/${videoId}/share`, { recipient_username: recipientUsername, message });
+  async shareTutorialVideo(videoId: string, recipientEmail: string, message?: string): Promise<void> {
+    await this.api.post(`/videos/${videoId}/share`, { recipient_email: recipientEmail, message });
   }
 
-  async getSharedTutorialVideos(): Promise<SharedTutorialVideo[]> {
-    const response = await this.api.get<SharedTutorialVideo[]>('/videos/shared/with-me');
+  async shareThreeDModel(resourceId: string, recipientEmail: string, message?: string): Promise<void> {
+    await this.api.post(`/resources/models/${resourceId}/share`, { recipient_email: recipientEmail, message });
+  }
+
+  async getSharedLearningItems(): Promise<SharedLearningItem[]> {
+    const response = await this.api.get<SharedLearningItem[]>('/videos/shared/with-me');
     return response.data;
   }
 
@@ -241,6 +295,22 @@ class AuthService {
   async getRecentLearning(): Promise<RecentLearningItem[]> {
     const response = await this.api.get<RecentLearningItem[]>('/resources/recent');
     return response.data;
+  }
+
+  async removeRecentLearning(targetType: 'model' | 'video', targetId: string): Promise<void> {
+    await this.api.delete(`/learning/recent/${targetType}/${targetId}`);
+  }
+
+  async restoreRecentLearning(targetType: 'model' | 'video', targetId: string): Promise<void> {
+    await this.api.post(`/learning/recent/${targetType}/${targetId}/restore`);
+  }
+
+  async dismissSharedLearningItem(shareId: string): Promise<void> {
+    await this.api.post(`/videos/shared/with-me/${shareId}/dismiss`);
+  }
+
+  async restoreSharedLearningItem(shareId: string): Promise<void> {
+    await this.api.post(`/videos/shared/with-me/${shareId}/restore`);
   }
 
   async getFavourites(): Promise<FavouriteItem[]> {

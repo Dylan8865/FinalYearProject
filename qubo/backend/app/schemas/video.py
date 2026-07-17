@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class VideoResponse(BaseModel):
@@ -13,13 +13,17 @@ class VideoResponse(BaseModel):
     subject_tag: Optional[str] = None
 
 
-class VideoShareCreate(BaseModel):
-    recipient_username: str = Field(min_length=1, max_length=100)
+class ContentShareCreate(BaseModel):
+    recipient_email: EmailStr
     message: Optional[str] = Field(default=None, max_length=300)
 
 
-class SharedVideoResponse(VideoResponse):
+class SharedContentResponse(BaseModel):
     share_id: UUID
-    sender_username: str
+    target_type: Literal["model", "video"]
+    target_id: UUID
+    title: str
+    subject_name: Optional[str] = None
+    sender_email: str
     message: Optional[str] = None
     shared_at: str
