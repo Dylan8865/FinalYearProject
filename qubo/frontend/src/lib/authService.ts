@@ -18,14 +18,13 @@ import {
   QuizQuestionType,
   SavedQuizResponse,
 } from '@/types/quiz';
-import {
-  EducatorDashboard,
-  StudySession,
-  StudySessionCreate,
-  SubjectAnalytics,
-} from '@/types/analytics';
+import { SubjectAnalytics } from '@/types/analytics';
+import { SharedTutorialVideo, TutorialVideo } from '@/types/video';
+import { EducatorRecommendation, FavouriteItem, LearningRecommendation, ModelAnnotation, ModelAnnotationDraft, RecentLearningItem, ThreeDModelDetail, ThreeDModelSummary } from '@/types/resource';
+import { GameHistoryEvent, GameMatch } from '@/types/game';
+import { EducatorAnalytics, LearningEventInput } from '@/types/learning';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 class AuthService {
   private api: AxiosInstance;
@@ -90,16 +89,6 @@ class AuthService {
     return response.data;
   }
 
-  async uploadProfilePicture(file: File): Promise<User> {
-    const formData = new FormData();
-    formData.append('picture', file);
-    const response = await this.api.post<User>('/auth/profile/picture', formData, {
-      headers: { 'Content-Type': undefined },
-      timeout: 30000,
-    });
-    return response.data;
-  }
-
   async generateQuiz(
     files: File[],
     questionType: QuizQuestionType,
@@ -143,41 +132,6 @@ class AuthService {
 
   async getSubjectAnalytics(): Promise<SubjectAnalytics[]> {
     const response = await this.api.get<SubjectAnalytics[]>('/analytics/subjects');
-    return response.data;
-  }
-
-  async createStudySession(data: StudySessionCreate): Promise<StudySession> {
-    const response = await this.api.post<StudySession>('/analytics/study-sessions', data);
-    return response.data;
-  }
-
-  async getStudySessions(limit = 10): Promise<StudySession[]> {
-    const response = await this.api.get<StudySession[]>('/analytics/study-sessions', { params: { limit } });
-    return response.data;
-  }
-
-  async getPredictionThreshold(): Promise<number> {
-    const response = await this.api.get<{ threshold: number }>('/analytics/prediction-settings');
-    return response.data.threshold;
-  }
-
-  async updatePredictionThreshold(threshold: number): Promise<number> {
-    const response = await this.api.put<{ threshold: number }>('/analytics/prediction-settings', { threshold });
-    return response.data.threshold;
-  }
-
-  async getEducatorDashboard(): Promise<EducatorDashboard> {
-    const response = await this.api.get<EducatorDashboard>('/analytics/educator/dashboard');
-    return response.data;
-  }
-
-  async linkStudent(username: string): Promise<{ id: string; message: string }> {
-    const response = await this.api.post<{ id: string; message: string }>('/analytics/educator/students', { username });
-    return response.data;
-  }
-
-  async unlinkStudent(studentId: string): Promise<{ id: string; message: string }> {
-    const response = await this.api.delete<{ id: string; message: string }>(`/analytics/educator/students/${studentId}`);
     return response.data;
   }
 
@@ -226,6 +180,140 @@ class AuthService {
 
   async getStudentSubjects(): Promise<Subject[]> {
     const response = await this.api.get<Subject[]>('/auth/profile/subjects');
+    return response.data;
+  }
+
+  async getTutorialVideos(search?: string, subject?: string): Promise<TutorialVideo[]> {
+    const params = new URLSearchParams();
+    if (search?.trim()) params.set('search', search.trim());
+    if (subject) params.set('subject', subject);
+    const suffix = params.toString() ? `?${params.toString()}` : '';
+    const response = await this.api.get<TutorialVideo[]>(`/videos${suffix}`);
+    return response.data;
+  }
+
+  async recordTutorialVideoView(videoId: string): Promise<void> {
+    await this.api.post(`/videos/${videoId}/view`);
+  }
+
+  async recordLearningEvent(event: LearningEventInput): Promise<void> {
+    await this.api.post('/learning/events', event);
+  }
+
+  async markLearningCompleted(targetType: 'model' | 'video', targetId: string, sessionId?: string): Promise<void> {
+    await this.api.post('/learning/completion', { target_type: targetType, target_id: targetId, session_id: sessionId });
+  }
+
+  async getLearningCompletion(targetType: 'model' | 'video', targetId: string): Promise<boolean> {
+    const response = await this.api.get<{ is_completed: boolean }>(`/learning/completion/${targetType}/${targetId}`);
+    return response.data.is_completed;
+  }
+
+  async getEducatorAnalytics(): Promise<EducatorAnalytics> {
+    const response = await this.api.get<EducatorAnalytics>('/learning/analytics');
+    return response.data;
+  }
+
+  async shareTutorialVideo(videoId: string, recipientUsername: string, message?: string): Promise<void> {
+    await this.api.post(`/videos/${videoId}/share`, { recipient_username: recipientUsername, message });
+  }
+
+  async getSharedTutorialVideos(): Promise<SharedTutorialVideo[]> {
+    const response = await this.api.get<SharedTutorialVideo[]>('/videos/shared/with-me');
+    return response.data;
+  }
+
+  async getThreeDModels(): Promise<ThreeDModelSummary[]> {
+    const response = await this.api.get<ThreeDModelSummary[]>('/resources/models');
+    return response.data;
+  }
+
+  async getPopularThreeDModels(): Promise<ThreeDModelSummary[]> {
+    const response = await this.api.get<ThreeDModelSummary[]>('/resources/models/popular');
+    return response.data;
+  }
+
+  async getModelRecommendation(): Promise<LearningRecommendation | null> {
+    const response = await this.api.get<LearningRecommendation | null>('/resources/recommendation');
+    return response.data;
+  }
+
+  async getRecentLearning(): Promise<RecentLearningItem[]> {
+    const response = await this.api.get<RecentLearningItem[]>('/resources/recent');
+    return response.data;
+  }
+
+  async getFavourites(): Promise<FavouriteItem[]> {
+    const response = await this.api.get<FavouriteItem[]>('/resources/favourites');
+    return response.data;
+  }
+
+  async getEducatorPicks(): Promise<EducatorRecommendation[]> {
+    const response = await this.api.get<EducatorRecommendation[]>('/resources/educator-picks');
+    return response.data;
+  }
+
+  async getMyEducatorPicks(): Promise<EducatorRecommendation[]> {
+    const response = await this.api.get<EducatorRecommendation[]>('/resources/educator-picks/mine');
+    return response.data;
+  }
+
+  async createEducatorPick(targetType: 'model' | 'video', targetId: string, note: string): Promise<EducatorRecommendation> {
+    const response = await this.api.post<EducatorRecommendation>('/resources/educator-picks', { target_type: targetType, target_id: targetId, note });
+    return response.data;
+  }
+
+  async deleteEducatorPick(recommendationId: string): Promise<void> {
+    await this.api.delete(`/resources/educator-picks/${recommendationId}`);
+  }
+
+  async saveFavourite(targetType: 'model' | 'video', targetId: string): Promise<void> {
+    await this.api.post('/resources/favourites', { target_type: targetType, target_id: targetId });
+  }
+
+  async removeFavourite(targetType: 'model' | 'video', targetId: string): Promise<void> {
+    await this.api.delete(`/resources/favourites/${targetType}/${targetId}`);
+  }
+
+  async getThreeDModel(resourceId: string): Promise<ThreeDModelDetail> {
+    const response = await this.api.get<ThreeDModelDetail>(`/resources/models/${resourceId}`);
+    return response.data;
+  }
+
+  async getModelAnnotations(resourceId: string): Promise<ModelAnnotation[]> {
+    const response = await this.api.get<ModelAnnotation[]>(`/resources/models/${resourceId}/annotations`);
+    return response.data;
+  }
+
+  async createModelAnnotation(resourceId: string, annotation: ModelAnnotationDraft): Promise<ModelAnnotation> {
+    const response = await this.api.post<ModelAnnotation>(`/resources/models/${resourceId}/annotations`, annotation);
+    return response.data;
+  }
+
+  async updateModelAnnotation(annotationId: string, annotation: ModelAnnotationDraft): Promise<ModelAnnotation> {
+    const response = await this.api.put<ModelAnnotation>(`/resources/models/annotations/${annotationId}`, annotation);
+    return response.data;
+  }
+
+  async deleteModelAnnotation(annotationId: string): Promise<void> {
+    await this.api.delete(`/resources/models/annotations/${annotationId}`);
+  }
+
+  async createGameMatch(): Promise<GameMatch> {
+    const response = await this.api.post<GameMatch>('/game/matches');
+    return response.data;
+  }
+
+  async saveGameMatchHistory(matchId: string, events: GameHistoryEvent[]): Promise<number> {
+    const response = await this.api.post<{ saved_count: number }>(`/game/matches/${matchId}/history`, { events });
+    return response.data.saved_count;
+  }
+
+  async completeGameMatch(matchId: string, winner: string, turnsPlayed: number): Promise<GameMatch> {
+    const response = await this.api.post<GameMatch>(`/game/matches/${matchId}/complete`, {
+      winner,
+      turns_played: turnsPlayed,
+    });
     return response.data;
   }
 

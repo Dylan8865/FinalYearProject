@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 
@@ -8,19 +8,23 @@ import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
 import LearningStyleAssessment from '@/features/auth/LearningStyleAssessment';
 import Dashboard from '@/pages/Dashboard';
-import ProfilePage from '@/features/profile/ProfilePage';
 import ProfileSettings from '@/features/profile/ProfileSettings';
 import QuizCreatorPage from '@/features/quiz/QuizCreatorPage';
 import QuizExperiencePage from '@/features/quiz/QuizExperiencePage';
 import LibraryPage from '@/features/library/LibraryPage';
 import SubjectsPage from '@/features/analytics/SubjectsPage';
-import LearningAnalyticsPage from '@/features/analytics/LearningAnalyticsPage';
-import EducatorAnalyticsPage from '@/features/analytics/EducatorAnalyticsPage';
+import ResourceHubPage from '@/features/resources/ResourceHubPage';
+import GameRoomPage from '@/features/game/GameRoomPage';
+import TutorialVideoPage from '@/features/videos/TutorialVideoPage';
+import MyLearningPage from '@/features/learning/MyLearningPage';
 
 // Components
 import ProtectedRoute from '@/components/common/ProtectedRoute';
 
 import '@/styles/global.css';
+
+const ModelLibraryPage = lazy(() => import('@/features/resources/ModelLibraryPage'));
+const ModelDetailPage = lazy(() => import('@/features/resources/ModelDetailPage'));
 
 export default function App() {
   const { setUser, setAuthInitialized, user, isAuthInitialized } = useAuthStore();
@@ -71,15 +75,9 @@ export default function App() {
           path="/profile"
           element={
             <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile/settings"
-          element={
-            <ProtectedRoute>
-              <ProfileSettings />
+              <div className="min-h-screen bg-gray-50 p-8">
+                <ProfileSettings />
+              </div>
             </ProtectedRoute>
           }
         />
@@ -108,6 +106,14 @@ export default function App() {
           }
         />
         <Route
+          path="/resources"
+          element={
+            <ProtectedRoute>
+              <ResourceHubPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/subjects"
           element={
             <ProtectedRoute>
@@ -116,18 +122,46 @@ export default function App() {
           }
         />
         <Route
-          path="/analytics"
+          path="/game-room"
           element={
             <ProtectedRoute>
-              <LearningAnalyticsPage />
+              <GameRoomPage />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/educator/analytics"
+          path="/tutorials"
           element={
             <ProtectedRoute>
-              <EducatorAnalyticsPage />
+              <TutorialVideoPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning"
+          element={
+            <ProtectedRoute>
+              <MyLearningPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/models"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+                <ModelLibraryPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/models/:resourceId"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+                <ModelDetailPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />

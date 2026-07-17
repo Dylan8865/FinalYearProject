@@ -4,6 +4,10 @@ from app.core.config import settings
 from app.api.v1.auth.routes import router as auth_router
 from app.api.v1.quiz.routes import router as quiz_router
 from app.api.v1.analytics.routes import router as analytics_router
+from app.api.v1.videos.routes import router as videos_router
+from app.api.v1.resources.routes import router as resources_router
+from app.api.v1.game.routes import router as game_router
+from app.api.v1.learning.routes import router as learning_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -25,6 +29,10 @@ app.add_middleware(
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(quiz_router, prefix=settings.API_V1_STR)
 app.include_router(analytics_router, prefix=settings.API_V1_STR)
+app.include_router(videos_router, prefix=settings.API_V1_STR)
+app.include_router(resources_router, prefix=settings.API_V1_STR)
+app.include_router(game_router, prefix=settings.API_V1_STR)
+app.include_router(learning_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

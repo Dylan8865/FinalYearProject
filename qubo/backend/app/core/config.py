@@ -50,6 +50,7 @@ class Settings(BaseSettings):
     
     # APIs
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    ENABLE_LLM_RECOMMENDATION_EXPLANATIONS: bool = os.getenv("ENABLE_LLM_RECOMMENDATION_EXPLANATIONS", "false").lower() in {"1", "true", "yes", "on"}
     GOOGLE_OAUTH_CLIENT_ID: str = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
     GOOGLE_OAUTH_CLIENT_SECRET: str = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
     

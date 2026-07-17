@@ -14,6 +14,11 @@ public class GameApp : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if (GetComponent<GameSessionReporter>() == null)
+        {
+            gameObject.AddComponent<GameSessionReporter>();
+        }
+
         LoginUI loginUI = UIManager.Instance.ShowUI<LoginUI>("LoginUI") as LoginUI;
         if (startGameplayOnLoad)
         {

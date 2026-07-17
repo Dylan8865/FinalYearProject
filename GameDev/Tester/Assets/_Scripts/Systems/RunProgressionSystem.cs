@@ -160,6 +160,8 @@ public class RunProgressionSystem : MonoBehaviour
         PlayerPrefs.SetInt(HighScoreKey, highScore);
         PlayerPrefs.Save();
 
+        GameSessionReporter.Instance?.ReportMatchCompleted("player", TurnsUsed);
+
         inGameUI?.ShowFinalReport(
             Score,
             highScore,
