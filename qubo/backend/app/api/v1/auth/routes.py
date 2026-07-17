@@ -1,6 +1,6 @@
 import asyncio
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from starlette.concurrency import run_in_threadpool
 from typing import List
 from app.schemas.auth import (
@@ -21,6 +21,8 @@ from app.db.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 REGISTRATION_TIMEOUT_SECONDS = 15
+MAX_PROFILE_PICTURE_SIZE = 5 * 1024 * 1024
+ALLOWED_PROFILE_PICTURE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
 
 @router.post("/register", response_model=AuthResponse)
@@ -58,6 +60,39 @@ async def update_profile(
     """Update user profile"""
     user_id = current_user.get("id")
     return AuthService.update_profile(user_id, update_data)
+
+
+@router.post("/profile/picture", response_model=UserResponse)
+async def upload_profile_picture(
+    picture: UploadFile = File(...),
+    current_user = Depends(get_current_user),
+):
+    """Upload a validated profile picture to Supabase Storage."""
+    if picture.content_type not in ALLOWED_PROFILE_PICTURE_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Profile picture must be a JPEG, PNG, WebP, or GIF image.",
+        )
+
+    content = await picture.read(MAX_PROFILE_PICTURE_SIZE + 1)
+    if len(content) > MAX_PROFILE_PICTURE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Profile picture must be 5 MB or smaller.",
+        )
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The selected image is empty.",
+        )
+
+    user_id = current_user.get("id")
+    return await run_in_threadpool(
+        AuthService.upload_profile_picture,
+        user_id,
+        content,
+        picture.content_type,
+    )
 
 
 @router.post("/learning-style")

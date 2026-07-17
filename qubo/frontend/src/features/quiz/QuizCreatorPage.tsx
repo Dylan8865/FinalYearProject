@@ -148,7 +148,7 @@ export default function QuizCreatorPage() {
       <AppSidebar />
 
       <div className="min-w-0">
-        <main className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
+        <main className="mx-auto w-full max-w-7xl px-5 pb-8 pt-20 md:px-8 lg:pb-10 lg:pt-24">
           <div className="mb-7">
             <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Module 3</p>
             <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-950">Quiz Creator</h1>

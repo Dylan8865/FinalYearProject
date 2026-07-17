@@ -4,6 +4,7 @@ import AppSidebar from '@/components/layout/AppSidebar';
 import { useQuizStore } from '@/contexts/quizStore';
 import { authService } from '@/lib/authService';
 import { GeneratedQuestion } from '@/types/quiz';
+import { ExamPrediction } from '@/types/analytics';
 import {
   FiAlertCircle,
   FiArrowLeft,
@@ -54,6 +55,7 @@ export default function QuizExperiencePage() {
   const [isSavingAttempt, setIsSavingAttempt] = useState(false);
   const [attemptSaved, setAttemptSaved] = useState(false);
   const [attemptError, setAttemptError] = useState('');
+  const [prediction, setPrediction] = useState<ExamPrediction | null>(null);
   const [optionOrders, setOptionOrders] = useState<Record<number, string[]>>(
     () => createOptionOrders(quiz?.questions ?? [])
   );
@@ -103,11 +105,12 @@ export default function QuizExperiencePage() {
         quizId = savedQuiz.id;
         setSavedQuizId(quizId);
       }
-      await authService.recordQuizAttempt(quizId, {
+      const attemptResponse = await authService.recordQuizAttempt(quizId, {
         score,
         total_questions: questions.length,
         time_taken_seconds: elapsedSeconds,
       });
+      setPrediction(attemptResponse.prediction || null);
       setAttemptSaved(true);
     } catch (requestError: any) {
       const detail = requestError.response?.data?.detail;
@@ -156,6 +159,7 @@ export default function QuizExperiencePage() {
     setIsComplete(false);
     setAttemptSaved(false);
     setAttemptError('');
+    setPrediction(null);
     setOptionOrders(createOptionOrders(questions));
   };
 
@@ -208,6 +212,26 @@ export default function QuizExperiencePage() {
               )}
             </div>
 
+            {prediction && (
+              <div className={`mt-5 rounded-2xl border p-5 text-left ${prediction.is_warning ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className={`text-xs font-extrabold uppercase tracking-[0.14em] ${prediction.is_warning ? 'text-red-600' : 'text-emerald-600'}`}>
+                      {prediction.is_warning ? 'Early warning' : 'Updated SPM forecast'}
+                    </p>
+                    <p className="mt-2 text-3xl font-extrabold text-slate-950">{Math.round(prediction.predicted_score)}%</p>
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      Based on {prediction.basis_attempt_count} saved attempt{prediction.basis_attempt_count === 1 ? '' : 's'} for {prediction.subject_name}. Warning threshold: {prediction.threshold}%.
+                    </p>
+                  </div>
+                  <FiTarget className={`mt-1 h-6 w-6 flex-none ${prediction.is_warning ? 'text-red-600' : 'text-emerald-600'}`} />
+                </div>
+                <button type="button" onClick={() => navigate('/analytics')} className="mt-4 text-sm font-extrabold text-blue-600 hover:text-blue-700">
+                  Open study tracker <FiArrowRight className="ml-1 inline" />
+                </button>
+              </div>
+            )}
+
             <div className="mt-7 grid grid-cols-3 gap-3">
               {[
                 ['Score', `${score}%`],
@@ -244,7 +268,7 @@ export default function QuizExperiencePage() {
   return (
     <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
       <AppSidebar />
-      <main className="mx-auto w-full max-w-6xl px-5 py-8 md:px-8 lg:py-10">
+      <main className="mx-auto w-full max-w-6xl px-5 pb-8 pt-20 md:px-8 lg:pb-10 lg:pt-24">
         <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">{quiz.subject} · {quiz.difficulty}</p>

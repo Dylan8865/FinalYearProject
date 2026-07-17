@@ -51,6 +51,7 @@ class QuizAttemptRequest(BaseModel):
 class QuizAttemptResponse(BaseModel):
     id: str
     message: str
+    prediction: Optional[dict] = None
 
 
 class LibraryQuizItem(BaseModel):

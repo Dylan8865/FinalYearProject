@@ -45,10 +45,27 @@ create table if not exists profiles (
   school text,
   target_grade text,
   target_exam_date date,
+  prediction_alert_threshold numeric(5,2) not null default 50
+    check (prediction_alert_threshold between 0 and 100),
   failed_login_attempts int not null default 0,   -- FR 1.10
   locked_until timestamptz,                        -- FR 1.10
   created_at timestamptz not null default now()
 );
+
+-- Public reads support profile avatars in <img> tags. Uploads are performed
+-- only by the authenticated backend through its server-side service client.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'avatars',
+  'avatars',
+  true,
+  5242880,
+  array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
 
 create table if not exists subjects (
   id uuid primary key default gen_random_uuid(),
@@ -120,6 +137,11 @@ create table if not exists exam_predictions (
   subject_id uuid not null references subjects(id) on delete cascade,
   predicted_score numeric(5,2) not null,
   risk_level risk_level not null,
+  quiz_attempt_id uuid,
+  alert_threshold numeric(5,2) not null default 50,
+  is_warning boolean not null default false,
+  basis_attempt_count int not null default 1,
+  model_version text not null default 'weighted-trend-v1',
   generated_at timestamptz not null default now()
 );
 
@@ -197,6 +219,19 @@ create table if not exists attempt_answers (
   time_spent_seconds int
 );
 
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'exam_predictions_quiz_attempt_id_fkey'
+      and conrelid = 'exam_predictions'::regclass
+  ) then
+    alter table exam_predictions
+      add constraint exam_predictions_quiz_attempt_id_fkey
+      foreign key (quiz_attempt_id) references quiz_attempts(id) on delete set null;
+  end if;
+end $$;
+
 -- ------------------------------------------------------------
 -- INDEXES (for common dashboard/query patterns)
 -- ------------------------------------------------------------
@@ -205,6 +240,8 @@ create index if not exists idx_performance_records_student on performance_record
 create index if not exists idx_quiz_attempts_student on quiz_attempts(student_id);
 create index if not exists idx_attempt_answers_attempt on attempt_answers(attempt_id);
 create index if not exists idx_exam_predictions_student on exam_predictions(student_id);
+create unique index if not exists idx_exam_predictions_attempt
+  on exam_predictions(quiz_attempt_id) where quiz_attempt_id is not null;
 create index if not exists idx_educator_students_educator on educator_students(educator_id);
 
 -- ------------------------------------------------------------

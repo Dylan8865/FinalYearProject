@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { ProfileUpdateRequest, Subject } from '@/types/auth';
@@ -12,9 +12,14 @@ import {
   FiImage,
   FiLock,
   FiSave,
+  FiUploadCloud,
   FiUser,
   FiX,
 } from 'react-icons/fi';
+
+const VALID_TARGET_GRADES = ['A+', 'A', 'A-', 'B+', 'B', 'C+', 'C', 'D', 'E', 'G'];
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 const getApiErrorMessage = (requestError: any, fallback: string) => {
   const detail = requestError.response?.data?.detail;
@@ -43,6 +48,10 @@ export default function ProfileSettings() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [profileImageFailed, setProfileImageFailed] = useState(false);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
   const [passwordSuccess, setPasswordSuccess] = useState('');
@@ -89,6 +98,16 @@ export default function ProfileSettings() {
   }, [formData.profile_picture_url]);
 
   useEffect(() => {
+    if (!isImagePreviewOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsImagePreviewOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [isImagePreviewOpen]);
+
+  useEffect(() => {
     const loadSubjects = async () => {
       if (!user || user.role !== 'student') {
         return;
@@ -130,6 +149,36 @@ export default function ProfileSettings() {
     );
   };
 
+  const handleImageFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    setImageUploadError('');
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setImageUploadError('Choose a JPEG, PNG, WebP, or GIF image.');
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setImageUploadError('Profile picture must be 5 MB or smaller.');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      const updatedUser = await authService.uploadProfilePicture(file);
+      setUser(updatedUser);
+      setFormData((previous) => ({
+        ...previous,
+        profile_picture_url: updatedUser.profile_picture_url || '',
+      }));
+    } catch (uploadError: any) {
+      setImageUploadError(getApiErrorMessage(uploadError, 'Unable to upload profile picture.'));
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!user) {
       return;
@@ -137,6 +186,12 @@ export default function ProfileSettings() {
 
     if (formData.target_exam_date && formData.target_exam_date < getTodayDateString()) {
       setError('Target exam date cannot be in the past.');
+      return;
+    }
+
+    const normalizedGrade = formData.target_grade.trim().toUpperCase();
+    if (normalizedGrade && !VALID_TARGET_GRADES.includes(normalizedGrade)) {
+      setError('Choose a valid SPM target grade.');
       return;
     }
 
@@ -150,7 +205,7 @@ export default function ProfileSettings() {
         profile_picture_url: formData.profile_picture_url,
         school: formData.school,
         form_level: formData.form_level,
-        target_grade: formData.target_grade,
+        target_grade: normalizedGrade,
         target_exam_date: formData.target_exam_date || undefined,
       };
 
@@ -277,28 +332,55 @@ export default function ProfileSettings() {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-bold text-slate-600">Profile picture URL</label>
-                <div className="relative">
-                  <FiImage className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <label className="mb-2 block text-sm font-bold text-slate-600">Profile picture</label>
+                <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                  <div className="relative">
+                    <FiImage className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="url"
+                      name="profile_picture_url"
+                      value={formData.profile_picture_url}
+                      onChange={handleChange}
+                      disabled={!isEditing || isUploadingImage}
+                      placeholder="https://..."
+                      className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={!isEditing || isUploadingImage}
+                    className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm hover:border-blue-300 hover:text-blue-600 disabled:opacity-50"
+                  >
+                    <FiUploadCloud className="h-4 w-4" />
+                    {isUploadingImage ? 'Uploading...' : 'Browse'}
+                  </button>
                   <input
-                    type="text"
-                    name="profile_picture_url"
-                    value={formData.profile_picture_url}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    placeholder="https://..."
-                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleImageFileSelect}
+                    className="hidden"
                   />
                 </div>
+                <p className="mt-2 text-xs text-slate-400">JPEG, PNG, WebP, or GIF. Maximum 5 MB.</p>
+                {imageUploadError && <p className="mt-2 text-sm font-semibold text-red-600">{imageUploadError}</p>}
                 {formData.profile_picture_url && (
                   <div className="mt-3 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
                     {!profileImageFailed ? (
-                      <img
-                        src={formData.profile_picture_url}
-                        alt="Profile preview"
-                        onError={() => setProfileImageFailed(true)}
-                        className="h-14 w-14 rounded-full border border-slate-200 object-cover"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setIsImagePreviewOpen(true)}
+                        aria-label="Open large profile picture preview"
+                        className="group relative h-14 w-14 flex-none overflow-hidden rounded-full border border-slate-200"
+                      >
+                        <img
+                          src={formData.profile_picture_url}
+                          alt="Profile preview"
+                          onError={() => setProfileImageFailed(true)}
+                          className="h-full w-full object-cover transition-transform group-hover:scale-110"
+                        />
+                      </button>
                     ) : (
                       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
                         <FiImage className="h-5 w-5" />
@@ -307,7 +389,7 @@ export default function ProfileSettings() {
                     <div className="min-w-0">
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Preview</p>
                       <p className={`mt-1 text-sm font-semibold ${profileImageFailed ? 'text-red-600' : 'text-slate-700'}`}>
-                        {profileImageFailed ? 'This image URL could not be loaded.' : 'Image loaded successfully.'}
+                        {profileImageFailed ? 'This image URL could not be loaded.' : 'Image loaded. Click it for a larger preview.'}
                       </p>
                     </div>
                   </div>
@@ -343,15 +425,19 @@ export default function ProfileSettings() {
 
               <div>
                 <label className="mb-2 block text-sm font-bold text-slate-600">Target grade</label>
-                <input
-                  type="text"
+                <select
                   name="target_grade"
-                  value={formData.target_grade}
+                  value={VALID_TARGET_GRADES.includes(formData.target_grade.trim().toUpperCase()) ? formData.target_grade.trim().toUpperCase() : ''}
                   onChange={handleChange}
                   disabled={!isEditing}
-                  placeholder="A, A+, etc."
                   className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
-                />
+                >
+                  <option value="">Select target grade</option>
+                  {VALID_TARGET_GRADES.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
+                </select>
+                {formData.target_grade && !VALID_TARGET_GRADES.includes(formData.target_grade.trim().toUpperCase()) && (
+                  <p className="mt-2 text-xs font-semibold text-red-600">The saved grade is invalid. Choose a valid SPM grade.</p>
+                )}
               </div>
 
               <div>
@@ -382,7 +468,7 @@ export default function ProfileSettings() {
               {isEditing && (
                 <button
                   onClick={handleSave}
-                  disabled={isLoading}
+                  disabled={isLoading || isUploadingImage}
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <FiSave className="h-4 w-4" />
@@ -547,6 +633,34 @@ export default function ProfileSettings() {
           </aside>
         </div>
       </div>
+
+      {isImagePreviewOpen && formData.profile_picture_url && !profileImageFailed && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Profile picture preview"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setIsImagePreviewOpen(false);
+          }}
+        >
+          <div className="relative max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-[28px] bg-white p-3 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setIsImagePreviewOpen(false)}
+              aria-label="Close profile picture preview"
+              className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/75 text-white backdrop-blur hover:bg-slate-950"
+            >
+              <FiX className="h-5 w-5" />
+            </button>
+            <img
+              src={formData.profile_picture_url}
+              alt="Large profile preview"
+              className="max-h-[calc(90vh-1.5rem)] w-full rounded-[20px] object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
