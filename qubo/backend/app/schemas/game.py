@@ -10,6 +10,23 @@ class MatchResponse(BaseModel):
     winner: Optional[str] = None
     turns_played: int
     match_date: str
+    game_level: int = 1
+    waves_cleared: int = 0
+    is_victory: bool = False
+    completed_at: Optional[str] = None
+
+
+class MatchHistoryResponse(MatchResponse):
+    result: str
+
+
+class LeaderboardEntryResponse(BaseModel):
+    rank: int
+    username: str
+    profile_picture_url: Optional[str] = None
+    turns_played: int
+    completed_at: Optional[str] = None
+    played_at: str
 
 
 class MatchHistoryEventCreate(BaseModel):
@@ -30,3 +47,5 @@ class MatchHistoryBatchResponse(BaseModel):
 class MatchCompleteRequest(BaseModel):
     winner: str = Field(min_length=1, max_length=100)
     turns_played: int = Field(ge=0, le=10_000)
+    waves_cleared: int = Field(default=0, ge=0, le=100)
+    is_victory: bool = False

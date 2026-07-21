@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppSidebar from '@/components/layout/AppSidebar';
 import { useQuizStore } from '@/contexts/quizStore';
+import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { GeneratedQuestion } from '@/types/quiz';
 import {
@@ -42,6 +43,8 @@ const createOptionOrders = (questions: GeneratedQuestion[]) =>
 
 export default function QuizExperiencePage() {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const isEducatorPreview = user?.role === 'educator';
   const quiz = useQuizStore((state) => state.generatedQuiz);
   const savedQuizId = useQuizStore((state) => state.savedQuizId);
   const setSavedQuizId = useQuizStore((state) => state.setSavedQuizId);
@@ -66,7 +69,7 @@ export default function QuizExperiencePage() {
   }, [quiz]);
 
   useEffect(() => {
-    if (!quiz || attemptedQuizRef.current === quiz.title) return;
+    if (!quiz || isEducatorPreview || attemptedQuizRef.current === quiz.title) return;
     attemptedQuizRef.current = quiz.title;
     completedQuizRef.current = false;
     quizSessionIdRef.current = crypto.randomUUID();
@@ -76,7 +79,7 @@ export default function QuizExperiencePage() {
       session_id: quizSessionIdRef.current,
       metadata: { quiz_title: quiz.title, subject_name: quiz.subject, question_count: quiz.questions.length },
     }).catch(() => undefined);
-  }, [quiz]);
+  }, [isEducatorPreview, quiz]);
 
   useEffect(() => {
     if (isComplete || !quiz) {
@@ -134,6 +137,10 @@ export default function QuizExperiencePage() {
   };
 
   const finishQuiz = () => {
+    if (isEducatorPreview) {
+      setIsComplete(true);
+      return;
+    }
     if (quiz && !completedQuizRef.current) {
       completedQuizRef.current = true;
       void authService.recordLearningEvent({
@@ -258,17 +265,17 @@ export default function QuizExperiencePage() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
-                onClick={restartQuiz}
+                onClick={isEducatorPreview ? () => navigate('/educator/quizzes/edit') : restartQuiz}
                 className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 px-5 py-3 font-bold text-slate-700 hover:bg-slate-50"
               >
-                <FiRefreshCw /> Retake quiz
+                {isEducatorPreview ? <><FiEdit3 /> Back to edit quiz</> : <><FiRefreshCw /> Retake quiz</>}
               </button>
-              <button
+              {!isEducatorPreview && <button
                 onClick={() => navigate('/quiz/create')}
                 className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
               >
                 Create another <FiArrowRight />
-              </button>
+              </button>}
             </div>
           </div>
         </main>
@@ -285,9 +292,12 @@ export default function QuizExperiencePage() {
             <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">{quiz.subject} · {quiz.difficulty}</p>
             <h1 className="mt-1 text-3xl font-extrabold text-slate-950">Question {currentIndex + 1} of {questions.length}</h1>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm">
-            <FiClock className="text-slate-400" />
-            Time taken: {formatTime(elapsedSeconds)}
+          <div className="flex items-center gap-2">
+            {isEducatorPreview && <button type="button" onClick={() => navigate('/educator/quizzes/edit')} className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-primary hover:bg-blue-100"><FiEdit3 />Back to edit quiz</button>}
+            <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm">
+              <FiClock className="text-slate-400" />
+              Time taken: {formatTime(elapsedSeconds)}
+            </div>
           </div>
         </div>
 

@@ -18,9 +18,13 @@ import ExploreResourcesPage from '@/features/resources/ExploreResourcesPage';
 import GameRoomPage from '@/features/game/GameRoomPage';
 import TutorialVideoPage from '@/features/videos/TutorialVideoPage';
 import MyLearningPage from '@/features/learning/MyLearningPage';
+import EducatorUploadContentPage from '@/features/educator/EducatorUploadContentPage';
+import MyCollectionsPage from '@/features/educator/MyCollectionsPage';
+import EducatorQuizEditorPage from '@/features/educator/EducatorQuizEditorPage';
 
 // Components
 import ProtectedRoute from '@/components/common/ProtectedRoute';
+import AppSidebar from '@/components/layout/AppSidebar';
 
 import '@/styles/global.css';
 
@@ -76,9 +80,26 @@ export default function App() {
           path="/profile"
           element={
             <ProtectedRoute>
-              <div className="min-h-screen bg-gray-50 p-8">
+              <div className="min-h-screen bg-[#f4f7fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+                <AppSidebar />
                 <ProfileSettings />
               </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/educator/upload"
+          element={
+            <ProtectedRoute>
+              <EducatorUploadContentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/educator/collections"
+          element={
+            <ProtectedRoute>
+              <MyCollectionsPage />
             </ProtectedRoute>
           }
         />
@@ -89,6 +110,10 @@ export default function App() {
               <QuizCreatorPage />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/educator/quizzes/edit"
+          element={<ProtectedRoute><EducatorQuizEditorPage /></ProtectedRoute>}
         />
         <Route
           path="/quiz/session"

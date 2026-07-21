@@ -2,7 +2,8 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Response, status
 
-from app.db.deps import get_current_user
+from app.db.deps import get_current_educator, get_current_user
+from app.schemas.collection import EducatorVideoCreate
 from app.schemas.video import ContentShareCreate, SharedContentResponse, VideoResponse
 from app.services.activity import ActivityService
 from app.services.share import ContentShareService
@@ -11,6 +12,11 @@ from app.services.learning import LearningService
 
 
 router = APIRouter(prefix="/videos", tags=["videos"])
+
+
+@router.post('', response_model=VideoResponse, status_code=status.HTTP_201_CREATED)
+async def create_video(payload: EducatorVideoCreate, current_user=Depends(get_current_educator)):
+    return VideoService.create_video(current_user['id'], payload.title, payload.youtube_url, payload.subject_tag)
 
 
 @router.get("", response_model=List[VideoResponse])

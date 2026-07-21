@@ -3,15 +3,18 @@ import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppSidebar from '@/components/layout/AppSidebar';
 import { authService } from '@/lib/authService';
+import { useAuthStore } from '@/contexts/authStore';
 import { FavouriteItem, ThreeDModelSummary } from '@/types/resource';
 import ModelThumbnail from './ModelThumbnail';
 import { FiAlertCircle, FiArrowLeft, FiArrowRight, FiBox, FiHeart, FiRefreshCw, FiSearch, FiShare2, FiX } from 'react-icons/fi';
 
 export default function ModelLibraryPage() {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
   const [models, setModels] = useState<ThreeDModelSummary[]>([]);
   const [search, setSearch] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('All');
+  const [visibilityScope, setVisibilityScope] = useState<'public' | 'private'>('public');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [favouriteIds, setFavouriteIds] = useState<Set<string>>(new Set());
@@ -38,7 +41,7 @@ export default function ModelLibraryPage() {
     setIsLoading(true);
     setError('');
     try {
-      setModels(await authService.getThreeDModels());
+      setModels(await authService.getThreeDModels(visibilityScope));
     } catch {
       setError('We could not load the 3D learning resources. Please check the backend connection and try again.');
     } finally {
@@ -47,9 +50,9 @@ export default function ModelLibraryPage() {
   };
 
   useEffect(() => {
-    loadModels();
+    void loadModels();
     authService.getFavourites().then((items: FavouriteItem[]) => setFavouriteIds(new Set(items.filter((item) => item.target_type === 'model').map((item) => item.target_id)))).catch(() => undefined);
-  }, []);
+  }, [visibilityScope]);
 
   const toggleFavourite = async (resourceId: string) => {
     const isSaved = favouriteIds.has(resourceId);
@@ -92,6 +95,7 @@ export default function ModelLibraryPage() {
         </section>
 
         <section className="mt-6 flex flex-wrap gap-2" aria-label="Filter models by subject">
+          {user?.role === 'educator' && <div className="mr-2 flex rounded-full bg-slate-200 p-1" aria-label="Filter models by visibility"><button onClick={() => setVisibilityScope('public')} className={`rounded-full px-3 py-1.5 text-sm font-bold ${visibilityScope === 'public' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>Public library</button><button onClick={() => setVisibilityScope('private')} className={`rounded-full px-3 py-1.5 text-sm font-bold ${visibilityScope === 'private' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>Only mine</button></div>}
           {subjects.map((subject) => <button key={subject} onClick={() => setSelectedSubject(subject)} className={`rounded-full px-4 py-2 text-sm font-bold transition ${selectedSubject === subject ? 'bg-primary text-white shadow-lg shadow-blue-600/20' : 'bg-white text-slate-600 shadow-sm hover:bg-blue-50 hover:text-primary'}`}>{subject}</button>)}
         </section>
 

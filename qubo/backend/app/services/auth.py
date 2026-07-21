@@ -157,6 +157,16 @@ class AuthService:
                 detail="No account found with this email. Please register first.",
             )
 
+        account_role = profile.get("role")
+        if account_role != credentials.role.value:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    f"This account is registered as an {account_role}. "
+                    f"Select {account_role.capitalize()} before logging in."
+                ),
+            )
+
         if profile.get("locked_until"):
             locked_until_str = profile.get("locked_until")
             clean_str = locked_until_str.replace("Z", "+00:00")

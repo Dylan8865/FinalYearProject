@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import AppSidebar from '@/components/layout/AppSidebar';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
@@ -13,6 +13,7 @@ const periodicTableAttribution = '3D Periodic Table by ApolloIndustries, CC Attr
 export default function ModelDetailPage() {
   const navigate = useNavigate();
   const { resourceId } = useParams();
+  const [searchParams] = useSearchParams();
   const user = useAuthStore((state) => state.user);
   const [model, setModel] = useState<ThreeDModelDetail | null>(null);
   const [annotations, setAnnotations] = useState<ModelAnnotation[]>([]);
@@ -22,7 +23,7 @@ export default function ModelDetailPage() {
   const [selectedAnnotation, setSelectedAnnotation] = useState<ModelAnnotation | null>(null);
   const [draft, setDraft] = useState<ModelAnnotationDraft | null>(null);
   const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
-  const [isPlacingAnnotation, setIsPlacingAnnotation] = useState(false);
+  const [isPlacingAnnotation, setIsPlacingAnnotation] = useState(() => searchParams.get('annotate') === '1');
   const [isSavingAnnotation, setIsSavingAnnotation] = useState(false);
   const [isFavourite, setIsFavourite] = useState(false);
   const [isSavingFavourite, setIsSavingFavourite] = useState(false);
@@ -41,6 +42,7 @@ export default function ModelDetailPage() {
   const exploredRef = useRef(false);
 
   const isEducator = user?.role === 'educator';
+  const canManageAnnotations = isEducator && Boolean(model?.can_manage_annotations);
 
   const loadModel = async () => {
     if (!resourceId) return;
@@ -157,6 +159,7 @@ export default function ModelDetailPage() {
   }, [resourceId]);
 
   const beginNewAnnotation = () => {
+    if (!canManageAnnotations) return;
     setSelectedAnnotation(null);
     setEditingAnnotationId(null);
     setDraft(null);
@@ -164,6 +167,7 @@ export default function ModelDetailPage() {
   };
 
   const placeAnnotation = (position: [number, number, number]) => {
+    if (!canManageAnnotations) return;
     setDraft((current) => ({
       title: current?.title || '',
       description: current?.description || '',
@@ -235,7 +239,7 @@ export default function ModelDetailPage() {
         {model && !isLoading && !error && <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
           <section>
             <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Interactive model</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950 md:text-4xl">{model.title}</h1></div><div className="flex gap-2">{isEducator && <button onClick={() => educatorPick ? void removeEducatorPick() : setIsPickDialogOpen(true)} className={`inline-flex h-12 items-center justify-center gap-2 rounded-2xl border px-4 text-sm font-bold transition ${educatorPick ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-amber-50 hover:text-amber-700'}`} title={educatorPick ? 'Remove educator recommendation' : 'Recommend to students'}><FiStar className={educatorPick ? 'fill-current' : ''} /><span className="hidden sm:inline">{educatorPick ? 'Recommended' : 'Recommend'}</span></button>}<button onClick={() => { setShareStatus(''); setIsShareDialogOpen(true); }} className="flex h-12 w-12 flex-none items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-100 hover:bg-blue-50 hover:text-primary" aria-label={`Share ${model.title}`} title="Share inside Qubo"><FiShare2 className="h-5 w-5" /></button><button onClick={toggleFavourite} disabled={isSavingFavourite} className={`flex h-12 w-12 flex-none items-center justify-center rounded-2xl border transition disabled:opacity-60 ${isFavourite ? 'border-rose-100 bg-rose-50 text-rose-500' : 'border-slate-200 bg-white text-slate-500 hover:border-rose-100 hover:bg-rose-50 hover:text-rose-500'}`} aria-label={isFavourite ? `Remove ${model.title} from saved items` : `Save ${model.title}`} title={isFavourite ? 'Remove from Saved' : 'Save for revision'}><FiHeart className={`h-5 w-5 ${isFavourite ? 'fill-current' : ''}`} /></button></div></div>
-            <div className="mt-6"><ModelViewer modelUrl={model.signed_model_url} title={model.title} annotations={annotations} isPlacingAnnotation={isPlacingAnnotation} selectedAnnotationId={selectedAnnotation?.annotation_id} onPlaceAnnotation={placeAnnotation} onSelectAnnotation={setSelectedAnnotation} onMeaningfulInteraction={recordMeaningfulInteraction} /></div>
+            <div className="mt-6"><ModelViewer modelUrl={model.signed_model_url} title={model.title} annotations={annotations} isPlacingAnnotation={isPlacingAnnotation && canManageAnnotations} selectedAnnotationId={selectedAnnotation?.annotation_id} onPlaceAnnotation={placeAnnotation} onSelectAnnotation={setSelectedAnnotation} onMeaningfulInteraction={recordMeaningfulInteraction} /></div>
             <p className="mt-3 text-xs font-medium text-slate-500">{periodicTableAttribution}</p>
             {selectedAnnotation && !draft && <article className="mt-5 rounded-2xl border border-blue-100 bg-white p-5 shadow-sm"><div className="flex items-start justify-between gap-4"><div><p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-primary"><FiMapPin /> Model annotation</p><h2 className="mt-2 text-lg font-extrabold text-slate-950">{selectedAnnotation.title}</h2></div><button type="button" onClick={() => setSelectedAnnotation(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Close annotation"><FiX /></button></div><p className="mt-3 text-sm leading-6 text-slate-600">{selectedAnnotation.description}</p>{isEducator && selectedAnnotation.created_by === user?.id && <div className="mt-4 flex gap-2"><button onClick={() => beginEditAnnotation(selectedAnnotation)} className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-200"><FiEdit2 /> Edit</button><button onClick={() => deleteAnnotation(selectedAnnotation)} className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-100"><FiTrash2 /> Delete</button></div>}</article>}
           </section>
@@ -243,10 +247,10 @@ export default function ModelDetailPage() {
             <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-400">Resource details</p>
             <div className="mt-5 space-y-3"><div className="rounded-2xl bg-slate-50 p-4"><p className="text-xs font-bold text-slate-400">Subject</p><p className="mt-1 font-extrabold text-slate-900">{model.subject_name || 'SPM learning'}</p></div><div className="rounded-2xl bg-slate-50 p-4"><p className="text-xs font-bold text-slate-400">Topic</p><p className="mt-1 font-extrabold text-slate-900">{model.topic_name || 'Interactive model'}</p></div><div className="rounded-2xl bg-slate-50 p-4"><p className="text-xs font-bold text-slate-400">Learning style</p><p className="mt-1 font-extrabold capitalize text-slate-900">{model.learning_style_tag || 'Visual'}</p></div></div>
             <div className="mt-6 flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-800"><FiBookOpen className="mt-1 flex-none" />Rotate the model and select a numbered marker to read the educator's explanation.</div>
-            <section className="mt-6 border-t border-slate-100 pt-5"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">Learning hotspots</p><p className="mt-1 text-sm font-bold text-slate-900">{annotations.length} annotation{annotations.length === 1 ? '' : 's'}</p></div>{isEducator && !draft && !isPlacingAnnotation && <button onClick={beginNewAnnotation} className="inline-flex items-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"><FiPlus /> Add</button>}</div>
+            <section className="mt-6 border-t border-slate-100 pt-5"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">Learning hotspots</p><p className="mt-1 text-sm font-bold text-slate-900">{annotations.length} annotation{annotations.length === 1 ? '' : 's'}</p></div>{canManageAnnotations && !draft && !isPlacingAnnotation && <button onClick={beginNewAnnotation} className="inline-flex items-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"><FiPlus /> Add</button>}</div>
               {annotationError && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs font-semibold leading-5 text-amber-800">{annotationError}</p>}
-              {isEducator && isPlacingAnnotation && <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4"><p className="text-sm font-bold text-blue-900">Choose a location</p><p className="mt-1 text-xs leading-5 text-blue-800">Click the exact part of the 3D model to place this hotspot.</p><button onClick={cancelDraft} className="mt-3 text-xs font-bold text-blue-700 underline">Cancel</button></div>}
-              {isEducator && draft && <form onSubmit={saveAnnotation} className="mt-4 space-y-3"><div><label htmlFor="annotation-title" className="text-xs font-bold text-slate-600">Title</label><input id="annotation-title" value={draft.title} onChange={(event) => updateDraft('title', event.target.value)} maxLength={100} required className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-blue-100" placeholder="e.g. Cell wall" /></div><div><label htmlFor="annotation-description" className="text-xs font-bold text-slate-600">Explanation</label><textarea id="annotation-description" value={draft.description} onChange={(event) => updateDraft('description', event.target.value)} maxLength={1200} required rows={5} className="mt-1 w-full resize-y rounded-xl border border-slate-200 px-3 py-2 text-sm leading-5 outline-none transition focus:border-primary focus:ring-2 focus:ring-blue-100" placeholder="Explain the purpose of this part…" /></div>{editingAnnotationId && <button type="button" onClick={() => setIsPlacingAnnotation(true)} className="text-xs font-bold text-primary underline">Choose a new location</button>}<div className="flex gap-2"><button type="submit" disabled={isSavingAnnotation} className="inline-flex items-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white disabled:opacity-60"><FiSave /> {isSavingAnnotation ? 'Saving…' : 'Save hotspot'}</button><button type="button" onClick={cancelDraft} className="rounded-xl bg-slate-100 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200">Cancel</button></div></form>}
+              {canManageAnnotations && isPlacingAnnotation && <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4"><p className="text-sm font-bold text-blue-900">Choose a location</p><p className="mt-1 text-xs leading-5 text-blue-800">Click the exact part of the 3D model to place this hotspot.</p><button onClick={cancelDraft} className="mt-3 text-xs font-bold text-blue-700 underline">Cancel</button></div>}
+              {canManageAnnotations && draft && <form onSubmit={saveAnnotation} className="mt-4 space-y-3"><div><label htmlFor="annotation-title" className="text-xs font-bold text-slate-600">Title</label><input id="annotation-title" value={draft.title} onChange={(event) => updateDraft('title', event.target.value)} maxLength={100} required className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-blue-100" placeholder="e.g. Cell wall" /></div><div><label htmlFor="annotation-description" className="text-xs font-bold text-slate-600">Explanation</label><textarea id="annotation-description" value={draft.description} onChange={(event) => updateDraft('title', event.target.value)} maxLength={1200} required rows={5} className="mt-1 w-full resize-y rounded-xl border border-slate-200 px-3 py-2 text-sm leading-5 outline-none transition focus:border-primary focus:ring-2 focus:ring-blue-100" placeholder="Explain the purpose of this part…" /></div>{editingAnnotationId && <button type="button" onClick={() => setIsPlacingAnnotation(true)} className="text-xs font-bold text-primary underline">Choose a new location</button>}<div className="flex gap-2"><button type="submit" disabled={isSavingAnnotation} className="inline-flex items-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white disabled:opacity-60"><FiSave /> {isSavingAnnotation ? 'Saving…' : 'Save hotspot'}</button><button type="button" onClick={cancelDraft} className="rounded-xl bg-slate-100 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200">Cancel</button></div></form>}
               {!isEducator && annotations.length === 0 && !annotationError && <p className="mt-4 text-sm leading-6 text-slate-500">No educator annotations have been added to this model yet.</p>}
               {annotations.length > 0 && <div className="mt-4 space-y-2">{annotations.map((annotation, index) => <button key={annotation.annotation_id} onClick={() => setSelectedAnnotation(annotation)} className={`flex w-full items-center gap-3 rounded-xl p-3 text-left transition ${selectedAnnotation?.annotation_id === annotation.annotation_id ? 'bg-blue-50 text-blue-900' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}><span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-primary text-xs font-extrabold text-white">{index + 1}</span><span className="truncate text-sm font-bold">{annotation.title}</span></button>)}</div>}
             </section>

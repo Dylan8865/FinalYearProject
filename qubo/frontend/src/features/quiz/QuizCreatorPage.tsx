@@ -16,10 +16,13 @@ import {
   FiX,
   FiZap,
 } from 'react-icons/fi';
-import { QuizDifficulty, QuizQuestionType } from '@/types/quiz';
+import { GeneratedQuestion, QuizDifficulty, QuizQuestionType } from '@/types/quiz';
+import { useAuthStore } from '@/contexts/authStore';
 
 export default function QuizCreatorPage() {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const isEducator = user?.role === 'educator';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const generatedQuiz = useQuizStore((state) => state.generatedQuiz);
   const setGeneratedQuiz = useQuizStore((state) => state.setGeneratedQuiz);
@@ -36,6 +39,7 @@ export default function QuizCreatorPage() {
   const [saveError, setSaveError] = useState('');
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [creationMethod, setCreationMethod] = useState<'ai' | 'manual'>('ai');
 
   const filePreviews = useMemo(
     () => uploadedFiles.map((file) => ({ file, url: URL.createObjectURL(file) })),
@@ -98,6 +102,7 @@ export default function QuizCreatorPage() {
     try {
       const quiz = await authService.generateQuiz(uploadedFiles, questionType, difficulty, questionCount);
       setGeneratedQuiz(quiz);
+      if (isEducator) navigate('/educator/quizzes/edit');
     } catch (requestError: any) {
       const detail = requestError.response?.data?.detail;
       if (typeof detail === 'string') {
@@ -112,6 +117,41 @@ export default function QuizCreatorPage() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const updateQuestion = (index: number, patch: Partial<GeneratedQuestion>) => {
+    if (!generatedQuiz) return;
+    setGeneratedQuiz({
+      ...generatedQuiz,
+      questions: generatedQuiz.questions.map((question, questionIndex) => questionIndex === index ? { ...question, ...patch } : question),
+    });
+  };
+
+  const addManualQuestion = () => {
+    if (!generatedQuiz) return;
+    setGeneratedQuiz({
+      ...generatedQuiz,
+      questions: [...generatedQuiz.questions, {
+        question: 'Write your question here', question_type: questionType,
+        options: questionType === 'mcq' ? ['Option A', 'Option B', 'Option C', 'Option D'] : [],
+        correct_answer: questionType === 'mcq' ? 'Option A' : 'Write the expected answer', explanation: '',
+      }],
+    });
+  };
+
+  const startManualQuiz = () => {
+    setCreationMethod('manual');
+    setSavedQuizId(null);
+    setGenerationError('');
+    setGeneratedQuiz({
+      title: 'Untitled educator quiz', subject: 'General', question_type: questionType,
+      difficulty, source_files: [], questions: [{
+        question: 'Write your first question here', question_type: questionType,
+        options: questionType === 'mcq' ? ['Option A', 'Option B', 'Option C', 'Option D'] : [],
+        correct_answer: questionType === 'mcq' ? 'Option A' : 'Write the expected answer', explanation: '',
+      }],
+    });
+    navigate('/educator/quizzes/edit');
   };
 
   const toggleAnswer = (questionIndex: number) => {
@@ -157,7 +197,7 @@ export default function QuizCreatorPage() {
             </p>
           </div>
 
-          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className={`grid items-start gap-6 ${isEducator ? 'xl:grid-cols-1' : 'xl:grid-cols-[minmax(0,1fr)_380px]'}`}>
             <div className="space-y-6">
               <section className="rounded-[30px] border border-slate-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] md:p-7">
                 <div
@@ -250,6 +290,12 @@ export default function QuizCreatorPage() {
 
               <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)] md:p-7">
                 <h2 className="text-xl font-extrabold text-slate-950">Quiz configuration</h2>
+                {isEducator && (
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <button type="button" onClick={() => { setCreationMethod('ai'); setGeneratedQuiz(null); setSavedQuizId(null); }} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${creationMethod === 'ai' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600'}`}>Generate with AI</button>
+                    <button type="button" onClick={startManualQuiz} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${creationMethod === 'manual' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600'}`}>Create manually</button>
+                  </div>
+                )}
                 {generationError && (
                   <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm font-semibold text-red-700">
                     {generationError}
@@ -327,10 +373,27 @@ export default function QuizCreatorPage() {
                     <p className="mt-3 text-xs leading-5 text-slate-400">More questions use more generation time and AI tokens.</p>
                   </div>
                 </div>
+                {isEducator && generatedQuiz && (
+                  <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 md:grid-cols-2">
+                    <label className="text-sm font-bold text-slate-700">Quiz title<input value={generatedQuiz.title} onChange={(event) => setGeneratedQuiz({ ...generatedQuiz, title: event.target.value })} className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-primary" /></label>
+                    <label className="text-sm font-bold text-slate-700">Subject<input value={generatedQuiz.subject} onChange={(event) => setGeneratedQuiz({ ...generatedQuiz, subject: event.target.value })} className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-primary" /></label>
+                  </div>
+                )}
+                {isEducator && creationMethod === 'ai' && (
+                  <button
+                    type="button"
+                    onClick={handleGenerate}
+                    disabled={uploadedFiles.length === 0 || isGenerating}
+                    className="mt-7 inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    <FiZap className="h-4 w-4" />
+                    {isGenerating ? 'Generating quiz…' : 'Generate full quiz'}
+                  </button>
+                )}
               </section>
             </div>
 
-            <aside className="space-y-5 xl:sticky xl:top-6">
+            {!isEducator && <aside className="space-y-5 xl:sticky xl:top-6">
               <section className="rounded-[30px] bg-slate-100 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-600 text-white">
@@ -347,11 +410,11 @@ export default function QuizCreatorPage() {
                 {generatedQuiz ? (
                   <div className="mt-5 max-h-[58vh] space-y-4 overflow-y-scroll overscroll-contain pr-2 touch-pan-y" tabIndex={0}>
                     {generatedQuiz.questions.map((item, index) => (
-                      <div key={`${index}-${item.question}`} className="rounded-2xl bg-white p-4 shadow-sm">
+                      <div key={index} className="rounded-2xl bg-white p-4 shadow-sm">
                         <span className="rounded-md bg-emerald-100 px-2 py-1 text-[10px] font-extrabold uppercase text-emerald-700">
                           Question {index + 1} · {item.question_type}
                         </span>
-                        <p className="mt-3 text-sm font-bold leading-5 text-slate-800">{item.question}</p>
+                        {isEducator ? <div className="mt-3 space-y-2"><textarea value={item.question} onChange={(event) => updateQuestion(index, { question: event.target.value })} rows={2} className="w-full rounded-xl border border-slate-200 p-2 text-sm font-bold outline-none focus:border-primary" />{item.question_type === 'mcq' && item.options.map((option, optionIndex) => <input key={optionIndex} value={option} onChange={(event) => updateQuestion(index, { options: item.options.map((value, currentIndex) => currentIndex === optionIndex ? event.target.value : value) })} className="h-9 w-full rounded-lg border border-slate-200 px-2 text-xs outline-none focus:border-primary" />)}<input value={item.correct_answer} onChange={(event) => updateQuestion(index, { correct_answer: event.target.value })} placeholder="Correct answer" className="h-9 w-full rounded-lg border border-emerald-200 bg-emerald-50 px-2 text-xs font-semibold outline-none focus:border-primary" /><textarea value={item.explanation} onChange={(event) => updateQuestion(index, { explanation: event.target.value })} placeholder="Teaching explanation (optional)" rows={2} className="w-full rounded-lg border border-slate-200 p-2 text-xs outline-none focus:border-primary" /></div> : <p className="mt-3 text-sm font-bold leading-5 text-slate-800">{item.question}</p>}
                         {revealedAnswers.has(index) ? (
                           <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-3 text-xs font-semibold text-emerald-800">
                             <div className="flex items-start gap-2">
@@ -374,6 +437,7 @@ export default function QuizCreatorPage() {
                         )}
                       </div>
                     ))}
+                    {isEducator && <button type="button" onClick={addManualQuestion} className="w-full rounded-xl border border-dashed border-blue-300 bg-blue-50 px-3 py-2 text-xs font-bold text-primary">+ Add question</button>}
                   </div>
                 ) : (
                   <div className="mt-5 flex min-h-[330px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 text-center">
@@ -385,10 +449,10 @@ export default function QuizCreatorPage() {
 
                 <button
                   onClick={handleGenerate}
-                  disabled={(!generatedQuiz && uploadedFiles.length === 0) || isGenerating}
+                  disabled={(creationMethod === 'ai' && !generatedQuiz && uploadedFiles.length === 0) || isGenerating}
                   className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 text-sm font-extrabold text-white shadow-xl shadow-blue-600/20 disabled:opacity-40"
                 >
-                  {isGenerating ? 'Generating quiz…' : generatedQuiz ? 'Start quiz' : 'Generate full quiz'}
+                  {isGenerating ? 'Generating quiz…' : generatedQuiz ? (isEducator ? 'Preview as student' : 'Start quiz') : 'Generate full quiz'}
                   <FiZap className="h-4 w-4" />
                 </button>
                 {saveError && (
@@ -415,7 +479,7 @@ export default function QuizCreatorPage() {
                   <p><span className="font-extrabold">Pro tip:</span> Clear, well-lit pages with readable labels produce more accurate questions.</p>
                 </div>
               </div>
-            </aside>
+            </aside>}
           </div>
         </main>
       </div>

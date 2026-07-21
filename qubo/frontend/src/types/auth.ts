@@ -41,6 +41,7 @@ export interface RegisterRequest {
 export interface LoginRequest {
   email: string;
   password: string;
+  role: UserRole;
 }
 
 export interface ProfileUpdateRequest {

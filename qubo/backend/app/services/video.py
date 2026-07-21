@@ -48,3 +48,23 @@ class VideoService:
 
         if not video:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tutorial video not found.")
+
+    @staticmethod
+    def create_video(educator_id: str, title: str, youtube_url: str, subject_tag: str | None) -> dict:
+        try:
+            existing = get_supabase().table('videos').select('video_id').eq('youtube_url', youtube_url).maybe_single().execute().data
+            if existing:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='That YouTube URL has already been added.')
+            created = get_supabase().table('videos').insert({
+                'uploaded_by': educator_id, 'title': title.strip(), 'youtube_url': youtube_url.strip(),
+                'subject_tag': subject_tag.strip() if subject_tag else None,
+            }).execute().data
+            if not created:
+                raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail='Tutorial video could not be created.')
+            from app.services.collection import CollectionService
+            CollectionService.add_uploaded_item(educator_id, 'video', created[0]['video_id'])
+            return created[0]
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail='Tutorial video could not be created in Supabase.') from exc

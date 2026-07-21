@@ -13,9 +13,61 @@ class ResourceService:
 
     STORAGE_BUCKET = "3d-models"
     SIGNED_URL_TTL_SECONDS = 900
-    MODEL_SELECT = "resource_id,title,url,learning_style_tag,topics(topic_name,subjects(subject_name))"
+    MODEL_SELECT = "resource_id,title,url,learning_style_tag,visibility,created_by,topics(topic_name,subjects(subject_name))"
     MODEL_TYPES = ["3d_model", "3D Model"]
     ANNOTATION_SELECT = "annotation_id,resource_id,title,description,position_x,position_y,position_z,created_by,created_at,updated_at"
+
+    @classmethod
+    def create_3d_model(cls, educator_id: str, title: str, subject_name: str, topic_name: str | None, visibility: str, content: bytes, content_type: str) -> dict:
+        """Store a GLB privately, then create its resource record."""
+        from uuid import uuid4
+
+        supabase = get_supabase()
+        try:
+            subject_rows = (
+                supabase.table('subjects')
+                .select('id')
+                .eq('subject_name', subject_name)
+                .limit(1)
+                .execute()
+                .data
+                or []
+            )
+            subject = subject_rows[0] if subject_rows else None
+            if not subject:
+                subject = supabase.table('subjects').insert({'subject_name': subject_name}).execute().data[0]
+            topic_label = (topic_name or 'General').strip() or 'General'
+            topic_rows = (
+                supabase.table('topics')
+                .select('id')
+                .eq('subject_id', subject['id'])
+                .eq('topic_name', topic_label)
+                .limit(1)
+                .execute()
+                .data
+                or []
+            )
+            topic = topic_rows[0] if topic_rows else None
+            if not topic:
+                topic = supabase.table('topics').insert({'subject_id': subject['id'], 'topic_name': topic_label}).execute().data[0]
+
+            storage_path = f'{educator_id}/{uuid4()}.glb'
+            supabase.storage.from_(cls.STORAGE_BUCKET).upload(storage_path, content, {'content-type': content_type, 'upsert': 'false'})
+            created = supabase.table('resources').insert({
+                'topic_id': topic['id'], 'title': title.strip(), 'url': storage_path,
+                'resource_type': '3d_model', 'learning_style_tag': 'visual',
+                'created_by': educator_id, 'visibility': visibility,
+            }).execute().data
+            if not created:
+                supabase.storage.from_(cls.STORAGE_BUCKET).remove([storage_path])
+                raise HTTPException(status_code=502, detail='The 3D model record could not be created.')
+            from app.services.collection import CollectionService
+            CollectionService.add_uploaded_item(educator_id, 'model', created[0]['resource_id'])
+            return cls._serialize_model(created[0], cls._create_signed_model_url(storage_path))
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail='3D model upload failed. Check the 3d-models Storage bucket and database migration.') from exc
 
     @classmethod
     def _serialize_model(cls, resource: dict, preview_model_url: str | None = None) -> dict:
@@ -27,6 +79,8 @@ class ResourceService:
             "subject_name": subject.get("subject_name"),
             "topic_name": topic.get("topic_name"),
             "learning_style_tag": resource.get("learning_style_tag"),
+            "visibility": resource.get("visibility") or "public",
+            "created_by": resource.get("created_by"),
             "preview_model_url": preview_model_url,
         }
 
@@ -39,16 +93,21 @@ class ResourceService:
         )
 
     @classmethod
-    def list_3d_models(cls) -> list[dict]:
+    def list_3d_models(cls, viewer_id: str | None = None, scope: str = 'public') -> list[dict]:
         try:
-            response = (
+            query = (
                 get_supabase()
                 .table("resources")
                 .select(cls.MODEL_SELECT)
                 .in_("resource_type", cls.MODEL_TYPES)
-                .order("title")
-                .execute()
             )
+            if scope == 'private':
+                if not viewer_id:
+                    return []
+                query = query.eq('created_by', viewer_id)
+            else:
+                query = query.eq('visibility', 'public')
+            response = query.order("title").execute()
             return [
                 cls._serialize_model(resource, cls._create_signed_model_url(resource["url"]))
                 for resource in response.data or []
@@ -60,8 +119,8 @@ class ResourceService:
             ) from exc
 
     @classmethod
-    def list_popular_3d_models(cls, limit: int = 3) -> list[dict]:
-        models = cls.list_3d_models()
+    def list_popular_3d_models(cls, viewer_id: str | None = None, limit: int = 3) -> list[dict]:
+        models = cls.list_3d_models(viewer_id, 'public')
         try:
             since = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
             events = get_supabase().table("learning_events").select(
@@ -90,7 +149,7 @@ class ResourceService:
 
     @classmethod
     def recommend_3d_model(cls, user_id: str) -> dict | None:
-        models = cls.list_3d_models()
+        models = cls.list_3d_models(user_id, 'public')
         videos = VideoService.list_videos()
         if not models and not videos:
             return None
@@ -158,7 +217,7 @@ class ResourceService:
             return {"target_type": "video", "target_id": video["video_id"], "title": video["title"], "subject_name": video.get("subject_tag"), "reason": "Start with this focused video lesson.", "learning_goal": "Build a strong foundation for revision.", "estimated_minutes": 6, "youtube_url": video["youtube_url"]}
 
     @classmethod
-    def get_3d_model(cls, resource_id: str) -> dict:
+    def get_3d_model(cls, resource_id: str, viewer_id: str) -> dict:
         try:
             response = (
                 get_supabase()
@@ -176,7 +235,7 @@ class ResourceService:
                 detail="3D learning resource could not be loaded from Supabase.",
             ) from exc
 
-        if not resource:
+        if not resource or (resource.get('visibility') == 'private' and resource.get('created_by') != viewer_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="3D model not found.")
 
         try:
@@ -190,6 +249,7 @@ class ResourceService:
         return {
             **cls._serialize_model(resource, signed_url),
             "signed_model_url": signed_url,
+            "can_manage_annotations": resource.get("created_by") == viewer_id,
         }
 
     @classmethod
@@ -314,6 +374,23 @@ class ResourceService:
     @classmethod
     def create_annotation(cls, resource_id: str, educator_id: str, annotation: dict) -> dict:
         try:
+            model = (
+                get_supabase()
+                .table("resources")
+                .select("resource_id")
+                .eq("resource_id", resource_id)
+                .in_("resource_type", cls.MODEL_TYPES)
+                .eq("created_by", educator_id)
+                .limit(1)
+                .execute()
+                .data
+                or []
+            )
+            if not model:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only the educator who uploaded this 3D model can add annotations.",
+                )
             response = (
                 get_supabase()
                 .table("resource_annotations")
