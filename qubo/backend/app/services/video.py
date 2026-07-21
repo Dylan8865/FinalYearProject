@@ -9,12 +9,12 @@ class VideoService:
     """Read-only tutorial video queries for the student resource area."""
 
     @staticmethod
-    def list_videos(search: Optional[str] = None, subject: Optional[str] = None) -> List[dict]:
+    def list_videos(search: Optional[str] = None, subject: Optional[str] = None, uploader_id: Optional[str] = None) -> List[dict]:
         try:
             query = (
                 get_supabase()
                 .table("videos")
-                .select("video_id,youtube_url,title,subject_tag")
+                .select("video_id,youtube_url,title,subject_tag,uploaded_by")
                 .order("title")
             )
 
@@ -22,6 +22,8 @@ class VideoService:
                 query = query.eq("subject_tag", subject)
             if search:
                 query = query.ilike("title", f"%{search.strip()}%")
+            if uploader_id:
+                query = query.eq("uploaded_by", uploader_id)
 
             return query.execute().data or []
         except Exception as exc:
@@ -54,8 +56,16 @@ class VideoService:
     @staticmethod
     def create_video(educator_id: str, title: str, youtube_url: str, subject_tag: str | None) -> dict:
         try:
-            existing = get_supabase().table('videos').select('video_id').eq('youtube_url', youtube_url).maybe_single().execute().data
-            if existing:
+            # A missing row is the normal case for a new upload.  Do not use
+            # maybe_single() here: PostgREST can turn a zero-row result into a
+            # 406 response, which was being reported as a generic upload
+            # failure before the insert was reached.
+            existing_rows = (
+                get_supabase().table('videos').select('video_id')
+                .eq('youtube_url', youtube_url.strip()).limit(1).execute().data
+                or []
+            )
+            if existing_rows:
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='That YouTube URL has already been added.')
             created = get_supabase().table('videos').insert({
                 'uploaded_by': educator_id, 'title': title.strip(), 'youtube_url': youtube_url.strip(),
@@ -70,3 +80,20 @@ class VideoService:
             raise
         except Exception as exc:
             raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail='Tutorial video could not be created in Supabase.') from exc
+
+    @staticmethod
+    def delete_video(video_id: str, educator_id: str) -> None:
+        supabase = get_supabase()
+        try:
+            owned = supabase.table('videos').select('video_id').eq('video_id', video_id).eq('uploaded_by', educator_id).limit(1).execute().data or []
+            if not owned:
+                raise HTTPException(status_code=404, detail='Video not found or not owned by this educator.')
+            for table in ('content_shares', 'educator_recommendations', 'user_favourites', 'user_resources', 'learning_events'):
+                supabase.table(table).delete().eq('video_id', video_id).execute()
+            deleted = supabase.table('videos').delete().eq('video_id', video_id).eq('uploaded_by', educator_id).execute().data or []
+            if not deleted:
+                raise HTTPException(status_code=404, detail='Video not found or not owned by this educator.')
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail='Tutorial video could not be deleted.') from exc

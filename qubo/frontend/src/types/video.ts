@@ -3,6 +3,7 @@ export interface TutorialVideo {
   youtube_url: string;
   title: string;
   subject_tag?: string | null;
+  uploaded_by?: string | null;
 }
 
 export interface SharedLearningItem {
