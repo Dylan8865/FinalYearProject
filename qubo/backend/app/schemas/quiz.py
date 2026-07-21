@@ -9,6 +9,7 @@ DifficultyLevel = Literal["Beginner", "Intermediate", "Advanced"]
 
 
 class GeneratedQuestion(BaseModel):
+    id: Optional[str] = None
     question: str = Field(..., min_length=5)
     question_type: QuestionType
     options: List[str] = Field(default_factory=list)
@@ -27,6 +28,7 @@ class GeneratedQuestion(BaseModel):
 class GeneratedQuizResponse(BaseModel):
     title: str
     subject: str
+    topic: str = Field(..., min_length=2, max_length=120)
     question_type: QuestionType
     difficulty: DifficultyLevel
     source_files: List[str]
@@ -42,16 +44,24 @@ class SavedQuizResponse(BaseModel):
     message: str
 
 
+class QuizAnswerRequest(BaseModel):
+    question_index: int = Field(..., ge=0, le=19)
+    selected_answer: Optional[str] = Field(default=None, max_length=2000)
+    time_spent_seconds: int = Field(default=0, ge=0, le=7200)
+
+
 class QuizAttemptRequest(BaseModel):
     score: float = Field(..., ge=0, le=100)
     total_questions: int = Field(..., ge=1, le=20)
     time_taken_seconds: int = Field(..., ge=0)
+    answers: List[QuizAnswerRequest] = Field(default_factory=list, max_length=20)
 
 
 class QuizAttemptResponse(BaseModel):
     id: str
     message: str
     prediction: Optional[dict] = None
+    review_schedule: Optional[dict] = None
 
 
 class LibraryQuizItem(BaseModel):

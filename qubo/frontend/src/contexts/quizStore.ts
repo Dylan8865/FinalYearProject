@@ -19,6 +19,7 @@ export const useQuizStore = create<QuizState>()(
     }),
     {
       name: 'qubo-generated-quiz',
+      version: 2,
       storage: createJSONStorage(() => sessionStorage),
     }
   )

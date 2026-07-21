@@ -13,8 +13,9 @@ import {
 
 import AppSidebar from '@/components/layout/AppSidebar';
 import { useAuthStore } from '@/contexts/authStore';
+import { useLanguageStore } from '@/contexts/languageStore';
 import { authService } from '@/lib/authService';
-import { StudySession, SubjectAnalytics } from '@/types/analytics';
+import { ReviewSchedule, StudySession, SubjectAnalytics } from '@/types/analytics';
 
 const localDateTimeValue = () => {
   const now = new Date();
@@ -31,9 +32,12 @@ const formatMinutes = (minutes: number) => {
 
 export default function LearningAnalyticsPage() {
   const user = useAuthStore((state) => state.user);
+  const language = useLanguageStore((state) => state.language);
+  const locale = language === 'ms' ? 'ms-MY' : 'en-MY';
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState<SubjectAnalytics[]>([]);
   const [sessions, setSessions] = useState<StudySession[]>([]);
+  const [reviewSchedule, setReviewSchedule] = useState<ReviewSchedule[]>([]);
   const [threshold, setThreshold] = useState(50);
   const [savedThreshold, setSavedThreshold] = useState(50);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,15 +58,17 @@ export default function LearningAnalyticsPage() {
     setIsLoading(true);
     setError('');
     try {
-      const [subjectData, sessionData, predictionThreshold] = await Promise.all([
+      const [subjectData, sessionData, predictionThreshold, reviewData] = await Promise.all([
         authService.getSubjectAnalytics(),
         authService.getStudySessions(),
         authService.getPredictionThreshold(),
+        authService.getReviewSchedule(),
       ]);
       setSubjects(subjectData);
       setSessions(sessionData);
       setThreshold(predictionThreshold);
       setSavedThreshold(predictionThreshold);
+      setReviewSchedule(reviewData);
       setForm((current) => ({
         ...current,
         subject_id: subjectData.some((subject) => subject.id === current.subject_id)
@@ -250,9 +256,28 @@ export default function LearningAnalyticsPage() {
                         <div><p className="text-sm font-extrabold">{session.subject_name}</p><p className="mt-1 text-xs text-slate-500">{session.topic_name}</p></div>
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">{session.duration_minutes} min</span>
                       </div>
-                      <p className="mt-3 text-xs text-slate-400">{new Date(session.session_date).toLocaleString('en-MY')} · {session.pomodoro_cycles} Pomodoro</p>
+                      <p className="mt-3 text-xs text-slate-400">{new Date(session.session_date).toLocaleString(locale)} · {session.pomodoro_cycles} Pomodoro</p>
                     </div>
                   )) : <p className="rounded-2xl border-2 border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">No study sessions recorded yet.</p>}
+                </div>
+              </section>
+
+              <section className="rounded-[30px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-xl font-extrabold">Review schedule</h2>
+                  <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700">{reviewSchedule.filter((item) => item.is_due).length} due</span>
+                </div>
+                <p className="mt-2 text-sm text-slate-500">Review dates adapt automatically after each quiz attempt.</p>
+                <div className="mt-4 space-y-3">
+                  {reviewSchedule.length ? reviewSchedule.slice(0, 6).map((item) => (
+                    <div key={item.id} className={`rounded-2xl border p-4 ${item.is_due ? 'border-amber-200 bg-amber-50' : 'border-slate-100 bg-slate-50'}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div><p className="text-sm font-extrabold">{item.topic_name}</p><p className="mt-1 text-xs text-slate-500">{item.subject_name}</p></div>
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase ${item.is_due ? 'bg-amber-200 text-amber-800' : 'bg-white text-slate-500'}`}>{item.is_due ? 'Due now' : `${item.interval_days} day interval`}</span>
+                      </div>
+                      <p className="mt-3 text-xs font-semibold text-slate-500">Next review: {new Date(`${item.next_review_date}T00:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    </div>
+                  )) : <p className="rounded-2xl border-2 border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">Complete a quiz to create your first review date.</p>}
                 </div>
               </section>
             </div>
