@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -14,16 +14,16 @@ LearningEventType = Literal[
 
 class LearningEventCreate(BaseModel):
     target_type: LearningTargetType
-    target_id: UUID | None = None
+    target_id: Optional[UUID] = None
     event_type: LearningEventType
-    session_id: UUID | None = None
-    metadata: dict[str, Any] = Field(default_factory=dict)
+    session_id: Optional[UUID] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class CompletionRequest(BaseModel):
     target_type: Literal["model", "video"]
     target_id: UUID
-    session_id: UUID | None = None
+    session_id: Optional[UUID] = None
 
 
 class CompletionStatusResponse(BaseModel):
@@ -37,5 +37,5 @@ class EducatorAnalyticsResponse(BaseModel):
     completions: int
     model_explorations: int
     video_learning_actions: int
-    top_subjects: list[dict[str, int | str]]
-    daily_activity: list[dict[str, int | str]]
+    top_subjects: List[Dict[str, Union[int, str]]]
+    daily_activity: List[Dict[str, Union[int, str]]]

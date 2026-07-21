@@ -2,12 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { lazy, Suspense, useEffect } from 'react';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
+import { LanguageDomBridge } from '@/contexts/languageStore';
 
 // Pages
 import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
 import LearningStyleAssessment from '@/features/auth/LearningStyleAssessment';
 import Dashboard from '@/pages/Dashboard';
+import ProfilePage from '@/features/profile/ProfilePage';
 import ProfileSettings from '@/features/profile/ProfileSettings';
 import QuizCreatorPage from '@/features/quiz/QuizCreatorPage';
 import QuizExperiencePage from '@/features/quiz/QuizExperiencePage';
@@ -50,6 +52,7 @@ export default function App() {
 
   return (
     <Router>
+      <LanguageDomBridge />
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -76,9 +79,15 @@ export default function App() {
           path="/profile"
           element={
             <ProtectedRoute>
-              <div className="min-h-screen bg-gray-50 p-8">
-                <ProfileSettings />
-              </div>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/settings"
+          element={
+            <ProtectedRoute>
+              <ProfileSettings />
             </ProtectedRoute>
           }
         />

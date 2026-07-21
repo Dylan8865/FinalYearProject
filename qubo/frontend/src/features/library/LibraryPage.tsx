@@ -20,6 +20,7 @@ import AppSidebar from '@/components/layout/AppSidebar';
 import { authService } from '@/lib/authService';
 import { GeneratedQuiz, LibraryQuiz } from '@/types/quiz';
 import { useQuizStore } from '@/contexts/quizStore';
+import { useLanguageStore } from '@/contexts/languageStore';
 
 const formatSourceType = (sourceType: string) =>
   sourceType
@@ -27,8 +28,8 @@ const formatSourceType = (sourceType: string) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-const formatCreatedDate = (createdAt: string) =>
-  new Intl.DateTimeFormat('en-MY', {
+const formatCreatedDate = (createdAt: string, locale: string) =>
+  new Intl.DateTimeFormat(locale, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -36,6 +37,8 @@ const formatCreatedDate = (createdAt: string) =>
 
 export default function LibraryPage() {
   const navigate = useNavigate();
+  const language = useLanguageStore((state) => state.language);
+  const locale = language === 'ms' ? 'ms-MY' : 'en-MY';
   const setGeneratedQuiz = useQuizStore((state) => state.setGeneratedQuiz);
   const savedQuizId = useQuizStore((state) => state.savedQuizId);
   const setSavedQuizId = useQuizStore((state) => state.setSavedQuizId);
@@ -164,7 +167,7 @@ export default function LibraryPage() {
       <AppSidebar />
 
       <main className="min-w-0">
-        <div className="mx-auto w-full max-w-7xl px-5 pb-8 pt-20 md:px-8 lg:pb-10 lg:pt-24">
+        <div className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
           <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Module 3</p>
@@ -303,7 +306,7 @@ export default function LibraryPage() {
                       <FiBookOpen className="h-4 w-4 flex-none" />
                       {quiz.subject || 'No subject assigned'}
                     </span>
-                    <span className="flex-none">{formatCreatedDate(quiz.created_at)}</span>
+                    <span className="flex-none">{formatCreatedDate(quiz.created_at, locale)}</span>
                   </div>
                   <div className="mt-5 grid grid-cols-[1fr_1fr_auto] gap-2 border-t border-slate-100 pt-4">
                     <button

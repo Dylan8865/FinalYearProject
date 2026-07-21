@@ -27,4 +27,5 @@ supabase>=2.3.0
 # Utilities
 pydantic[email]==2.5.0
 requests==2.31.0
+reportlab==4.2.5
 python-jose==3.3.0

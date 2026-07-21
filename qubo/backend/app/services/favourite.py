@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import HTTPException, status
 
 from app.db.supabase import get_supabase
@@ -44,7 +46,7 @@ class FavouriteService:
             raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Saved item could not be removed.") from exc
 
     @staticmethod
-    def list_for_user(user_id: str) -> list[dict]:
+    def list_for_user(user_id: str) -> List[dict]:
         try:
             favourites = (
                 get_supabase().table("user_favourites")

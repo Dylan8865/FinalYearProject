@@ -75,6 +75,21 @@ class StudySessionItem(BaseModel):
     notes: Optional[str] = None
 
 
+class ReviewScheduleItem(BaseModel):
+    id: str
+    subject_id: str
+    subject_name: str
+    topic_id: str
+    topic_name: str
+    ease_factor: float
+    interval_days: int
+    repetitions: int
+    next_review_date: str
+    last_reviewed_date: Optional[str] = None
+    last_score: Optional[float] = None
+    is_due: bool
+
+
 class PredictionSettings(BaseModel):
     threshold: float = Field(..., ge=0, le=100)
 

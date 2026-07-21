@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
 from fastapi import HTTPException, status
@@ -314,13 +314,127 @@ class AnalyticsService:
         } for session in sessions]
 
     @staticmethod
-    def get_subject_analytics(student_id: str):
+    def list_review_schedule(student_id: str, due_only: bool = False):
+        supabase = get_supabase()
+        query = (
+            supabase.table("spaced_repetition_schedule")
+            .select("id,topic_id,ease_factor,interval_days,repetitions,next_review_date,last_reviewed_date,last_score")
+            .eq("student_id", student_id)
+            .order("next_review_date")
+        )
+        if due_only:
+            query = query.lte("next_review_date", date.today().isoformat())
+        schedules = query.execute().data or []
+        if not schedules:
+            return []
+
+        topic_ids = [row["topic_id"] for row in schedules]
+        topics = (
+            supabase.table("topics")
+            .select("id,topic_name,subject_id")
+            .in_("id", topic_ids)
+            .execute().data or []
+        )
+        topic_by_id = {row["id"]: row for row in topics}
+        subject_ids = list({row["subject_id"] for row in topics})
+        subjects = (
+            supabase.table("subjects")
+            .select("id,subject_name")
+            .in_("id", subject_ids)
+            .execute().data or []
+        ) if subject_ids else []
+        subject_names = {row["id"]: row["subject_name"] for row in subjects}
+        today = date.today().isoformat()
+        result = []
+        for schedule in schedules:
+            topic = topic_by_id.get(schedule["topic_id"])
+            if not topic:
+                continue
+            result.append({
+                **schedule,
+                "ease_factor": float(schedule["ease_factor"]),
+                "last_score": float(schedule["last_score"]) if schedule.get("last_score") is not None else None,
+                "subject_id": topic["subject_id"],
+                "subject_name": subject_names.get(topic["subject_id"], "Subject"),
+                "topic_name": topic["topic_name"],
+                "is_due": schedule["next_review_date"] <= today,
+            })
+        return result
+
+    @staticmethod
+    def export_progress_report(
+        student_id: str,
+        language: str = "en",
+        subject_id: Optional[str] = None,
+        topic_id: Optional[str] = None,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None,
+    ):
+        from app.services.report import ProgressReportService
+
+        supabase = get_supabase()
+        profile = (
+            supabase.table("profiles")
+            .select("username,full_name,school,form_level,target_grade")
+            .eq("id", student_id)
+            .single()
+            .execute().data
+        )
+        if not profile:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student profile not found")
+        subjects = AnalyticsService.get_subject_analytics(
+            student_id,
+            subject_id,
+            topic_id,
+            date_from,
+            date_to,
+        )
+        sessions = AnalyticsService.list_study_sessions(student_id, 50)
+        if subject_id:
+            sessions = [item for item in sessions if item["subject_id"] == subject_id]
+        if topic_id:
+            sessions = [item for item in sessions if item["topic_id"] == topic_id]
+        if date_from:
+            sessions = [item for item in sessions if AnalyticsService._parse_datetime(item["session_date"]).date() >= date_from]
+        if date_to:
+            sessions = [item for item in sessions if AnalyticsService._parse_datetime(item["session_date"]).date() <= date_to]
+        schedule = AnalyticsService.list_review_schedule(student_id)
+        if subject_id:
+            schedule = [item for item in schedule if item["subject_id"] == subject_id]
+        if topic_id:
+            schedule = [item for item in schedule if item["topic_id"] == topic_id]
+
+        now = datetime.now(timezone.utc).astimezone()
+        return ProgressReportService.render(
+            profile,
+            subjects,
+            sessions,
+            schedule,
+            language,
+            now.strftime("%d %B %Y, %H:%M"),
+        )
+
+    @staticmethod
+    def get_subject_analytics(
+        student_id: str,
+        subject_id: Optional[str] = None,
+        topic_id: Optional[str] = None,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None,
+    ):
+        if date_from and date_to and date_from > date_to:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="From date must be on or before to date.",
+            )
         supabase = get_supabase()
 
         selected_rows = (
             supabase.table("student_subjects").select("subject_id").eq("student_id", student_id).execute().data or []
         )
         subject_ids = [row["subject_id"] for row in selected_rows]
+        if subject_id:
+            subject_ids = [value for value in subject_ids if value == subject_id]
         if not subject_ids:
             return []
 
@@ -328,9 +442,10 @@ class AnalyticsService:
             supabase.table("subjects").select("id,subject_name,category").in_("id", subject_ids).order("subject_name").execute().data or []
         )
         subject_names = {row["id"]: row["subject_name"] for row in subject_rows}
-        topic_rows = (
-            supabase.table("topics").select("id,subject_id,topic_name,difficulty_level").in_("subject_id", subject_ids).order("topic_name").execute().data or []
-        )
+        topic_query = supabase.table("topics").select("id,subject_id,topic_name,difficulty_level").in_("subject_id", subject_ids)
+        if topic_id:
+            topic_query = topic_query.eq("id", topic_id)
+        topic_rows = topic_query.order("topic_name").execute().data or []
         topic_ids = [topic["id"] for topic in topic_rows]
 
         performance_rows = []
@@ -343,30 +458,47 @@ class AnalyticsService:
                 .execute().data or []
             )
 
-        session_rows = (
+        session_query = (
             supabase.table("study_sessions")
-            .select("id,subject_id,duration_minutes")
+            .select("id,subject_id,duration_minutes,session_date")
             .eq("student_id", student_id)
             .in_("subject_id", subject_ids)
-            .execute().data or []
         )
+        if date_from:
+            session_query = session_query.gte("session_date", datetime.combine(date_from, datetime.min.time(), tzinfo=timezone.utc).isoformat())
+        if date_to:
+            session_query = session_query.lte("session_date", datetime.combine(date_to, datetime.max.time(), tzinfo=timezone.utc).isoformat())
+        session_rows = session_query.execute().data or []
         session_ids = [row["id"] for row in session_rows]
         session_topic_rows = (
             supabase.table("session_topics").select("session_id,topic_id").in_("session_id", session_ids).execute().data or []
         ) if session_ids else []
+        if topic_id:
+            matching_session_ids = {
+                row["session_id"] for row in session_topic_rows if row["topic_id"] == topic_id
+            }
+            session_rows = [row for row in session_rows if row["id"] in matching_session_ids]
+            session_topic_rows = [row for row in session_topic_rows if row["topic_id"] == topic_id]
 
-        attempt_rows = (
+        attempt_query = (
             supabase.table("quiz_attempts")
             .select("quiz_id,score,attempted_at")
             .eq("student_id", student_id)
-            .order("attempted_at")
-            .execute().data or []
         )
+        if date_from:
+            attempt_query = attempt_query.gte("attempted_at", datetime.combine(date_from, datetime.min.time(), tzinfo=timezone.utc).isoformat())
+        if date_to:
+            attempt_query = attempt_query.lte("attempted_at", datetime.combine(date_to, datetime.max.time(), tzinfo=timezone.utc).isoformat())
+        attempt_rows = attempt_query.order("attempted_at").execute().data or []
         attempted_quiz_ids = list({row["quiz_id"] for row in attempt_rows})
         quiz_subjects: Dict[str, str] = {}
         if attempted_quiz_ids:
-            quiz_rows = supabase.table("quizzes").select("id,subject_id").in_("id", attempted_quiz_ids).execute().data or []
-            quiz_subjects = {row["id"]: row.get("subject_id") for row in quiz_rows}
+            quiz_rows = supabase.table("quizzes").select("id,subject_id,topic_id").in_("id", attempted_quiz_ids).execute().data or []
+            quiz_subjects = {
+                row["id"]: row.get("subject_id")
+                for row in quiz_rows
+                if not topic_id or row.get("topic_id") == topic_id
+            }
 
         prediction_rows = (
             supabase.table("exam_predictions")

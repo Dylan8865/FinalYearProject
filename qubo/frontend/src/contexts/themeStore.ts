@@ -4,15 +4,6 @@ export type ThemeMode = 'light' | 'dark';
 
 const THEME_STORAGE_KEY = 'qubo-theme';
 
-const getPreferredTheme = (): ThemeMode => {
-  if (typeof window === 'undefined') return 'light';
-
-  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-  if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-};
-
 const applyTheme = (theme: ThemeMode) => {
   if (typeof document === 'undefined') return;
 
@@ -20,7 +11,28 @@ const applyTheme = (theme: ThemeMode) => {
   document.documentElement.style.colorScheme = theme;
 };
 
-const initialTheme = getPreferredTheme();
+const getInitialTheme = (): ThemeMode => {
+  if (typeof window === 'undefined') return 'light';
+
+  try {
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+  } catch {
+    // Continue with the operating-system preference when storage is unavailable.
+  }
+
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
+const saveTheme = (theme: ThemeMode) => {
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {
+    // Applying the theme should still work when storage is unavailable.
+  }
+};
+
+const initialTheme: ThemeMode = getInitialTheme();
 applyTheme(initialTheme);
 
 interface ThemeState {
@@ -36,15 +48,15 @@ export const initializeTheme = () => {
 export const useThemeStore = create<ThemeState>((set, get) => ({
   theme: initialTheme,
   setTheme: (theme) => {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     applyTheme(theme);
+    saveTheme(theme);
     set({ theme });
   },
   toggleTheme: () => {
     const appliedTheme = document.documentElement.classList.contains('dark') ? 'dark' : get().theme;
     const nextTheme = appliedTheme === 'dark' ? 'light' : 'dark';
-    window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
     applyTheme(nextTheme);
+    saveTheme(nextTheme);
     set({ theme: nextTheme });
   },
 }));

@@ -56,6 +56,28 @@ export interface StudySession extends StudySessionCreate {
   session_date: string;
 }
 
+export interface ReviewSchedule {
+  id: string;
+  subject_id: string;
+  subject_name: string;
+  topic_id: string;
+  topic_name: string;
+  ease_factor: number;
+  interval_days: number;
+  repetitions: number;
+  next_review_date: string;
+  last_reviewed_date: string | null;
+  last_score: number | null;
+  is_due: boolean;
+}
+
+export interface AnalyticsFilters {
+  subject_id?: string;
+  topic_id?: string;
+  date_from?: string;
+  date_to?: string;
+}
+
 export interface EducatorStudentSummary {
   id: string;
   username: string;

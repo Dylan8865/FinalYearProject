@@ -59,7 +59,7 @@ export default function ResourceHubPage() {
   return <div className="min-h-screen bg-[#f7f9fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
     <AppSidebar />
     <div className="min-w-0">
-      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 px-5 py-4 backdrop-blur md:px-8">
+      <header className="sticky top-16 z-20 border-b border-slate-200/80 bg-white/90 px-5 py-4 backdrop-blur md:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <label className="flex h-11 w-full max-w-md items-center gap-3 rounded-full bg-slate-100 px-4 text-slate-400"><FiSearch className="h-4 w-4" /><input placeholder="Search resources, topics, or subjects" onFocus={() => navigate('/resources/explore')} className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none" /></label>
           <div className="text-right"><p className="text-sm font-extrabold text-slate-900">Learning resources</p><p className="text-xs font-medium text-slate-500">SPM resource collection</p></div>

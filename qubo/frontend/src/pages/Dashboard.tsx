@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiLogOut, FiSettings, FiTarget } from 'react-icons/fi';
 import AppSidebar from '@/components/layout/AppSidebar';
 import { EducatorAnalytics } from '@/types/learning';
+import { normalizeSpmTargetGrade } from '@/lib/spmGrades';
 
 export default function Dashboard() {
   const { user, logout } = useAuthStore();
@@ -55,7 +56,7 @@ export default function Dashboard() {
       user.profile_picture_url,
       user.school,
       user.form_level,
-      user.target_grade,
+      normalizeSpmTargetGrade(user.target_grade),
       user.target_exam_date,
       user.learning_style,
     ];
@@ -90,6 +91,7 @@ export default function Dashboard() {
 
   const isStudent = user.role === 'student';
   const firstName = user.full_name?.split(' ')[0] || user.full_name;
+  const targetGrade = normalizeSpmTargetGrade(user.target_grade);
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
@@ -179,7 +181,7 @@ export default function Dashboard() {
                   ['Full name', user.full_name],
                   ['School', user.school || 'Not set'],
                   ['Form level', user.form_level || 'Not set'],
-                  ['Target grade', user.target_grade || 'Not set'],
+                  ['Target grade', targetGrade || 'Not set'],
                 ].map(([label, value]) => (
                   <div key={label} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
                     <span className="text-sm font-semibold text-slate-500">{label}</span>

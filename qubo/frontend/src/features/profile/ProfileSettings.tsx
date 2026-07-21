@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
+import { normalizeSpmTargetGrade, VALID_SPM_TARGET_GRADES } from '@/lib/spmGrades';
 import { ProfileUpdateRequest, Subject } from '@/types/auth';
 import {
   FiArrowLeft,
@@ -17,7 +18,6 @@ import {
   FiX,
 } from 'react-icons/fi';
 
-const VALID_TARGET_GRADES = ['A+', 'A', 'A-', 'B+', 'B', 'C+', 'C', 'D', 'E', 'G'];
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
@@ -73,7 +73,7 @@ export default function ProfileSettings() {
     profile_picture_url: user?.profile_picture_url || '',
     school: user?.school || '',
     form_level: user?.form_level || '',
-    target_grade: user?.target_grade || '',
+    target_grade: normalizeSpmTargetGrade(user?.target_grade),
     target_exam_date: user?.target_exam_date || '',
   });
 
@@ -88,7 +88,7 @@ export default function ProfileSettings() {
       profile_picture_url: user.profile_picture_url || '',
       school: user.school || '',
       form_level: user.form_level || '',
-      target_grade: user.target_grade || '',
+      target_grade: normalizeSpmTargetGrade(user.target_grade),
       target_exam_date: user.target_exam_date ? user.target_exam_date.slice(0, 10) : '',
     });
   }, [user]);
@@ -190,7 +190,7 @@ export default function ProfileSettings() {
     }
 
     const normalizedGrade = formData.target_grade.trim().toUpperCase();
-    if (normalizedGrade && !VALID_TARGET_GRADES.includes(normalizedGrade)) {
+    if (normalizedGrade && !VALID_SPM_TARGET_GRADES.some((grade) => grade === normalizedGrade)) {
       setError('Choose a valid SPM target grade.');
       return;
     }
@@ -276,7 +276,7 @@ export default function ProfileSettings() {
 
               <button
                 onClick={() => setIsEditing((value) => !value)}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500"
               >
                 {isEditing ? <FiX className="h-4 w-4" /> : <FiEdit2 className="h-4 w-4" />}
                 {isEditing ? 'Cancel' : 'Edit profile'}
@@ -350,7 +350,7 @@ export default function ProfileSettings() {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={!isEditing || isUploadingImage}
-                    className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm hover:border-blue-300 hover:text-blue-600 disabled:opacity-50"
+                    className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm hover:border-blue-300 hover:text-blue-600 disabled:opacity-50 dark:disabled:border-slate-700 dark:disabled:bg-slate-800 dark:disabled:text-slate-400 dark:disabled:opacity-100"
                   >
                     <FiUploadCloud className="h-4 w-4" />
                     {isUploadingImage ? 'Uploading...' : 'Browse'}
@@ -427,15 +427,15 @@ export default function ProfileSettings() {
                 <label className="mb-2 block text-sm font-bold text-slate-600">Target grade</label>
                 <select
                   name="target_grade"
-                  value={VALID_TARGET_GRADES.includes(formData.target_grade.trim().toUpperCase()) ? formData.target_grade.trim().toUpperCase() : ''}
+                  value={normalizeSpmTargetGrade(formData.target_grade)}
                   onChange={handleChange}
                   disabled={!isEditing}
                   className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
                 >
                   <option value="">Select target grade</option>
-                  {VALID_TARGET_GRADES.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
+                  {VALID_SPM_TARGET_GRADES.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
                 </select>
-                {formData.target_grade && !VALID_TARGET_GRADES.includes(formData.target_grade.trim().toUpperCase()) && (
+                {formData.target_grade && !normalizeSpmTargetGrade(formData.target_grade) && (
                   <p className="mt-2 text-xs font-semibold text-red-600">The saved grade is invalid. Choose a valid SPM grade.</p>
                 )}
               </div>
@@ -532,7 +532,7 @@ export default function ProfileSettings() {
                   ['Full name', user.full_name],
                   ['School', user.school || 'Not set'],
                   ['Form level', user.form_level || 'Not set'],
-                  ['Target grade', user.target_grade || 'Not set'],
+                  ['Target grade', normalizeSpmTargetGrade(user.target_grade) || 'Not set'],
                   ['Target exam date', user.target_exam_date ? user.target_exam_date.slice(0, 10) : 'Not set'],
                 ].map(([label, value]) => (
                   <div key={label} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
@@ -624,7 +624,7 @@ export default function ProfileSettings() {
                 <button
                   type="submit"
                   disabled={isChangingPassword}
-                  className="h-12 w-full rounded-full bg-slate-950 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-12 w-full rounded-full bg-slate-950 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-500"
                 >
                   {isChangingPassword ? 'Updating password...' : 'Update password'}
                 </button>
