@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import List, Optional
 
 from fastapi import HTTPException, status
 
@@ -7,7 +8,9 @@ from app.db.supabase import get_supabase
 
 class ContentShareService:
     @staticmethod
-    def share(target_type: str, target_id: str, sender_id: str, recipient_email: str, message: str | None) -> None:
+    def share(
+        target_type: str, target_id: str, sender_id: str, recipient_email: str, message: Optional[str]
+    ) -> None:
         if target_type not in {"model", "video"}:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Learning content not found.")
         supabase = get_supabase()
@@ -40,7 +43,7 @@ class ContentShareService:
             raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Content could not be shared. Apply the content shares migrations first.") from exc
 
     @staticmethod
-    def list_received(user_id: str) -> list[dict]:
+    def list_received(user_id: str) -> List[dict]:
         supabase = get_supabase()
         try:
             shares = supabase.table("content_shares").select("share_id,video_id,resource_id,sender_id,message,shared_at").eq("recipient_id", user_id).is_("dismissed_at", "null").order("shared_at", desc=True).execute().data or []

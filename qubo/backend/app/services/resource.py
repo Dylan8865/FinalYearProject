@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from collections import Counter, defaultdict
+from typing import Dict, List, Optional
 
 from fastapi import HTTPException, status
 
@@ -18,7 +19,7 @@ class ResourceService:
     ANNOTATION_SELECT = "annotation_id,resource_id,title,description,position_x,position_y,position_z,created_by,created_at,updated_at"
 
     @classmethod
-    def _serialize_model(cls, resource: dict, preview_model_url: str | None = None) -> dict:
+    def _serialize_model(cls, resource: dict, preview_model_url: Optional[str] = None) -> dict:
         topic = resource.get("topics") or {}
         subject = topic.get("subjects") or {}
         return {
@@ -39,7 +40,7 @@ class ResourceService:
         )
 
     @classmethod
-    def list_3d_models(cls) -> list[dict]:
+    def list_3d_models(cls) -> List[dict]:
         try:
             response = (
                 get_supabase()
@@ -60,7 +61,7 @@ class ResourceService:
             ) from exc
 
     @classmethod
-    def list_popular_3d_models(cls, limit: int = 3) -> list[dict]:
+    def list_popular_3d_models(cls, limit: int = 3) -> List[dict]:
         models = cls.list_3d_models()
         try:
             since = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
@@ -89,7 +90,7 @@ class ResourceService:
                 return [{**model, "popularity_count": 0} for model in models[:limit]]
 
     @classmethod
-    def recommend_3d_model(cls, user_id: str) -> dict | None:
+    def recommend_3d_model(cls, user_id: str) -> Optional[dict]:
         models = cls.list_3d_models()
         videos = VideoService.list_videos()
         if not models and not videos:
@@ -105,8 +106,8 @@ class ResourceService:
                 "opened": 1, "video_played": 1, "skipped_quickly": -2,
             }
             subject_scores: defaultdict[str, float] = defaultdict(float)
-            subject_event_counts: Counter[tuple[str, str]] = Counter()
-            weak_quizzes: dict[str, float] = {}
+            subject_event_counts: Counter = Counter()
+            weak_quizzes: Dict[str, float] = {}
             for event in events:
                 metadata = event.get("metadata") or {}
                 subject = metadata.get("subject_name")
@@ -193,7 +194,7 @@ class ResourceService:
         }
 
     @classmethod
-    def list_educator_recommendations(cls, educator_id: str | None = None) -> list[dict]:
+    def list_educator_recommendations(cls, educator_id: Optional[str] = None) -> List[dict]:
         try:
             query = get_supabase().table("educator_recommendations").select(
                 "recommendation_id,educator_id,resource_id,video_id,note,created_at,profiles(full_name,username)"
@@ -203,8 +204,8 @@ class ResourceService:
             recommendations = query.execute().data or []
             resource_ids = [row["resource_id"] for row in recommendations if row.get("resource_id")]
             video_ids = [row["video_id"] for row in recommendations if row.get("video_id")]
-            models_by_id: dict[str, dict] = {}
-            videos_by_id: dict[str, dict] = {}
+            models_by_id: Dict[str, dict] = {}
+            videos_by_id: Dict[str, dict] = {}
 
             if resource_ids:
                 resources = get_supabase().table("resources").select(cls.MODEL_SELECT).in_("resource_id", resource_ids).execute().data or []
@@ -294,7 +295,7 @@ class ResourceService:
         }
 
     @classmethod
-    def list_annotations(cls, resource_id: str) -> list[dict]:
+    def list_annotations(cls, resource_id: str) -> List[dict]:
         try:
             response = (
                 get_supabase()

@@ -9,6 +9,7 @@ import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
 import LearningStyleAssessment from '@/features/auth/LearningStyleAssessment';
 import Dashboard from '@/pages/Dashboard';
+import ProfilePage from '@/features/profile/ProfilePage';
 import ProfileSettings from '@/features/profile/ProfileSettings';
 import QuizCreatorPage from '@/features/quiz/QuizCreatorPage';
 import QuizExperiencePage from '@/features/quiz/QuizExperiencePage';
@@ -78,9 +79,15 @@ export default function App() {
           path="/profile"
           element={
             <ProtectedRoute>
-              <div className="min-h-screen bg-gray-50 p-8">
-                <ProfileSettings />
-              </div>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/settings"
+          element={
+            <ProtectedRoute>
+              <ProfileSettings />
             </ProtectedRoute>
           }
         />

@@ -11,7 +11,28 @@ const applyTheme = (theme: ThemeMode) => {
   document.documentElement.style.colorScheme = theme;
 };
 
-const initialTheme: ThemeMode = 'light';
+const getInitialTheme = (): ThemeMode => {
+  if (typeof window === 'undefined') return 'light';
+
+  try {
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+  } catch {
+    // Continue with the operating-system preference when storage is unavailable.
+  }
+
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
+const saveTheme = (theme: ThemeMode) => {
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {
+    // Applying the theme should still work when storage is unavailable.
+  }
+};
+
+const initialTheme: ThemeMode = getInitialTheme();
 applyTheme(initialTheme);
 
 interface ThemeState {
@@ -21,11 +42,6 @@ interface ThemeState {
 }
 
 export const initializeTheme = () => {
-  // Theme choice is intentionally temporary. Remove values saved by older
-  // versions so reopening or refreshing the app always starts in light mode.
-  if (typeof window !== 'undefined') {
-    window.localStorage.removeItem(THEME_STORAGE_KEY);
-  }
   applyTheme(initialTheme);
 };
 
@@ -33,12 +49,14 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   theme: initialTheme,
   setTheme: (theme) => {
     applyTheme(theme);
+    saveTheme(theme);
     set({ theme });
   },
   toggleTheme: () => {
     const appliedTheme = document.documentElement.classList.contains('dark') ? 'dark' : get().theme;
     const nextTheme = appliedTheme === 'dark' ? 'light' : 'dark';
     applyTheme(nextTheme);
+    saveTheme(nextTheme);
     set({ theme: nextTheme });
   },
 }));

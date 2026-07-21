@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from fastapi import HTTPException, status
 
 from app.db.supabase import get_supabase
@@ -7,7 +9,7 @@ class VideoService:
     """Read-only tutorial video queries for the student resource area."""
 
     @staticmethod
-    def list_videos(search: str | None = None, subject: str | None = None) -> list[dict]:
+    def list_videos(search: Optional[str] = None, subject: Optional[str] = None) -> List[dict]:
         try:
             query = (
                 get_supabase()
