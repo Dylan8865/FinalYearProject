@@ -65,6 +65,7 @@ class UserLoginRequest(BaseModel):
     """User login request"""
     email: EmailStr
     password: str
+    role: UserRole
 
     @field_validator("email")
     @classmethod

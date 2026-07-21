@@ -1,0 +1,4129 @@
+{
+  "project": {
+    "name": "FYP Project",
+    "ref": "zifjmdcxruzsdcybrbfd",
+    "schema": "public"
+  },
+  "exported_at": "2026-07-19T14:57:19.356Z",
+  "table_count": 29,
+  "row_count": 406,
+  "tables": {
+    "profiles": [
+      {
+        "id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "role": "student",
+        "email": "benjaminyjy-wp23@student.tarc.edu.my",
+        "school": "TARUMT",
+        "username": "benjamin73",
+        "full_name": "Hello",
+        "created_at": "2026-07-11T17:42:35.126534+00:00",
+        "form_level": "Form 5",
+        "locked_until": null,
+        "target_grade": "G",
+        "learning_style": "visual",
+        "target_exam_date": "2026-07-24",
+        "profile_picture_url": "https://zifjmdcxruzsdcybrbfd.supabase.co/storage/v1/object/public/avatars/a0626f10-7cd7-4809-a0d7-cf3dbbc6778c/avatar?v=1784272983",
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 60
+      },
+      {
+        "id": "d690b142-e35d-4bf5-9a03-fb707224f3f9",
+        "role": "educator",
+        "email": "yongcj-wp23@student.tarc.edu.my",
+        "school": null,
+        "username": "yongSir",
+        "full_name": "Mr Yong",
+        "created_at": "2026-07-16T07:54:07.069022+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": null,
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "7ab9e0f2-4ffc-4404-a595-c3cc8a93bf1b",
+        "role": "student",
+        "email": "directuser18110@example.com",
+        "school": null,
+        "username": "directuser43687",
+        "full_name": "Direct User",
+        "created_at": "2026-07-11T18:35:14.058929+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": null,
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "2368c87f-9ee9-40ea-ac3c-d20232b9fb66",
+        "role": "student",
+        "email": "codextest607751@gmail.com",
+        "school": null,
+        "username": "codextest607751",
+        "full_name": "Codex Test",
+        "created_at": "2026-07-11T18:44:22.553473+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": null,
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "aad2ebdf-6872-4f19-b78d-7916b3a2a56c",
+        "role": "student",
+        "email": "proxytest556120@gmail.com",
+        "school": null,
+        "username": "proxytest556120",
+        "full_name": "Proxy Test",
+        "created_at": "2026-07-11T18:44:42.282547+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": null,
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "b2a856a3-a593-4b2b-8a59-36297b3e1cdb",
+        "role": "student",
+        "email": "benjain77@gmail.com",
+        "school": null,
+        "username": "Bryan",
+        "full_name": "Bryan",
+        "created_at": "2026-07-11T18:47:57.470335+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": "visual",
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "9ef71c08-c68b-4881-bbae-5c2aa7154b39",
+        "role": "student",
+        "email": "directrestart220822@gmail.com",
+        "school": null,
+        "username": "directrestart220822",
+        "full_name": "Direct Restart",
+        "created_at": "2026-07-11T18:57:40.585247+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": null,
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "53bc444f-db3d-4140-9016-9fd6507e474c",
+        "role": "student",
+        "email": "proxyfinal525784@gmail.com",
+        "school": null,
+        "username": "proxyfinal525784",
+        "full_name": "Proxy Final",
+        "created_at": "2026-07-11T18:58:32.878864+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": null,
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "role": "student",
+        "email": "demo70595@gmail.com",
+        "school": "SMK Sr Sentosa",
+        "username": "Sha256",
+        "full_name": "Juinyong",
+        "created_at": "2026-07-14T03:43:52.688133+00:00",
+        "form_level": "Form 4",
+        "locked_until": null,
+        "target_grade": "A",
+        "learning_style": "visual",
+        "target_exam_date": "2026-11-02",
+        "profile_picture_url": "https://zifjmdcxruzsdcybrbfd.supabase.co/storage/v1/object/public/avatars/b0de2c26-9ea6-40ca-8905-64b89faca5c8/avatar?v=1784453344",
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "4b37d86c-440d-4ef6-8736-919407d48857",
+        "role": "student",
+        "email": "yiben2126@gmail.com",
+        "school": null,
+        "username": "Ben",
+        "full_name": "Bem",
+        "created_at": "2026-07-11T19:01:53.768371+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": "visual",
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "f94a8365-9fc8-4949-966c-93bb1c85bd78",
+        "role": "student",
+        "email": "snorlax6212@gmail.com",
+        "school": null,
+        "username": "yin2",
+        "full_name": "yi",
+        "created_at": "2026-07-11T18:58:46.239729+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": null,
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      },
+      {
+        "id": "0a79c101-6b80-4872-8c8f-b1277f37b4be",
+        "role": "educator",
+        "email": "qubo123@gmail.com",
+        "school": null,
+        "username": "benjamin",
+        "full_name": "bryan",
+        "created_at": "2026-07-13T13:58:29.039765+00:00",
+        "form_level": null,
+        "locked_until": null,
+        "target_grade": null,
+        "learning_style": null,
+        "target_exam_date": null,
+        "profile_picture_url": null,
+        "failed_login_attempts": 0,
+        "prediction_alert_threshold": 50
+      }
+    ],
+    "subjects": [
+      {
+        "id": "8e5ff7f7-296e-4889-b653-c0ff38b04319",
+        "category": "Core",
+        "subject_name": "Bahasa Melayu"
+      },
+      {
+        "id": "b442b218-5198-412d-bff4-4b794f0a9f32",
+        "category": "Core",
+        "subject_name": "English"
+      },
+      {
+        "id": "a7093c51-b069-44d0-adb6-7ac188dc615b",
+        "category": "Core",
+        "subject_name": "Mathematics"
+      },
+      {
+        "id": "9464da18-e1f5-4af3-b638-503685297374",
+        "category": "Core",
+        "subject_name": "Science"
+      },
+      {
+        "id": "b0ef447c-9b7a-463b-880a-91bd5b4d539e",
+        "category": "Core",
+        "subject_name": "History"
+      },
+      {
+        "id": "ce32072f-7cbb-4acd-b424-3e604e93600a",
+        "category": "Elective (Science)",
+        "subject_name": "Physics"
+      },
+      {
+        "id": "19ad8638-5404-48d7-9fd5-4ddfc3c17c2b",
+        "category": "Elective (Science)",
+        "subject_name": "Chemistry"
+      },
+      {
+        "id": "56f1eb75-542f-441f-8af0-1554adfc4206",
+        "category": "Elective (Science)",
+        "subject_name": "Biology"
+      },
+      {
+        "id": "c99c7a53-1e33-4999-bd45-ac2c752bf590",
+        "category": "Elective (Science)",
+        "subject_name": "Add Mathematics"
+      }
+    ],
+    "student_subjects": [
+      {
+        "id": "df73217a-fd8d-4ce1-9fbb-36a704b3420f",
+        "student_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "subject_id": "8e5ff7f7-296e-4889-b653-c0ff38b04319"
+      }
+    ],
+    "educator_students": [],
+    "topics": [
+      {
+        "id": "796888aa-33ab-4066-98cb-56c83c1f8017",
+        "subject_id": "19ad8638-5404-48d7-9fd5-4ddfc3c17c2b",
+        "topic_name": "Periodic Table",
+        "difficulty_level": "Intermediate"
+      },
+      {
+        "id": "699d4459-5f98-429d-b359-e8fc3cb38821",
+        "subject_id": "56f1eb75-542f-441f-8af0-1554adfc4206",
+        "topic_name": "Bacterial Cell Model",
+        "difficulty_level": "Beginner"
+      },
+      {
+        "id": "6ff7a696-cfa8-4625-ac8c-5ce3f804bb34",
+        "subject_id": "b0ef447c-9b7a-463b-880a-91bd5b4d539e",
+        "topic_name": "Part 1",
+        "difficulty_level": null
+      },
+      {
+        "id": "a1b77df7-0e2d-408c-a22c-229de2c2d727",
+        "subject_id": "b0ef447c-9b7a-463b-880a-91bd5b4d539e",
+        "topic_name": "General Practice",
+        "difficulty_level": null
+      }
+    ],
+    "study_sessions": [
+      {
+        "id": "978f6135-6db9-4578-a7de-c60c8449e549",
+        "notes": null,
+        "student_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "subject_id": "b0ef447c-9b7a-463b-880a-91bd5b4d539e",
+        "session_date": "2026-07-17T08:26:00+00:00",
+        "pomodoro_cycles": 1,
+        "duration_minutes": 5
+      }
+    ],
+    "session_topics": [
+      {
+        "id": "746d46c4-aa90-4d4a-a144-83faea8e71b3",
+        "topic_id": "6ff7a696-cfa8-4625-ac8c-5ce3f804bb34",
+        "session_id": "978f6135-6db9-4578-a7de-c60c8449e549",
+        "time_spent_minutes": 5
+      }
+    ],
+    "performance_records": [],
+    "spaced_repetition_schedule": [],
+    "quizzes": [
+      {
+        "id": "8c1bc4fa-b659-4a4e-8090-cffe85c005e9",
+        "title": "Kuis Bab 2: Maksud Nasionalisme",
+        "owner_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "topic_id": "a1b77df7-0e2d-408c-a22c-229de2c2d727",
+        "created_at": "2026-07-15T15:03:02.411805+00:00",
+        "subject_id": "b0ef447c-9b7a-463b-880a-91bd5b4d539e",
+        "is_assigned": false,
+        "source_type": "ai_generated"
+      }
+    ],
+    "questions": [
+      {
+        "id": "189563b4-a7d7-4514-a133-5043c7a7854c",
+        "quiz_id": "8c1bc4fa-b659-4a4e-8090-cffe85c005e9",
+        "created_at": "2026-07-15T15:03:02.558726+00:00",
+        "explanation": null,
+        "question_text": "Apakah maksud nasionalisme secara umum menurut teks tersebut?",
+        "question_type": "mcq",
+        "correct_answer": "Perasaan cinta yang mendalam terhadap bangsa dan negara",
+        "difficulty_level": "Intermediate"
+      },
+      {
+        "id": "f0b8080a-db90-4de1-bee4-946e28d64fe3",
+        "quiz_id": "8c1bc4fa-b659-4a4e-8090-cffe85c005e9",
+        "created_at": "2026-07-15T15:03:02.796183+00:00",
+        "explanation": null,
+        "question_text": "Menurut Hans Kohn, nasionalisme merupakan satu gerakan yang meletakkan kesetiaan seseorang kepada...",
+        "question_type": "mcq",
+        "correct_answer": "Negara atau bangsanya",
+        "difficulty_level": "Intermediate"
+      },
+      {
+        "id": "775a5cd4-902a-4a5d-81bd-d0246a6a5486",
+        "quiz_id": "8c1bc4fa-b659-4a4e-8090-cffe85c005e9",
+        "created_at": "2026-07-15T15:03:03.529843+00:00",
+        "explanation": null,
+        "question_text": "Apakah pandangan Profesor Datuk Zainal Abidin Abdul Wahid mengenai nasionalisme Melayu?",
+        "question_type": "mcq",
+        "correct_answer": "Ia telah wujud sejak zaman Kesultanan Melayu Melaka",
+        "difficulty_level": "Intermediate"
+      },
+      {
+        "id": "8bc32348-e4f9-4c5f-9f10-ab2ea373f260",
+        "quiz_id": "8c1bc4fa-b659-4a4e-8090-cffe85c005e9",
+        "created_at": "2026-07-15T15:03:04.446324+00:00",
+        "explanation": null,
+        "question_text": "Menurut Dr. Burhanuddin al-Helmi, perjuangan menentang penjajahan haruslah berlandaskan...",
+        "question_type": "mcq",
+        "correct_answer": "Persatuan yang kuat dan pegangan kepada agama Islam",
+        "difficulty_level": "Intermediate"
+      },
+      {
+        "id": "8d893edc-2618-4588-982c-4a7009be66e9",
+        "quiz_id": "8c1bc4fa-b659-4a4e-8090-cffe85c005e9",
+        "created_at": "2026-07-15T15:03:05.313323+00:00",
+        "explanation": null,
+        "question_text": "Apakah punca kebangkitan nasionalisme Melayu pada dekad terakhir sebelum Perang Dunia Kedua menurut Profesor William R. Roff?",
+        "question_type": "mcq",
+        "correct_answer": "Kesedaran dan ketegasan diri terhadap ancaman hak kepentingan orang Melayu",
+        "difficulty_level": "Intermediate"
+      }
+    ],
+    "question_options": [
+      {
+        "id": "4d263619-0cb9-4d1f-93d9-6d8d9f73bb90",
+        "is_correct": true,
+        "option_text": "Perasaan cinta yang mendalam terhadap bangsa dan negara",
+        "question_id": "189563b4-a7d7-4514-a133-5043c7a7854c"
+      },
+      {
+        "id": "dc888e8d-4c6a-4151-a301-80d8b0663cd6",
+        "is_correct": false,
+        "option_text": "Keinginan untuk menguasai negara asing",
+        "question_id": "189563b4-a7d7-4514-a133-5043c7a7854c"
+      },
+      {
+        "id": "9d4736c1-0e8d-42c3-a2ce-bae36e659a5b",
+        "is_correct": false,
+        "option_text": "Sikap tidak peduli terhadap adat resam",
+        "question_id": "189563b4-a7d7-4514-a133-5043c7a7854c"
+      },
+      {
+        "id": "3033b3a9-da3c-44c8-9e3c-c18ed648c2af",
+        "is_correct": false,
+        "option_text": "Gerakan untuk menukar agama rasmi negara",
+        "question_id": "189563b4-a7d7-4514-a133-5043c7a7854c"
+      },
+      {
+        "id": "05e0e912-0e4b-4eda-a33b-1426580270a7",
+        "is_correct": false,
+        "option_text": "Pemimpin agama",
+        "question_id": "f0b8080a-db90-4de1-bee4-946e28d64fe3"
+      },
+      {
+        "id": "8c59fe00-7203-46cd-940c-81ea57d62b4a",
+        "is_correct": true,
+        "option_text": "Negara atau bangsanya",
+        "question_id": "f0b8080a-db90-4de1-bee4-946e28d64fe3"
+      },
+      {
+        "id": "6268d816-3c36-4908-ba54-e75f63e01739",
+        "is_correct": false,
+        "option_text": "Pihak penjajah",
+        "question_id": "f0b8080a-db90-4de1-bee4-946e28d64fe3"
+      },
+      {
+        "id": "76dfcbe8-ac21-4ad6-ab5e-3ceef661418f",
+        "is_correct": false,
+        "option_text": "Keluarga terdekat",
+        "question_id": "f0b8080a-db90-4de1-bee4-946e28d64fe3"
+      },
+      {
+        "id": "2aeacde7-e28d-4e5d-a814-255556349627",
+        "is_correct": false,
+        "option_text": "Ia adalah gejala baharu hasil gabungan British",
+        "question_id": "775a5cd4-902a-4a5d-81bd-d0246a6a5486"
+      },
+      {
+        "id": "d73fa960-ac47-43de-9064-00c6704659f9",
+        "is_correct": false,
+        "option_text": "Ia hanya wujud selepas Perang Dunia Kedua",
+        "question_id": "775a5cd4-902a-4a5d-81bd-d0246a6a5486"
+      },
+      {
+        "id": "e1fec3d2-2c04-418a-8c0d-3db8adcf7ed6",
+        "is_correct": true,
+        "option_text": "Ia telah wujud sejak zaman Kesultanan Melayu Melaka",
+        "question_id": "775a5cd4-902a-4a5d-81bd-d0246a6a5486"
+      },
+      {
+        "id": "e6c7aba9-341b-4863-91ea-fd8d2f56557c",
+        "is_correct": false,
+        "option_text": "Ia tidak mempunyai kaitan dengan semangat kebangsaan",
+        "question_id": "775a5cd4-902a-4a5d-81bd-d0246a6a5486"
+      },
+      {
+        "id": "ba7e1334-74ae-41d4-ac77-8e12212e4d42",
+        "is_correct": false,
+        "option_text": "Kekuatan senjata semata-mata",
+        "question_id": "8bc32348-e4f9-4c5f-9f10-ab2ea373f260"
+      },
+      {
+        "id": "e10bcb2c-b52c-412c-9405-8f660743f519",
+        "is_correct": true,
+        "option_text": "Persatuan yang kuat dan pegangan kepada agama Islam",
+        "question_id": "8bc32348-e4f9-4c5f-9f10-ab2ea373f260"
+      },
+      {
+        "id": "c14b038a-b82f-4220-81c4-c4be55b60d88",
+        "is_correct": false,
+        "option_text": "Bantuan daripada kuasa asing",
+        "question_id": "8bc32348-e4f9-4c5f-9f10-ab2ea373f260"
+      },
+      {
+        "id": "d711f246-3185-4826-9302-203495196cf8",
+        "is_correct": false,
+        "option_text": "Pengabaian adat resam tempatan",
+        "question_id": "8bc32348-e4f9-4c5f-9f10-ab2ea373f260"
+      },
+      {
+        "id": "15e06ef6-bed7-46d4-b0ab-4527c6431ac0",
+        "is_correct": false,
+        "option_text": "Keinginan untuk meniru budaya Barat",
+        "question_id": "8d893edc-2618-4588-982c-4a7009be66e9"
+      },
+      {
+        "id": "861a630f-94c7-4745-ad14-6a71eb775ef9",
+        "is_correct": true,
+        "option_text": "Kesedaran dan ketegasan diri terhadap ancaman hak kepentingan orang Melayu",
+        "question_id": "8d893edc-2618-4588-982c-4a7009be66e9"
+      },
+      {
+        "id": "36e2f2df-f19a-4cdc-aba7-aed424e2af28",
+        "is_correct": false,
+        "option_text": "Galakan daripada pihak penjajah British",
+        "question_id": "8d893edc-2618-4588-982c-4a7009be66e9"
+      },
+      {
+        "id": "e8fb12f2-03ff-463b-9e0b-bdfbdd9219af",
+        "is_correct": false,
+        "option_text": "Kekurangan sumber ekonomi di Tanah Melayu",
+        "question_id": "8d893edc-2618-4588-982c-4a7009be66e9"
+      }
+    ],
+    "quiz_assignments": [],
+    "quiz_attempts": [
+      {
+        "id": "8a3fb12d-1776-47dc-a0e9-7ddc1c830816",
+        "score": 40,
+        "quiz_id": "8c1bc4fa-b659-4a4e-8090-cffe85c005e9",
+        "student_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "attempted_at": "2026-07-15T15:03:39.874792+00:00",
+        "total_questions": 5,
+        "time_taken_seconds": 32
+      },
+      {
+        "id": "29c5d710-9ed6-46ce-a3dc-8e55b4548ac8",
+        "score": 20,
+        "quiz_id": "8c1bc4fa-b659-4a4e-8090-cffe85c005e9",
+        "student_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "attempted_at": "2026-07-15T15:09:39.287927+00:00",
+        "total_questions": 5,
+        "time_taken_seconds": 9
+      },
+      {
+        "id": "816c7be9-bca8-401a-b515-918f51c1855d",
+        "score": 20,
+        "quiz_id": "8c1bc4fa-b659-4a4e-8090-cffe85c005e9",
+        "student_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "attempted_at": "2026-07-15T15:09:50.886662+00:00",
+        "total_questions": 5,
+        "time_taken_seconds": 9
+      }
+    ],
+    "attempt_answers": [],
+    "exam_predictions": [],
+    "resources": [
+      {
+        "url": "chemistry/chemistryperiodic-table.glb",
+        "title": "3D Periodic Table",
+        "topic_id": "796888aa-33ab-4066-98cb-56c83c1f8017",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "resource_type": "3D Model",
+        "learning_style_tag": "visual"
+      },
+      {
+        "url": "biology/bacterial_cell_model.glb",
+        "title": "Bacterial 3D Model",
+        "topic_id": "699d4459-5f98-429d-b359-e8fc3cb38821",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "resource_type": "3D Model",
+        "learning_style_tag": "visual"
+      }
+    ],
+    "user_resources": [
+      {
+        "user_id": "7ab9e0f2-4ffc-4404-a595-c3cc8a93bf1b",
+        "is_saved": false,
+        "video_id": null,
+        "view_count": 1,
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "completed_at": null,
+        "is_completed": false,
+        "last_viewed_at": "2026-07-15T16:42:47.845283+00:00",
+        "recommended_at": "2026-07-15T16:37:10.350213+00:00",
+        "user_resource_id": "5907e234-a2b5-4ed2-9a05-faf14b7eef4b"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "is_saved": false,
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "view_count": 1,
+        "resource_id": null,
+        "completed_at": "2026-07-16T06:33:05.153002+00:00",
+        "is_completed": true,
+        "last_viewed_at": "2026-07-16T06:33:05.832914+00:00",
+        "recommended_at": "2026-07-16T06:31:51.431252+00:00",
+        "user_resource_id": "00fb7fde-0d6c-43df-abfc-0588c3da5918"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "is_saved": false,
+        "video_id": "cc2fe7d8-18a7-443b-905f-674b9c8e9710",
+        "view_count": 1,
+        "resource_id": null,
+        "completed_at": null,
+        "is_completed": false,
+        "last_viewed_at": "2026-07-16T08:32:36.807384+00:00",
+        "recommended_at": "2026-07-16T00:49:19.942351+00:00",
+        "user_resource_id": "1032107d-a3f3-45d9-89ec-42d057acd6d7"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "is_saved": false,
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "view_count": 1,
+        "resource_id": null,
+        "completed_at": null,
+        "is_completed": false,
+        "last_viewed_at": "2026-07-17T07:48:02.39563+00:00",
+        "recommended_at": "2026-07-16T01:25:17.275149+00:00",
+        "user_resource_id": "4d6b7e0e-7313-412b-9639-bec58329bb39"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "is_saved": false,
+        "video_id": null,
+        "view_count": 2,
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "completed_at": null,
+        "is_completed": false,
+        "last_viewed_at": "2026-07-17T08:10:55.390919+00:00",
+        "recommended_at": "2026-07-15T16:39:24.729013+00:00",
+        "user_resource_id": "c99f77b0-5980-40e8-b89d-2ef31e58ebcb"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "is_saved": false,
+        "video_id": null,
+        "view_count": 4,
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "completed_at": "2026-07-16T06:31:19.379424+00:00",
+        "is_completed": true,
+        "last_viewed_at": "2026-07-17T08:20:07.080273+00:00",
+        "recommended_at": "2026-07-15T16:38:59.082708+00:00",
+        "user_resource_id": "e4a60dd4-0e8c-4b79-8479-a38a11ca2ef0"
+      },
+      {
+        "user_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "is_saved": false,
+        "video_id": null,
+        "view_count": 1,
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "completed_at": null,
+        "is_completed": false,
+        "last_viewed_at": "2026-07-19T13:40:53.269967+00:00",
+        "recommended_at": "2026-07-19T13:40:53.325376+00:00",
+        "user_resource_id": "03e88aa2-384b-4ee6-8adc-868ed83f6df2"
+      }
+    ],
+    "achievements": [],
+    "matches": [
+      {
+        "winner": "player",
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "game_level": 1,
+        "is_victory": false,
+        "match_date": "2026-07-15T09:28:37.489723+00:00",
+        "completed_at": null,
+        "turns_played": 16,
+        "waves_cleared": 0
+      },
+      {
+        "winner": "enemy",
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "game_level": 1,
+        "is_victory": false,
+        "match_date": "2026-07-15T09:36:54.818459+00:00",
+        "completed_at": null,
+        "turns_played": 6,
+        "waves_cleared": 0
+      },
+      {
+        "winner": null,
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "match_id": "46a8132d-e1e8-48cf-962d-6a6accbc610e",
+        "game_level": 1,
+        "is_victory": false,
+        "match_date": "2026-07-15T09:53:53.1441+00:00",
+        "completed_at": null,
+        "turns_played": 0,
+        "waves_cleared": 0
+      },
+      {
+        "winner": null,
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "match_id": "8e59e3d8-67f9-42e3-88b2-18c03dad3423",
+        "game_level": 1,
+        "is_victory": false,
+        "match_date": "2026-07-16T01:01:43.548368+00:00",
+        "completed_at": null,
+        "turns_played": 0,
+        "waves_cleared": 0
+      },
+      {
+        "winner": null,
+        "user_id": "d690b142-e35d-4bf5-9a03-fb707224f3f9",
+        "match_id": "b8f49112-240e-4119-ac1f-23aa7804177d",
+        "game_level": 1,
+        "is_victory": false,
+        "match_date": "2026-07-17T09:56:12.675174+00:00",
+        "completed_at": null,
+        "turns_played": 0,
+        "waves_cleared": 0
+      },
+      {
+        "winner": null,
+        "user_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "match_id": "f726290f-dfda-4b80-b12c-c6fca5c9ab7a",
+        "game_level": 1,
+        "is_victory": false,
+        "match_date": "2026-07-17T10:35:12.617284+00:00",
+        "completed_at": null,
+        "turns_played": 0,
+        "waves_cleared": 0
+      }
+    ],
+    "match_history": [
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "936a56bf-c3e2-4aeb-8611-e2e2d9caa92d",
+        "effect_type": "cards_combined",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "634acaa8-5b78-4cde-a00d-63c66e60fc7a",
+        "effect_type": "card_played",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "bbca661c-034f-4dc2-af08-f65af63447b5",
+        "effect_type": "damage_taken",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9cd3a05b-6b9d-4616-9711-e1770fbbad6c",
+        "effect_type": "damage_dealt",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a7de6a65-c7be-487b-aa4c-fb78885026eb",
+        "effect_type": "turn_ended",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "196fb707-9cc9-4485-8965-aca34db16d81",
+        "effect_type": "cards_combined",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "455fdce3-a514-4b3b-9f5e-987698bc95b2",
+        "effect_type": "card_played",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "dd29d5f4-77da-4c8b-a2df-fa563ff3490d",
+        "effect_type": "cards_combined",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "c580aa03-8ad1-4f82-b667-0eaddfe9af87",
+        "effect_type": "enemy_defeated",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "f2efa480-c664-4c4a-a831-ed682efce80b",
+        "effect_type": "damage_dealt",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 25
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a91d44ef-22ed-471b-810d-1acb30396029",
+        "effect_type": "card_played",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "4c3de837-1a03-4bb2-a3ec-cb09b4bd216c",
+        "effect_type": "cards_combined",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "3d4b7679-9597-420d-98e9-0fb228ddf275",
+        "effect_type": "card_played",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "5691e8d5-2969-4313-84fa-8d689c3784da",
+        "effect_type": "damage_taken",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 4
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "7d7a1968-edc5-4b28-a991-41ddb822d0a6",
+        "effect_type": "damage_dealt",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "6f0c315a-c66f-4cf9-b0c8-d476a04ce93c",
+        "effect_type": "damage_taken",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 4
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "8788fcce-a3e3-416f-a1d8-5a3b7b39c37e",
+        "effect_type": "damage_dealt",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "afc3f3ed-7441-4e29-a136-42934feec78d",
+        "effect_type": "turn_ended",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "556bfb94-8e56-4108-b900-c2c5ea50e40a",
+        "effect_type": "cards_combined",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "d59dbb34-b018-4211-ac42-2718d8489490",
+        "effect_type": "enemy_defeated",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "d9aa8419-ec7e-4ca8-8850-e348a246b8b2",
+        "effect_type": "damage_dealt",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 27
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "78f1b953-d6e4-49c7-82c4-09d694509660",
+        "effect_type": "card_played",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "5e990ca8-c79f-4048-ad48-a88ceb3468cf",
+        "effect_type": "damage_taken",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 4
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "5622ca04-ed7b-4554-8e66-c06105fd0c4a",
+        "effect_type": "damage_dealt",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1af6ee60-9340-454b-95b2-1b5e6e26a6f1",
+        "effect_type": "turn_ended",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "cde1b274-d884-4daa-a581-038a7094a546",
+        "effect_type": "card_played",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "2a0762d4-0ec7-462b-9d6c-d3562ecdfae5",
+        "effect_type": "card_played",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "62715f8d-77d1-4d2b-ba98-ba33cce9ffc7",
+        "effect_type": "card_played",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "0d8df8e5-56ac-439e-8c52-a1ff5c27395d",
+        "effect_type": "cards_combined",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "29de62f1-3f39-4626-a1de-e651891cdd94",
+        "effect_type": "card_played",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "2a2f8933-aecd-4622-850d-b34866206c5c",
+        "effect_type": "damage_taken",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 4
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "411eadb5-d527-42db-8f3a-a020d8ef9a8b",
+        "effect_type": "damage_dealt",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9695c84d-7fee-4bdc-8ea8-a18d0715481c",
+        "effect_type": "turn_ended",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "d5379e4a-6106-4eaf-8795-415c638074f0",
+        "effect_type": "card_played",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "699a18f2-a644-45b7-9ba9-07fabe5927d7",
+        "effect_type": "cards_combined",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "81222638-0cb2-4380-85f6-a02f9a778d33",
+        "effect_type": "card_played",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "42522278-abc1-4274-aaf4-d680c5ab041c",
+        "effect_type": "cards_combined",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "f1fce6d6-b64c-422b-aebd-dd57c67bb55b",
+        "effect_type": "enemy_defeated",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "ea093dad-02e1-486f-a20d-2af26260775d",
+        "effect_type": "damage_dealt",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 27
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9105d7f7-6d5b-4603-b860-172b081c7061",
+        "effect_type": "card_played",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "4d396ea2-afdb-486b-ace6-5a8cf6c74c76",
+        "effect_type": "cards_combined",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "21c6d84d-1ba7-4024-a8de-c15d11006ee0",
+        "effect_type": "card_played",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "db5db36a-72d8-4228-81d8-a977b7b34952",
+        "effect_type": "damage_taken",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "440f6c51-bc88-4525-b96c-98ef4eeb0b5e",
+        "effect_type": "damage_dealt",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "57b04672-3bfc-490d-86c1-c0e30fe043eb",
+        "effect_type": "damage_taken",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "388b7234-733c-49fd-b49c-f1cb520958f6",
+        "effect_type": "damage_dealt",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "08e8ea47-de73-4351-b2e5-2dd43f83ad1a",
+        "effect_type": "damage_taken",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "68b60b19-ac84-437f-aa26-c0ee0fec45cd",
+        "effect_type": "damage_dealt",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9667df91-4fbe-43d3-926e-118635d2056b",
+        "effect_type": "turn_ended",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "37e3cc09-f844-49a7-862b-fcb7d19a22ee",
+        "effect_type": "card_played",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "57ed7b94-e5b0-4667-8e81-64fb21914de7",
+        "effect_type": "card_played",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "ad2c0f2a-9499-4105-9e9c-2a56fc5c9594",
+        "effect_type": "card_played",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "c8607111-960b-493f-ade9-888cc39c98f8",
+        "effect_type": "card_played",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "aa4c919c-6815-422b-b425-f70bc66fa231",
+        "effect_type": "cards_combined",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "4bfc0f8c-4fcf-467b-8f3d-63f2a83da4b5",
+        "effect_type": "damage_dealt",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 17
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "de074544-d6f3-46b9-bee2-e21d569c04b8",
+        "effect_type": "card_played",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "5b367c3c-d170-4ad5-953f-92f562914951",
+        "effect_type": "cards_combined",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1d57084e-6c60-4074-b221-2cbfa231c58e",
+        "effect_type": "card_played",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "6327ada1-1db8-4a92-857b-05dedb235ec9",
+        "effect_type": "damage_taken",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "88cb0a07-1b3b-4ff6-b1a2-004c0bf50c88",
+        "effect_type": "damage_dealt",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "2ad68af4-1d77-48a3-a2a1-ef78cc4a2f83",
+        "effect_type": "damage_taken",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "8eb57c80-ee4d-49b4-824d-a6d2f43637f9",
+        "effect_type": "damage_dealt",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "0b91e635-702b-409f-9e10-24eda6660a00",
+        "effect_type": "damage_taken",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "5af24ec6-76d2-4516-ac11-b9b9c9de0055",
+        "effect_type": "damage_dealt",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "52bf2351-7d65-4039-a04d-680684c61587",
+        "effect_type": "turn_ended",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9959c6e5-d56e-4ab9-94ba-099f213a579c",
+        "effect_type": "card_played",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9883bb81-df9d-46c0-8e19-3e29edd6ef1f",
+        "effect_type": "cards_combined",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "f62d53c3-3488-4ae9-8593-0b918d0560e5",
+        "effect_type": "damage_dealt",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 17
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "bd176ad9-468f-4f28-9298-35e387dbbbcf",
+        "effect_type": "card_played",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a4b62826-ba2c-4cb1-a185-1086626f7b34",
+        "effect_type": "cards_combined",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "140b4fb8-3124-4094-bf07-97b7f7dc0064",
+        "effect_type": "card_played",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1d587e5c-7dd3-47d9-a34a-bd3607502677",
+        "effect_type": "cards_combined",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "cd56c0d4-307d-4416-92bd-b41592385435",
+        "effect_type": "card_played",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "04eccb6a-2078-47e6-b354-249a3b5c3632",
+        "effect_type": "enemy_defeated",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "fd260012-d12d-4217-8e64-b149dde7c768",
+        "effect_type": "damage_dealt",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1322729f-bfc4-4d8e-9ae2-1c3d17c03fb5",
+        "effect_type": "enemy_defeated",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "d61aec40-a3c4-4197-8359-da7256827d0c",
+        "effect_type": "damage_dealt",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "6fe67d2b-ba41-4e2f-a001-18efd4e9841c",
+        "effect_type": "damage_taken",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "fb35fc75-0476-48e0-8dfc-d1063061732c",
+        "effect_type": "damage_dealt",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a2ce596a-929d-4f95-949c-9724ea0c9b52",
+        "effect_type": "turn_ended",
+        "turn_number": 7,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "50ab6a6f-84ac-4f73-8434-b7be481dc6a7",
+        "effect_type": "cards_combined",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "882dd0d1-a421-472f-91cb-987a3ebee64d",
+        "effect_type": "enemy_defeated",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "6aa056d2-109e-455e-9f73-3a0873267fed",
+        "effect_type": "damage_dealt",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 17
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "16de1492-f4eb-4c33-804d-dd9c3f274091",
+        "effect_type": "card_played",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1a33b563-db9d-4a5b-97d3-ce95553ba308",
+        "effect_type": "cards_combined",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "bc803199-8a56-41cf-8022-a4bb90c3a052",
+        "effect_type": "damage_dealt",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 29
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1fbe7618-f1b0-4ff2-80ce-de864cb0481d",
+        "effect_type": "card_played",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "7c20c8f7-e92a-4623-a23f-2fa3c5b66238",
+        "effect_type": "damage_taken",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 6
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "6ca36bee-f421-420d-b04a-17deedc83d87",
+        "effect_type": "damage_dealt",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "491b6d7e-06d9-4f17-8c3d-22925a92c677",
+        "effect_type": "turn_ended",
+        "turn_number": 8,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "6f32caac-09f5-4ebe-b486-41a4edf4775a",
+        "effect_type": "cards_combined",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1d88ba0c-c2e4-423e-ae88-43f542d991ce",
+        "effect_type": "damage_dealt",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 19
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "e7388796-fd5d-4719-b11a-f9c7987a8980",
+        "effect_type": "card_played",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "7a8750bf-4b88-4f3d-bf87-b7bfaf56a63f",
+        "effect_type": "cards_combined",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "c3e922a5-b271-496d-aebe-f7d2ccf5fb71",
+        "effect_type": "damage_dealt",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 24
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "c352a9c7-e06e-4660-a26a-ba940a3b8e7e",
+        "effect_type": "card_played",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "202d0134-317e-4755-a432-10e7307418c3",
+        "effect_type": "cards_combined",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "3b91e45b-a0f0-4b52-a911-6dc8418baa1e",
+        "effect_type": "card_played",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "53ee117b-e668-411e-b64c-d5da4bd998a2",
+        "effect_type": "damage_taken",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 6
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "0f08c4d1-3cb3-4aab-a849-e58c8fe8d424",
+        "effect_type": "damage_dealt",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1c689af9-3d25-4231-81b5-7c84f04c54a3",
+        "effect_type": "turn_ended",
+        "turn_number": 9,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "e510d831-bfb6-4555-9cec-4b79c0c413b8",
+        "effect_type": "card_played",
+        "turn_number": 10,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "e2141b58-ac16-4ff9-ae53-444bb750e244",
+        "effect_type": "cards_combined",
+        "turn_number": 10,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "7ec140e8-27ec-4a7b-819d-2f3680c5717b",
+        "effect_type": "card_played",
+        "turn_number": 10,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "fed0fb8a-2606-489d-98de-2849f4469650",
+        "effect_type": "damage_taken",
+        "turn_number": 10,
+        "corrupted_id": null,
+        "effect_value": 6
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "3e7ea6f5-1867-4088-8399-20bada810b97",
+        "effect_type": "enemy_defeated",
+        "turn_number": 10,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "08c7ada8-0e82-46d9-a998-797667e0e79c",
+        "effect_type": "damage_dealt",
+        "turn_number": 10,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "b432a575-acef-446e-97f1-de9869d812e8",
+        "effect_type": "turn_ended",
+        "turn_number": 10,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "99305a47-a60f-412e-9541-e502ccde054f",
+        "effect_type": "cards_combined",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "7ef2f3c5-ab19-41de-aab9-9590a2799753",
+        "effect_type": "damage_dealt",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 24
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "bf4f512c-afcd-4b49-bdc1-af0a0e241bef",
+        "effect_type": "card_played",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a5efdeda-3e26-4401-ae7c-8a70f51ef7f1",
+        "effect_type": "cards_combined",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "5b8f6430-d6d0-4210-9a60-79b2fddc4af9",
+        "effect_type": "card_played",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "b1317bb2-cb89-41e3-b780-3ebaa75fb823",
+        "effect_type": "card_played",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "0e8ac517-a873-4149-9090-7e3045f4e99e",
+        "effect_type": "card_played",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "3f34bd26-2372-4d51-a6a3-33592fdd56a5",
+        "effect_type": "cards_combined",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "cab9fde8-9e59-4176-9ee0-f3e389f190d6",
+        "effect_type": "damage_dealt",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 29
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "f8ffa911-7c50-47e9-8c52-240452d98a4c",
+        "effect_type": "card_played",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a5eb0f3f-ae56-4105-a36a-a46da4f154a3",
+        "effect_type": "cards_combined",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "3fc47e28-01e9-4d27-971f-40943936d06b",
+        "effect_type": "card_played",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "cb11f560-030a-4a65-8431-f16cc0fd91a5",
+        "effect_type": "damage_taken",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 7
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "36a3b0aa-0903-4510-a972-fe5d93b0d0c4",
+        "effect_type": "damage_dealt",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "c67f8a00-4b8f-4116-8b0e-b3cf9ec634d9",
+        "effect_type": "damage_taken",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 7
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "c2dfbd66-1737-4b80-b167-ebfd3977ffa5",
+        "effect_type": "damage_dealt",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "b7c510b4-1b11-4d91-9ddd-d83a68181acb",
+        "effect_type": "damage_taken",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 8
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "0e810f72-b45b-4c40-b155-6c39169f1792",
+        "effect_type": "damage_dealt",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "34ea767b-0612-42ee-b49f-6815d8a0b25b",
+        "effect_type": "turn_ended",
+        "turn_number": 11,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "ff726ce5-a62a-47f3-a32f-95541f35f73b",
+        "effect_type": "card_played",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "f8f58321-5005-4891-9b12-08e0114dcd4d",
+        "effect_type": "cards_combined",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "7944bd03-6b04-44ce-9042-d2bedc604f8c",
+        "effect_type": "damage_dealt",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 24
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "0b63e8ae-d87d-41d6-b722-9902df14af43",
+        "effect_type": "card_played",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "14047eec-8ee0-4b1d-b29a-192f7385d725",
+        "effect_type": "cards_combined",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "4a191038-cd65-4425-b2c3-59e3c19f881d",
+        "effect_type": "enemy_defeated",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a6685bed-18e3-4d73-bf7f-fb9b45d3b237",
+        "effect_type": "damage_dealt",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 24
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "e0b03d32-eb92-4431-ad08-4678e03e4e9e",
+        "effect_type": "card_played",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "79eb809f-43c3-4033-b28b-5d55d0b4d066",
+        "effect_type": "cards_combined",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "6a8ebb9c-17a8-40bf-bc42-25576bd821ae",
+        "effect_type": "card_played",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "6f1d3223-c7f8-400e-93c0-3e19863a840c",
+        "effect_type": "card_played",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "400e12ab-68e7-4cc3-8f2c-8080053a7327",
+        "effect_type": "cards_combined",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a99e9176-d1ef-4ad5-987e-4301b9a98a76",
+        "effect_type": "card_played",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "05acfd93-6604-41cd-8f3f-5322bdc5395b",
+        "effect_type": "damage_taken",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 7
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9b421c45-40b4-443d-82d7-11ddd390fe15",
+        "effect_type": "damage_dealt",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "da59e91f-b9cd-496c-8c73-7ea92d36f0ca",
+        "effect_type": "damage_taken",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 8
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "006c6d63-038d-44a7-957e-f12a1393caa3",
+        "effect_type": "damage_dealt",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "313a8fba-a9a4-4bf4-845c-b792380903ff",
+        "effect_type": "turn_ended",
+        "turn_number": 12,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1e644a40-ccec-4775-a660-bdfd28841a02",
+        "effect_type": "cards_combined",
+        "turn_number": 13,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "456ec02a-3daa-4935-b3b4-d4301f4cf1d1",
+        "effect_type": "card_played",
+        "turn_number": 13,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a3028fb3-ad16-40e3-9125-73884e699ede",
+        "effect_type": "damage_taken",
+        "turn_number": 13,
+        "corrupted_id": null,
+        "effect_value": 7
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "dd4cdf13-29a4-4c1f-b8bc-c1df68f7b08f",
+        "effect_type": "damage_dealt",
+        "turn_number": 13,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "43848ca1-5525-462c-af23-33ea90430343",
+        "effect_type": "damage_taken",
+        "turn_number": 13,
+        "corrupted_id": null,
+        "effect_value": 8
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "f99ef0bd-8f7b-483c-8bc6-e502ab7b64de",
+        "effect_type": "damage_dealt",
+        "turn_number": 13,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "bd4fb709-c4d1-496f-a431-c1ba0b55d71d",
+        "effect_type": "turn_ended",
+        "turn_number": 13,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "ae3ce94e-3c33-48be-9481-1faecefd5c24",
+        "effect_type": "cards_combined",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "88b1390b-ee7c-44b6-9a31-51f202612c4d",
+        "effect_type": "card_played",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "f7583e29-f675-44dc-a016-392ac6253cce",
+        "effect_type": "cards_combined",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "e87c28e8-cb47-4c78-af15-7d7247462c71",
+        "effect_type": "card_played",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "799b97c4-e84a-4cc3-bb69-5853c475e323",
+        "effect_type": "cards_combined",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "eec0dc3f-2294-4ed1-8ce4-e276dcbd6ff5",
+        "effect_type": "card_played",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a35b570c-98ee-4113-8abd-3deeb83317d0",
+        "effect_type": "card_played",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "48787f15-6031-49fd-884e-05619d9c4719",
+        "effect_type": "enemy_defeated",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "777d1fd0-46c4-415b-9b35-fd2dfa2c3866",
+        "effect_type": "damage_dealt",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "a6eb0c85-19de-4fe1-b251-a58bfcc9d322",
+        "effect_type": "damage_taken",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 8
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "d8e5dd9c-f484-4419-abb4-ada178c3bca6",
+        "effect_type": "damage_dealt",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "af01fa77-1e65-4cab-81d5-477b916b853c",
+        "effect_type": "turn_ended",
+        "turn_number": 14,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "ae4dd136-51d9-41b7-9a37-1158067b9787",
+        "effect_type": "cards_combined",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "47c54f72-90b5-4b99-9fa7-b5567208a31b",
+        "effect_type": "enemy_defeated",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "0e21550e-37c1-48b0-a393-cbc61a1c2bb8",
+        "effect_type": "damage_dealt",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 29
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "17d8aa27-f571-4221-be14-c0a17253c186",
+        "effect_type": "card_played",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "4795b2dd-0062-475f-a673-060036c1f3e3",
+        "effect_type": "cards_combined",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "3573b7e4-e707-43b6-ba7b-7277908f1aa9",
+        "effect_type": "damage_dealt",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 21
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "cc9087ae-d7a8-4288-9e4d-f5ae5cc16374",
+        "effect_type": "card_played",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "44c184bf-625a-4c30-b6ac-6922bc49bfd4",
+        "effect_type": "cards_combined",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "8ed2fa7a-c83c-4ad4-b76d-cf6976edb77f",
+        "effect_type": "card_played",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9b394d5a-7061-4835-97c2-9a5a0c7e0c6c",
+        "effect_type": "damage_taken",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 10
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9d8a402d-c4f6-43eb-becf-e528177c7cd4",
+        "effect_type": "damage_dealt",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "bde98b31-ddfa-4006-8d3b-fc97d01a5fcc",
+        "effect_type": "turn_ended",
+        "turn_number": 15,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "8350fb6f-d6c2-45ff-b0aa-d7a1cc9afb64",
+        "effect_type": "card_played",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "ebfb84f5-072b-47db-8818-4d532b6c8232",
+        "effect_type": "cards_combined",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "4ed98885-fb46-4381-a73b-f205646e7dcf",
+        "effect_type": "damage_dealt",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 21
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "48c221db-2362-4dee-8d38-fb5961755d80",
+        "effect_type": "card_played",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9a1b94c4-972f-4281-ad6b-edaf1f5ebb91",
+        "effect_type": "cards_combined",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "1f85d5f1-5e5e-4605-af69-c593a05025c9",
+        "effect_type": "card_played",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "d0dc5797-e95f-476b-b645-1fa6b3099237",
+        "effect_type": "cards_combined",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "bb5e742e-1a13-4731-a6f5-ba89486abb13",
+        "effect_type": "damage_dealt",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 31
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "8ca26f4d-9125-45eb-8834-ebb21e677c9c",
+        "effect_type": "card_played",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "cc6b4aea-3c79-4203-a6ce-856837ce29fe",
+        "effect_type": "damage_taken",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 10
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "ec94fd55-0134-4d10-adea-bbb0056575ea",
+        "effect_type": "damage_dealt",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "9e99bc08-5f69-4db4-b47c-c0d96227932b",
+        "effect_type": "turn_ended",
+        "turn_number": 16,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "b0b7f463-2850-4ecc-8064-88fb6c6b817c",
+        "effect_type": "card_played",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "7aa44b19-c824-47ef-aab8-96b5cc7d3bac",
+        "effect_type": "card_played",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "b98825af-c8dd-49c3-a049-9335c4cb50b5",
+        "effect_type": "cards_combined",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "4ea29847-6697-48ab-842a-92a99cbd73b3",
+        "effect_type": "damage_dealt",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 31
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "e4a91177-1616-4a27-93ce-226933288669",
+        "effect_type": "card_played",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "694e3ab4-2a7b-44d9-9160-e9a15f06fa19",
+        "effect_type": "card_played",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "96bbc488-6db2-4187-90c1-019e7eca721b",
+        "effect_type": "cards_combined",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "92bdfa2e-d58d-40dc-a1a4-76bd0e2a6abd",
+        "effect_type": "damage_dealt",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 21
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "f8620299-cb9e-4fcd-b016-63ff1efb26e2",
+        "effect_type": "card_played",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:36:18.964246+00:00",
+        "match_id": "7164a83e-5270-403e-8127-3c37d433635b",
+        "action_id": "3b3b3953-c0ed-4d62-ae0a-419c766cfc9e",
+        "effect_type": "cards_combined",
+        "turn_number": 17,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "f3f11d25-e678-4e90-b114-b33dc8e1ba5d",
+        "effect_type": "cards_combined",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "3e845e0b-bfbf-42a7-ba8e-3ce8a6e5d805",
+        "effect_type": "damage_dealt",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 15
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "1c990b66-692f-4fc7-94cf-3c78bb7ea151",
+        "effect_type": "card_played",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "654f1b37-447b-4151-bbfb-548672dc3067",
+        "effect_type": "cards_combined",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "8a7aa895-437b-427c-a20c-a64b0788b6d4",
+        "effect_type": "enemy_defeated",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "1075a4f3-36fc-479b-99ac-9ef269ba3cea",
+        "effect_type": "damage_dealt",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 25
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "90256368-dbd7-4f88-9da3-89970cbc25bf",
+        "effect_type": "card_played",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "c918db6d-c1d3-4b9c-b188-71f27cabfbc5",
+        "effect_type": "damage_taken",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 4
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "fc20e53a-07e9-420a-a883-0e2b6be489f5",
+        "effect_type": "damage_dealt",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "5d71ceb4-924f-4507-a404-29274684ac58",
+        "effect_type": "damage_taken",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 4
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "717284a8-83d0-453d-8e86-893bf35faea5",
+        "effect_type": "damage_dealt",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "7906a990-d6c4-463a-97ca-aa25a15e8a8c",
+        "effect_type": "turn_ended",
+        "turn_number": 1,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "37f495f0-a83e-4237-a0ae-534826ca9097",
+        "effect_type": "card_played",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "cb0120c1-dbf8-45c3-86b3-8b4d7c285783",
+        "effect_type": "cards_combined",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "8a535ba8-a966-48d9-ba8a-589359e7f504",
+        "effect_type": "damage_dealt",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 20
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "9c905b2f-9202-42b8-a1d7-f21495475a7c",
+        "effect_type": "card_played",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "af118b26-ddb3-40ce-adb5-03ff7f8a17eb",
+        "effect_type": "cards_combined",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "54774714-f193-4690-a1b2-474b3aceb181",
+        "effect_type": "enemy_defeated",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "28aaedcd-6bb0-4747-85b8-e621857f0c5a",
+        "effect_type": "damage_dealt",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 25
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "ae422ea9-b435-485c-8844-23d106fab287",
+        "effect_type": "card_played",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "88addb72-409c-46f1-affb-3e3922a86a6d",
+        "effect_type": "damage_taken",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 4
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "af8b589e-1f94-46b3-85ed-6aa57b0d9533",
+        "effect_type": "damage_dealt",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "89228aa3-6392-4fd1-8c8e-f5cad986fe45",
+        "effect_type": "turn_ended",
+        "turn_number": 2,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "47aab30c-dfb5-42cd-a93e-5f73b17bf728",
+        "effect_type": "cards_combined",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "f6fa26a2-3b4a-470f-ae7d-bf670868a00f",
+        "effect_type": "enemy_defeated",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 1
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "2e950911-13a5-4544-82c4-c0504a6b4d59",
+        "effect_type": "damage_dealt",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 25
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "8c70acf1-cdfe-4ac0-8b91-15645a955dbb",
+        "effect_type": "card_played",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "c4a867ec-b234-4269-b411-bce5ac822cfd",
+        "effect_type": "damage_taken",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "ecf8c367-de4d-47fb-a1e6-a654fb3f028c",
+        "effect_type": "damage_dealt",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "3563ccb1-4d89-4460-9d55-d99c13f13809",
+        "effect_type": "damage_taken",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "2350d7a4-92db-466b-a85d-0fc167a61308",
+        "effect_type": "damage_dealt",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "d8496eb9-8624-4a32-8ccd-068d5d17ebb0",
+        "effect_type": "damage_taken",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "0b2dbb14-b785-4e30-a365-13f4b464ee00",
+        "effect_type": "damage_dealt",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "fe6100d1-aa31-4931-b7c0-da6d37b6a778",
+        "effect_type": "turn_ended",
+        "turn_number": 3,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "db73c871-b4d5-49a3-ab13-e16e5c58275b",
+        "effect_type": "damage_taken",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "97f2685a-4da9-4b94-a06e-85c97075d6da",
+        "effect_type": "damage_dealt",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "6fb1f9c4-f8e4-4d2c-9e76-c1b247cfee04",
+        "effect_type": "damage_taken",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "53c299bd-5dc9-4bc4-9d3b-8ab35464d912",
+        "effect_type": "damage_dealt",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "66d5943f-beae-4a76-a558-f891a3652d88",
+        "effect_type": "damage_taken",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "3784e85f-4cf2-4ce5-91ca-660c4e8de488",
+        "effect_type": "damage_dealt",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "8f0f8c67-5c25-4304-ac8c-07cde7f2646e",
+        "effect_type": "turn_ended",
+        "turn_number": 4,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "626306ba-2ba7-40a0-9154-7624f2e3b6f8",
+        "effect_type": "damage_taken",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "9afb56c4-f124-466b-9311-6f8a073a0f2f",
+        "effect_type": "damage_dealt",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "210bf215-be2e-48b2-89a0-f7a341755327",
+        "effect_type": "damage_taken",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "6fdab2f4-93ba-46b0-b824-af221dee476e",
+        "effect_type": "damage_dealt",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "2620df44-31cb-4367-8cdb-f2081286db23",
+        "effect_type": "damage_taken",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "e314548b-cf5c-4360-b986-7095543b7bf9",
+        "effect_type": "damage_dealt",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "da6aa98c-6c33-4964-a665-623c75a96f29",
+        "effect_type": "turn_ended",
+        "turn_number": 5,
+        "corrupted_id": null,
+        "effect_value": 0
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "908f1cfe-19c3-4af8-a9f9-90cda7dec54a",
+        "effect_type": "damage_taken",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "889f56ae-9e7c-4da8-9434-d2216222aea2",
+        "effect_type": "damage_dealt",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 3
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "ab3a2b53-48cd-4419-af6f-fb7f8e3ec0b6",
+        "effect_type": "damage_taken",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 5
+      },
+      {
+        "acted_at": "2026-07-15T09:37:59.648523+00:00",
+        "match_id": "dd1d106b-2d71-484f-bcde-4389a10afb87",
+        "action_id": "1ecda391-ee8d-4a4a-8856-25630b9e1d91",
+        "effect_type": "damage_dealt",
+        "turn_number": 6,
+        "corrupted_id": null,
+        "effect_value": 3
+      }
+    ],
+    "collections": [],
+    "videos": [
+      {
+        "title": "Bacterial Cell Structure",
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "subject_tag": "Biology",
+        "uploaded_by": "0a79c101-6b80-4872-8c8f-b1277f37b4be",
+        "youtube_url": "https://youtu.be/bOvjpdV3G5A?si=lZ7jM629uQsUG8n4"
+      },
+      {
+        "title": "SEJARAH KSSM TINGKATAN 5",
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "subject_tag": "Sejarah",
+        "uploaded_by": "0a79c101-6b80-4872-8c8f-b1277f37b4be",
+        "youtube_url": "https://youtu.be/7x_622_1jnQ?si=GTevM3ro6kfytRM7"
+      },
+      {
+        "title": "How I went from C to A+ in BM SPM KARANGAN!",
+        "video_id": "cc2fe7d8-18a7-443b-905f-674b9c8e9710",
+        "subject_tag": "Bahasa Melayu",
+        "uploaded_by": "0a79c101-6b80-4872-8c8f-b1277f37b4be",
+        "youtube_url": "https://youtu.be/sHFoL498Oho?si=qioNgzecFUByjS02"
+      }
+    ],
+    "collection_videos": [],
+    "user_favourites": [
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "video_id": null,
+        "date_added": "2026-07-16T00:49:03.843638+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "favourite_id": "bdaece4b-fe80-41d3-a50a-8a912f27149c"
+      }
+    ],
+    "resource_annotations": [
+      {
+        "title": "Ribosomes",
+        "created_at": "2026-07-15T15:42:15.156307+00:00",
+        "created_by": "0a79c101-6b80-4872-8c8f-b1277f37b4be",
+        "position_x": 13.3444777504458,
+        "position_y": 30.1569643117954,
+        "position_z": -25.5552235360174,
+        "updated_at": "2026-07-15T15:42:15.156307+00:00",
+        "description": "Ribosomes are cellular structures responsible for protein synthesis. They function as molecular machines that read the genetic information encoded in RNA and use it to assemble amino acids into proteins.",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "annotation_id": "9d0d8f09-78a7-4c40-93ee-d92526f64830"
+      },
+      {
+        "title": "Plasmid",
+        "created_at": "2026-07-15T15:42:15.156307+00:00",
+        "created_by": "0a79c101-6b80-4872-8c8f-b1277f37b4be",
+        "position_x": 45.8515370971172,
+        "position_y": 30.1168138693337,
+        "position_z": -10.2048756994039,
+        "updated_at": "2026-07-15T15:42:15.156307+00:00",
+        "description": "A plasmid is a small, circular piece of DNA that exists independently of the chromosomal DNA in a cell. It can carry genes that provide various advantages to the host organism.",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "annotation_id": "2f6c1eef-30a7-4683-8578-84e1af63d83f"
+      },
+      {
+        "title": "Cytoplasm",
+        "created_at": "2026-07-15T15:42:15.156307+00:00",
+        "created_by": "0a79c101-6b80-4872-8c8f-b1277f37b4be",
+        "position_x": 43.9744016445407,
+        "position_y": 28.9427777575166,
+        "position_z": 9.2186714102795,
+        "updated_at": "2026-07-15T15:42:15.156307+00:00",
+        "description": "Cytoplasm is the gel-like substance found inside a cell that plays a crucial role in supporting cellular processes, providing a medium for chemical reactions, and facilitating the movement of materials within the cell.",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "annotation_id": "eb4d8b3d-4cdc-4d53-901d-0c5ccd784b1d"
+      }
+    ],
+    "content_shares": [
+      {
+        "message": null,
+        "read_at": null,
+        "share_id": "8e0c1ca6-f993-4cae-a85a-4404811df5a3",
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "sender_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "shared_at": "2026-07-16T01:23:49.231024+00:00",
+        "resource_id": null,
+        "dismissed_at": "2026-07-17T08:07:26.606364+00:00",
+        "recipient_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8"
+      },
+      {
+        "message": null,
+        "read_at": null,
+        "share_id": "f3ca4d97-68c1-4035-8d61-403a64d4e8fe",
+        "video_id": null,
+        "sender_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "shared_at": "2026-07-17T08:34:38.858918+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "dismissed_at": null,
+        "recipient_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c"
+      }
+    ],
+    "learning_events": [
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "301b2b64-40f4-448c-87e9-206bc472ba34",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "22fc35b1-78d9-44f4-ba30-e406052e8c49",
+        "occurred_at": "2026-07-16T06:28:34.177964+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "197dab79-1b8f-4f74-84e5-0c3e39411d3b",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "3675e763-3a0e-4027-85c6-c90bd3f0e88f",
+        "occurred_at": "2026-07-16T06:28:35.247645+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "d10712b0-7167-4e0a-92f9-a89c7437bb72",
+        "metadata": {
+          "source": "rotate_or_hotspot",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "model_explored",
+        "session_id": "3675e763-3a0e-4027-85c6-c90bd3f0e88f",
+        "occurred_at": "2026-07-16T06:28:43.711147+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "5e1f7853-2f59-4060-aa6d-0cbf490e8564",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 48
+        },
+        "video_id": null,
+        "event_type": "model_viewed",
+        "session_id": "3675e763-3a0e-4027-85c6-c90bd3f0e88f",
+        "occurred_at": "2026-07-16T06:29:24.435415+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "08f7e3cc-4126-4adc-8202-640306ae4cc3",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "a23a72c2-8d73-4b42-a5f2-3fa9672caf53",
+        "occurred_at": "2026-07-16T06:30:18.976049+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "25b1bdd5-07f4-4fa7-b065-ea4d3af95345",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "9eb4c761-0401-43ac-8a36-f134f387745a",
+        "occurred_at": "2026-07-16T06:30:21.34969+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "34c36d69-b449-4089-b10b-c1d19f1b42e8",
+        "metadata": {
+          "source": "rotate_or_hotspot",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "model_explored",
+        "session_id": "9eb4c761-0401-43ac-8a36-f134f387745a",
+        "occurred_at": "2026-07-16T06:30:33.698171+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "f0172181-ff90-4f42-856f-8eb99abf8cc5",
+        "metadata": {
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "completed",
+        "session_id": "9eb4c761-0401-43ac-8a36-f134f387745a",
+        "occurred_at": "2026-07-16T06:31:21.234332+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "f9f05738-d005-4523-810c-f5e4a1742016",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 77
+        },
+        "video_id": null,
+        "event_type": "model_viewed",
+        "session_id": "9eb4c761-0401-43ac-8a36-f134f387745a",
+        "occurred_at": "2026-07-16T06:31:38.145007+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "ce090e07-d9a4-437f-adf6-7d0a955d5be9",
+        "metadata": {
+          "subject_name": "Sejarah",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "skipped_quickly",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:31:51.789679+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "f6c16738-4cb6-4cbe-a641-5a489970e1e3",
+        "metadata": {
+          "source": "tutorial_player",
+          "subject_name": "Sejarah"
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "opened",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:31:52.355558+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "7b1d6e85-821d-43a1-9f25-0a9a32f2f66b",
+        "metadata": {
+          "subject_name": "Sejarah",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "skipped_quickly",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:31:52.698575+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "81cb109d-745f-44ae-8bfd-998955d95b29",
+        "metadata": {
+          "subject_name": "Sejarah"
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "video_played",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:31:55.473588+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "6255a3cf-3f9f-401c-80e3-57f2071ea155",
+        "metadata": {
+          "subject_name": "Sejarah",
+          "progress_percent": 0,
+          "current_time_seconds": 1.986978828338623
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "video_progress",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:31:59.493694+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "acf44b71-f895-40e7-a21c-6d6ba3637653",
+        "metadata": {
+          "subject_name": "Sejarah"
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "video_paused",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:32:33.566891+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "67e2a513-ec3a-4832-ad31-53ad4abfb07e",
+        "metadata": {
+          "subject_name": "Sejarah",
+          "rewind_seconds": 16.370516173568724,
+          "current_time_seconds": 19.314149826431276
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "rewound",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:32:46.031834+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "b480bd69-5feb-45e8-bdae-6349749ac432",
+        "metadata": {
+          "subject_name": "Sejarah"
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "video_paused",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:33:00.842566+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "27755145-9427-4a37-a5ea-387025fc23e5",
+        "metadata": {
+          "subject_name": "Sejarah",
+          "progress_percent": 94,
+          "current_time_seconds": 804.7976698989105
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "video_progress",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:33:06.191362+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "bb020a3e-d626-406c-b800-06bf44dbb364",
+        "metadata": {
+          "subject_name": "Sejarah"
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "completed",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:33:06.988076+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "7959a37a-faa5-47f7-a345-e8f8d6839c78",
+        "metadata": {
+          "subject_name": "Sejarah",
+          "rewind_seconds": 844.3917830190735,
+          "current_time_seconds": 0
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "rewound",
+        "session_id": "a8d75aa0-531f-4cbe-818c-767ec9549cb4",
+        "occurred_at": "2026-07-16T06:33:07.803101+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "fa7230ad-4715-420f-b3a3-1bff4567cc25",
+        "metadata": {
+          "subject_name": "Sejarah"
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "saved",
+        "session_id": null,
+        "occurred_at": "2026-07-16T06:33:24.371789+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "4017401b-6338-4768-b9b1-cc2ffc8a6ba3",
+        "metadata": {
+          "quiz_title": "Introduction to Chemistry Quiz",
+          "subject_name": "Chemistry",
+          "question_count": 5
+        },
+        "video_id": null,
+        "event_type": "quiz_attempted",
+        "session_id": "3000efc3-a12b-488c-9f0b-a1f008928748",
+        "occurred_at": "2026-07-16T07:51:20.799536+00:00",
+        "resource_id": null,
+        "target_type": "quiz"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "8a81946f-fd9b-44bf-81c4-9bb27953705b",
+        "metadata": {
+          "quiz_title": "Introduction to Chemistry Quiz",
+          "subject_name": "Chemistry",
+          "score_percent": 80,
+          "question_count": 5,
+          "duration_seconds": 51
+        },
+        "video_id": null,
+        "event_type": "quiz_completed",
+        "session_id": "3000efc3-a12b-488c-9f0b-a1f008928748",
+        "occurred_at": "2026-07-16T07:52:15.274865+00:00",
+        "resource_id": null,
+        "target_type": "quiz"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "e3e8bc6a-001e-45d1-b24e-5aabcadb1e9e",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "d37f6809-661d-4959-b34f-2c9d982debcb",
+        "occurred_at": "2026-07-16T08:14:50.123019+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "f807733e-d273-42b2-a828-55bc581fd34f",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "7f22fe83-6549-4f88-a312-9eb0fd2f5a9e",
+        "occurred_at": "2026-07-16T08:14:51.929932+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "279e23d8-e403-4442-a8f4-9d1c04a2bac2",
+        "metadata": {
+          "source": "rotate_or_hotspot",
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "model_explored",
+        "session_id": "7f22fe83-6549-4f88-a312-9eb0fd2f5a9e",
+        "occurred_at": "2026-07-16T08:15:00.073031+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "4592882b-4004-4da5-a1b3-a2d6347bc98d",
+        "metadata": {
+          "subject_name": "Chemistry",
+          "duration_seconds": 51
+        },
+        "video_id": null,
+        "event_type": "model_viewed",
+        "session_id": "7f22fe83-6549-4f88-a312-9eb0fd2f5a9e",
+        "occurred_at": "2026-07-16T08:15:44.338984+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "fd646d07-8627-4bb9-9b8e-d3ac160b0b22",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "220185eb-7f4d-4dc9-82c4-b74a0cc87711",
+        "occurred_at": "2026-07-16T08:16:13.509795+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "3f966c3b-1a95-4918-b0f9-dcfd7675bbc7",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "ee8ad872-e5d6-49fb-b009-538e4939c2ce",
+        "occurred_at": "2026-07-16T08:16:13.843801+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "95a6f8ab-5744-451e-ace6-9da29368c619",
+        "metadata": {
+          "source": "rotate_or_hotspot",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "model_explored",
+        "session_id": "ee8ad872-e5d6-49fb-b009-538e4939c2ce",
+        "occurred_at": "2026-07-16T08:16:22.236813+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "b753942c-6ba7-46d8-9cab-f86de49c31a2",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 961
+        },
+        "video_id": null,
+        "event_type": "model_viewed",
+        "session_id": "ee8ad872-e5d6-49fb-b009-538e4939c2ce",
+        "occurred_at": "2026-07-16T08:32:15.897076+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "db00c809-d4e0-45c7-9c53-4e65a9b77cb0",
+        "metadata": {
+          "source": "tutorial_player",
+          "subject_name": "Bahasa Melayu"
+        },
+        "video_id": "cc2fe7d8-18a7-443b-905f-674b9c8e9710",
+        "event_type": "opened",
+        "session_id": "7740d38c-9cb3-4258-b77e-d871a0cc3b4f",
+        "occurred_at": "2026-07-16T08:32:37.885924+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "6762004a-814b-4593-9c5c-25817e8895de",
+        "metadata": {
+          "subject_name": "Bahasa Melayu",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "cc2fe7d8-18a7-443b-905f-674b9c8e9710",
+        "event_type": "skipped_quickly",
+        "session_id": "7740d38c-9cb3-4258-b77e-d871a0cc3b4f",
+        "occurred_at": "2026-07-16T08:32:38.741237+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "817d19cd-6239-41be-87ac-b5fb75c0d7e8",
+        "metadata": {
+          "subject_name": "Bahasa Melayu",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "cc2fe7d8-18a7-443b-905f-674b9c8e9710",
+        "event_type": "skipped_quickly",
+        "session_id": "7740d38c-9cb3-4258-b77e-d871a0cc3b4f",
+        "occurred_at": "2026-07-16T08:32:39.077251+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "8123a77c-a627-41dd-af3f-23e6a415a241",
+        "metadata": {
+          "subject_name": "Bahasa Melayu",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "cc2fe7d8-18a7-443b-905f-674b9c8e9710",
+        "event_type": "skipped_quickly",
+        "session_id": "7740d38c-9cb3-4258-b77e-d871a0cc3b4f",
+        "occurred_at": "2026-07-16T08:32:39.405937+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "c6208378-2210-4be5-abe0-d1ee8f268011",
+        "metadata": {
+          "subject_name": "Bahasa Melayu",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "cc2fe7d8-18a7-443b-905f-674b9c8e9710",
+        "event_type": "skipped_quickly",
+        "session_id": "7740d38c-9cb3-4258-b77e-d871a0cc3b4f",
+        "occurred_at": "2026-07-16T08:32:39.873648+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "c090f3ad-5c47-42f3-9a19-d833184ef352",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "5163970e-e07b-473d-a149-0d14cd677f3b",
+        "occurred_at": "2026-07-16T08:33:23.643038+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "6d38a909-7ed4-4fce-b978-279167ea1ff4",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "5163970e-e07b-473d-a149-0d14cd677f3b",
+        "occurred_at": "2026-07-16T08:33:23.979456+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "c1ec0480-0610-43a0-b84f-4668f68b70f3",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "5163970e-e07b-473d-a149-0d14cd677f3b",
+        "occurred_at": "2026-07-16T08:33:24.317243+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "741628a2-d339-4319-a225-6a99956b4ede",
+        "metadata": {
+          "source": "tutorial_player",
+          "subject_name": "Biology"
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "opened",
+        "session_id": "5163970e-e07b-473d-a149-0d14cd677f3b",
+        "occurred_at": "2026-07-16T08:33:24.643796+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "3cfded84-890b-43a6-88b6-24f228175800",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "5163970e-e07b-473d-a149-0d14cd677f3b",
+        "occurred_at": "2026-07-16T08:33:25.437417+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "2a2a7a4f-24f0-4bb5-8e5a-339ff899f9b0",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "5163970e-e07b-473d-a149-0d14cd677f3b",
+        "occurred_at": "2026-07-16T08:33:25.780603+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "292188cb-31ea-44b5-bcc3-b3a1b212b953",
+        "metadata": {
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "saved",
+        "session_id": null,
+        "occurred_at": "2026-07-16T08:33:42.623554+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "7824ba01-c98a-43ef-a7bc-46d8a05b7990",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "ffd6057b-ec9c-4c51-8e62-fff06a1b793b",
+        "occurred_at": "2026-07-16T08:33:58.93405+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "7a5fb90d-7ea4-48f5-a18e-535813b9cb14",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "b135da39-e58d-4cb0-b9ac-2f1adf5724f7",
+        "occurred_at": "2026-07-16T08:33:59.980801+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "3ee34766-1737-4d09-a269-ebc3ebb4b9b4",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 8
+        },
+        "video_id": null,
+        "event_type": "model_viewed",
+        "session_id": "b135da39-e58d-4cb0-b9ac-2f1adf5724f7",
+        "occurred_at": "2026-07-16T08:34:06.870467+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "f507f98a-1909-4274-91d0-e07332e1e53e",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "7d475caf-66ff-4067-bb3e-036b3226c999",
+        "occurred_at": "2026-07-17T07:42:34.007969+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "2f5d95e1-7f4c-46cf-946c-08444cc7d117",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "a5456328-1cfa-4ff7-99ea-9a2c5333c769",
+        "occurred_at": "2026-07-17T07:42:34.716886+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "192aac99-723b-45d2-954a-0c3e3572b3ca",
+        "metadata": {
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "unsaved",
+        "session_id": null,
+        "occurred_at": "2026-07-17T07:42:38.234941+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "5cd9fd21-5c15-4285-a13a-1fddcf41f7c5",
+        "metadata": {
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "unsaved",
+        "session_id": null,
+        "occurred_at": "2026-07-17T07:42:39.757169+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "9c4ec28a-6b70-47bd-8ad9-ff2dfd247df3",
+        "metadata": {
+          "subject_name": "Chemistry",
+          "duration_seconds": 8
+        },
+        "video_id": null,
+        "event_type": "model_viewed",
+        "session_id": "a5456328-1cfa-4ff7-99ea-9a2c5333c769",
+        "occurred_at": "2026-07-17T07:42:41.751143+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "76497f22-4207-4056-a04b-d9fcd70a06b0",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "ef5a392c-a502-4de9-b5e8-0c522b8d2aaf",
+        "occurred_at": "2026-07-17T07:43:08.131428+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "3e3a47fa-304a-4ad3-91c9-f7acdc0b75f5",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "ef5a392c-a502-4de9-b5e8-0c522b8d2aaf",
+        "occurred_at": "2026-07-17T07:43:08.487251+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "aa46f699-d4e5-4af0-9f77-c6f4aa58a97d",
+        "metadata": {
+          "source": "tutorial_player",
+          "subject_name": "Biology"
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "opened",
+        "session_id": "ef5a392c-a502-4de9-b5e8-0c522b8d2aaf",
+        "occurred_at": "2026-07-17T07:43:09.47831+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "203288f2-6e2c-46ce-96fc-3e80d92fc2a5",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "ef5a392c-a502-4de9-b5e8-0c522b8d2aaf",
+        "occurred_at": "2026-07-17T07:43:09.799747+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "286a4784-173c-4d25-937c-ea79a79c4fd8",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "ef5a392c-a502-4de9-b5e8-0c522b8d2aaf",
+        "occurred_at": "2026-07-17T07:43:10.127204+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "e02922e8-4b1b-4d58-ad99-631000f33692",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "ef5a392c-a502-4de9-b5e8-0c522b8d2aaf",
+        "occurred_at": "2026-07-17T07:43:12.280693+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "be10110c-9212-4950-be65-ab9cb6e344a8",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "b25f35f9-afb7-4b31-a3cf-0b9b848eefb1",
+        "occurred_at": "2026-07-17T07:48:04.674843+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "2509459a-1089-4086-9eca-b62155346c9a",
+        "metadata": {
+          "source": "tutorial_player",
+          "subject_name": "Biology"
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "opened",
+        "session_id": "b25f35f9-afb7-4b31-a3cf-0b9b848eefb1",
+        "occurred_at": "2026-07-17T07:48:05.023711+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "b4f3c278-f36a-4526-9bf1-4bb9a69621fd",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "b25f35f9-afb7-4b31-a3cf-0b9b848eefb1",
+        "occurred_at": "2026-07-17T07:48:05.35769+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "39b37693-246c-495d-bf10-ef64ce0f91e3",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 0,
+          "progress_percent": 0
+        },
+        "video_id": "4ea83254-0249-42ee-b4a3-93e1ffd118f2",
+        "event_type": "skipped_quickly",
+        "session_id": "b25f35f9-afb7-4b31-a3cf-0b9b848eefb1",
+        "occurred_at": "2026-07-17T07:48:05.707169+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "227e7ff7-e050-43a5-8e95-232f31054a28",
+        "metadata": {
+          "subject_name": "Sejarah"
+        },
+        "video_id": "3b0763d4-2688-4469-ab40-50501a9c5c54",
+        "event_type": "unsaved",
+        "session_id": null,
+        "occurred_at": "2026-07-17T08:07:38.146551+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "1050e5ac-0e78-4d0c-a658-58f0bfb9361b",
+        "metadata": {
+          "subject_name": "Bahasa Melayu"
+        },
+        "video_id": "cc2fe7d8-18a7-443b-905f-674b9c8e9710",
+        "event_type": "unsaved",
+        "session_id": null,
+        "occurred_at": "2026-07-17T08:07:44.028674+00:00",
+        "resource_id": null,
+        "target_type": "video"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "e533c2a2-3af9-4762-a123-f98fb7ef4877",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "5246a0d8-1a1f-41a9-a686-72cc0e0856a2",
+        "occurred_at": "2026-07-17T08:10:54.345997+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "a2f27277-1955-427f-9734-3b1c98037fc1",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "0f213f27-4469-4577-a1c7-cee8e24f9a20",
+        "occurred_at": "2026-07-17T08:10:56.249977+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "81aa8d76-8405-46f2-99a8-ca63e41a3dab",
+        "metadata": {
+          "subject_name": "Chemistry",
+          "duration_seconds": 6
+        },
+        "video_id": null,
+        "event_type": "model_viewed",
+        "session_id": "0f213f27-4469-4577-a1c7-cee8e24f9a20",
+        "occurred_at": "2026-07-17T08:11:01.978942+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "fcd94480-ab7d-4ea3-b32c-de52f7aa06b9",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "59521b71-5f95-402a-8ed5-ec705d85169b",
+        "occurred_at": "2026-07-17T08:20:06.030346+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "10df4a5f-6650-47f7-ab33-9c5c23694e52",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "18347d6e-5a0b-4872-9560-0efd7759ce3e",
+        "occurred_at": "2026-07-17T08:20:07.165177+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "754c4149-057c-4154-ae65-c7046c03a2fe",
+        "metadata": {
+          "source": "rotate_or_hotspot",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "model_explored",
+        "session_id": "18347d6e-5a0b-4872-9560-0efd7759ce3e",
+        "occurred_at": "2026-07-17T08:20:47.815747+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "758d8409-8176-4fb9-85c0-0445db8b1576",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 83
+        },
+        "video_id": null,
+        "event_type": "model_viewed",
+        "session_id": "18347d6e-5a0b-4872-9560-0efd7759ce3e",
+        "occurred_at": "2026-07-17T08:21:31.160925+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "b0de2c26-9ea6-40ca-8905-64b89faca5c8",
+        "event_id": "8443981e-6e9d-4c9f-a951-e49ac0c0c93e",
+        "metadata": {
+          "source": "in_app_share",
+          "subject_name": "Chemistry"
+        },
+        "video_id": null,
+        "event_type": "shared",
+        "session_id": null,
+        "occurred_at": "2026-07-17T08:34:40.889721+00:00",
+        "resource_id": "0fc6e796-439f-44bd-95dc-0c4587d07151",
+        "target_type": "model"
+      },
+      {
+        "user_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "event_id": "15b4e967-9f8e-4a23-b4a7-d6ec8530629f",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "4302fbea-5ae1-420a-9f1d-ca828f25fd7b",
+        "occurred_at": "2026-07-19T13:40:52.389176+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "event_id": "161515e0-4847-476f-a7a7-52aafeb22325",
+        "metadata": {
+          "source": "model_detail",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "opened",
+        "session_id": "496eb225-fba0-4903-ab89-9d7a2e00947d",
+        "occurred_at": "2026-07-19T13:40:54.408122+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "event_id": "d73c82df-8233-478d-8516-398df46e4ffc",
+        "metadata": {
+          "source": "rotate_or_hotspot",
+          "subject_name": "Biology"
+        },
+        "video_id": null,
+        "event_type": "model_explored",
+        "session_id": "496eb225-fba0-4903-ab89-9d7a2e00947d",
+        "occurred_at": "2026-07-19T13:40:59.749351+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      },
+      {
+        "user_id": "a0626f10-7cd7-4809-a0d7-cf3dbbc6778c",
+        "event_id": "65ad6862-c139-48c7-acd8-755e8153d15d",
+        "metadata": {
+          "subject_name": "Biology",
+          "duration_seconds": 1235
+        },
+        "video_id": null,
+        "event_type": "model_viewed",
+        "session_id": "496eb225-fba0-4903-ab89-9d7a2e00947d",
+        "occurred_at": "2026-07-19T14:01:32.815494+00:00",
+        "resource_id": "726a2fe9-b4b7-4c2b-8726-efbcf6c4c34e",
+        "target_type": "model"
+      }
+    ],
+    "educator_recommendations": []
+  }
+}
+

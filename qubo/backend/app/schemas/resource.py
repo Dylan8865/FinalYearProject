@@ -12,10 +12,13 @@ class ThreeDModelSummaryResponse(BaseModel):
     learning_style_tag: Optional[str] = None
     preview_model_url: str
     popularity_count: int = 0
+    visibility: Literal['public', 'private'] = 'public'
+    created_by: Optional[str] = None
 
 
 class ThreeDModelDetailResponse(ThreeDModelSummaryResponse):
     signed_model_url: str
+    can_manage_annotations: bool = False
 
 
 class LearningRecommendationResponse(BaseModel):

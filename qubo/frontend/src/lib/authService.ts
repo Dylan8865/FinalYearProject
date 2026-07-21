@@ -28,8 +28,15 @@ import {
 } from '@/types/analytics';
 import { SharedLearningItem, TutorialVideo } from '@/types/video';
 import { EducatorRecommendation, FavouriteItem, LearningRecommendation, ModelAnnotation, ModelAnnotationDraft, RecentLearningItem, ThreeDModelDetail, ThreeDModelSummary } from '@/types/resource';
-import { GameHistoryEvent, GameMatch } from '@/types/game';
+import { GameHistoryEvent, GameMatch, GameMatchHistory, LevelOneLeaderboardEntry } from '@/types/game';
 import { EducatorAnalytics, LearningEventInput } from '@/types/learning';
+import {
+  CollectionContentOption,
+  CollectionEditorData,
+  CollectionItemType,
+  EducatorCollection,
+  LinkedStudent,
+} from '@/types/collection';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
@@ -300,8 +307,8 @@ class AuthService {
     return response.data;
   }
 
-  async getThreeDModels(): Promise<ThreeDModelSummary[]> {
-    const response = await this.api.get<ThreeDModelSummary[]>('/resources/models');
+  async getThreeDModels(scope: 'public' | 'private' = 'public'): Promise<ThreeDModelSummary[]> {
+    const response = await this.api.get<ThreeDModelSummary[]>('/resources/models', { params: { scope } });
     return response.data;
   }
 
@@ -402,11 +409,85 @@ class AuthService {
     return response.data.saved_count;
   }
 
-  async completeGameMatch(matchId: string, winner: string, turnsPlayed: number): Promise<GameMatch> {
+  async completeGameMatch(matchId: string, winner: string, turnsPlayed: number, wavesCleared = 0, isVictory = false): Promise<GameMatch> {
     const response = await this.api.post<GameMatch>(`/game/matches/${matchId}/complete`, {
       winner,
       turns_played: turnsPlayed,
+      waves_cleared: wavesCleared,
+      is_victory: isVictory,
     });
+    return response.data;
+  }
+
+  async createTutorialVideo(data: { title: string; youtube_url: string; subject_tag?: string }): Promise<TutorialVideo> {
+    const response = await this.api.post<TutorialVideo>('/videos', data);
+    return response.data;
+  }
+
+  async uploadThreeDModel(data: { title: string; subject_name: string; topic_name?: string; visibility: 'public' | 'private'; model: File }): Promise<ThreeDModelSummary> {
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('subject_name', data.subject_name);
+    if (data.topic_name) formData.append('topic_name', data.topic_name);
+    formData.append('visibility', data.visibility);
+    formData.append('model', data.model);
+    const response = await this.api.post<ThreeDModelSummary>('/resources/models', formData, { headers: { 'Content-Type': undefined }, timeout: 60000 });
+    return response.data;
+  }
+
+  async getMyCollections(status?: string): Promise<EducatorCollection[]> {
+    const response = await this.api.get<EducatorCollection[]>('/collections/mine', { params: status ? { status_filter: status } : undefined });
+    return response.data;
+  }
+
+  async createCollection(data: { title: string; description: string; primary_subject_id?: string }): Promise<EducatorCollection> {
+    const response = await this.api.post<EducatorCollection>('/collections', data);
+    return response.data;
+  }
+
+  async getCollectionEditor(collectionId: string): Promise<CollectionEditorData> {
+    const response = await this.api.get<CollectionEditorData>(`/collections/${collectionId}/editor`);
+    return response.data;
+  }
+
+  async getCollectionContentOptions(): Promise<CollectionContentOption[]> {
+    const response = await this.api.get<CollectionContentOption[]>('/collections/content-options');
+    return response.data;
+  }
+
+  async addCollectionItem(collectionId: string, data: { item_type: CollectionItemType; target_id: string; sort_order: number }): Promise<void> {
+    await this.api.post(`/collections/${collectionId}/items`, data);
+  }
+
+  async removeCollectionItem(collectionId: string, collectionItemId: string): Promise<void> {
+    await this.api.delete(`/collections/${collectionId}/items/${collectionItemId}`);
+  }
+
+  async getLinkedStudents(): Promise<LinkedStudent[]> {
+    const response = await this.api.get<LinkedStudent[]>('/collections/linked-students');
+    return response.data;
+  }
+
+  async shareCollection(collectionId: string, data: { student_ids: string[]; message?: string; due_at?: string }): Promise<void> {
+    await this.api.post(`/collections/${collectionId}/share`, data);
+  }
+
+  async archiveCollection(collectionId: string): Promise<void> {
+    await this.api.post(`/collections/${collectionId}/archive`);
+  }
+
+  async duplicateCollection(collectionId: string): Promise<EducatorCollection> {
+    const response = await this.api.post<EducatorCollection>(`/collections/${collectionId}/duplicate`);
+    return response.data;
+  }
+
+  async getGameMatchHistory(limit = 5): Promise<GameMatchHistory[]> {
+    const response = await this.api.get<GameMatchHistory[]>('/game/matches/history', { params: { limit } });
+    return response.data;
+  }
+
+  async getLevelOneLeaderboard(limit = 50): Promise<LevelOneLeaderboardEntry[]> {
+    const response = await this.api.get<LevelOneLeaderboardEntry[]>('/game/matches/leaderboard/level-1', { params: { limit } });
     return response.data;
   }
 

@@ -20,6 +20,7 @@ import AppSidebar from '@/components/layout/AppSidebar';
 import { authService } from '@/lib/authService';
 import { GeneratedQuiz, LibraryQuiz } from '@/types/quiz';
 import { useQuizStore } from '@/contexts/quizStore';
+import { useAuthStore } from '@/contexts/authStore';
 import { useLanguageStore } from '@/contexts/languageStore';
 
 const formatSourceType = (sourceType: string) =>
@@ -37,6 +38,8 @@ const formatCreatedDate = (createdAt: string, locale: string) =>
 
 export default function LibraryPage() {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const isEducator = user?.role === 'educator';
   const language = useLanguageStore((state) => state.language);
   const locale = language === 'ms' ? 'ms-MY' : 'en-MY';
   const setGeneratedQuiz = useQuizStore((state) => state.setGeneratedQuiz);
@@ -171,9 +174,9 @@ export default function LibraryPage() {
           <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Module 3</p>
-              <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-950">Knowledge Vault</h1>
+              <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-950">{isEducator ? 'Quiz Library' : 'Knowledge Vault'}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
-                Find your saved quizzes and continue learning from your own study materials.
+                {isEducator ? 'Create, edit and organise quizzes before adding them to learning collections.' : 'Find your saved quizzes and continue learning from your own study materials.'}
               </p>
             </div>
             <button
@@ -182,7 +185,7 @@ export default function LibraryPage() {
               className="inline-flex h-12 items-center justify-center gap-2 self-start rounded-2xl bg-blue-600 px-5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 md:self-auto"
             >
               <FiUploadCloud className="h-4 w-4" />
-              Upload study material
+              {isEducator ? 'Create quiz' : 'Upload study material'}
             </button>
           </header>
 

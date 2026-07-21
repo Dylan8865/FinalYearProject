@@ -71,7 +71,7 @@ async def generate_quiz(
     question_type: str = Form("mcq"),
     difficulty: str = Form("Intermediate"),
     question_count: int = Form(5),
-    current_user=Depends(get_current_student),
+    current_user=Depends(get_current_user),
 ):
     if question_type not in {"mcq", "fill", "short"}:
         raise HTTPException(status_code=400, detail="Unsupported question type")

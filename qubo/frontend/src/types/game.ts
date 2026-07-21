@@ -4,6 +4,23 @@ export interface GameMatch {
   winner: string | null;
   turns_played: number;
   match_date: string;
+  game_level: number;
+  waves_cleared: number;
+  is_victory: boolean;
+  completed_at: string | null;
+}
+
+export interface GameMatchHistory extends GameMatch {
+  result: 'Win' | 'Loss';
+}
+
+export interface LevelOneLeaderboardEntry {
+  rank: number;
+  username: string;
+  profile_picture_url: string | null;
+  turns_played: number;
+  completed_at: string | null;
+  played_at: string;
 }
 
 export interface GameHistoryEvent {
@@ -25,6 +42,8 @@ export interface UnityMatchCompletedMessage {
   type: 'qubo:match-completed';
   winner: string;
   turns_played: number;
+  waves_cleared?: number;
+  is_victory?: boolean;
 }
 
 export type UnityGameMessage =

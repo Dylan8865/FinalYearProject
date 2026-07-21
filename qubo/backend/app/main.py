@@ -6,6 +6,7 @@ from app.api.v1.quiz.routes import router as quiz_router
 from app.api.v1.analytics.routes import router as analytics_router
 from app.api.v1.videos.routes import router as videos_router
 from app.api.v1.resources.routes import router as resources_router
+from app.api.v1.collections.routes import router as collections_router
 from app.api.v1.game.routes import router as game_router
 from app.api.v1.learning.routes import router as learning_router
 
@@ -31,6 +32,7 @@ app.include_router(quiz_router, prefix=settings.API_V1_STR)
 app.include_router(analytics_router, prefix=settings.API_V1_STR)
 app.include_router(videos_router, prefix=settings.API_V1_STR)
 app.include_router(resources_router, prefix=settings.API_V1_STR)
+app.include_router(collections_router, prefix=settings.API_V1_STR)
 app.include_router(game_router, prefix=settings.API_V1_STR)
 app.include_router(learning_router, prefix=settings.API_V1_STR)
 
