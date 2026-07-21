@@ -152,8 +152,10 @@ create table if not exists spaced_repetition_schedule (
   topic_id uuid not null references topics(id) on delete cascade,
   ease_factor numeric(4,2) not null default 2.5,
   interval_days int not null default 1,
+  repetitions int not null default 0,
   next_review_date date not null default current_date,
   last_reviewed_date date,
+  last_score numeric(5,2),
   unique (student_id, topic_id)
 );
 
@@ -178,6 +180,7 @@ create table if not exists questions (
   question_text text not null,
   question_type question_type not null,
   correct_answer text,           -- used for fill_blank / short_answer
+  explanation text,
   difficulty_level text,
   created_at timestamptz not null default now()
 );
@@ -239,6 +242,8 @@ create index if not exists idx_study_sessions_student on study_sessions(student_
 create index if not exists idx_performance_records_student on performance_records(student_id);
 create index if not exists idx_quiz_attempts_student on quiz_attempts(student_id);
 create index if not exists idx_attempt_answers_attempt on attempt_answers(attempt_id);
+create unique index if not exists idx_attempt_answers_attempt_question
+  on attempt_answers(attempt_id, question_id);
 create index if not exists idx_exam_predictions_student on exam_predictions(student_id);
 create unique index if not exists idx_exam_predictions_attempt
   on exam_predictions(quiz_attempt_id) where quiz_attempt_id is not null;

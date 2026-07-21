@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
 from fastapi.concurrency import run_in_threadpool
@@ -67,7 +67,7 @@ async def list_popular_3d_models(current_user=Depends(get_current_user)):
     return ResourceService.list_popular_3d_models(current_user['id'])
 
 
-@router.get("/recommendation", response_model=LearningRecommendationResponse | None)
+@router.get("/recommendation", response_model=Optional[LearningRecommendationResponse])
 async def get_recommendation(current_user=Depends(get_current_user)):
     return ResourceService.recommend_3d_model(current_user["id"])
 

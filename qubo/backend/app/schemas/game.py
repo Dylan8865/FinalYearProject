@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -37,7 +37,7 @@ class MatchHistoryEventCreate(BaseModel):
 
 
 class MatchHistoryBatchCreate(BaseModel):
-    events: list[MatchHistoryEventCreate] = Field(min_length=1, max_length=1_000)
+    events: List[MatchHistoryEventCreate] = Field(min_length=1, max_length=1_000)
 
 
 class MatchHistoryBatchResponse(BaseModel):

@@ -1,6 +1,7 @@
-from typing import List
+from datetime import date
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from starlette.concurrency import run_in_threadpool
 
 from app.db.deps import get_current_educator, get_current_student
@@ -8,6 +9,7 @@ from app.schemas.analytics import (
     EducatorDashboardResponse,
     PredictionSettings,
     PredictionSettingsResponse,
+    ReviewScheduleItem,
     StudentLinkRequest,
     StudentLinkResponse,
     StudySessionCreate,
@@ -21,8 +23,21 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
 @router.get("/subjects", response_model=List[SubjectAnalyticsItem])
-async def get_subject_analytics(current_user=Depends(get_current_student)):
-    return await run_in_threadpool(AnalyticsService.get_subject_analytics, current_user["id"])
+async def get_subject_analytics(
+    subject_id: Optional[str] = None,
+    topic_id: Optional[str] = None,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    current_user=Depends(get_current_student),
+):
+    return await run_in_threadpool(
+        AnalyticsService.get_subject_analytics,
+        current_user["id"],
+        subject_id,
+        topic_id,
+        date_from,
+        date_to,
+    )
 
 
 @router.post("/study-sessions", response_model=StudySessionItem, status_code=status.HTTP_201_CREATED)
@@ -46,6 +61,39 @@ async def get_prediction_settings(current_user=Depends(get_current_student)):
 @router.put("/prediction-settings", response_model=PredictionSettingsResponse)
 async def update_prediction_settings(payload: PredictionSettings, current_user=Depends(get_current_student)):
     return await run_in_threadpool(AnalyticsService.update_prediction_settings, current_user["id"], payload.threshold)
+
+
+@router.get("/review-schedule", response_model=List[ReviewScheduleItem])
+async def get_review_schedule(
+    due_only: bool = False,
+    current_user=Depends(get_current_student),
+):
+    return await run_in_threadpool(AnalyticsService.list_review_schedule, current_user["id"], due_only)
+
+
+@router.get("/export/pdf")
+async def export_progress_pdf(
+    language: str = Query(default="en", pattern="^(en|ms)$"),
+    subject_id: Optional[str] = None,
+    topic_id: Optional[str] = None,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    current_user=Depends(get_current_student),
+):
+    pdf_bytes = await run_in_threadpool(
+        AnalyticsService.export_progress_report,
+        current_user["id"],
+        language,
+        subject_id,
+        topic_id,
+        date_from,
+        date_to,
+    )
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=qubo-progress-report.pdf"},
+    )
 
 
 @router.get("/educator/dashboard", response_model=EducatorDashboardResponse)

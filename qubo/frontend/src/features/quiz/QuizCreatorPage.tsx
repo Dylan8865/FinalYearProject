@@ -98,11 +98,25 @@ export default function QuizCreatorPage() {
     }
 
     setGenerationError('');
+    setSaveError('');
     setIsGenerating(true);
     try {
       const quiz = await authService.generateQuiz(uploadedFiles, questionType, difficulty, questionCount);
       setGeneratedQuiz(quiz);
-      if (isEducator) navigate('/educator/quizzes/edit');
+      if (isEducator) {
+        navigate('/educator/quizzes/edit');
+      } else {
+        setIsSaving(true);
+        try {
+          const savedQuiz = await authService.saveQuizToLibrary(quiz);
+          setSavedQuizId(savedQuiz.id);
+        } catch (saveRequestError: any) {
+          const detail = saveRequestError.response?.data?.detail;
+          setSaveError(typeof detail === 'string' ? detail : 'Quiz generated, but automatic saving failed. Select retry below.');
+        } finally {
+          setIsSaving(false);
+        }
+      }
     } catch (requestError: any) {
       const detail = requestError.response?.data?.detail;
       if (typeof detail === 'string') {
@@ -144,7 +158,7 @@ export default function QuizCreatorPage() {
     setSavedQuizId(null);
     setGenerationError('');
     setGeneratedQuiz({
-      title: 'Untitled educator quiz', subject: 'General', question_type: questionType,
+      title: 'Untitled educator quiz', subject: 'General', topic: 'General', question_type: questionType,
       difficulty, source_files: [], questions: [{
         question: 'Write your first question here', question_type: questionType,
         options: questionType === 'mcq' ? ['Option A', 'Option B', 'Option C', 'Option D'] : [],
@@ -188,7 +202,7 @@ export default function QuizCreatorPage() {
       <AppSidebar />
 
       <div className="min-w-0">
-        <main className="mx-auto w-full max-w-7xl px-5 pb-8 pt-20 md:px-8 lg:pb-10 lg:pt-24">
+        <main className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
           <div className="mb-7">
             <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Module 3</p>
             <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-950">Quiz Creator</h1>
@@ -402,7 +416,7 @@ export default function QuizCreatorPage() {
                   <div>
                     <h2 className="font-extrabold text-slate-950">AI-generated preview</h2>
                     <p className="text-xs text-slate-500">
-                      {generatedQuiz ? `${generatedQuiz.subject} · ${generatedQuiz.difficulty}` : 'Generated questions will appear here'}
+                      {generatedQuiz ? `${generatedQuiz.subject} · ${generatedQuiz.topic} · ${generatedQuiz.difficulty}` : 'Generated questions will appear here'}
                     </p>
                   </div>
                 </div>
@@ -469,7 +483,7 @@ export default function QuizCreatorPage() {
                   }`}
                 >
                   {savedQuizId ? <FiCheck className="h-4 w-4" /> : <FiSave className="h-4 w-4" />}
-                  {isSaving ? 'Saving…' : savedQuizId ? 'Saved — view library' : 'Save to library'}
+                  {isSaving ? 'Saving automatically…' : savedQuizId ? 'Saved automatically — view library' : 'Retry save to library'}
                 </button>
               </section>
 

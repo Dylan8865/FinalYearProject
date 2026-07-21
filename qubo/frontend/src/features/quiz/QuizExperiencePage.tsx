@@ -5,6 +5,8 @@ import { useQuizStore } from '@/contexts/quizStore';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { GeneratedQuestion } from '@/types/quiz';
+import { ExamPrediction, ReviewSchedule } from '@/types/analytics';
+import { useLanguageStore } from '@/contexts/languageStore';
 import {
   FiAlertCircle,
   FiArrowLeft,
@@ -45,6 +47,8 @@ export default function QuizExperiencePage() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const isEducatorPreview = user?.role === 'educator';
+  const language = useLanguageStore((state) => state.language);
+  const locale = language === 'ms' ? 'ms-MY' : 'en-MY';
   const quiz = useQuizStore((state) => state.generatedQuiz);
   const savedQuizId = useQuizStore((state) => state.savedQuizId);
   const setSavedQuizId = useQuizStore((state) => state.setSavedQuizId);
@@ -60,6 +64,10 @@ export default function QuizExperiencePage() {
   const quizSessionIdRef = useRef(crypto.randomUUID());
   const attemptedQuizRef = useRef('');
   const completedQuizRef = useRef(false);
+  const [prediction, setPrediction] = useState<ExamPrediction | null>(null);
+  const [reviewSchedule, setReviewSchedule] = useState<ReviewSchedule | null>(null);
+  const [answerTimes, setAnswerTimes] = useState<Record<number, number>>({});
+  const questionStartedAt = useRef(Date.now());
   const [optionOrders, setOptionOrders] = useState<Record<number, string[]>>(
     () => createOptionOrders(quiz?.questions ?? [])
   );
@@ -106,9 +114,16 @@ export default function QuizExperiencePage() {
 
   useEffect(() => {
     setWrittenAnswer(answers[currentIndex] ?? '');
+    questionStartedAt.current = Date.now();
   }, [answers, currentIndex]);
 
   const score = questions.length ? Math.round((correctCount / questions.length) * 100) : 0;
+
+  const recordAnswer = (value: string) => {
+    const timeSpent = Math.max(1, Math.round((Date.now() - questionStartedAt.current) / 1000));
+    setAnswers((current) => ({ ...current, [currentIndex]: value }));
+    setAnswerTimes((current) => ({ ...current, [currentIndex]: timeSpent }));
+  };
 
   const saveAttempt = async () => {
     if (!quiz || isSavingAttempt || attemptSaved) return;
@@ -122,11 +137,18 @@ export default function QuizExperiencePage() {
         quizId = savedQuiz.id;
         setSavedQuizId(quizId);
       }
-      await authService.recordQuizAttempt(quizId, {
+      const attemptResponse = await authService.recordQuizAttempt(quizId, {
         score,
         total_questions: questions.length,
         time_taken_seconds: elapsedSeconds,
+        answers: questions.map((_, questionIndex) => ({
+          question_index: questionIndex,
+          selected_answer: answers[questionIndex] ?? null,
+          time_spent_seconds: answerTimes[questionIndex] ?? 0,
+        })),
       });
+      setPrediction(attemptResponse.prediction || null);
+      setReviewSchedule(attemptResponse.review_schedule || null);
       setAttemptSaved(true);
     } catch (requestError: any) {
       const detail = requestError.response?.data?.detail;
@@ -188,6 +210,9 @@ export default function QuizExperiencePage() {
     setIsComplete(false);
     setAttemptSaved(false);
     setAttemptError('');
+    setPrediction(null);
+    setReviewSchedule(null);
+    setAnswerTimes({});
     setOptionOrders(createOptionOrders(questions));
     if (quiz) {
       completedQuizRef.current = false;
@@ -249,6 +274,36 @@ export default function QuizExperiencePage() {
                 'Saving your quiz result…'
               )}
             </div>
+
+            {prediction && (
+              <div className={`mt-5 rounded-2xl border p-5 text-left ${prediction.is_warning ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className={`text-xs font-extrabold uppercase tracking-[0.14em] ${prediction.is_warning ? 'text-red-600' : 'text-emerald-600'}`}>
+                      {prediction.is_warning ? 'Early warning' : 'Updated SPM forecast'}
+                    </p>
+                    <p className="mt-2 text-3xl font-extrabold text-slate-950">{Math.round(prediction.predicted_score)}%</p>
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      Based on {prediction.basis_attempt_count} saved attempt{prediction.basis_attempt_count === 1 ? '' : 's'} for {prediction.subject_name}. Warning threshold: {prediction.threshold}%.
+                    </p>
+                  </div>
+                  <FiTarget className={`mt-1 h-6 w-6 flex-none ${prediction.is_warning ? 'text-red-600' : 'text-emerald-600'}`} />
+                </div>
+                <button type="button" onClick={() => navigate('/analytics')} className="mt-4 text-sm font-extrabold text-blue-600 hover:text-blue-700">
+                  Open study tracker <FiArrowRight className="ml-1 inline" />
+                </button>
+              </div>
+            )}
+
+            {reviewSchedule && (
+              <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-left">
+                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-purple-700">Spaced repetition</p>
+                <p className="mt-2 text-sm font-bold text-slate-900">
+                  Review {quiz.topic} again on {new Date(`${reviewSchedule.next_review_date}T00:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}.
+                </p>
+                <p className="mt-1 text-xs text-slate-500">Interval: {reviewSchedule.interval_days} day{reviewSchedule.interval_days === 1 ? '' : 's'}.</p>
+              </div>
+            )}
 
             <div className="mt-7 grid grid-cols-3 gap-3">
               {[
@@ -377,7 +432,7 @@ export default function QuizExperiencePage() {
                     <button
                       key={`${index}-${option}`}
                       disabled={hasAnswered}
-                      onClick={() => setAnswers((current) => ({ ...current, [currentIndex]: option }))}
+                      onClick={() => recordAnswer(option)}
                       className={`flex min-h-[62px] w-full items-center gap-4 rounded-2xl border-2 px-4 text-left font-bold shadow-sm ${
                         isCorrectOption
                           ? 'border-emerald-400 bg-emerald-50 text-emerald-800'
@@ -407,7 +462,7 @@ export default function QuizExperiencePage() {
                 />
                 <button
                   disabled={!writtenAnswer.trim() || hasAnswered}
-                  onClick={() => setAnswers((current) => ({ ...current, [currentIndex]: writtenAnswer.trim() }))}
+                  onClick={() => recordAnswer(writtenAnswer.trim())}
                   className="mt-3 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-40"
                 >
                   Submit answer

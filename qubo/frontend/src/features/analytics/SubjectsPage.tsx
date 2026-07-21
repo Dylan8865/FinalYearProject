@@ -6,6 +6,8 @@ import {
   FiArrowRight,
   FiBookOpen,
   FiClock,
+  FiDownload,
+  FiFilter,
   FiRefreshCw,
   FiTarget,
   FiTrendingUp,
@@ -23,7 +25,8 @@ import {
 import { Line } from 'react-chartjs-2';
 import AppSidebar from '@/components/layout/AppSidebar';
 import { authService } from '@/lib/authService';
-import { SubjectAnalytics } from '@/types/analytics';
+import { AnalyticsFilters, SubjectAnalytics } from '@/types/analytics';
+import { useLanguageStore } from '@/contexts/languageStore';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
@@ -44,16 +47,21 @@ const masteryColor = (score: number | null) => {
 export default function SubjectsPage() {
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState<SubjectAnalytics[]>([]);
+  const [subjectOptions, setSubjectOptions] = useState<SubjectAnalytics[]>([]);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
+  const language = useLanguageStore((state) => state.language);
+  const [filters, setFilters] = useState<AnalyticsFilters>({});
 
-  const loadSubjects = async () => {
+  const loadSubjects = async (activeFilters: AnalyticsFilters = filters) => {
     setIsLoading(true);
     setLoadError('');
     try {
-      const response = await authService.getSubjectAnalytics();
+      const response = await authService.getSubjectAnalytics(activeFilters);
       setSubjects(response);
+      if (subjectOptions.length === 0 && Object.keys(activeFilters).length === 0) setSubjectOptions(response);
       setSelectedSubjectId((current) => current && response.some((item) => item.id === current) ? current : response[0]?.id || null);
     } catch (requestError: any) {
       const detail = requestError.response?.data?.detail;
@@ -67,6 +75,27 @@ export default function SubjectsPage() {
     void loadSubjects();
   }, []);
 
+  const selectedFilterSubject = subjectOptions.find((subject) => subject.id === filters.subject_id) || null;
+
+  const clearFilters = async () => {
+    const emptyFilters: AnalyticsFilters = {};
+    setFilters(emptyFilters);
+    await loadSubjects(emptyFilters);
+  };
+
+  const exportPdf = async () => {
+    setIsExporting(true);
+    setLoadError('');
+    try {
+      await authService.exportProgressReport(language, filters);
+    } catch (requestError: any) {
+      const detail = requestError.response?.data?.detail;
+      setLoadError(typeof detail === 'string' ? detail : 'Progress report could not be exported.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const selectedSubject = subjects.find((subject) => subject.id === selectedSubjectId) || null;
   const measuredTopics = useMemo(
     () => selectedSubject?.topic_performance.filter((topic) => topic.score_percentage !== null) || [],
@@ -78,7 +107,7 @@ export default function SubjectsPage() {
   );
 
   const chartData = useMemo(() => ({
-    labels: selectedSubject?.recent_quiz_scores.map((point) => new Date(point.attempted_at).toLocaleDateString('en-MY', { day: 'numeric', month: 'short' })) || [],
+    labels: selectedSubject?.recent_quiz_scores.map((point) => new Date(point.attempted_at).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-MY', { day: 'numeric', month: 'short' })) || [],
     datasets: [{
       label: 'Quiz score',
       data: selectedSubject?.recent_quiz_scores.map((point) => point.score) || [],
@@ -89,13 +118,13 @@ export default function SubjectsPage() {
       pointBackgroundColor: '#2563eb',
       pointRadius: 4,
     }],
-  }), [selectedSubject]);
+  }), [language, selectedSubject]);
 
   return (
     <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
       <AppSidebar />
       <main className="min-w-0">
-        <div className="mx-auto w-full max-w-7xl px-5 pb-8 pt-20 md:px-8 lg:pb-10 lg:pt-24">
+        <div className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
           <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Module 2</p>
@@ -104,16 +133,43 @@ export default function SubjectsPage() {
                 Review mastery, learning activity, and knowledge gaps calculated from your saved study records.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => void loadSubjects()}
-              disabled={isLoading}
-              className="inline-flex h-11 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-blue-200 hover:text-blue-600 disabled:opacity-45"
-            >
-              <FiRefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh data
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={() => void exportPdf()} disabled={isExporting || isLoading} className="inline-flex h-11 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white shadow-lg shadow-blue-600/15 disabled:opacity-45">
+                <FiDownload /> {isExporting ? 'Exporting…' : 'Export PDF'}
+              </button>
+              <button type="button" onClick={() => void loadSubjects()} disabled={isLoading} className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-blue-200 hover:text-blue-600 disabled:opacity-45">
+                <FiRefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh data
+              </button>
+            </div>
           </header>
+
+          <section className="mt-6 rounded-[26px] border border-slate-200 bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
+            <div className="flex items-center gap-2 text-sm font-extrabold text-slate-800"><FiFilter className="text-blue-600" /> Analytics filters</div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+              <label className="text-xs font-bold text-slate-500">Subject
+                <select value={filters.subject_id || ''} onChange={(event) => setFilters((current) => ({ ...current, subject_id: event.target.value || undefined, topic_id: undefined }))} className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none focus:border-blue-500">
+                  <option value="">All subjects</option>
+                  {subjectOptions.map((subject) => <option key={subject.id} value={subject.id}>{subject.subject_name}</option>)}
+                </select>
+              </label>
+              <label className="text-xs font-bold text-slate-500">Topic
+                <select value={filters.topic_id || ''} disabled={!selectedFilterSubject} onChange={(event) => setFilters((current) => ({ ...current, topic_id: event.target.value || undefined }))} className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none focus:border-blue-500 disabled:opacity-50">
+                  <option value="">All topics</option>
+                  {selectedFilterSubject?.topic_performance.map((topic) => <option key={topic.topic_id} value={topic.topic_id}>{topic.topic_name}</option>)}
+                </select>
+              </label>
+              <label className="text-xs font-bold text-slate-500">From date
+                <input type="date" value={filters.date_from || ''} onChange={(event) => setFilters((current) => ({ ...current, date_from: event.target.value || undefined }))} className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none focus:border-blue-500" />
+              </label>
+              <label className="text-xs font-bold text-slate-500">To date
+                <input type="date" min={filters.date_from} value={filters.date_to || ''} onChange={(event) => setFilters((current) => ({ ...current, date_to: event.target.value || undefined }))} className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none focus:border-blue-500" />
+              </label>
+              <div className="flex items-end gap-2">
+                <button type="button" onClick={() => void loadSubjects(filters)} className="h-11 flex-1 rounded-xl bg-slate-950 px-4 text-sm font-extrabold text-white">Apply</button>
+                <button type="button" onClick={() => void clearFilters()} className="h-11 rounded-xl border border-slate-200 px-3 text-xs font-bold text-slate-500">Clear filters</button>
+              </div>
+            </div>
+          </section>
 
           {isLoading ? (
             <div className="mt-8 grid animate-pulse gap-5 lg:grid-cols-3">

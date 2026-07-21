@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Dict, List
 
 from fastapi import HTTPException, status
 
@@ -70,7 +71,7 @@ class ActivityService:
             raise HTTPException(status_code=502, detail="Recent learning item could not be removed.") from exc
 
     @staticmethod
-    def list_recent_learning(user_id: str, limit: int = 6) -> list[dict]:
+    def list_recent_learning(user_id: str, limit: int = 6) -> List[dict]:
         try:
             activity_rows = (
                 get_supabase()
@@ -86,8 +87,8 @@ class ActivityService:
 
             resource_ids = [row["resource_id"] for row in activity_rows if row.get("resource_id")]
             video_ids = [row["video_id"] for row in activity_rows if row.get("video_id")]
-            resources_by_id: dict[str, dict] = {}
-            videos_by_id: dict[str, dict] = {}
+            resources_by_id: Dict[str, dict] = {}
+            videos_by_id: Dict[str, dict] = {}
 
             if resource_ids:
                 resources = (
