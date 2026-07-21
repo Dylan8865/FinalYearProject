@@ -1,0 +1,609 @@
+import { useEffect } from 'react';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+
+export type UiLanguage = 'en' | 'ms';
+
+interface LanguageState {
+  language: UiLanguage;
+  setLanguage: (language: UiLanguage) => void;
+  toggleLanguage: () => void;
+}
+
+export const useLanguageStore = create<LanguageState>()(
+  persist(
+    (set, get) => ({
+      language: 'en',
+      setLanguage: (language) => set({ language }),
+      toggleLanguage: () => set({ language: get().language === 'en' ? 'ms' : 'en' }),
+    }),
+    {
+      name: 'qubo-ui-language',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
+
+export const useTranslation = () => {
+  const language = useLanguageStore((state) => state.language);
+  return {
+    language,
+    tr: (english: string, malay: string) => language === 'ms' ? malay : english,
+  };
+};
+
+const MALAY_TRANSLATIONS: Record<string, string> = {
+  'Dashboard': 'Papan Pemuka',
+  'Subjects': 'Subjek',
+  'Study Tracker': 'Penjejak Pembelajaran',
+  'Game Room': 'Bilik Permainan',
+  'Quizzes': 'Kuiz',
+  'Library': 'Perpustakaan',
+  'Resource': 'Sumber',
+  'Profile': 'Profil',
+  'Class Analytics': 'Analitik Kelas',
+  'Signed in as': 'Log masuk sebagai',
+  'Open user profile': 'Buka profil pengguna',
+  'Student dashboard': 'Papan pemuka pelajar',
+  'Educator dashboard': 'Papan pemuka pendidik',
+  'Open profile': 'Buka profil',
+  'Open study tracker': 'Buka penjejak pembelajaran',
+  'Review class analytics': 'Lihat analitik kelas',
+  'Account summary': 'Ringkasan akaun',
+  'Stored profile data': 'Data profil tersimpan',
+  'Username': 'Nama pengguna',
+  'Full name': 'Nama penuh',
+  'School': 'Sekolah',
+  'Form level': 'Tingkatan',
+  'Target grade': 'Gred sasaran',
+  'Learning analytics': 'Analitik pembelajaran',
+  'Study tracker & forecast': 'Penjejak pembelajaran dan ramalan',
+  'Total study time': 'Jumlah masa belajar',
+  'Recorded sessions': 'Sesi direkodkan',
+  'Active forecasts': 'Ramalan aktif',
+  'Early warnings': 'Amaran awal',
+  'Record study session': 'Rekod sesi pembelajaran',
+  'Subject': 'Subjek',
+  'Topic': 'Topik',
+  'Duration (minutes)': 'Tempoh (minit)',
+  'Pomodoro cycles': 'Kitaran Pomodoro',
+  'Session date and time': 'Tarikh dan masa sesi',
+  'Notes': 'Catatan',
+  '(optional)': '(pilihan)',
+  'Save study session': 'Simpan sesi pembelajaran',
+  'Saving session…': 'Menyimpan sesi…',
+  'Early-warning setting': 'Tetapan amaran awal',
+  'Save threshold': 'Simpan ambang',
+  'Threshold saved': 'Ambang disimpan',
+  'Recent study sessions': 'Sesi pembelajaran terkini',
+  'Review schedule': 'Jadual ulang kaji',
+  'Due now': 'Perlu sekarang',
+  'Exam score forecasts': 'Ramalan skor peperiksaan',
+  'Velocity': 'Halaju',
+  'Educator analytics': 'Analitik pendidik',
+  'Class performance': 'Prestasi kelas',
+  'Student username': 'Nama pengguna pelajar',
+  'Add': 'Tambah',
+  'Adding…': 'Menambah…',
+  'Refresh': 'Muat semula',
+  'Linked students': 'Pelajar dipautkan',
+  'Students at risk': 'Pelajar berisiko',
+  'Average forecast': 'Purata ramalan',
+  'Class study time': 'Masa belajar kelas',
+  'Students': 'Pelajar',
+  'Search students': 'Cari pelajar',
+  'Individual summary': 'Ringkasan individu',
+  'Remove': 'Buang',
+  'Average mastery': 'Purata penguasaan',
+  'Latest forecast': 'Ramalan terkini',
+  'Study time': 'Masa belajar',
+  'Early warning active': 'Amaran awal aktif',
+  'Subject summaries': 'Ringkasan subjek',
+  'Mastery': 'Penguasaan',
+  'Forecast': 'Ramalan',
+  'Select a student': 'Pilih seorang pelajar',
+  'Module 2': 'Modul 2',
+  'Subject Performance': 'Prestasi Subjek',
+  'Manage subjects': 'Urus subjek',
+  'Completed quizzes': 'Kuiz selesai',
+  'Measured topics': 'Topik diukur',
+  'Historical quiz performance': 'Sejarah prestasi kuiz',
+  'Quiz score': 'Skor kuiz',
+  'Knowledge gap analysis': 'Analisis jurang pengetahuan',
+  'Not enough data yet': 'Data belum mencukupi',
+  'Create a practice quiz': 'Cipta kuiz latihan',
+  'Topic mastery breakdown': 'Pecahan penguasaan topik',
+  'Quiz Creator': 'Pencipta Kuiz',
+  'Quiz configuration': 'Konfigurasi kuiz',
+  'Question type': 'Jenis soalan',
+  'Generate full quiz': 'Jana kuiz penuh',
+  'Generating quiz…': 'Menjana kuiz…',
+  'Start quiz': 'Mula kuiz',
+  'Saving automatically…': 'Menyimpan secara automatik…',
+  'Retry save to library': 'Cuba simpan semula',
+  'Preview': 'Pratonton',
+  'Quiz completed': 'Kuiz selesai',
+  'Try saving again': 'Cuba simpan semula',
+  'Updated SPM forecast': 'Ramalan SPM dikemas kini',
+  'Spaced repetition': 'Ulang kaji berjarak',
+  'Score': 'Skor',
+  'Time': 'Masa',
+  'Retake quiz': 'Ulang kuiz',
+  'Create another': 'Cipta yang lain',
+  'Select an option': 'Pilih satu jawapan',
+  'Write your answer': 'Tulis jawapan anda',
+  'Submit answer': 'Hantar jawapan',
+  'Previous': 'Sebelumnya',
+  'Skip question': 'Langkau soalan',
+  'Finish quiz': 'Tamatkan kuiz',
+  'Next question': 'Soalan seterusnya',
+  'Current score': 'Skor semasa',
+  'Average speed': 'Kelajuan purata',
+  'Correct!': 'Betul!',
+  'Not quite.': 'Belum tepat.',
+  'End without answering?': 'Tamat tanpa menjawab?',
+  'Continue quiz': 'Teruskan kuiz',
+  'End quiz': 'Tamatkan kuiz',
+  'Your Quiz Library': 'Perpustakaan Kuiz Anda',
+  'Search quizzes': 'Cari kuiz',
+  'All subjects': 'Semua subjek',
+  'Delete': 'Padam',
+  'Start this quiz': 'Mulakan kuiz ini',
+  'Student Identity': 'Identiti Pelajar',
+  'Profile Settings': 'Tetapan Profil',
+  'Settings': 'Tetapan',
+  'Dark Mode': 'Mod Gelap',
+  'Privacy & Data': 'Privasi dan Data',
+  'Account Security': 'Keselamatan Akaun',
+  'Academic Preferences': 'Keutamaan Akademik',
+  'Active subjects': 'Subjek aktif',
+  'Study reminders': 'Peringatan belajar',
+  'Log Out': 'Log Keluar',
+  'Manage your account': 'Urus akaun anda',
+  'Edit profile': 'Edit profil',
+  'Profile picture': 'Gambar profil',
+  'Target exam date': 'Tarikh peperiksaan sasaran',
+  'Learning style': 'Gaya pembelajaran',
+  'Target subjects': 'Subjek sasaran',
+  'Change password': 'Tukar kata laluan',
+  'Update password': 'Kemas kini kata laluan',
+  'Save changes': 'Simpan perubahan',
+  'Discard changes': 'Batalkan perubahan',
+  'Back': 'Kembali',
+  'Welcome back': 'Selamat kembali',
+  'Log in': 'Log masuk',
+  'Email': 'E-mel',
+  'Password': 'Kata laluan',
+  'Forgot password?': 'Lupa kata laluan?',
+  'Create account': 'Cipta akaun',
+  'Student': 'Pelajar',
+  'Educator': 'Pendidik',
+  'Loading...': 'Memuatkan...',
+  'Export PDF': 'Eksport PDF',
+  'Clear filters': 'Kosongkan penapis',
+  'From date': 'Dari tarikh',
+  'To date': 'Hingga tarikh',
+  'All topics': 'Semua topik',
+  'Good morning,': 'Selamat pagi,',
+  'Database-backed overview': 'Gambaran keseluruhan berasaskan pangkalan data',
+  'Your learning profile is ready for study tracking.': 'Profil pembelajaran anda sedia untuk penjejakan pembelajaran.',
+  'Review your class and student access from one place.': 'Semak kelas dan akses pelajar anda dari satu tempat.',
+  'This dashboard uses your saved profile, target exam date, and selected subjects from the database.': 'Papan pemuka ini menggunakan profil tersimpan, tarikh peperiksaan sasaran dan subjek pilihan anda daripada pangkalan data.',
+  'Use the profile and access data already stored in the system to manage your cohort.': 'Gunakan profil dan data akses yang telah disimpan dalam sistem untuk mengurus kumpulan anda.',
+  'Profile completion': 'Kelengkapan profil',
+  'Days remaining': 'Hari berbaki',
+  'Not set': 'Belum ditetapkan',
+  'not set': 'belum ditetapkan',
+  'Date passed': 'Tarikh telah berlalu',
+  'Exam day': 'Hari peperiksaan',
+  'Selected SPM subjects': 'Subjek SPM yang dipilih',
+  'Manage': 'Urus',
+  'Subjects could not be loaded from the database.': 'Subjek tidak dapat dimuatkan daripada pangkalan data.',
+  'No subjects have been selected yet.': 'Belum ada subjek dipilih.',
+  'Subject data is managed from the database and profile screen.': 'Data subjek diurus melalui pangkalan data dan skrin profil.',
+  'Status': 'Status',
+  'What the system knows': 'Maklumat yang diketahui oleh sistem',
+  'Role-based access': 'Akses berdasarkan peranan',
+  'Account created': 'Akaun dicipta',
+  'Set': 'Ditetapkan',
+  'student': 'pelajar',
+  'educator': 'pendidik',
+  'SPM Mastery': 'Penguasaan SPM',
+  'Qubo user': 'Pengguna Qubo',
+
+  'Enter your academic sanctuary.': 'Masuki ruang pembelajaran akademik anda.',
+  'A premium digital-first space where your focus thrives and complex knowledge becomes intuitive.': 'Ruang digital premium yang membantu anda fokus dan memahami pengetahuan kompleks dengan mudah.',
+  'Editorial Design': 'Reka Bentuk Editorial',
+  'Advanced Analytics': 'Analitik Lanjutan',
+  'Account recovery': 'Pemulihan akaun',
+  'Reset password': 'Tetapkan semula kata laluan',
+  'Log in to Qubo': 'Log masuk ke Qubo',
+  'Use your registered email address and choose a new password.': 'Gunakan alamat e-mel berdaftar anda dan pilih kata laluan baharu.',
+  'Email Address': 'Alamat E-mel',
+  'Forgot Password?': 'Lupa Kata Laluan?',
+  'Logging in...': 'Sedang log masuk...',
+  'Log In': 'Log Masuk',
+  'Administrator Access': 'Akses Pentadbir',
+  "Don't have an account?": 'Belum mempunyai akaun?',
+  'Sign up': 'Daftar',
+  'Enter your email first.': 'Masukkan e-mel anda dahulu.',
+  'Passwords do not match.': 'Kata laluan tidak sepadan.',
+  'Unable to reset password.': 'Kata laluan tidak dapat ditetapkan semula.',
+  'New Password': 'Kata Laluan Baharu',
+  'Confirm New Password': 'Sahkan Kata Laluan Baharu',
+  'New password': 'Kata laluan baharu',
+  'Confirm password': 'Sahkan kata laluan',
+  'Resetting...': 'Sedang menetapkan semula...',
+  'Reset': 'Tetapkan Semula',
+  'Privacy Policy': 'Dasar Privasi',
+  'Terms of Service': 'Terma Perkhidmatan',
+  'Contact Support': 'Hubungi Sokongan',
+
+  'Start your learning journey.': 'Mulakan perjalanan pembelajaran anda.',
+  'Build your account, choose your role, and personalize the experience for SPM mastery.': 'Bina akaun, pilih peranan dan sesuaikan pengalaman anda untuk penguasaan SPM.',
+  'Student first': 'Keutamaan pelajar',
+  'Educator tools': 'Alat pendidik',
+  'Register to Qubo': 'Daftar ke Qubo',
+  'Create your account in one step, then personalize your learning profile.': 'Cipta akaun anda dalam satu langkah, kemudian sesuaikan profil pembelajaran anda.',
+  'Full Name': 'Nama Penuh',
+  'Account Type': 'Jenis Akaun',
+  'Creating account...': 'Sedang mencipta akaun...',
+  'Register': 'Daftar',
+  'Already have an account?': 'Sudah mempunyai akaun?',
+  'Login': 'Log masuk',
+  'Email is required': 'E-mel diperlukan',
+  'Invalid email format': 'Format e-mel tidak sah',
+  'Password is required': 'Kata laluan diperlukan',
+  'Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&#)': 'Kata laluan mesti sekurang-kurangnya 8 aksara dan mengandungi sekurang-kurangnya satu huruf besar, satu huruf kecil, satu nombor dan satu aksara khas (@$!%*?&#)',
+  'Passwords do not match': 'Kata laluan tidak sepadan',
+  'Username must be at least 3 characters': 'Nama pengguna mesti sekurang-kurangnya 3 aksara',
+  'Full name is required': 'Nama penuh diperlukan',
+  'Full name must contain only letters and spaces': 'Nama penuh hanya boleh mengandungi huruf dan ruang',
+
+  'Learning Style Assessment': 'Penilaian Gaya Pembelajaran',
+  'Help us understand how you learn best': 'Bantu kami memahami cara pembelajaran terbaik anda',
+  'Visual': 'Visual',
+  'Auditory': 'Auditori',
+  'Kinesthetic': 'Kinestetik',
+  'visual': 'visual',
+  'auditory': 'auditori',
+  'kinesthetic': 'kinestetik',
+  'How do you prefer to learn new information?': 'Bagaimanakah anda lebih suka mempelajari maklumat baharu?',
+  'I prefer to see diagrams, charts, and visual demonstrations': 'Saya lebih suka melihat rajah, carta dan demonstrasi visual',
+  'I prefer to listen to lectures and verbal explanations': 'Saya lebih suka mendengar kuliah dan penerangan lisan',
+  'I prefer to do hands-on practice and learn by doing': 'Saya lebih suka latihan praktikal dan belajar melalui perbuatan',
+  'When studying for exams, you typically:': 'Semasa belajar untuk peperiksaan, anda biasanya:',
+  'Create mind maps and colorful notes': 'Mencipta peta minda dan nota berwarna-warni',
+  'Read notes aloud and discuss with others': 'Membaca nota dengan kuat dan berbincang dengan orang lain',
+  'Work through practice problems and experiments': 'Menyelesaikan latihan dan eksperimen',
+  'In a classroom, you find it easiest to concentrate when:': 'Di dalam kelas, anda paling mudah menumpukan perhatian apabila:',
+  'The teacher uses slides and visual aids': 'Guru menggunakan slaid dan bahan bantu visual',
+  'The teacher explains concepts clearly': 'Guru menerangkan konsep dengan jelas',
+  'You can move around and interact with materials': 'Anda boleh bergerak dan berinteraksi dengan bahan',
+  'For remembering important concepts, you:': 'Untuk mengingati konsep penting, anda:',
+  'Draw pictures or use color coding': 'Melukis gambar atau menggunakan kod warna',
+  'Explain it out loud or create mnemonics': 'Menerangkannya dengan kuat atau mencipta mnemonik',
+  'Act it out or use physical objects': 'Melakonkannya atau menggunakan objek fizikal',
+  'When giving directions, you would:': 'Apabila memberikan arahan, anda akan:',
+  'Draw a map or show a picture': 'Melukis peta atau menunjukkan gambar',
+  'Explain verbally step by step': 'Menerangkan secara lisan langkah demi langkah',
+  'Show by walking or demonstrating': 'Menunjukkan dengan berjalan atau membuat demonstrasi',
+  'Completing...': 'Sedang melengkapkan...',
+  'Complete': 'Selesai',
+  'Next': 'Seterusnya',
+
+  'Analytics filters': 'Penapis analitik',
+  'Apply': 'Terapkan',
+  'Refresh data': 'Muat semula data',
+  'Subject analytics could not be loaded': 'Analitik subjek tidak dapat dimuatkan',
+  'No subjects selected': 'Tiada subjek dipilih',
+  'Choose your SPM subjects in Profile Settings before viewing subject analytics.': 'Pilih subjek SPM anda dalam Tetapan Profil sebelum melihat analitik subjek.',
+  'Analytics below use your recorded quiz attempts, study sessions, and topic performance.': 'Analitik di bawah menggunakan percubaan kuiz, sesi pembelajaran dan prestasi topik yang direkodkan.',
+  'No mastery data': 'Tiada data penguasaan',
+  'SPM subject': 'Subjek SPM',
+  'Average across measured topics': 'Purata bagi topik yang diukur',
+  'Complete topic activities to calculate mastery.': 'Lengkapkan aktiviti topik untuk mengira penguasaan.',
+  'No completed quiz attempts yet': 'Belum ada percubaan kuiz yang selesai',
+  'Scores will appear here after attempts are recorded.': 'Skor akan dipaparkan di sini selepas percubaan direkodkan.',
+  'Complete subject activities to identify the topic that needs the most attention.': 'Lengkapkan aktiviti subjek untuk mengenal pasti topik yang paling memerlukan perhatian.',
+  'No topics are stored for this subject yet.': 'Belum ada topik disimpan untuk subjek ini.',
+  'Not measured': 'Belum diukur',
+  'Unable to load subject analytics.': 'Analitik subjek tidak dapat dimuatkan.',
+  'Progress report could not be exported.': 'Laporan kemajuan tidak dapat dieksport.',
+
+  'Review class-wide progress, early warnings, and individual subject summaries for linked students.': 'Semak kemajuan seluruh kelas, amaran awal dan ringkasan subjek individu bagi pelajar yang dipautkan.',
+  'School not set': 'Sekolah belum ditetapkan',
+  'Form level not set': 'Tingkatan belum ditetapkan',
+  'Pts/week': 'Mata/minggu',
+  'At least one subject forecast is below this student\'s configured threshold.': 'Sekurang-kurangnya satu ramalan subjek berada di bawah ambang yang ditetapkan oleh pelajar ini.',
+  'This student has not selected any subjects.': 'Pelajar ini belum memilih sebarang subjek.',
+  'Choose a linked student to view their subject progress and forecasts.': 'Pilih pelajar yang dipautkan untuk melihat kemajuan subjek dan ramalan mereka.',
+  'No student matches your search.': 'Tiada pelajar sepadan dengan carian anda.',
+  'Add a student by username to begin class analytics.': 'Tambah pelajar menggunakan nama pengguna untuk memulakan analitik kelas.',
+  'Class analytics could not be loaded.': 'Analitik kelas tidak dapat dimuatkan.',
+  'Student could not be added.': 'Pelajar tidak dapat ditambah.',
+  'Student could not be removed.': 'Pelajar tidak dapat dibuang.',
+  'Early warning': 'Amaran awal',
+
+  'Save the subject, topic, duration and Pomodoro cycles.': 'Simpan subjek, topik, tempoh dan kitaran Pomodoro.',
+  'Select your SPM subjects before recording a session.': 'Pilih subjek SPM anda sebelum merekodkan sesi.',
+  'Open Profile Settings': 'Buka Tetapan Profil',
+  'A warning appears when a subject forecast falls below this score.': 'Amaran akan muncul apabila ramalan subjek berada di bawah skor ini.',
+  'No study sessions recorded yet.': 'Belum ada sesi pembelajaran direkodkan.',
+  'Review dates adapt automatically after each quiz attempt.': 'Tarikh ulang kaji disesuaikan secara automatik selepas setiap percubaan kuiz.',
+  'Complete a quiz to create your first review date.': 'Lengkapkan kuiz untuk mencipta tarikh ulang kaji pertama anda.',
+  'Forecasts are updated automatically after a saved quiz attempt.': 'Ramalan dikemas kini secara automatik selepas percubaan kuiz disimpan.',
+  'Complete a quiz to start forecasting': 'Lengkapkan kuiz untuk memulakan ramalan',
+  'Not enough data': 'Data tidak mencukupi',
+  'Choose a subject and enter the topic you studied.': 'Pilih subjek dan masukkan topik yang anda pelajari.',
+  'Study session recorded successfully.': 'Sesi pembelajaran berjaya direkodkan.',
+  'Study session could not be saved.': 'Sesi pembelajaran tidak dapat disimpan.',
+  'Warning threshold could not be updated.': 'Ambang amaran tidak dapat dikemas kini.',
+  'Learning analytics could not be loaded.': 'Analitik pembelajaran tidak dapat dimuatkan.',
+  'e.g. Quadratic equations': 'cth. Persamaan kuadratik',
+  'What did you cover?': 'Apakah yang anda pelajari?',
+  'Prediction warning threshold': 'Ambang amaran ramalan',
+
+  'Knowledge Vault': 'Gedung Pengetahuan',
+  'Filter by subject': 'Tapis mengikut subjek',
+  'Filter by source': 'Tapis mengikut sumber',
+  'All resource types': 'Semua jenis sumber',
+  'Your saved quizzes': 'Kuiz tersimpan anda',
+  'Your library could not be loaded': 'Perpustakaan anda tidak dapat dimuatkan',
+  'Create another quiz': 'Cipta kuiz lain',
+  'Saved quiz preview': 'Pratonton kuiz tersimpan',
+  'Search your saved quizzes': 'Cari kuiz tersimpan anda',
+  'Refresh library': 'Muat semula perpustakaan',
+  'Loading library': 'Sedang memuatkan perpustakaan',
+  'Delete quiz': 'Padam kuiz',
+  'Close quiz preview': 'Tutup pratonton kuiz',
+  'Loading your library…': 'Sedang memuatkan perpustakaan anda…',
+  'Loading…': 'Sedang memuatkan…',
+  'No subject assigned': 'Tiada subjek ditetapkan',
+  'No quizzes match these filters': 'Tiada kuiz sepadan dengan penapis ini',
+  'Your library is empty': 'Perpustakaan anda kosong',
+  'Try a different search or clear the current filters.': 'Cuba carian lain atau kosongkan penapis semasa.',
+  'Generate a quiz from your own notes or textbook pages. Saved quizzes will appear here.': 'Jana kuiz daripada nota atau halaman buku teks anda. Kuiz yang disimpan akan dipaparkan di sini.',
+  'Starting…': 'Sedang bermula…',
+  'Unable to load your library right now.': 'Perpustakaan anda tidak dapat dimuatkan sekarang.',
+  'Unable to start this quiz.': 'Kuiz ini tidak dapat dimulakan.',
+  'Unable to preview this quiz.': 'Kuiz ini tidak dapat dipratonton.',
+  'Unable to delete this quiz.': 'Kuiz ini tidak dapat dipadam.',
+
+  'Drag and drop textbook pages': 'Seret dan lepaskan halaman buku teks',
+  'Recent uploads': 'Muat naik terkini',
+  'View all': 'Lihat semua',
+  'Tap to preview': 'Ketik untuk pratonton',
+  'New scan': 'Imbasan baharu',
+  'Difficulty level': 'Tahap kesukaran',
+  'Number of questions': 'Bilangan soalan',
+  'More questions use more generation time and AI tokens.': 'Lebih banyak soalan memerlukan lebih banyak masa penjanaan dan token AI.',
+  'AI-generated preview': 'Pratonton dijana AI',
+  'No generated questions yet': 'Belum ada soalan dijana',
+  'Upload study material, choose the configuration, and generate a quiz.': 'Muat naik bahan pembelajaran, pilih konfigurasi dan jana kuiz.',
+  'Generated questions will appear here': 'Soalan yang dijana akan dipaparkan di sini',
+  'Pro tip:': 'Petua:',
+  'Clear, well-lit pages with readable labels produce more accurate questions.': 'Halaman yang jelas, terang dan mempunyai label mudah dibaca menghasilkan soalan yang lebih tepat.',
+  'MCQ (Single choice)': 'Aneka Pilihan (Satu jawapan)',
+  'Fill-in-the-blank': 'Isi tempat kosong',
+  'Short answer': 'Jawapan pendek',
+  'Beginner': 'Pemula',
+  'Intermediate': 'Pertengahan',
+  'Advanced': 'Lanjutan',
+  'Upload at least one textbook image or PDF first.': 'Muat naik sekurang-kurangnya satu imej buku teks atau PDF terlebih dahulu.',
+  'Quiz generation took too long. Please try again with fewer or smaller files.': 'Penjanaan kuiz mengambil masa terlalu lama. Cuba lagi dengan fail yang lebih sedikit atau lebih kecil.',
+  'Cannot reach the quiz server. Please make sure the backend is running and try again.': 'Pelayan kuiz tidak dapat dicapai. Pastikan bahagian belakang sedang berjalan dan cuba lagi.',
+  'Quiz generation failed. Please try again.': 'Penjanaan kuiz gagal. Sila cuba lagi.',
+  'Quiz generated, but automatic saving failed. Select retry below.': 'Kuiz berjaya dijana tetapi penyimpanan automatik gagal. Pilih cuba semula di bawah.',
+  'Unable to save this quiz. Please try again.': 'Kuiz ini tidak dapat disimpan. Sila cuba lagi.',
+  'Saved automatically — view library': 'Disimpan secara automatik — lihat perpustakaan',
+  'PDF document': 'Dokumen PDF',
+  'Image': 'Imej',
+  'Delete file': 'Padam fail',
+  'Close preview': 'Tutup pratonton',
+
+  'No generated quiz': 'Tiada kuiz dijana',
+  'Upload study material and generate questions before starting a quiz.': 'Muat naik bahan pembelajaran dan jana soalan sebelum memulakan kuiz.',
+  'Enter the missing word or phrase': 'Masukkan perkataan atau frasa yang hilang',
+  'Write a concise answer': 'Tulis jawapan ringkas',
+  'Quiz question navigation': 'Navigasi soalan kuiz',
+  'Confirm ending quiz': 'Sahkan penamatan kuiz',
+  'You have skipped every question. Are you sure you want to end this quiz with no answers?': 'Anda telah melangkau semua soalan. Adakah anda pasti mahu menamatkan kuiz ini tanpa jawapan?',
+
+  'SPM Target': 'Sasaran SPM',
+  'Days to SPM': 'Hari ke SPM',
+  'Days': 'Hari',
+  'Core academic targets': 'Sasaran akademik utama',
+  'AI-analyzed cognitive profile': 'Profil kognitif dianalisis AI',
+  'AI Recommendation': 'Cadangan AI',
+  'Prefer diagrams & mind maps': 'Gemar rajah dan peta minda',
+  'Audio notes & lectures': 'Nota audio dan kuliah',
+  'Learn by doing & practice': 'Belajar melalui aktiviti dan latihan',
+  'Daily AI Flashcards': 'Kad imbas AI harian',
+  'Nightly Progress Review': 'Semakan kemajuan setiap malam',
+  'Account Management': 'Pengurusan Akaun',
+  'Deactivate Account': 'Nyahaktifkan Akaun',
+  'Delete Data': 'Padam Data',
+  'SPM Student': 'Pelajar SPM',
+  'SPM: Set target': 'SPM: Tetapkan sasaran',
+  'Role': 'Peranan',
+  'JPEG, PNG, WebP, or GIF. Maximum 5 MB.': 'JPEG, PNG, WebP atau GIF. Maksimum 5 MB.',
+  'Select form level': 'Pilih tingkatan',
+  'Select target grade': 'Pilih gred sasaran',
+  'The saved grade is invalid. Choose a valid SPM grade.': 'Gred tersimpan tidak sah. Pilih gred SPM yang sah.',
+  'Subjects stored in the database': 'Subjek yang disimpan dalam pangkalan data',
+  'Your profile data': 'Data profil anda',
+  'Old password': 'Kata laluan lama',
+  'Show old password': 'Tunjukkan kata laluan lama',
+  'Hide old password': 'Sembunyikan kata laluan lama',
+  'Show new password': 'Tunjukkan kata laluan baharu',
+  'Hide new password': 'Sembunyikan kata laluan baharu',
+  'Show password confirmation': 'Tunjukkan pengesahan kata laluan',
+  'Hide password confirmation': 'Sembunyikan pengesahan kata laluan',
+  'Open large profile picture preview': 'Buka pratonton besar gambar profil',
+  'Profile picture preview': 'Pratonton gambar profil',
+  'Close profile picture preview': 'Tutup pratonton gambar profil',
+  'Edit profile picture': 'Edit gambar profil',
+  'Account deactivation is not available yet': 'Penyahaktifan akaun belum tersedia',
+  'Data deletion is not available yet': 'Pemadaman data belum tersedia',
+
+  'Mathematics': 'Matematik',
+  'Additional Mathematics': 'Matematik Tambahan',
+  'History': 'Sejarah',
+  'Biology': 'Biologi',
+  'Physics': 'Fizik',
+  'Chemistry': 'Kimia',
+  'English': 'Bahasa Inggeris',
+  '7 Day Streak': 'Rentetan 7 Hari',
+  'Level 12': 'Tahap 12',
+  'Add More': 'Tambah Lagi',
+  'Browse files': 'Semak imbas fail',
+  'Browse': 'Semak Imbas',
+  'Cancel': 'Batal',
+  'Try again': 'Cuba lagi',
+  'Confirm Password': 'Sahkan Kata Laluan',
+  'Confirm new password': 'Sahkan kata laluan baharu',
+  'Learning Style': 'Gaya Pembelajaran',
+  'Profile settings': 'Tetapan profil',
+  'Module 3': 'Modul 3',
+  'Form 4': 'Tingkatan 4',
+  'Form 5': 'Tingkatan 5',
+  'Trusted by 200+ institutions': 'Dipercayai oleh lebih 200 institusi',
+  'Find your saved quizzes and continue learning from your own study materials.': 'Cari kuiz tersimpan anda dan teruskan pembelajaran menggunakan bahan anda sendiri.',
+  'No uploads yet. Added files will appear here.': 'Belum ada muat naik. Fail yang ditambah akan dipaparkan di sini.',
+  'Open Quiz Creator': 'Buka Pencipta Kuiz',
+  'Transform study materials into interactive mastery challenges. Upload textbook pages or notes and configure the quiz experience.': 'Ubah bahan pembelajaran menjadi cabaran penguasaan interaktif. Muat naik halaman buku teks atau nota dan tetapkan pengalaman kuiz.',
+  'Upload study material': 'Muat naik bahan pembelajaran',
+  'Upload up to four images (JPEG/PNG) or PDFs from your study material.': 'Muat naik sehingga empat imej (JPEG/PNG) atau PDF daripada bahan pembelajaran anda.',
+  'Hide answer': 'Sembunyikan jawapan',
+  'Reveal answer': 'Tunjukkan jawapan',
+  'Your result was saved to Module 2 analytics.': 'Keputusan anda telah disimpan ke analitik Modul 2.',
+  'Your quiz result could not be saved.': 'Keputusan kuiz anda tidak dapat disimpan.',
+  'Saving your quiz result…': 'Sedang menyimpan keputusan kuiz anda…',
+  'Review mastery, learning activity, and knowledge gaps calculated from your saved study records.': 'Semak penguasaan, aktiviti pembelajaran dan jurang pengetahuan yang dikira daripada rekod pembelajaran tersimpan anda.',
+  'Record focused study, follow your learning velocity, and receive an updated SPM forecast after every quiz.': 'Rekod pembelajaran berfokus, ikuti kadar kemajuan anda dan terima ramalan SPM terkini selepas setiap kuiz.',
+  'Manage your academic profile, learning preferences, and platform security in your scholastic sanctuary.': 'Urus profil akademik, keutamaan pembelajaran dan keselamatan platform anda dalam ruang pembelajaran ini.',
+  'Update your identity, academic details, and selected SPM subjects using data stored in the database.': 'Kemas kini identiti, butiran akademik dan subjek SPM pilihan anda menggunakan data dalam pangkalan data.',
+  'No subjects loaded from the database yet.': 'Belum ada subjek dimuatkan daripada pangkalan data.',
+  'Once you delete your account, there is no going back. All your learning progress and AI data will be permanently erased.': 'Selepas akaun dipadam, tindakan ini tidak boleh dibatalkan. Semua kemajuan pembelajaran dan data AI anda akan dipadamkan secara kekal.',
+  'Choose a JPEG, PNG, WebP, or GIF image.': 'Pilih imej JPEG, PNG, WebP atau GIF.',
+  'Profile picture must be 5 MB or smaller.': 'Gambar profil mestilah bersaiz 5 MB atau lebih kecil.',
+  'Unable to upload profile picture.': 'Gambar profil tidak dapat dimuat naik.',
+  'This image URL could not be loaded.': 'URL imej ini tidak dapat dimuatkan.',
+  'Choose a valid SPM target grade.': 'Pilih gred sasaran SPM yang sah.',
+  'Target exam date cannot be in the past.': 'Tarikh peperiksaan sasaran tidak boleh berada pada masa lalu.',
+  'Failed to update profile': 'Profil gagal dikemas kini',
+  'New passwords do not match': 'Kata laluan baharu tidak sepadan',
+  'Password changed successfully': 'Kata laluan berjaya ditukar',
+  'Failed to change password': 'Kata laluan gagal ditukar',
+  'Updating password...': 'Sedang mengemas kini kata laluan...',
+  'Uploading...': 'Sedang memuat naik...',
+  'Saving...': 'Sedang menyimpan...',
+  'Large profile preview': 'Pratonton profil besar',
+  'Profile preview': 'Pratonton profil',
+  'Switch to English': 'Tukar kepada Bahasa Inggeris',
+  'Saving…': 'Sedang menyimpan…',
+  'Exporting…': 'Sedang mengeksport…',
+  'Ai Generated': 'Dijana AI',
+  'Question': 'Soalan',
+  'of': 'daripada',
+  'Next review:': 'Ulang kaji seterusnya:',
+  'Review': 'Ulang kaji',
+  'again on': 'sekali lagi pada',
+  'Target': 'Sasaran',
+};
+
+const originalText = new WeakMap<Text, string>();
+const originalAttributes = new WeakMap<Element, Map<string, string>>();
+const translatedAttributes = ['placeholder', 'title', 'aria-label'];
+
+const translateValue = (value: string) => {
+  const trimmed = value.trim();
+  let translation = MALAY_TRANSLATIONS[trimmed];
+
+  if (!translation) {
+    const patterns: Array<[RegExp, (...matches: string[]) => string]> = [
+      [/^Good morning, (.+)\.$/, (name) => `Selamat pagi, ${name}.`],
+      [/^Question (\d+) of (\d+)$/, (current, total) => `Soalan ${current} daripada ${total}`],
+      [/^(\d+) days?$/, (days) => `${days} hari`],
+      [/^(\d+) quizzes?$/, (count) => `${count} kuiz`],
+      [/^(\d+) due$/, (count) => `${count} perlu diulang kaji`],
+      [/^(\d+) day interval$/, (days) => `Selang ${days} hari`],
+      [/^Next review: (.+)$/, (date) => `Ulang kaji seterusnya: ${date}`],
+      [/^Based on (\d+) attempts?$/, (count) => `Berdasarkan ${count} percubaan`],
+      [/^Target (.+)$/, (target) => `Sasaran ${target}`],
+      [/^Review (.+) again on (.+)\.$/, (topic, date) => `Ulang kaji ${topic} sekali lagi pada ${date}.`],
+      [/^Go to question (\d+), answered$/, (number) => `Pergi ke soalan ${number}, telah dijawab`],
+      [/^Go to question (\d+), unanswered$/, (number) => `Pergi ke soalan ${number}, belum dijawab`],
+      [/^(.+) pts\/week$/, (points) => `${points} mata/minggu`],
+    ];
+
+    for (const [pattern, replacer] of patterns) {
+      const match = trimmed.match(pattern);
+      if (match) {
+        translation = replacer(...match.slice(1));
+        break;
+      }
+    }
+  }
+
+  if (!translation) return value;
+  const leading = value.slice(0, value.indexOf(trimmed));
+  const trailing = value.slice(value.indexOf(trimmed) + trimmed.length);
+  return `${leading}${translation}${trailing}`;
+};
+
+const visit = (root: Node, language: UiLanguage) => {
+  if (root.nodeType === Node.TEXT_NODE) {
+    const node = root as Text;
+    if (!originalText.has(node)) originalText.set(node, node.nodeValue || '');
+    const english = originalText.get(node) || '';
+    node.nodeValue = language === 'ms' ? translateValue(english) : english;
+    return;
+  }
+  if (!(root instanceof Element) || root.closest('[data-no-translate]')) return;
+  const saved = originalAttributes.get(root) || new Map<string, string>();
+  translatedAttributes.forEach((attribute) => {
+    const current = root.getAttribute(attribute);
+    if (current !== null && !saved.has(attribute)) saved.set(attribute, current);
+    if (saved.has(attribute)) root.setAttribute(attribute, language === 'ms' ? translateValue(saved.get(attribute) || '') : saved.get(attribute) || '');
+  });
+  originalAttributes.set(root, saved);
+  root.childNodes.forEach((child) => visit(child, language));
+};
+
+export function LanguageDomBridge() {
+  const language = useLanguageStore((state) => state.language);
+
+  useEffect(() => {
+    document.documentElement.lang = language === 'ms' ? 'ms-MY' : 'en';
+    let applying = false;
+    const apply = (root: Node) => {
+      applying = true;
+      visit(root, language);
+      applying = false;
+    };
+    apply(document.body);
+    const observer = new MutationObserver((mutations) => {
+      if (applying) return;
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'characterData') {
+          const text = mutation.target as Text;
+          const knownEnglish = originalText.get(text);
+          const expectedValue = knownEnglish === undefined
+            ? undefined
+            : language === 'ms' ? translateValue(knownEnglish) : knownEnglish;
+          if (expectedValue === text.nodeValue) return;
+          originalText.set(text, text.nodeValue || '');
+          apply(text);
+        } else {
+          mutation.addedNodes.forEach(apply);
+        }
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
+  }, [language]);
+
+  return null;
+}

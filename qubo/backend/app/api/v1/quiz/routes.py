@@ -120,5 +120,6 @@ async def record_quiz_attempt(
         attempt.score,
         attempt.total_questions,
         attempt.time_taken_seconds,
+        attempt.answers,
     )
 

@@ -7,10 +7,13 @@ import {
   FiBookOpen,
   FiFolder,
   FiGrid,
+  FiGlobe,
   FiHelpCircle,
   FiPlayCircle,
+  FiTarget,
   FiUser,
 } from 'react-icons/fi';
+import { useLanguageStore } from '@/contexts/languageStore';
 
 const navigationItems = [
   { icon: FiGrid, label: 'Dashboard', path: '/dashboard' },
@@ -28,13 +31,67 @@ export default function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [profileImageFailed, setProfileImageFailed] = useState(false);
+  const language = useLanguageStore((state) => state.language);
+  const toggleLanguage = useLanguageStore((state) => state.toggleLanguage);
 
   useEffect(() => {
     setProfileImageFailed(false);
   }, [user?.profile_picture_url]);
 
+  const displayName = user?.full_name || user?.username || 'Qubo user';
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+
   return (
-    <aside className="hidden border-r border-slate-200/80 bg-[#f8fbff] px-5 py-7 lg:flex lg:flex-col">
+    <>
+      {user && (
+        <header className="absolute left-0 right-0 top-0 z-40 flex h-16 items-center justify-end border-b border-slate-200/80 bg-white/90 px-5 backdrop-blur-md md:px-8 lg:left-[260px]">
+          <div className="flex items-center gap-3 pr-12 text-xs font-bold text-slate-600 md:pr-14">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              data-no-translate
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-600 shadow-sm hover:border-blue-300 hover:text-blue-600"
+              aria-label={language === 'en' ? 'Tukar ke Bahasa Melayu' : 'Switch to English'}
+              title={language === 'en' ? 'Bahasa Melayu' : 'English'}
+            >
+              <FiGlobe /> {language === 'en' ? 'BM' : 'EN'}
+            </button>
+            <span className="hidden items-center gap-1.5 sm:flex">
+              <span aria-hidden="true">🔥</span>
+              <span className="text-blue-600">7 Day Streak</span>
+            </span>
+            <span className="hidden items-center gap-1.5 sm:flex">
+              <FiTarget className="text-slate-500" /> Level 12
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/profile')}
+            aria-label="Open user profile"
+            title="Open user profile"
+            className="absolute right-4 top-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-blue-50 text-xs font-extrabold text-blue-700 shadow-[0_6px_18px_rgba(15,23,42,0.18)] ring-1 ring-slate-200 hover:scale-105 hover:ring-blue-400 md:right-6"
+          >
+            {user.profile_picture_url && !profileImageFailed ? (
+              <img
+                src={user.profile_picture_url}
+                alt=""
+                onError={() => setProfileImageFailed(true)}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              initials || 'QB'
+            )}
+          </button>
+        </header>
+      )}
+
+      <aside className="sticky top-0 hidden h-screen self-start overflow-y-auto border-r border-slate-200/80 bg-[#f8fbff] px-5 py-7 lg:flex lg:flex-col">
       <div className="mb-8 px-4">
         <p className="text-xl font-extrabold tracking-tight text-primary">Qubo</p>
         <p className="mt-1 text-xs font-bold text-slate-700">SPM Mastery</p>
@@ -81,6 +138,7 @@ export default function AppSidebar() {
           </div>
         </div>
       )}
-    </aside>
+      </aside>
+    </>
   );
 }

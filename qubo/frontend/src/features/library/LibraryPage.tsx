@@ -20,6 +20,7 @@ import AppSidebar from '@/components/layout/AppSidebar';
 import { authService } from '@/lib/authService';
 import { GeneratedQuiz, LibraryQuiz } from '@/types/quiz';
 import { useQuizStore } from '@/contexts/quizStore';
+import { useLanguageStore } from '@/contexts/languageStore';
 
 const formatSourceType = (sourceType: string) =>
   sourceType
@@ -27,8 +28,8 @@ const formatSourceType = (sourceType: string) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-const formatCreatedDate = (createdAt: string) =>
-  new Intl.DateTimeFormat('en-MY', {
+const formatCreatedDate = (createdAt: string, locale: string) =>
+  new Intl.DateTimeFormat(locale, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -36,6 +37,8 @@ const formatCreatedDate = (createdAt: string) =>
 
 export default function LibraryPage() {
   const navigate = useNavigate();
+  const language = useLanguageStore((state) => state.language);
+  const locale = language === 'ms' ? 'ms-MY' : 'en-MY';
   const setGeneratedQuiz = useQuizStore((state) => state.setGeneratedQuiz);
   const savedQuizId = useQuizStore((state) => state.savedQuizId);
   const setSavedQuizId = useQuizStore((state) => state.setSavedQuizId);
@@ -303,7 +306,7 @@ export default function LibraryPage() {
                       <FiBookOpen className="h-4 w-4 flex-none" />
                       {quiz.subject || 'No subject assigned'}
                     </span>
-                    <span className="flex-none">{formatCreatedDate(quiz.created_at)}</span>
+                    <span className="flex-none">{formatCreatedDate(quiz.created_at, locale)}</span>
                   </div>
                   <div className="mt-5 grid grid-cols-[1fr_1fr_auto] gap-2 border-t border-slate-100 pt-4">
                     <button

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { lazy, Suspense, useEffect } from 'react';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
+import { LanguageDomBridge } from '@/contexts/languageStore';
 
 // Pages
 import LoginPage from '@/features/auth/LoginPage';
@@ -50,6 +51,7 @@ export default function App() {
 
   return (
     <Router>
+      <LanguageDomBridge />
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />

@@ -2,6 +2,7 @@ import base64
 import json
 import re
 import unicodedata
+from datetime import date, timedelta
 from typing import List, Tuple
 
 import requests
@@ -26,6 +27,7 @@ class GeminiQuizService:
         "properties": {
             "title": {"type": "string"},
             "subject": {"type": "string"},
+            "topic": {"type": "string"},
             "questions": {
                 "type": "array",
                 "items": {
@@ -53,7 +55,7 @@ class GeminiQuizService:
                 },
             },
         },
-        "required": ["title", "subject", "questions"],
+        "required": ["title", "subject", "topic", "questions"],
     }
 
     @staticmethod
@@ -82,6 +84,7 @@ class GeminiQuizService:
             "questions according to how much clear, useful study content each file contains. "
             "Set subject to the matching SPM subject name: Bahasa Melayu, English, Mathematics, Science, History, "
             "Physics, Chemistry, Biology, or Add Mathematics. "
+            "Set topic to one concise syllabus topic that best describes the attached material. "
             "Keep wording clear for secondary-school students. Give a short teaching explanation for every answer. "
             "Do not invent facts that are absent from the uploaded material."
         )
@@ -162,14 +165,21 @@ class GeminiQuizService:
                 detail="Gemini returned an incomplete quiz. Please try again.",
             )
 
-        return GeneratedQuizResponse(
-            title=generated_data["title"],
-            subject=generated_data["subject"],
-            question_type=question_type,
-            difficulty=difficulty,
-            source_files=[name for name, _, _ in files],
-            questions=questions,
-        )
+        try:
+            return GeneratedQuizResponse(
+                title=generated_data["title"],
+                subject=generated_data["subject"],
+                topic=generated_data["topic"],
+                question_type=question_type,
+                difficulty=difficulty,
+                source_files=[name for name, _, _ in files],
+                questions=questions,
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Gemini returned incomplete quiz metadata. Please try again.",
+            ) from exc
 
 
 class QuizLibraryService:
@@ -219,6 +229,29 @@ class QuizLibraryService:
         return match
 
     @staticmethod
+    def _resolve_or_create_topic(supabase, subject_id: str, topic_name: str):
+        cleaned_name = " ".join(topic_name.split()).strip()
+        topic_rows = (
+            supabase.table("topics")
+            .select("id,topic_name")
+            .eq("subject_id", subject_id)
+            .execute()
+            .data
+            or []
+        )
+        normalized = cleaned_name.casefold()
+        existing = next((row for row in topic_rows if row["topic_name"].casefold() == normalized), None)
+        if existing:
+            return existing
+        response = supabase.table("topics").insert({
+            "subject_id": subject_id,
+            "topic_name": cleaned_name,
+        }).execute()
+        if not response.data:
+            raise RuntimeError("Quiz topic was not created")
+        return response.data[0]
+
+    @staticmethod
     def list_quizzes(user_id: str):
         supabase = get_supabase()
         quiz_response = (
@@ -260,7 +293,7 @@ class QuizLibraryService:
         supabase = get_supabase()
         quiz_response = (
             supabase.table("quizzes")
-            .select("id,title,subject_id")
+            .select("id,title,subject_id,topic_id")
             .eq("id", quiz_id)
             .eq("owner_id", user_id)
             .limit(1)
@@ -287,9 +320,21 @@ class QuizLibraryService:
                 detail="This saved quiz has no subject assigned.",
             )
 
+        topic = "General practice"
+        if quiz_row.get("topic_id"):
+            topic_response = (
+                supabase.table("topics")
+                .select("topic_name")
+                .eq("id", quiz_row["topic_id"])
+                .limit(1)
+                .execute()
+            )
+            if topic_response.data:
+                topic = topic_response.data[0]["topic_name"]
+
         question_rows = (
             supabase.table("questions")
-            .select("id,question_text,question_type,correct_answer,difficulty_level,created_at")
+            .select("id,question_text,question_type,correct_answer,explanation,difficulty_level,created_at")
             .eq("quiz_id", quiz_id)
             .order("created_at")
             .execute()
@@ -331,16 +376,18 @@ class QuizLibraryService:
         return {
             "title": quiz_row["title"],
             "subject": subject,
+            "topic": topic,
             "question_type": first_type,
             "difficulty": difficulty,
             "source_files": [],
             "questions": [
                 {
+                    "id": question["id"],
                     "question": question["question_text"],
                     "question_type": question_type_map[question["question_type"]],
                     "options": options_by_question[question["id"]],
                     "correct_answer": question["correct_answer"],
-                    "explanation": "",
+                    "explanation": question.get("explanation") or "",
                 }
                 for question in question_rows
             ],
@@ -364,11 +411,11 @@ class QuizLibraryService:
         return {"id": quiz_id, "message": "Quiz deleted"}
 
     @staticmethod
-    def record_attempt(user_id: str, quiz_id: str, score: float, total_questions: int, time_taken_seconds: int):
+    def record_attempt(user_id: str, quiz_id: str, score: float, total_questions: int, time_taken_seconds: int, answers):
         supabase = get_supabase()
         quiz_response = (
             supabase.table("quizzes")
-            .select("id,owner_id")
+            .select("id,owner_id,subject_id,topic_id")
             .eq("id", quiz_id)
             .limit(1)
             .execute()
@@ -389,12 +436,48 @@ class QuizLibraryService:
             if not assignment_response.data:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Quiz access denied")
 
+        question_rows = (
+            supabase.table("questions")
+            .select("id,correct_answer,created_at")
+            .eq("quiz_id", quiz_id)
+            .order("created_at")
+            .execute()
+            .data
+            or []
+        )
+        if not question_rows or total_questions != len(question_rows):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Quiz questions changed before this attempt could be saved.",
+            )
+
+        answer_by_index = {answer.question_index: answer for answer in answers}
+        correct_count = 0
+        answer_rows = []
+        for index, question in enumerate(question_rows):
+            submitted = answer_by_index.get(index)
+            selected_answer = submitted.selected_answer.strip() if submitted and submitted.selected_answer else None
+            expected = (question.get("correct_answer") or "").strip().casefold()
+            is_correct = bool(selected_answer) and selected_answer.casefold() == expected
+            if is_correct:
+                correct_count += 1
+            answer_rows.append({
+                "question_id": question["id"],
+                "selected_answer": selected_answer,
+                "is_correct": is_correct,
+                "time_spent_seconds": submitted.time_spent_seconds if submitted else 0,
+            })
+
+        calculated_score = round((correct_count / len(question_rows)) * 100, 2)
+
         attempt_response = (
             supabase.table("quiz_attempts")
             .insert({
                 "student_id": user_id,
                 "quiz_id": quiz_id,
-                "score": round(score, 2),
+                # Recompute correctness on the server instead of trusting the
+                # aggregate score sent by the browser.
+                "score": calculated_score,
                 "total_questions": total_questions,
                 "time_taken_seconds": time_taken_seconds,
             })
@@ -406,8 +489,35 @@ class QuizLibraryService:
                 detail="Quiz attempt could not be saved.",
             )
         attempt_id = attempt_response.data[0]["id"]
+        try:
+            for row in answer_rows:
+                row["attempt_id"] = attempt_id
+            answer_response = supabase.table("attempt_answers").insert(answer_rows).execute()
+            if len(answer_response.data or []) != len(answer_rows):
+                raise RuntimeError("Not every answer was stored")
+        except Exception as exc:
+            try:
+                supabase.table("quiz_attempts").delete().eq("id", attempt_id).eq("student_id", user_id).execute()
+            except Exception:
+                pass
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Per-question answers could not be saved. Please try again.",
+            ) from exc
+
         prediction = None
-        prediction_message = "Quiz attempt saved"
+        review_schedule = None
+        prediction_message = "Quiz attempt and per-question answers saved"
+        try:
+            review_schedule = QuizLibraryService._update_topic_learning_records(
+                supabase,
+                user_id,
+                quiz_row,
+                calculated_score,
+            )
+        except Exception:
+            prediction_message = "Answers saved; topic analytics are temporarily unavailable"
+
         try:
             # Keep analytics generation server-side so it always runs for a
             # completed attempt, regardless of which client submits it.
@@ -418,14 +528,107 @@ class QuizLibraryService:
                 quiz_id,
                 attempt_id,
             )
-            if prediction:
-                prediction_message = "Quiz attempt saved and exam forecast updated"
+            if prediction and review_schedule:
+                prediction_message = "Answers saved; topic mastery, review date, and exam forecast updated"
         except Exception:
             # The attempt is the student's source record and must never be
             # discarded if a secondary forecast calculation is unavailable.
-            prediction_message = "Quiz attempt saved; forecast update is temporarily unavailable"
+            prediction_message = "Answers saved; some analytics updates are temporarily unavailable"
 
-        return {"id": attempt_id, "message": prediction_message, "prediction": prediction}
+        return {
+            "id": attempt_id,
+            "message": prediction_message,
+            "prediction": prediction,
+            "review_schedule": review_schedule,
+        }
+
+    @staticmethod
+    def _update_topic_learning_records(supabase, user_id: str, quiz_row: dict, score: float):
+        topic_id = quiz_row.get("topic_id")
+        if not topic_id:
+            return None
+
+        performance_rows = (
+            supabase.table("performance_records")
+            .select("id,score_percentage,sessions_count")
+            .eq("student_id", user_id)
+            .eq("topic_id", topic_id)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        if performance_rows:
+            record = performance_rows[0]
+            count = int(record.get("sessions_count") or 0)
+            average = ((float(record.get("score_percentage") or 0) * count) + score) / (count + 1)
+            supabase.table("performance_records").update({
+                "score_percentage": round(average, 2),
+                "sessions_count": count + 1,
+                "last_updated": date.today().isoformat(),
+            }).eq("id", record["id"]).eq("student_id", user_id).execute()
+        else:
+            supabase.table("performance_records").insert({
+                "student_id": user_id,
+                "topic_id": topic_id,
+                "score_percentage": score,
+                "sessions_count": 1,
+            }).execute()
+
+        schedule_rows = (
+            supabase.table("spaced_repetition_schedule")
+            .select("id,ease_factor,interval_days,repetitions")
+            .eq("student_id", user_id)
+            .eq("topic_id", topic_id)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        current = schedule_rows[0] if schedule_rows else None
+        old_ease = float(current.get("ease_factor") or 2.5) if current else 2.5
+        old_interval = int(current.get("interval_days") or 1) if current else 1
+        old_repetitions = int(current.get("repetitions") or 0) if current else 0
+        today = date.today()
+        values = QuizLibraryService._calculate_review_schedule(
+            score,
+            old_ease,
+            old_interval,
+            old_repetitions,
+            today,
+        )
+        values.update({
+            "last_reviewed_date": today.isoformat(),
+            "last_score": score,
+        })
+        if current:
+            response = supabase.table("spaced_repetition_schedule").update(values).eq("id", current["id"]).eq("student_id", user_id).execute()
+        else:
+            response = supabase.table("spaced_repetition_schedule").insert({
+                **values,
+                "student_id": user_id,
+                "topic_id": topic_id,
+            }).execute()
+        if not response.data:
+            raise RuntimeError("Review schedule was not updated")
+        return response.data[0]
+
+    @staticmethod
+    def _calculate_review_schedule(score: float, old_ease: float, old_interval: int, old_repetitions: int, today: date):
+        quality = 5 if score >= 90 else 4 if score >= 75 else 3 if score >= 60 else 2 if score >= 40 else 1
+        if quality < 3:
+            repetitions = 0
+            interval_days = 1
+        else:
+            repetitions = old_repetitions + 1
+            interval_days = 1 if repetitions == 1 else 6 if repetitions == 2 else max(1, round(old_interval * old_ease))
+        ease_factor = max(1.3, old_ease + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)))
+        return {
+            "ease_factor": round(ease_factor, 2),
+            "interval_days": interval_days,
+            "repetitions": repetitions,
+            "next_review_date": (today + timedelta(days=interval_days)).isoformat(),
+        }
 
     @staticmethod
     def save_quiz(user_id: str, quiz: SaveQuizRequest):
@@ -436,12 +639,19 @@ class QuizLibraryService:
         try:
             matched_subject = QuizLibraryService._resolve_subject(supabase, quiz.subject)
             subject_id = matched_subject["id"] if matched_subject else None
+            if not subject_id:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Generated quiz subject could not be matched to an SPM subject.",
+                )
+            topic = QuizLibraryService._resolve_or_create_topic(supabase, subject_id, quiz.topic)
 
             quiz_response = (
                 supabase.table("quizzes")
                 .insert({
                     "owner_id": user_id,
                     "subject_id": subject_id,
+                    "topic_id": topic["id"],
                     "title": quiz.title.strip(),
                     "source_type": "ai_generated",
                 })
@@ -465,6 +675,7 @@ class QuizLibraryService:
                         "question_text": question.question,
                         "question_type": question_type_map[question.question_type],
                         "correct_answer": question.correct_answer,
+                        "explanation": question.explanation,
                         "difficulty_level": quiz.difficulty,
                     })
                     .execute()

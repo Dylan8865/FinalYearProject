@@ -20,6 +20,8 @@ import {
 } from '@/types/quiz';
 import {
   EducatorDashboard,
+  AnalyticsFilters,
+  ReviewSchedule,
   StudySession,
   StudySessionCreate,
   SubjectAnalytics,
@@ -145,9 +147,30 @@ class AuthService {
     return response.data;
   }
 
-  async getSubjectAnalytics(): Promise<SubjectAnalytics[]> {
-    const response = await this.api.get<SubjectAnalytics[]>('/analytics/subjects');
+  async getSubjectAnalytics(filters: AnalyticsFilters = {}): Promise<SubjectAnalytics[]> {
+    const response = await this.api.get<SubjectAnalytics[]>('/analytics/subjects', { params: filters });
     return response.data;
+  }
+
+  async getReviewSchedule(dueOnly = false): Promise<ReviewSchedule[]> {
+    const response = await this.api.get<ReviewSchedule[]>('/analytics/review-schedule', { params: { due_only: dueOnly } });
+    return response.data;
+  }
+
+  async exportProgressReport(language: 'en' | 'ms', filters: AnalyticsFilters = {}): Promise<void> {
+    const response = await this.api.get<Blob>('/analytics/export/pdf', {
+      params: { language, ...filters },
+      responseType: 'blob',
+      timeout: 60000,
+    });
+    const url = URL.createObjectURL(response.data);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = language === 'ms' ? 'laporan-kemajuan-qubo.pdf' : 'qubo-progress-report.pdf';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 
   async createStudySession(data: StudySessionCreate): Promise<StudySession> {

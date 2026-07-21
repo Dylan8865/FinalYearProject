@@ -94,10 +94,21 @@ export default function QuizCreatorPage() {
     }
 
     setGenerationError('');
+    setSaveError('');
     setIsGenerating(true);
     try {
       const quiz = await authService.generateQuiz(uploadedFiles, questionType, difficulty, questionCount);
       setGeneratedQuiz(quiz);
+      setIsSaving(true);
+      try {
+        const savedQuiz = await authService.saveQuizToLibrary(quiz);
+        setSavedQuizId(savedQuiz.id);
+      } catch (saveRequestError: any) {
+        const detail = saveRequestError.response?.data?.detail;
+        setSaveError(typeof detail === 'string' ? detail : 'Quiz generated, but automatic saving failed. Select retry below.');
+      } finally {
+        setIsSaving(false);
+      }
     } catch (requestError: any) {
       const detail = requestError.response?.data?.detail;
       if (typeof detail === 'string') {
@@ -339,7 +350,7 @@ export default function QuizCreatorPage() {
                   <div>
                     <h2 className="font-extrabold text-slate-950">AI-generated preview</h2>
                     <p className="text-xs text-slate-500">
-                      {generatedQuiz ? `${generatedQuiz.subject} · ${generatedQuiz.difficulty}` : 'Generated questions will appear here'}
+                      {generatedQuiz ? `${generatedQuiz.subject} · ${generatedQuiz.topic} · ${generatedQuiz.difficulty}` : 'Generated questions will appear here'}
                     </p>
                   </div>
                 </div>
@@ -405,7 +416,7 @@ export default function QuizCreatorPage() {
                   }`}
                 >
                   {savedQuizId ? <FiCheck className="h-4 w-4" /> : <FiSave className="h-4 w-4" />}
-                  {isSaving ? 'Saving…' : savedQuizId ? 'Saved — view library' : 'Save to library'}
+                  {isSaving ? 'Saving automatically…' : savedQuizId ? 'Saved automatically — view library' : 'Retry save to library'}
                 </button>
               </section>
 
