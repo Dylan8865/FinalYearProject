@@ -695,6 +695,23 @@ class QuizLibraryService:
                     ]
                     supabase.table("question_options").insert(option_rows).execute()
 
+            # Educator-created quizzes are reusable teaching assets. Put them
+            # in the default draft collection so they are immediately
+            # available alongside uploaded videos and 3D models.
+            profile_rows = (
+                supabase.table("profiles").select("role").eq("id", user_id).limit(1).execute().data
+                or []
+            )
+            if profile_rows and profile_rows[0].get("role") == "educator":
+                from app.services.collection import CollectionService
+                try:
+                    CollectionService.add_uploaded_item(user_id, "quiz", quiz_id)
+                except Exception:
+                    # The quiz itself is the primary user action. A temporary
+                    # collection problem must not discard an otherwise valid
+                    # educator quiz.
+                    pass
+
             return {"id": quiz_id, "message": "Quiz saved to library"}
         except HTTPException:
             raise

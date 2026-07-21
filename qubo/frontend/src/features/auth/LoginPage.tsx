@@ -32,7 +32,7 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await login(email, password);
+      await login(email, password, role);
       navigate('/dashboard');
     } catch (err) {
       // Error is already set in the store

@@ -6,10 +6,13 @@ export interface ThreeDModelSummary {
   learning_style_tag?: string | null;
   preview_model_url: string;
   popularity_count?: number;
+  visibility: 'public' | 'private';
+  created_by?: string | null;
 }
 
 export interface ThreeDModelDetail extends ThreeDModelSummary {
   signed_model_url: string;
+  can_manage_annotations: boolean;
 }
 
 export interface LearningRecommendation {

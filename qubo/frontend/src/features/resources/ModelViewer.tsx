@@ -88,7 +88,7 @@ function LoadedModel({
               onMeaningfulInteraction?.();
               onSelectAnnotation?.(annotation);
             }}
-            className={`flex h-48 w-48 items-center justify-center rounded-full border-[13px] text-6xl font-extrabold shadow-xl transition ${selectedAnnotationId === annotation.annotation_id ? 'border-white bg-blue-700 text-white ring-4 ring-blue-300/70' : 'border-white bg-primary text-white hover:scale-110 hover:bg-blue-700'}`}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-extrabold shadow-lg transition ${selectedAnnotationId === annotation.annotation_id ? 'border-white bg-blue-700 text-white ring-4 ring-blue-300/70' : 'border-white bg-primary text-white hover:scale-110 hover:bg-blue-700'}`}
             aria-label={`Read annotation ${index + 1}: ${annotation.title}`}
             title={annotation.title}
           >

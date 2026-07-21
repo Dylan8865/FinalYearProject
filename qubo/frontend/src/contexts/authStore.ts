@@ -16,7 +16,7 @@ interface AuthState {
   setAuthInitialized: (isAuthInitialized: boolean) => void;
   setError: (error: string | null) => void;
   
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, role: 'student' | 'educator') => Promise<void>;
   register: (email: string, password: string, username: string, full_name: string, role: 'student' | 'educator') => Promise<void>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;
@@ -52,10 +52,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAuthInitialized: (isAuthInitialized) => set({ isAuthInitialized }),
   setError: (error) => set({ error }),
 
-  login: async (email, password) => {
+  login: async (email, password, role) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await authService.login({ email, password });
+      const response = await authService.login({ email, password, role });
       set({ 
         user: response.user, 
         tokens: response.tokens,

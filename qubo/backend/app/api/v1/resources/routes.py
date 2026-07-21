@@ -1,6 +1,7 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
+from fastapi.concurrency import run_in_threadpool
 
 from app.db.deps import get_current_educator, get_current_user
 from app.schemas.resource import (
@@ -26,16 +27,44 @@ from app.services.share import ContentShareService
 
 router = APIRouter(prefix="/resources", tags=["resources"])
 
+MAX_GLB_FILE_SIZE = 50 * 1024 * 1024
+ALLOWED_GLB_TYPES = {'model/gltf-binary', 'application/octet-stream'}
+
+
+@router.post('/models', response_model=ThreeDModelSummaryResponse, status_code=status.HTTP_201_CREATED)
+async def upload_3d_model(
+    title: str = Form(...),
+    subject_name: str = Form(...),
+    topic_name: str | None = Form(default=None),
+    visibility: str = Form(default='public'),
+    model: UploadFile = File(...),
+    current_user=Depends(get_current_educator),
+):
+    if model.content_type not in ALLOWED_GLB_TYPES and not (model.filename or '').lower().endswith('.glb'):
+        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='3D models must be uploaded as a .glb file.')
+    content = await model.read(MAX_GLB_FILE_SIZE + 1)
+    if not content:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='The selected model is empty.')
+    if len(content) > MAX_GLB_FILE_SIZE:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail='3D models must be 50 MB or smaller.')
+    if visibility not in {'public', 'private'}:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail='Visibility must be public or private.')
+    return await run_in_threadpool(ResourceService.create_3d_model, current_user['id'], title, subject_name, topic_name, visibility, content, model.content_type or 'model/gltf-binary')
+
 
 @router.get("/models", response_model=List[ThreeDModelSummaryResponse])
-async def list_3d_models(_current_user=Depends(get_current_user)):
+async def list_3d_models(scope: str = 'public', current_user=Depends(get_current_user)):
     """List 3D learning resources without exposing their private Storage paths."""
-    return ResourceService.list_3d_models()
+    if scope not in {'public', 'private'}:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail='Scope must be public or private.')
+    if scope == 'private' and current_user['role'] != 'educator':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Only educators can view private models.')
+    return ResourceService.list_3d_models(current_user['id'], scope)
 
 
 @router.get("/models/popular", response_model=List[ThreeDModelSummaryResponse])
-async def list_popular_3d_models(_current_user=Depends(get_current_user)):
-    return ResourceService.list_popular_3d_models()
+async def list_popular_3d_models(current_user=Depends(get_current_user)):
+    return ResourceService.list_popular_3d_models(current_user['id'])
 
 
 @router.get("/recommendation", response_model=Optional[LearningRecommendationResponse])
@@ -102,7 +131,7 @@ async def remove_favourite(target_type: str, target_id: str, current_user=Depend
 @router.get("/models/{resource_id}", response_model=ThreeDModelDetailResponse)
 async def get_3d_model(resource_id: str, current_user=Depends(get_current_user)):
     """Return a short-lived signed URL for one private GLB resource."""
-    model = ResourceService.get_3d_model(resource_id)
+    model = ResourceService.get_3d_model(resource_id, current_user['id'])
     ActivityService.record_resource_view(current_user["id"], resource_id)
     return model
 
