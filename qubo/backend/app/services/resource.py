@@ -71,6 +71,30 @@ class ResourceService:
             raise HTTPException(status_code=502, detail='3D model upload failed. Check the 3d-models Storage bucket and database migration.') from exc
 
     @classmethod
+    def delete_3d_model(cls, resource_id: str, educator_id: str) -> None:
+        supabase = get_supabase()
+        try:
+            owned = supabase.table('resources').select('resource_id,url').eq('resource_id', resource_id).eq('created_by', educator_id).in_('resource_type', cls.MODEL_TYPES).limit(1).execute().data or []
+            if not owned:
+                raise HTTPException(status_code=404, detail='3D model not found or not owned by this educator.')
+            storage_path = owned[0]['url']
+            for table in ('resource_annotations', 'content_shares', 'educator_recommendations', 'user_favourites', 'user_resources', 'learning_events'):
+                supabase.table(table).delete().eq('resource_id', resource_id).execute()
+            deleted = supabase.table('resources').delete().eq('resource_id', resource_id).eq('created_by', educator_id).execute().data or []
+            if not deleted:
+                raise HTTPException(status_code=404, detail='3D model not found or not owned by this educator.')
+            try:
+                supabase.storage.from_(cls.STORAGE_BUCKET).remove([storage_path])
+            except Exception:
+                # The model record is already deleted; retain no broken UI if
+                # a transient storage cleanup error occurs.
+                pass
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail='3D model could not be deleted.') from exc
+
+    @classmethod
     def _serialize_model(cls, resource: dict, preview_model_url: str | None = None) -> dict:
         topic = resource.get("topics") or {}
         subject = topic.get("subjects") or {}

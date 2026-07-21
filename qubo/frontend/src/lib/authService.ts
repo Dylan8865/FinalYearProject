@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { 
   LoginRequest, 
   RegisterRequest, 
@@ -7,7 +7,8 @@ import {
   LearningStyleAssessment,
   Subject,
   PasswordChangeRequest,
-  User 
+  User,
+  AuthTokens,
 } from '@/types/auth';
 import {
   GeneratedQuiz,
@@ -42,6 +43,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 class AuthService {
   private api: AxiosInstance;
+  private refreshRequest: Promise<AuthTokens> | null = null;
 
   constructor() {
     this.api = axios.create({
@@ -61,13 +63,27 @@ class AuthService {
       return config;
     });
 
-    // Handle 401 responses
+    // Retry one failed request after renewing an expired access token.
     this.api.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
         const requestUrl = error.config?.url || '';
-        const isAuthAttempt = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
-        if (error.response?.status === 401 && !isAuthAttempt) {
+        const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
+        const isAuthRequest = requestUrl.includes('/auth/login')
+          || requestUrl.includes('/auth/register')
+          || requestUrl.includes('/auth/refresh');
+
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isAuthRequest) {
+          originalRequest._retry = true;
+          try {
+            const tokens = await this.refreshAccessToken();
+            originalRequest.headers.Authorization = `Bearer ${tokens.access_token}`;
+            return this.api.request(originalRequest);
+          } catch {
+            this.clearTokens();
+            window.location.href = '/login';
+          }
+        } else if (error.response?.status === 401 && !isAuthRequest) {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           window.location.href = '/login';
@@ -263,13 +279,39 @@ class AuthService {
     return response.data;
   }
 
-  async getTutorialVideos(search?: string, subject?: string): Promise<TutorialVideo[]> {
+  async getTutorialVideos(search?: string, subject?: string, scope: 'public' | 'private' = 'public'): Promise<TutorialVideo[]> {
     const params = new URLSearchParams();
     if (search?.trim()) params.set('search', search.trim());
     if (subject) params.set('subject', subject);
+    if (scope === 'private') params.set('scope', scope);
     const suffix = params.toString() ? `?${params.toString()}` : '';
     const response = await this.api.get<TutorialVideo[]>(`/videos${suffix}`);
     return response.data;
+  }
+
+  private async refreshAccessToken(): Promise<AuthTokens> {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    if (!this.refreshRequest) {
+      this.refreshRequest = this.api
+        .post<AuthTokens>('/auth/refresh', { refresh_token: refreshToken })
+        .then((response) => {
+          this.storeTokens(response.data);
+          return response.data;
+        })
+        .finally(() => {
+          this.refreshRequest = null;
+        });
+    }
+
+    return this.refreshRequest;
+  }
+
+  async deleteTutorialVideo(videoId: string): Promise<void> {
+    await this.api.delete(`/videos/${videoId}`);
   }
 
   async recordTutorialVideoView(videoId: string): Promise<void> {
@@ -310,6 +352,10 @@ class AuthService {
   async getThreeDModels(scope: 'public' | 'private' = 'public'): Promise<ThreeDModelSummary[]> {
     const response = await this.api.get<ThreeDModelSummary[]>('/resources/models', { params: { scope } });
     return response.data;
+  }
+
+  async deleteThreeDModel(resourceId: string): Promise<void> {
+    await this.api.delete(`/resources/models/${resourceId}`);
   }
 
   async getPopularThreeDModels(): Promise<ThreeDModelSummary[]> {

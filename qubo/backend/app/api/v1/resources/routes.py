@@ -67,6 +67,12 @@ async def list_popular_3d_models(current_user=Depends(get_current_user)):
     return ResourceService.list_popular_3d_models(current_user['id'])
 
 
+@router.delete('/models/{resource_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_3d_model(resource_id: str, current_user=Depends(get_current_educator)):
+    ResourceService.delete_3d_model(resource_id, current_user['id'])
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.get("/recommendation", response_model=Optional[LearningRecommendationResponse])
 async def get_recommendation(current_user=Depends(get_current_user)):
     return ResourceService.recommend_3d_model(current_user["id"])

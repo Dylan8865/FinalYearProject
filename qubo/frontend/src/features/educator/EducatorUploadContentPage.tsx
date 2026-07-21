@@ -1,9 +1,10 @@
-import { FormEvent, useMemo, useRef, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { FiBox, FiCheckCircle, FiChevronDown, FiLink, FiUploadCloud, FiVideo } from 'react-icons/fi';
 import { Navigate, useNavigate } from 'react-router-dom';
 import AppSidebar from '@/components/layout/AppSidebar';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
+import { Subject } from '@/types/auth';
 
 type AssetType = 'Video' | '3D Model';
 
@@ -17,6 +18,7 @@ export default function EducatorUploadContentPage() {
   const user = useAuthStore((state) => state.user);
   const [assetType, setAssetType] = useState<AssetType>('Video');
   const [subject, setSubject] = useState('Physics');
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [topic, setTopic] = useState('');
@@ -28,6 +30,16 @@ export default function EducatorUploadContentPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedAsset = useMemo(() => assetOptions.find((item) => item.value === assetType)!, [assetType]);
+
+  useEffect(() => {
+    let active = true;
+    void authService.getSubjects().then((databaseSubjects) => {
+      if (!active || !databaseSubjects.length) return;
+      setSubjects(databaseSubjects);
+      setSubject((current) => databaseSubjects.some((item) => item.subject_name === current) ? current : databaseSubjects[0].subject_name);
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   if (user?.role !== 'educator') return <Navigate to="/dashboard" replace />;
 
@@ -99,7 +111,7 @@ export default function EducatorUploadContentPage() {
                 {assetType === '3D Model' && <><label className="md:col-span-2"><span className="mb-2 block text-sm font-bold text-slate-700">GLB model file</span><input ref={fileInputRef} type="file" accept=".glb,model/gltf-binary,application/octet-stream" required onChange={(event) => setModelFile(event.target.files?.[0] || null)} className="block w-full rounded-xl border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-bold file:text-white" />{modelFile && <p className="mt-2 text-xs font-semibold text-emerald-700">Selected: {modelFile.name}</p>}</label><label className="md:col-span-2"><span className="mb-2 block text-sm font-bold text-slate-700">Topic (optional)</span><input value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="e.g. Cell structure" className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none transition focus:border-primary focus:bg-white" /></label></>}
                 <label>
                   <span className="mb-2 block text-sm font-bold text-slate-700">Subject</span>
-                  <span className="relative block"><select value={subject} onChange={(event) => setSubject(event.target.value)} className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none transition focus:border-primary focus:bg-white"><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Mathematics</option></select><FiChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></span>
+                  <span className="relative block"><select value={subject} onChange={(event) => setSubject(event.target.value)} className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none transition focus:border-primary focus:bg-white">{subjects.length ? subjects.map((item) => <option key={item.id} value={item.subject_name}>{item.subject_name}</option>) : <option value={subject}>{subject}</option>}</select><FiChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></span>
                 </label>
                 {assetType === '3D Model' && <label>
                   <span className="mb-2 block text-sm font-bold text-slate-700">Visibility</span>

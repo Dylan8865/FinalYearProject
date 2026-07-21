@@ -73,6 +73,11 @@ class UserLoginRequest(BaseModel):
         return str(v).strip().lower()
 
 
+class RefreshTokenRequest(BaseModel):
+    """Request a new short-lived access token using a valid refresh token."""
+    refresh_token: str = Field(..., min_length=1)
+
+
 class ProfileUpdateRequest(BaseModel):
     """Profile update request"""
     username: Optional[str] = Field(None, max_length=50)
