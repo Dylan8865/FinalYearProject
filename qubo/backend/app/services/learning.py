@@ -1,6 +1,6 @@
 from collections import Counter
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Dict, Optional, Tuple
 
 from fastapi import HTTPException, status
 
@@ -27,7 +27,9 @@ class LearningService:
     }
 
     @classmethod
-    def _target_context(cls, target_type: str, target_id: str | None) -> tuple[str | None, str | None, str | None]:
+    def _target_context(
+        cls, target_type: str, target_id: Optional[str]
+    ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         if target_type == "quiz":
             return None, None, None
         if not target_id:
@@ -52,8 +54,8 @@ class LearningService:
             raise HTTPException(status_code=502, detail="Learning target could not be checked.") from exc
 
     @classmethod
-    def _safe_metadata(cls, metadata: dict[str, Any], inferred_subject: str | None) -> dict[str, Any]:
-        safe: dict[str, Any] = {}
+    def _safe_metadata(cls, metadata: Dict[str, Any], inferred_subject: Optional[str]) -> Dict[str, Any]:
+        safe: Dict[str, Any] = {}
         for key, value in metadata.items():
             if key not in cls.METADATA_KEYS:
                 continue
@@ -66,7 +68,7 @@ class LearningService:
         return safe
 
     @classmethod
-    def record(cls, user_id: str, payload: dict[str, Any]) -> None:
+    def record(cls, user_id: str, payload: Dict[str, Any]) -> None:
         event_type = payload["event_type"]
         target_type = payload["target_type"]
         if target_type not in cls.EVENT_TARGETS[event_type]:
@@ -94,7 +96,9 @@ class LearningService:
             ) from exc
 
     @classmethod
-    def mark_completed(cls, user_id: str, target_type: str, target_id: str, session_id: str | None = None) -> None:
+    def mark_completed(
+        cls, user_id: str, target_type: str, target_id: str, session_id: Optional[str] = None
+    ) -> None:
         target_column = "resource_id" if target_type == "model" else "video_id"
         if target_type == "model":
             ActivityService.record_resource_view(user_id, target_id)

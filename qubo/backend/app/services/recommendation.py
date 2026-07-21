@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import requests
 
@@ -9,7 +10,7 @@ class RecommendationExplanationService:
     """Optional LLM copywriter. It never chooses an item or sees student PII."""
 
     @staticmethod
-    def explain(title: str, subject: str | None, rule_reason: str) -> str:
+    def explain(title: str, subject: Optional[str], rule_reason: str) -> str:
         if not settings.GEMINI_API_KEY or not settings.ENABLE_LLM_RECOMMENDATION_EXPLANATIONS:
             return rule_reason
         prompt = (

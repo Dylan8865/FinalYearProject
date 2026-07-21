@@ -147,7 +147,7 @@ export default function LearningAnalyticsPage() {
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
       <AppSidebar />
-      <main className="min-w-0 px-5 pb-10 pt-20 md:px-8 md:pt-24">
+      <main className="min-w-0 px-5 py-8 md:px-8 lg:py-10">
         <div className="mx-auto max-w-7xl">
           <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>

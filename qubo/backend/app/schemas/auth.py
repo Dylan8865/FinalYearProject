@@ -5,7 +5,7 @@ from enum import Enum
 import re
 
 
-VALID_SPM_GRADES = {"A+", "A", "A-", "B+", "B", "C+", "C", "D", "E", "G"}
+VALID_SPM_GRADES = {"A+", "A", "A-", "B+", "B", "C+", "C", "D", "E"}
 
 
 class UserRole(str, Enum):
@@ -105,7 +105,7 @@ class ProfileUpdateRequest(BaseModel):
 
         normalized_grade = v.strip().upper()
         if normalized_grade not in VALID_SPM_GRADES:
-            raise ValueError("Target grade must be one of: A+, A, A-, B+, B, C+, C, D, E, G")
+            raise ValueError("Target grade must be one of: A+, A, A-, B+, B, C+, C, D, E")
         return normalized_grade
 
 

@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import HTTPException, status
 
 from app.db.supabase import get_supabase
@@ -53,7 +55,7 @@ class GameService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found.")
 
     @classmethod
-    def save_history(cls, match_id: str, user_id: str, events: list[dict]) -> int:
+    def save_history(cls, match_id: str, user_id: str, events: List[dict]) -> int:
         cls._ensure_owned_match(match_id, user_id)
         rows = [{"match_id": match_id, **event} for event in events]
         try:

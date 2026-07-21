@@ -21,6 +21,7 @@ import AppSidebar from '@/components/layout/AppSidebar';
 import { useAuthStore } from '@/contexts/authStore';
 import { useThemeStore } from '@/contexts/themeStore';
 import { authService } from '@/lib/authService';
+import { normalizeSpmTargetGrade } from '@/lib/spmGrades';
 import { LearningStyle, Subject } from '@/types/auth';
 
 const styleCards = [
@@ -120,8 +121,9 @@ export default function ProfilePage() {
 
   const selectedStyle = user.learning_style || 'visual';
   const displayName = user.full_name || user.username;
+  const targetGrade = normalizeSpmTargetGrade(user.target_grade);
   const coreTargets = [
-    user.target_grade ? `SPM: ${user.target_grade}` : 'SPM: Set target',
+    targetGrade ? `SPM: ${targetGrade}` : 'SPM: Set target',
     user.form_level || 'Form level not set',
     user.school || 'School not set',
   ];
@@ -136,7 +138,7 @@ export default function ProfilePage() {
       <AppSidebar />
 
       <div className="min-w-0">
-        <main className="mx-auto w-full max-w-[1120px] px-5 pb-8 pt-20 md:px-8 md:pb-10 md:pt-24">
+        <main className="mx-auto w-full max-w-[1120px] px-5 py-8 md:px-8 lg:py-10">
           <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h1 className="text-3xl font-black tracking-tight text-slate-950 md:text-[38px]">Student Identity</h1>
@@ -192,7 +194,7 @@ export default function ProfilePage() {
                     <div className="mt-4 grid max-w-sm grid-cols-2 gap-3">
                       <div className="rounded-xl bg-emerald-50 px-4 py-3">
                         <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">SPM Target</p>
-                        <p className="mt-1 text-xl font-black text-emerald-700">{user.target_grade || '—'}</p>
+                        <p className="mt-1 text-xl font-black text-emerald-700">{targetGrade || '—'}</p>
                       </div>
                       <div className="rounded-xl bg-blue-50 px-4 py-3">
                         <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-500">Days to SPM</p>

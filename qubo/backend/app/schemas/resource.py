@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -76,7 +76,7 @@ class EducatorRecommendationResponse(BaseModel):
 class ModelAnnotationCreate(BaseModel):
     title: str = Field(min_length=1, max_length=100)
     description: str = Field(min_length=1, max_length=1200)
-    position: list[float] = Field(min_length=3, max_length=3)
+    position: List[float] = Field(min_length=3, max_length=3)
 
 
 class ModelAnnotationUpdate(ModelAnnotationCreate):
@@ -88,7 +88,7 @@ class ModelAnnotationResponse(BaseModel):
     resource_id: UUID
     title: str
     description: str
-    position: list[float]
+    position: List[float]
     created_by: UUID
     created_at: str
     updated_at: str
