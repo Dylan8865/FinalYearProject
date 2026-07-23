@@ -7,6 +7,11 @@ export interface GameMatch {
   game_level: number;
   waves_cleared: number;
   is_victory: boolean;
+  score: number | null;
+  enemies_defeated: number | null;
+  compounds_discovered: number | null;
+  highest_combo: number | null;
+  leaderboard_points: number | null;
   completed_at: string | null;
 }
 
@@ -16,8 +21,16 @@ export interface GameMatchHistory extends GameMatch {
 
 export interface LevelOneLeaderboardEntry {
   rank: number;
+  match_id: string;
   username: string;
   profile_picture_url: string | null;
+  score: number;
+  leaderboard_points: number;
+  waves_cleared: number;
+  enemies_defeated: number;
+  compounds_discovered: number;
+  highest_combo: number;
+  grade: string;
   turns_played: number;
   completed_at: string | null;
   played_at: string;
@@ -44,6 +57,10 @@ export interface UnityMatchCompletedMessage {
   turns_played: number;
   waves_cleared?: number;
   is_victory?: boolean;
+  score?: number;
+  enemies_defeated?: number;
+  compounds_discovered?: number;
+  highest_combo?: number;
 }
 
 export type UnityGameMessage =

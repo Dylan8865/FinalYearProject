@@ -44,9 +44,16 @@ public class DamageSystem : MonoBehaviour
                 }
                 else
                 {
+                    RunProgressionSystem progression = RunProgressionSystem.Instance;
                     GameSessionReporter.Instance?.ReportMatchCompleted(
                         "enemy",
-                        RunProgressionSystem.Instance != null ? RunProgressionSystem.Instance.TurnsUsed : 0);
+                        progression != null ? progression.TurnsUsed : 0,
+                        progression != null ? progression.Score : 0,
+                        progression != null ? progression.WavesCleared : 0,
+                        false,
+                        progression != null ? progression.EnemiesDefeated : 0,
+                        progression != null ? progression.CompoundsDiscovered : 0,
+                        progression != null ? progression.HighestCombo : 0);
                     if (UIManager.Instance != null)
                     {
                         UIManager.Instance.ShowUI<GameOverUI>("GameOverUI");

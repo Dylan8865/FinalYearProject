@@ -44,7 +44,7 @@ async def complete_match(
     payload: MatchCompleteRequest,
     current_user=Depends(get_current_user),
 ):
-    """Save the final winner and number of turns for an owned game session."""
+    """Save the final result and score for an owned game session."""
     return GameService.complete_match_with_progress(
         str(match_id),
         current_user["id"],
@@ -52,6 +52,10 @@ async def complete_match(
         payload.turns_played,
         payload.waves_cleared,
         payload.is_victory,
+        payload.score,
+        payload.enemies_defeated,
+        payload.compounds_discovered,
+        payload.highest_combo,
     )
 
 
@@ -66,5 +70,5 @@ async def get_match_history(
 
 @router.get("/leaderboard/level-1", response_model=list[LeaderboardEntryResponse])
 async def get_level_one_leaderboard(limit: int = Query(default=5, ge=1, le=50)):
-    """Best winning turn count per student, ranked from lowest to highest."""
+    """Winning runs, ranked by actual score from highest to lowest."""
     return GameService.get_level_one_leaderboard(limit)

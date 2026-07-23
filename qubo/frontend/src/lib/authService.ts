@@ -723,6 +723,10 @@ class AuthService {
     turnsPlayed: number,
     wavesCleared = 0,
     isVictory = false,
+    score?: number,
+    enemiesDefeated?: number,
+    compoundsDiscovered?: number,
+    highestCombo?: number,
   ): Promise<GameMatch> {
     const response = await this.api.post<GameMatch>(
       `/game/matches/${matchId}/complete`,
@@ -731,6 +735,10 @@ class AuthService {
         turns_played: turnsPlayed,
         waves_cleared: wavesCleared,
         is_victory: isVictory,
+        score,
+        enemies_defeated: enemiesDefeated,
+        compounds_discovered: compoundsDiscovered,
+        highest_combo: highestCombo,
       },
     );
     return response.data;

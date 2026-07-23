@@ -11,7 +11,8 @@ class GameService:
 
     MATCH_COLUMNS = (
         "match_id,user_id,winner,turns_played,match_date,game_level,"
-        "waves_cleared,is_victory,completed_at"
+        "waves_cleared,is_victory,score,enemies_defeated,compounds_discovered,"
+        "highest_combo,leaderboard_points,completed_at"
     )
 
     @classmethod
@@ -86,21 +87,33 @@ class GameService:
         turns_played: int,
         waves_cleared: int,
         is_victory: bool,
+        score: int | None = None,
+        enemies_defeated: int | None = None,
+        compounds_discovered: int | None = None,
+        highest_combo: int | None = None,
     ) -> dict:
         cls._ensure_owned_match(match_id, user_id)
         try:
+            update_values = {
+                "winner": winner,
+                "turns_played": turns_played,
+                "waves_cleared": waves_cleared,
+                "is_victory": is_victory,
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+            }
+            if score is not None:
+                update_values["score"] = score
+            if enemies_defeated is not None:
+                update_values["enemies_defeated"] = enemies_defeated
+            if compounds_discovered is not None:
+                update_values["compounds_discovered"] = compounds_discovered
+            if highest_combo is not None:
+                update_values["highest_combo"] = highest_combo
+
             response = (
                 get_supabase()
                 .table("matches")
-                .update(
-                    {
-                        "winner": winner,
-                        "turns_played": turns_played,
-                        "waves_cleared": waves_cleared,
-                        "is_victory": is_victory,
-                        "completed_at": datetime.now(timezone.utc).isoformat(),
-                    }
-                )
+                .update(update_values)
                 .eq("match_id", match_id)
                 .eq("user_id", user_id)
                 .execute()
@@ -127,7 +140,7 @@ class GameService:
                 .select(cls.MATCH_COLUMNS)
                 .eq("user_id", user_id)
                 .not_.is_("winner", "null")
-                .order("match_date", desc=True)
+                .order("completed_at", desc=True)
                 .limit(limit)
                 .execute()
             )
@@ -151,12 +164,17 @@ class GameService:
             response = (
                 get_supabase()
                 .table("matches")
-                .select("user_id,turns_played,match_date,completed_at,profiles!inner(username,profile_picture_url,role)")
+                .select("match_id,user_id,score,leaderboard_points,waves_cleared,enemies_defeated,compounds_discovered,highest_combo,turns_played,match_date,completed_at,profiles!inner(username,profile_picture_url,role)")
                 .ilike("winner", "player")
                 .eq("profiles.role", "student")
+                .not_.is_("score", "null")
+                .order("leaderboard_points", desc=True)
+                .order("score", desc=True)
+                .order("waves_cleared", desc=True)
+                .order("compounds_discovered", desc=True)
                 .order("turns_played")
                 .order("match_date")
-                .limit(limit * 20)
+                .limit(limit)
                 .execute()
             )
         except Exception as exc:
@@ -165,28 +183,40 @@ class GameService:
                 detail="The ChemBattle leaderboard could not be loaded from Supabase.",
             ) from exc
 
-        # The ordered query means the first result for each student is their
-        # best winning match. Do not expose email addresses or match history.
+        # Every completed winning run receives its own rank. This lets the
+        # same student appear with distinct scores while keeping email and
+        # other private match history details out of the public leaderboard.
         entries: list[dict] = []
-        seen_user_ids: set[str] = set()
         for row in response.data or []:
-            user_id = row["user_id"]
-            if user_id in seen_user_ids:
-                continue
-            seen_user_ids.add(user_id)
             profile = row.get("profiles") or {}
             if isinstance(profile, list):
                 profile = profile[0] if profile else {}
             entries.append(
                 {
                     "rank": len(entries) + 1,
+                    "match_id": row["match_id"],
                     "username": profile.get("username") or "Qubo student",
                     "profile_picture_url": profile.get("profile_picture_url"),
+                    "score": row["score"],
+                    "leaderboard_points": row["leaderboard_points"],
+                    "waves_cleared": row.get("waves_cleared") or 0,
+                    "enemies_defeated": row.get("enemies_defeated") or 0,
+                    "compounds_discovered": row.get("compounds_discovered") or 0,
+                    "highest_combo": row.get("highest_combo") or 0,
+                    "grade": cls._grade_for_score(row["score"]),
                     "turns_played": row["turns_played"],
                     "completed_at": row["completed_at"],
                     "played_at": row["completed_at"] or row["match_date"],
                 }
             )
-            if len(entries) == limit:
-                break
         return entries
+
+    @staticmethod
+    def _grade_for_score(score: int) -> str:
+        if score >= 7000:
+            return "S - Master Chemist"
+        if score >= 5000:
+            return "A - Senior Researcher"
+        if score >= 3000:
+            return "B - Lab Assistant"
+        return "C - Chemistry Student"
