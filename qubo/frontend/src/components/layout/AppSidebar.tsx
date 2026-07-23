@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/contexts/authStore';
 import {
   FiArchive,
+  FiBarChart2,
   FiBookmark,
   FiBookOpen,
   FiBox,
@@ -26,6 +27,7 @@ import { useThemeStore } from '@/contexts/themeStore';
 const studentNavigationItems = [
   { icon: FiGrid, label: 'Dashboard', path: '/dashboard' },
   { icon: FiBookOpen, label: 'Subjects', path: '/subjects' },
+  { icon: FiBarChart2, label: 'Analytics', path: '/analytics' },
   { icon: FiPlayCircle, label: 'Game Room', path: '/game-room' },
   { icon: FiHelpCircle, label: 'Quizzes', path: '/quiz/create' },
   { icon: FiArchive, label: 'Library', path: '/library' },
@@ -36,6 +38,7 @@ const studentNavigationItems = [
 
 const educatorNavigationItems = [
   { icon: FiGrid, label: 'Dashboard', path: '/dashboard' },
+  { icon: FiBarChart2, label: 'Student Analytics', path: '/educator/analytics' },
   { icon: FiFolderPlus, label: 'Upload Content', path: '/educator/upload' },
   { icon: FiBookOpen, label: 'My Collections', path: '/educator/collections' },
   { icon: FiUser, label: 'Profile', path: '/profile' },

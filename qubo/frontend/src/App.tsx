@@ -1,8 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { LanguageDomBridge } from '@/contexts/languageStore';
+import { applyThemeForPath, useThemeStore } from '@/contexts/themeStore';
 
 // Pages
 import LoginPage from '@/features/auth/LoginPage';
@@ -15,6 +16,8 @@ import QuizCreatorPage from '@/features/quiz/QuizCreatorPage';
 import QuizExperiencePage from '@/features/quiz/QuizExperiencePage';
 import LibraryPage from '@/features/library/LibraryPage';
 import SubjectsPage from '@/features/analytics/SubjectsPage';
+import LearningAnalyticsPage from '@/features/analytics/LearningAnalyticsPage';
+import EducatorAnalyticsPage from '@/features/analytics/EducatorAnalyticsPage';
 import ResourceHubPage from '@/features/resources/ResourceHubPage';
 import ExploreResourcesPage from '@/features/resources/ExploreResourcesPage';
 import GameRoomPage from '@/features/game/GameRoomPage';
@@ -29,11 +32,23 @@ import AdminPortalPage from '@/features/admin/AdminPortalPage';
 // Components
 import ProtectedRoute from '@/components/common/ProtectedRoute';
 import AdminProtectedRoute from '@/components/common/AdminProtectedRoute';
+import StudyReminderNotifier from '@/components/common/StudyReminderNotifier';
 
 import '@/styles/global.css';
 
 const ModelLibraryPage = lazy(() => import('@/features/resources/ModelLibraryPage'));
 const ModelDetailPage = lazy(() => import('@/features/resources/ModelDetailPage'));
+
+function ThemeRouteBridge() {
+  const { pathname } = useLocation();
+  const theme = useThemeStore((state) => state.theme);
+
+  useLayoutEffect(() => {
+    applyThemeForPath(theme, pathname);
+  }, [pathname, theme]);
+
+  return null;
+}
 
 export default function App() {
   const { setUser, setAuthInitialized, user, isAuthInitialized } = useAuthStore();
@@ -58,7 +73,9 @@ export default function App() {
 
   return (
     <Router>
+      <ThemeRouteBridge />
       <LanguageDomBridge />
+      <StudyReminderNotifier />
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -102,7 +119,7 @@ export default function App() {
         <Route
           path="/educator/upload"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['educator']}>
               <EducatorUploadContentPage />
             </ProtectedRoute>
           }
@@ -110,7 +127,7 @@ export default function App() {
         <Route
           path="/educator/collections"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['educator']}>
               <MyCollectionsPage />
             </ProtectedRoute>
           }
@@ -125,7 +142,7 @@ export default function App() {
         />
         <Route
           path="/educator/quizzes/edit"
-          element={<ProtectedRoute><EducatorQuizEditorPage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={['educator']}><EducatorQuizEditorPage /></ProtectedRoute>}
         />
         <Route
           path="/quiz/session"
@@ -164,6 +181,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <SubjectsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute allowedRoles={['student']}>
+              <LearningAnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/educator/analytics"
+          element={
+            <ProtectedRoute allowedRoles={['educator']}>
+              <EducatorAnalyticsPage />
             </ProtectedRoute>
           }
         />
@@ -223,6 +256,7 @@ export default function App() {
             )
           }
         />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

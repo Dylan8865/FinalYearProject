@@ -19,6 +19,11 @@ import {
 import { GeneratedQuestion, QuizDifficulty, QuizQuestionType } from '@/types/quiz';
 import { useAuthStore } from '@/contexts/authStore';
 
+const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
+const MAX_TOTAL_SIZE_BYTES = 16 * 1024 * 1024;
+
+const formatMegabytes = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+
 export default function QuizCreatorPage() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
@@ -40,6 +45,10 @@ export default function QuizCreatorPage() {
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [creationMethod, setCreationMethod] = useState<'ai' | 'manual'>('ai');
+  const totalUploadSize = useMemo(
+    () => uploadedFiles.reduce((total, file) => total + file.size, 0),
+    [uploadedFiles]
+  );
 
   const filePreviews = useMemo(
     () => uploadedFiles.map((file) => ({ file, url: URL.createObjectURL(file) })),
@@ -57,21 +66,31 @@ export default function QuizCreatorPage() {
   }, [generatedQuiz]);
 
   const addFiles = (files: FileList | File[]) => {
-    const supportedFiles = Array.from(files).filter((file) =>
-      file.type.startsWith('image/') || file.type === 'application/pdf'
-    );
-    setUploadedFiles((current) => {
-      const knownFiles = new Set(current.map((file) => `${file.name}-${file.size}-${file.lastModified}`));
-      const newFiles = supportedFiles.filter((file) => {
-        const signature = `${file.name}-${file.size}-${file.lastModified}`;
-        if (knownFiles.has(signature)) return false;
-        knownFiles.add(signature);
-        return true;
-      });
-      return [...current, ...newFiles].slice(0, 4);
+    const knownFiles = new Set(uploadedFiles.map((file) => `${file.name}-${file.size}-${file.lastModified}`));
+    const acceptedFiles: File[] = [];
+    const rejectedFiles: string[] = [];
+    let nextTotalSize = totalUploadSize;
+
+    Array.from(files).forEach((file) => {
+      const signature = `${file.name}-${file.size}-${file.lastModified}`;
+      if (knownFiles.has(signature)) return;
+      knownFiles.add(signature);
+
+      if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
+        rejectedFiles.push(`${file.name}: unsupported file type`);
+      } else if (file.size > MAX_FILE_SIZE_BYTES) {
+        rejectedFiles.push(`${file.name}: larger than 8 MB`);
+      } else if (nextTotalSize + file.size > MAX_TOTAL_SIZE_BYTES) {
+        rejectedFiles.push(`${file.name}: would exceed the 16 MB total`);
+      } else {
+        acceptedFiles.push(file);
+        nextTotalSize += file.size;
+      }
     });
+
+    if (acceptedFiles.length) setUploadedFiles((current) => [...current, ...acceptedFiles]);
     setGeneratedQuiz(null);
-    setGenerationError('');
+    setGenerationError(rejectedFiles.length ? `Some files were not added: ${rejectedFiles.join('; ')}.` : '');
   };
 
   const removeFile = (fileToRemove: File) => {
@@ -230,7 +249,7 @@ export default function QuizCreatorPage() {
                   </div>
                   <h2 className="mt-5 text-lg font-extrabold text-slate-900">Drag and drop textbook pages</h2>
                   <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                    Upload up to four images (JPEG/PNG) or PDFs from your study material.
+                    Upload JPEG/PNG images or PDFs. Maximum 8 MB per file and 16 MB in total.
                   </p>
                   <button
                     onClick={() => fileInputRef.current?.click()}
@@ -253,8 +272,10 @@ export default function QuizCreatorPage() {
                 </div>
 
                 <div className="mt-7 flex items-center justify-between">
-                  <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">Recent uploads</h3>
-                  <button className="text-xs font-bold text-primary">View all</button>
+                  <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">Selected uploads</h3>
+                  <span className="text-xs font-bold text-slate-400" aria-label={`${uploadedFiles.length} files selected, ${formatMegabytes(totalUploadSize)} of 16 MB used`}>
+                    {uploadedFiles.length} selected · {formatMegabytes(totalUploadSize)} / 16 MB
+                  </span>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">

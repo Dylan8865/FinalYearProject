@@ -2,7 +2,14 @@ import React from 'react';
 import { useAuthStore } from '@/contexts/authStore';
 import { Navigate } from 'react-router-dom';
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
+type UserRole = 'student' | 'educator';
+
+type ProtectedRouteProps = {
+  children: React.ReactNode;
+  allowedRoles?: UserRole[];
+};
+
+export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, isLoading, isAuthInitialized } = useAuthStore();
 
   if (!isAuthInitialized || isLoading) {
@@ -22,6 +29,10 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (user.role === 'admin') {
     return <Navigate to="/admin/content" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

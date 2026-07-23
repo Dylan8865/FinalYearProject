@@ -1,20 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
+import { LearningStyle } from '@/types/auth';
 
 export default function LearningStyleAssessment() {
-  const [questionAnswers, setQuestionAnswers] = useState<
-    Array<{ visual: number; auditory: number; kinesthetic: number }>
-  >(
-    Array(5).fill(null).map(() => ({
-      visual: 50,
-      auditory: 50,
-      kinesthetic: 50,
-    }))
-  );
+  const [questionAnswers, setQuestionAnswers] = useState<Array<LearningStyle | null>>(Array(5).fill(null));
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const fetchProfile = useAuthStore((state) => state.fetchProfile);
 
   const questions = [
     {
@@ -59,41 +56,40 @@ export default function LearningStyleAssessment() {
     },
   ];
 
-  const handleScoreChange = (style: 'visual' | 'auditory' | 'kinesthetic', value: number) => {
+  const chooseAnswer = (style: LearningStyle) => {
     setQuestionAnswers((prev) => {
       const updated = [...prev];
-      updated[currentQuestion] = {
-        ...updated[currentQuestion],
-        [style]: value,
-      };
+      updated[currentQuestion] = style;
       return updated;
     });
+    setError('');
   };
 
   const handleNext = async () => {
+    if (!questionAnswers[currentQuestion]) {
+      setError('Choose the answer that fits you best before continuing.');
+      return;
+    }
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Submit assessment
       setIsLoading(true);
-      const totalVisual = questionAnswers.reduce((sum, q) => sum + q.visual, 0);
-      const totalAuditory = questionAnswers.reduce((sum, q) => sum + q.auditory, 0);
-      const totalKinesthetic = questionAnswers.reduce((sum, q) => sum + q.kinesthetic, 0);
-
-      const numQuestions = questions.length;
+      setError('');
+      const count = (style: LearningStyle) => questionAnswers.filter((answer) => answer === style).length;
       const finalScores = {
-        visual_score: Math.round(totalVisual / numQuestions),
-        auditory_score: Math.round(totalAuditory / numQuestions),
-        kinesthetic_score: Math.round(totalKinesthetic / numQuestions),
+        visual_score: Math.round((count('visual') / questions.length) * 100),
+        auditory_score: Math.round((count('auditory') / questions.length) * 100),
+        kinesthetic_score: Math.round((count('kinesthetic') / questions.length) * 100),
       };
 
       try {
-        const result = await authService.setLearningStyle(finalScores);
-        console.log('Learning style set:', result);
-        navigate('/dashboard');
+        await authService.setLearningStyle(finalScores);
+        await fetchProfile();
+        const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
+        navigate(returnTo || '/dashboard', { replace: true });
       } catch (error) {
         console.error('Failed to set learning style:', error);
-        navigate('/dashboard');
+        setError('Your learning preference could not be saved. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -102,7 +98,7 @@ export default function LearningStyleAssessment() {
 
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
-  const currentAnswers = questionAnswers[currentQuestion];
+  const currentAnswer = questionAnswers[currentQuestion];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-4">
@@ -131,24 +127,20 @@ export default function LearningStyleAssessment() {
           <h2 className="text-lg font-semibold text-gray-900 mb-6">{question.text}</h2>
 
           <div className="space-y-4">
-            {(Object.keys(question.styles) as Array<'visual' | 'auditory' | 'kinesthetic'>).map((style) => (
-              <div key={style} className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="capitalize font-medium text-gray-900">{style}</label>
-                  <span className="text-sm font-semibold text-primary">{currentAnswers[style]}</span>
-                </div>
-                <p className="text-sm text-gray-600 mb-3">{question.styles[style]}</p>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={currentAnswers[style]}
-                  onChange={(e) => handleScoreChange(style, parseInt(e.target.value))}
-                  className="w-full"
-                />
-              </div>
+            {(Object.keys(question.styles) as LearningStyle[]).map((style) => (
+              <button
+                type="button"
+                key={style}
+                onClick={() => chooseAnswer(style)}
+                aria-pressed={currentAnswer === style}
+                className={`w-full rounded-xl border-2 p-4 text-left transition ${currentAnswer === style ? 'border-primary bg-blue-50' : 'border-transparent bg-gray-50 hover:border-blue-200'}`}
+              >
+                <span className="capitalize font-semibold text-gray-900">{style}</span>
+                <span className="mt-1 block text-sm text-gray-600">{question.styles[style]}</span>
+              </button>
             ))}
           </div>
+          {error && <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{error}</p>}
         </div>
 
         <div className="flex justify-between">

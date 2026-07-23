@@ -62,7 +62,7 @@ export default function EducatorAnalyticsPage() {
       return;
     }
     void loadDashboard();
-  }, [user?.role]);
+  }, [navigate, user?.role]);
 
   const filteredStudents = useMemo(() => {
     const query = search.trim().toLowerCase();

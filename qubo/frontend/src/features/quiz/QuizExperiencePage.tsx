@@ -97,7 +97,7 @@ export default function QuizExperiencePage() {
     return () => window.clearInterval(timer);
   }, [isComplete, quiz]);
 
-  const questions = quiz?.questions ?? [];
+  const questions = useMemo(() => quiz?.questions ?? [], [quiz]);
   const currentQuestion = questions[currentIndex];
   const hasAnswered = Object.prototype.hasOwnProperty.call(answers, currentIndex);
   const selectedAnswer = answers[currentIndex] ?? '';

@@ -21,6 +21,17 @@ class GeminiQuizService:
     # its current high-demand response first.
     MODELS = ("gemini-3.1-flash-lite", "gemini-3.5-flash")
     API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    DEFAULT_SUBJECT_NAMES = (
+        "Bahasa Melayu",
+        "English",
+        "Mathematics",
+        "Science",
+        "History",
+        "Physics",
+        "Chemistry",
+        "Biology",
+        "Add Mathematics",
+    )
 
     RESPONSE_SCHEMA = {
         "type": "object",
@@ -59,6 +70,25 @@ class GeminiQuizService:
     }
 
     @staticmethod
+    def _available_subject_names() -> List[str]:
+        try:
+            rows = (
+                get_supabase().table("subjects")
+                .select("subject_name")
+                .order("subject_name")
+                .execute().data
+                or []
+            )
+            names = [row["subject_name"].strip() for row in rows if row.get("subject_name")]
+            if names:
+                return names
+        except Exception:
+            # Quiz generation can still proceed with the standard SPM list if
+            # the subject catalogue is temporarily unavailable.
+            pass
+        return list(GeminiQuizService.DEFAULT_SUBJECT_NAMES)
+
+    @staticmethod
     def generate_quiz(
         files: List[Tuple[str, str, bytes]],
         question_type: str,
@@ -76,14 +106,14 @@ class GeminiQuizService:
             "fill": "Create fill-in-the-blank questions. Use an empty options array and provide the missing text in correct_answer.",
             "short": "Create short-answer questions. Use an empty options array and provide a concise expected answer in correct_answer.",
         }
+        available_subjects = ", ".join(GeminiQuizService._available_subject_names())
         prompt = (
             "You are an expert Malaysian SPM tutor. Generate a quiz using only the attached study material. "
             f"Create exactly {question_count} {difficulty.lower()} questions. "
             f"{type_instructions[question_type]} "
             "Use every attached file for at least one question. After covering every file, allocate the remaining "
             "questions according to how much clear, useful study content each file contains. "
-            "Set subject to the matching SPM subject name: Bahasa Melayu, English, Mathematics, Science, History, "
-            "Physics, Chemistry, Biology, or Add Mathematics. "
+            f"Set subject to exactly one matching name from this current SPM subject list: {available_subjects}. "
             "Set topic to one concise syllabus topic that best describes the attached material. "
             "Keep wording clear for secondary-school students. Give a short teaching explanation for every answer. "
             "Do not invent facts that are absent from the uploaded material."
@@ -196,6 +226,15 @@ class QuizLibraryService:
         "fizik": "physics",
         "kimia": "chemistry",
         "biologi": "biology",
+        "geografi": "geography",
+        "sains komputer": "computer science",
+        "informatik": "computer science",
+        "ekonomi": "economic",
+        "economics": "economic",
+        "bahasa cina": "chinese",
+        "bahasa mandarin": "chinese",
+        "chinese language": "chinese",
+        "mandarin": "chinese",
         "bahasa malaysia": "bahasa melayu",
         "malay": "bahasa melayu",
     }
@@ -208,6 +247,10 @@ class QuizLibraryService:
     @staticmethod
     def _resolve_subject(supabase, generated_subject: str):
         subject_rows = supabase.table("subjects").select("id,subject_name").execute().data or []
+        return QuizLibraryService._match_subject(subject_rows, generated_subject)
+
+    @staticmethod
+    def _match_subject(subject_rows: List[dict], generated_subject: str):
         subjects_by_name = {
             QuizLibraryService._normalize_subject(row["subject_name"]): row
             for row in subject_rows
@@ -226,6 +269,13 @@ class QuizLibraryService:
                     match = subjects_by_name.get(target)
                     if match:
                         break
+        if not match:
+            # Accept descriptive model output such as "SPM Geography" while
+            # preferring the longest subject name (Computer Science before Science).
+            for subject_key in sorted(subjects_by_name, key=len, reverse=True):
+                if subject_key in generated_key or generated_key in subject_key:
+                    match = subjects_by_name[subject_key]
+                    break
         return match
 
     @staticmethod
@@ -642,7 +692,7 @@ class QuizLibraryService:
             if not subject_id:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail="Generated quiz subject could not be matched to an SPM subject.",
+                    detail=f"Generated quiz subject '{quiz.subject}' could not be matched to an SPM subject.",
                 )
             topic = QuizLibraryService._resolve_or_create_topic(supabase, subject_id, quiz.topic)
 

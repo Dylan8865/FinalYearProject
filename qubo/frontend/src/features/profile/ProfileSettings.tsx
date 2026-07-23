@@ -522,7 +522,7 @@ export default function ProfileSettings() {
           </section>
 
           <aside className="space-y-6">
-            <div className="rounded-[32px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+            <div id="change-password" className="scroll-mt-24 rounded-[32px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Account summary</p>
               <h2 className="mt-2 text-2xl font-extrabold text-slate-950">Your profile data</h2>
 

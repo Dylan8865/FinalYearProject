@@ -1,0 +1,2 @@
+-- Baseline migration retained to match the migration already applied remotely.
+-- The full original baseline remains documented in ../../database/schema.sql.

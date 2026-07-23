@@ -3,7 +3,7 @@ setlocal
 
 cd /d "%~dp0"
 
-set "PYTHON_EXE=..\.venv\Scripts\python.exe"
+set "PYTHON_EXE=backend\.venv\Scripts\python.exe"
 
 if not exist "%PYTHON_EXE%" (
   echo [Qubo] Python virtual environment not found at %PYTHON_EXE%
@@ -17,7 +17,7 @@ if not exist "frontend\node_modules" (
   exit /b 1
 )
 
-echo [Qubo] Starting backend on http://127.0.0.1:8002
+echo [Qubo] Starting backend on http://127.0.0.1:8003
 start "Qubo Backend" "%~dp0start-backend.bat"
 
 echo [Qubo] Starting frontend on http://localhost:3000
@@ -29,4 +29,4 @@ echo [Qubo] Wait until both windows say they are running, then open:
 echo [Qubo]   http://localhost:3000
 echo.
 echo [Qubo] Backend health check:
-echo [Qubo]   http://127.0.0.1:8002/health
+echo [Qubo]   http://127.0.0.1:8003/health
