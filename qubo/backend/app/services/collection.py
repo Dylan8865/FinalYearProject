@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, status
 
 from app.db.supabase import get_supabase
+from app.services.resource import ResourceService
 
 
 class CollectionService:
@@ -79,9 +80,64 @@ class CollectionService:
         return collection
 
     @staticmethod
-    def _serialize(row: dict) -> dict:
+    def _serialize(row: dict, preview_items: list[dict] | None = None) -> dict:
         subject = row.get('subjects') or {}
-        return {**row, 'primary_subject_name': subject.get('subject_name')}
+        return {
+            **row,
+            'primary_subject_name': subject.get('subject_name'),
+            'preview_items': preview_items or [],
+        }
+
+    @classmethod
+    def _preview_items(cls, collection_ids: list[str]) -> dict[str, list[dict]]:
+        if not collection_ids:
+            return {}
+        supabase = get_supabase()
+        rows = (
+            supabase.table('collection_items')
+            .select('collection_id,item_type,video_id,resource_id,quiz_id,sort_order')
+            .in_('collection_id', collection_ids).order('sort_order').execute().data
+            or []
+        )
+        placeholder_id = '00000000-0000-0000-0000-000000000000'
+        model_ids = [item['resource_id'] for item in rows if item.get('resource_id')]
+        video_ids = [item['video_id'] for item in rows if item.get('video_id')]
+        quiz_ids = [item['quiz_id'] for item in rows if item.get('quiz_id')]
+        models = {
+            item['resource_id']: item
+            for item in supabase.table('resources').select('resource_id,title,url')
+            .in_('resource_id', model_ids or [placeholder_id]).execute().data
+            or []
+        }
+        videos = {
+            item['video_id']: item
+            for item in supabase.table('videos').select('video_id,title,youtube_url')
+            .in_('video_id', video_ids or [placeholder_id]).execute().data
+            or []
+        }
+        quizzes = {
+            item['id']: item
+            for item in supabase.table('quizzes').select('id,title')
+            .in_('id', quiz_ids or [placeholder_id]).execute().data
+            or []
+        }
+        result: dict[str, list[dict]] = {collection_id: [] for collection_id in collection_ids}
+        for item in rows:
+            collection_items = result.setdefault(item['collection_id'], [])
+            if len(collection_items) >= 3:
+                continue
+            item_type = item['item_type']
+            source = models.get(item.get('resource_id')) or videos.get(item.get('video_id')) or quizzes.get(item.get('quiz_id')) or {}
+            preview = {'item_type': item_type, 'title': source.get('title', 'Unavailable item')}
+            if item_type == 'video':
+                preview['youtube_url'] = source.get('youtube_url')
+            elif item_type == 'model' and source.get('url'):
+                try:
+                    preview['preview_model_url'] = ResourceService._create_signed_model_url(source['url'])
+                except Exception:
+                    preview['preview_model_url'] = None
+            collection_items.append(preview)
+        return result
 
     @classmethod
     def list_mine(cls, educator_id: str, status_filter: str | None = None) -> list[dict]:
@@ -89,7 +145,8 @@ class CollectionService:
         if status_filter:
             query = query.eq('status', status_filter)
         rows = query.execute().data or []
-        return [cls._serialize(row) for row in rows]
+        previews = cls._preview_items([row['collection_id'] for row in rows])
+        return [cls._serialize(row, previews.get(row['collection_id'])) for row in rows]
 
     @classmethod
     def create(cls, educator_id: str, payload: dict) -> dict:
@@ -168,19 +225,60 @@ class CollectionService:
         collection = cls._owner_collection(collection_id, educator_id)
         if collection['status'] != 'draft':
             raise HTTPException(status_code=409, detail='Only draft collections can be shared.')
-        linked = get_supabase().table('educator_students').select('student_id').eq('educator_id', educator_id).in_('student_id', payload['student_ids']).execute().data or []
-        allowed = {row['student_id'] for row in linked}
         requested = {str(student_id) for student_id in payload['student_ids']}
-        if allowed != requested:
-            raise HTTPException(status_code=403, detail='Collections can only be shared with linked students.')
+        supabase = get_supabase()
+        students = (
+            supabase.table('profiles').select('id')
+            .in_('id', list(requested)).eq('role', 'student').execute().data
+            or []
+        )
+        found_student_ids = {row['id'] for row in students}
+        if found_student_ids != requested:
+            raise HTTPException(status_code=422, detail='Every recipient must be a registered student account.')
+
+        # Sharing is also the educator's consent to observe the selected
+        # students' learning progress. Create any missing class links here so
+        # the Class Performance dashboard is immediately scoped to recipients.
+        existing_links = (
+            supabase.table('educator_students').select('student_id')
+            .eq('educator_id', educator_id).in_('student_id', list(requested))
+            .execute().data
+            or []
+        )
+        existing_student_ids = {row['student_id'] for row in existing_links}
+        missing_links = [
+            {'educator_id': educator_id, 'student_id': student_id}
+            for student_id in requested - existing_student_ids
+        ]
+        if missing_links:
+            supabase.table('educator_students').insert(missing_links).execute()
         rows = [{'collection_id': collection_id, 'student_id': student_id, 'shared_by': educator_id, 'message': payload.get('message'), 'due_at': payload.get('due_at')} for student_id in requested]
-        get_supabase().table('collection_shares').upsert(rows, on_conflict='collection_id,student_id').execute()
-        get_supabase().table('collections').update({'status': 'shared', 'updated_at': datetime.now(timezone.utc).isoformat()}).eq('collection_id', collection_id).execute()
+        supabase.table('collection_shares').upsert(rows, on_conflict='collection_id,student_id').execute()
+        supabase.table('collections').update({'status': 'shared', 'updated_at': datetime.now(timezone.utc).isoformat()}).eq('collection_id', collection_id).execute()
 
     @classmethod
     def archive(cls, collection_id: str, educator_id: str) -> None:
         cls._owner_collection(collection_id, educator_id)
         get_supabase().table('collections').update({'status': 'archived', 'archived_at': datetime.now(timezone.utc).isoformat(), 'updated_at': datetime.now(timezone.utc).isoformat()}).eq('collection_id', collection_id).execute()
+
+    @classmethod
+    def delete(cls, collection_id: str, educator_id: str) -> None:
+        collection = cls._owner_collection(collection_id, educator_id)
+        if collection['status'] == 'shared':
+            raise HTTPException(
+                status_code=409,
+                detail='Archive this shared collection before permanently deleting it.',
+            )
+        # The collection foreign keys cascade to its items and shares. Original
+        # videos, models and quizzes remain in their educator libraries.
+        deleted = (
+            get_supabase().table('collections').delete()
+            .eq('collection_id', collection_id).eq('educator_id', educator_id)
+            .execute().data
+            or []
+        )
+        if not deleted:
+            raise HTTPException(status_code=404, detail='Collection not found or not owned by this educator.')
 
     @classmethod
     def duplicate(cls, collection_id: str, educator_id: str) -> dict:
@@ -195,3 +293,20 @@ class CollectionService:
     def linked_students(educator_id: str) -> list[dict]:
         rows = get_supabase().table('educator_students').select('student_id,profiles!educator_students_student_id_fkey(id,full_name,username,email)').eq('educator_id', educator_id).execute().data or []
         return [row['profiles'] for row in rows if row.get('profiles')]
+
+    @staticmethod
+    def search_students_by_email(email_query: str) -> list[dict]:
+        """Find registered student accounts by email for collection sharing."""
+        query = email_query.strip().lower()
+        if len(query) < 2:
+            return []
+        rows = (
+            get_supabase().table('profiles')
+            .select('id,full_name,username,email')
+            .eq('role', 'student')
+            .ilike('email', f'%{query}%')
+            .limit(10)
+            .execute().data
+            or []
+        )
+        return rows

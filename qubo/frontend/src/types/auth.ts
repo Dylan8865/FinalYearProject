@@ -1,5 +1,5 @@
 // User types
-export type UserRole = 'student' | 'educator';
+export type UserRole = 'student' | 'educator' | 'admin';
 
 export type LearningStyle = 'visual' | 'auditory' | 'kinesthetic';
 
@@ -35,7 +35,7 @@ export interface RegisterRequest {
   password: string;
   username: string;
   full_name: string;
-  role: UserRole;
+  role: Exclude<UserRole, 'admin'>;
 }
 
 export interface LoginRequest {

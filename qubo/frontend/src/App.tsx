@@ -23,9 +23,12 @@ import MyLearningPage from '@/features/learning/MyLearningPage';
 import EducatorUploadContentPage from '@/features/educator/EducatorUploadContentPage';
 import MyCollectionsPage from '@/features/educator/MyCollectionsPage';
 import EducatorQuizEditorPage from '@/features/educator/EducatorQuizEditorPage';
+import AdminLoginPage from '@/features/admin/AdminLoginPage';
+import AdminPortalPage from '@/features/admin/AdminPortalPage';
 
 // Components
 import ProtectedRoute from '@/components/common/ProtectedRoute';
+import AdminProtectedRoute from '@/components/common/AdminProtectedRoute';
 
 import '@/styles/global.css';
 
@@ -60,6 +63,8 @@ export default function App() {
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/:section" element={<AdminProtectedRoute><AdminPortalPage /></AdminProtectedRoute>} />
 
         {/* Protected Routes */}
         <Route
@@ -212,7 +217,7 @@ export default function App() {
           path="/"
           element={
             isAuthInitialized ? (
-              user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+              user ? <Navigate to={user.role === 'admin' ? '/admin/content' : '/dashboard'} /> : <Navigate to="/login" />
             ) : (
               <div className="min-h-screen bg-slate-50" />
             )
