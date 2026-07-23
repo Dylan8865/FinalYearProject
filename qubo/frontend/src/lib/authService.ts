@@ -5,8 +5,12 @@ import {
   AuthResponse,
   ProfileUpdateRequest,
   LearningStyleAssessment,
+  LearningStyleAssessmentResult,
+  StudyReminderPreferences,
+  StudyReminderPreferencesUpdate,
   Subject,
   PasswordChangeRequest,
+  AccountDataSummary,
   User,
   AuthTokens,
 } from "@/types/auth";
@@ -397,14 +401,69 @@ class AuthService {
     return response.data;
   }
 
-  async setLearningStyle(assessment: LearningStyleAssessment): Promise<any> {
-    const response = await this.api.post("/auth/learning-style", assessment);
+  async setLearningStyle(
+    assessment: LearningStyleAssessment,
+  ): Promise<LearningStyleAssessmentResult> {
+    const response = await this.api.post<LearningStyleAssessmentResult>(
+      "/auth/learning-style",
+      assessment,
+    );
+    return response.data;
+  }
+
+  async getStudyReminders(): Promise<StudyReminderPreferences> {
+    const response = await this.api.get<StudyReminderPreferences>(
+      "/auth/profile/reminders",
+    );
+    return response.data;
+  }
+
+  async updateStudyReminders(
+    preferences: StudyReminderPreferencesUpdate,
+  ): Promise<StudyReminderPreferences> {
+    const response = await this.api.put<StudyReminderPreferences>(
+      "/auth/profile/reminders",
+      preferences,
+    );
     return response.data;
   }
 
   async logout(): Promise<void> {
     await this.api.post("/auth/logout");
     this.clearTokens();
+  }
+
+  async deactivateAccount(password: string): Promise<void> {
+    await this.api.post('/auth/account/deactivate', { password });
+    this.clearTokens();
+  }
+
+  async deleteAccount(password: string): Promise<void> {
+    await this.api.delete('/auth/account', { data: { password } });
+    this.clearTokens();
+  }
+
+  async getAccountDataSummary(): Promise<AccountDataSummary> {
+    const response = await this.api.get<AccountDataSummary>('/auth/account/data-summary');
+    return response.data;
+  }
+
+  async downloadAccountData(): Promise<void> {
+    const response = await this.api.get<Record<string, unknown>>('/auth/account/data');
+    const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `qubo-account-data-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async clearLearningHistory(password: string): Promise<{ message: string; cleared: Record<string, number> }> {
+    const response = await this.api.delete<{ message: string; cleared: Record<string, number> }>('/auth/account/learning-history', { data: { password } });
+    return response.data;
   }
 
   async changePassword(data: PasswordChangeRequest): Promise<any> {

@@ -79,8 +79,8 @@ async def generate_quiz(
         raise HTTPException(status_code=400, detail="Unsupported difficulty level")
     if question_count < 1 or question_count > 20:
         raise HTTPException(status_code=400, detail="Question count must be between 1 and 20")
-    if not files or len(files) > 4:
-        raise HTTPException(status_code=400, detail="Upload between one and four files")
+    if not files:
+        raise HTTPException(status_code=400, detail="Upload at least one file")
 
     prepared_files = []
     total_size = 0

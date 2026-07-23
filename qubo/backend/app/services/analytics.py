@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
+import re
 from typing import Dict, List, Optional
 
 from fastapi import HTTPException, status
@@ -15,7 +16,15 @@ class AnalyticsService:
 
     @staticmethod
     def _parse_datetime(value: str) -> datetime:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        normalized = value.strip().replace("Z", "+00:00")
+        # Python 3.8 accepts either three or six fractional-second digits,
+        # while Postgres may return any precision from one to six digits.
+        normalized = re.sub(
+            r"\.(\d+)(?=([+-]\d{2}:\d{2})?$)",
+            lambda match: f".{match.group(1)[:6].ljust(6, '0')}",
+            normalized,
+        )
+        return datetime.fromisoformat(normalized)
 
     @staticmethod
     def _calculate_learning_velocity(attempts: List[dict]) -> Optional[float]:
@@ -344,6 +353,31 @@ class AnalyticsService:
             .execute().data or []
         ) if subject_ids else []
         subject_names = {row["id"]: row["subject_name"] for row in subjects}
+
+        quiz_rows = (
+            supabase.table("quizzes")
+            .select("id,owner_id,topic_id,created_at")
+            .in_("topic_id", topic_ids)
+            .order("created_at", desc=True)
+            .execute().data or []
+        )
+        quiz_ids = [row["id"] for row in quiz_rows]
+        assigned_quiz_ids = set()
+        if quiz_ids:
+            assignments = (
+                supabase.table("quiz_assignments")
+                .select("quiz_id")
+                .eq("assigned_to", student_id)
+                .in_("quiz_id", quiz_ids)
+                .execute().data or []
+            )
+            assigned_quiz_ids = {row["quiz_id"] for row in assignments}
+
+        quiz_by_topic = {}
+        for quiz in quiz_rows:
+            if quiz["owner_id"] == student_id or quiz["id"] in assigned_quiz_ids:
+                quiz_by_topic.setdefault(quiz["topic_id"], quiz["id"])
+
         today = date.today().isoformat()
         result = []
         for schedule in schedules:
@@ -358,6 +392,7 @@ class AnalyticsService:
                 "subject_name": subject_names.get(topic["subject_id"], "Subject"),
                 "topic_name": topic["topic_name"],
                 "is_due": schedule["next_review_date"] <= today,
+                "quiz_id": quiz_by_topic.get(schedule["topic_id"]),
             })
         return result
 

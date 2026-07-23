@@ -71,7 +71,7 @@ export default function AdminPortalPage() {
 
   useEffect(() => {
     void load();
-  }, [section, contentType]);
+  }, [section, contentType]); // eslint-disable-line react-hooks/exhaustive-deps -- search is submitted explicitly
 
   const removeContent = async (item: any) => {
     if (!window.confirm(`Delete “${item.title}” permanently?`)) return;

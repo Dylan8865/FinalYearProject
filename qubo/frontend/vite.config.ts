@@ -49,8 +49,26 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8002',
+        target: 'http://127.0.0.1:8003',
         changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    // Three.js is isolated behind the lazy model routes; the initial app bundle
+    // stays small while the 3D engine is downloaded only when it is needed.
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+          if (id.includes('@react-three') || id.includes('/three/')) return 'three-vendor'
+          if (id.includes('chart.js') || id.includes('react-chartjs-2')) return 'charts-vendor'
+          if (id.includes('@supabase') || id.includes('/axios/')) return 'data-vendor'
+          if (id.includes('react-icons')) return 'icons-vendor'
+          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('react-router') || id.includes('/zustand/')) return 'react-vendor'
+          return undefined
+        },
       },
     },
   },

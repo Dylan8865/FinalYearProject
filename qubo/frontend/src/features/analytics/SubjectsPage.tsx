@@ -62,7 +62,12 @@ export default function SubjectsPage() {
       const response = await authService.getSubjectAnalytics(activeFilters);
       setSubjects(response);
       if (subjectOptions.length === 0 && Object.keys(activeFilters).length === 0) setSubjectOptions(response);
-      setSelectedSubjectId((current) => current && response.some((item) => item.id === current) ? current : response[0]?.id || null);
+      setSelectedSubjectId((current) => {
+        if (activeFilters.subject_id && response.some((item) => item.id === activeFilters.subject_id)) {
+          return activeFilters.subject_id;
+        }
+        return current && response.some((item) => item.id === current) ? current : null;
+      });
     } catch (requestError: any) {
       const detail = requestError.response?.data?.detail;
       setLoadError(typeof detail === 'string' ? detail : 'Unable to load subject analytics.');
@@ -73,14 +78,20 @@ export default function SubjectsPage() {
 
   useEffect(() => {
     void loadSubjects();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- initial unfiltered load only
 
   const selectedFilterSubject = subjectOptions.find((subject) => subject.id === filters.subject_id) || null;
 
   const clearFilters = async () => {
     const emptyFilters: AnalyticsFilters = {};
     setFilters(emptyFilters);
+    setSelectedSubjectId(null);
     await loadSubjects(emptyFilters);
+  };
+
+  const applyFilters = async () => {
+    setSelectedSubjectId(filters.subject_id || null);
+    await loadSubjects(filters);
   };
 
   const exportPdf = async () => {
@@ -105,6 +116,28 @@ export default function SubjectsPage() {
     () => [...measuredTopics].sort((a, b) => (a.score_percentage ?? 0) - (b.score_percentage ?? 0))[0] || null,
     [measuredTopics]
   );
+  const overallStats = useMemo(() => {
+    const measuredSubjects = subjects.filter((subject) => subject.overall_mastery !== null);
+    const measuredTopicScores = subjects.flatMap((subject) =>
+      subject.topic_performance
+        .map((topic) => topic.score_percentage)
+        .filter((score): score is number => score !== null)
+    );
+    const orderedSubjects = [...measuredSubjects].sort(
+      (a, b) => (b.overall_mastery ?? 0) - (a.overall_mastery ?? 0)
+    );
+
+    return {
+      averageMastery: measuredTopicScores.length
+        ? measuredTopicScores.reduce((total, score) => total + score, 0) / measuredTopicScores.length
+        : null,
+      measuredSubjectCount: measuredSubjects.length,
+      totalQuizzes: subjects.reduce((total, subject) => total + subject.quizzes_completed, 0),
+      totalStudyMinutes: subjects.reduce((total, subject) => total + subject.study_minutes, 0),
+      strongestSubject: orderedSubjects[0] || null,
+      attentionSubject: orderedSubjects[orderedSubjects.length - 1] || null,
+    };
+  }, [subjects]);
 
   const chartData = useMemo(() => ({
     labels: selectedSubject?.recent_quiz_scores.map((point) => new Date(point.attempted_at).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-MY', { day: 'numeric', month: 'short' })) || [],
@@ -165,7 +198,7 @@ export default function SubjectsPage() {
                 <input type="date" min={filters.date_from} value={filters.date_to || ''} onChange={(event) => setFilters((current) => ({ ...current, date_to: event.target.value || undefined }))} className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none focus:border-blue-500" />
               </label>
               <div className="flex items-end gap-2">
-                <button type="button" onClick={() => void loadSubjects(filters)} className="h-11 flex-1 rounded-xl bg-slate-950 px-4 text-sm font-extrabold text-white">Apply</button>
+                <button type="button" onClick={() => void applyFilters()} className="h-11 flex-1 rounded-xl bg-slate-950 px-4 text-sm font-extrabold text-white">Apply</button>
                 <button type="button" onClick={() => void clearFilters()} className="h-11 rounded-xl border border-slate-200 px-3 text-xs font-bold text-slate-500">Clear filters</button>
               </div>
             </div>
@@ -188,24 +221,45 @@ export default function SubjectsPage() {
               <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">Choose your SPM subjects in Profile Settings before viewing subject analytics.</p>
               <button onClick={() => navigate('/profile')} className="mt-6 rounded-xl bg-blue-600 px-5 py-3 text-sm font-extrabold text-white">Manage subjects</button>
             </section>
-          ) : selectedSubject ? (
+          ) : (
             <>
-              <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {subjects.map((subject) => (
-                  <button
-                    key={subject.id}
-                    type="button"
-                    onClick={() => setSelectedSubjectId(subject.id)}
-                    className={`rounded-2xl border p-4 text-left transition ${selectedSubject.id === subject.id ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 bg-white hover:border-blue-200'}`}
-                  >
-                    <p className="font-extrabold text-slate-900">{subject.subject_name}</p>
-                    <p className={`mt-2 text-sm font-bold ${masteryColor(subject.overall_mastery)}`}>
-                      {subject.overall_mastery === null ? 'No mastery data' : `${Math.round(subject.overall_mastery)}% mastery`}
-                    </p>
-                  </button>
-                ))}
+              <section className="mt-8">
+                <div className="mb-3 flex items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-sm font-extrabold text-slate-800">Subject view</h2>
+                    <p className="mt-1 text-xs text-slate-400">Scroll sideways to switch subjects.</p>
+                  </div>
+                  <span className="text-xs font-bold text-slate-400">{subjects.length} subjects</span>
+                </div>
+                <div className="overflow-x-auto pb-2 [scrollbar-width:thin]">
+                  <div className="flex min-w-max gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSubjectId(null)}
+                      className={`min-w-[150px] rounded-2xl border px-4 py-3 text-left transition ${selectedSubjectId === null ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 bg-white hover:border-blue-200'}`}
+                    >
+                      <p className="text-sm font-extrabold text-slate-900">All subjects</p>
+                      <p className="mt-1 text-xs font-bold text-blue-600">Overall summary</p>
+                    </button>
+                    {subjects.map((subject) => (
+                      <button
+                        key={subject.id}
+                        type="button"
+                        onClick={() => setSelectedSubjectId(subject.id)}
+                        className={`min-w-[180px] rounded-2xl border px-4 py-3 text-left transition ${selectedSubject?.id === subject.id ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 bg-white hover:border-blue-200'}`}
+                      >
+                        <p className="text-sm font-extrabold text-slate-900">{subject.subject_name}</p>
+                        <p className={`mt-1 text-xs font-bold ${masteryColor(subject.overall_mastery)}`}>
+                          {subject.overall_mastery === null ? 'No mastery data' : `${Math.round(subject.overall_mastery)}% mastery`}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </section>
 
+              {selectedSubject ? (
+                <>
               <section className="mt-6 grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
                 <div className="rounded-[30px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] md:p-7">
                   <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600">{selectedSubject.category || 'SPM subject'}</p>
@@ -317,8 +371,77 @@ export default function SubjectsPage() {
                   <div className="mt-5 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">No topics are stored for this subject yet.</div>
                 )}
               </section>
+                </>
+              ) : (
+                <section className="mt-6 rounded-[30px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] md:p-7">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600">All-subject overview</p>
+                      <h2 className="mt-2 text-2xl font-extrabold text-slate-950">Your overall learning picture</h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                        Mastery averages only measured topics. Subjects without activity are shown as coverage gaps, not counted as zero.
+                      </p>
+                    </div>
+                    <button type="button" onClick={() => navigate('/quiz/create')} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white hover:bg-blue-700">
+                      Practice a subject <FiArrowRight />
+                    </button>
+                  </div>
+
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {[
+                      {
+                        icon: FiTarget,
+                        label: 'Average mastery',
+                        value: overallStats.averageMastery === null ? '—' : `${Math.round(overallStats.averageMastery)}%`,
+                      },
+                      {
+                        icon: FiBookOpen,
+                        label: 'Subjects measured',
+                        value: `${overallStats.measuredSubjectCount}/${subjects.length}`,
+                      },
+                      {
+                        icon: FiActivity,
+                        label: 'Completed quizzes',
+                        value: String(overallStats.totalQuizzes),
+                      },
+                      {
+                        icon: FiClock,
+                        label: 'Total study time',
+                        value: formatStudyTime(overallStats.totalStudyMinutes),
+                      },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-2xl bg-slate-50 p-4">
+                        <item.icon className="h-5 w-5 text-blue-600" />
+                        <p className="mt-4 text-2xl font-extrabold text-slate-950">{item.value}</p>
+                        <p className="mt-1 text-xs font-semibold text-slate-500">{item.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+                      <div className="flex items-center gap-2 text-sm font-extrabold text-emerald-800"><FiTrendingUp /> Strongest measured subject</div>
+                      <p className="mt-3 text-xl font-extrabold text-slate-950">{overallStats.strongestSubject?.subject_name || 'Not enough data yet'}</p>
+                      <p className="mt-1 text-sm font-bold text-emerald-700">
+                        {overallStats.strongestSubject?.overall_mastery === null || !overallStats.strongestSubject
+                          ? 'Complete a quiz to begin measuring mastery.'
+                          : `${Math.round(overallStats.strongestSubject.overall_mastery)}% mastery`}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+                      <div className="flex items-center gap-2 text-sm font-extrabold text-amber-800"><FiAlertCircle /> Needs the most attention</div>
+                      <p className="mt-3 text-xl font-extrabold text-slate-950">{overallStats.attentionSubject?.subject_name || 'Not enough data yet'}</p>
+                      <p className="mt-1 text-sm font-bold text-amber-700">
+                        {overallStats.attentionSubject?.overall_mastery === null || !overallStats.attentionSubject
+                          ? 'More measured activity is needed for comparison.'
+                          : `${Math.round(overallStats.attentionSubject.overall_mastery)}% mastery`}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              )}
             </>
-          ) : null}
+          )}
         </div>
       </main>
     </div>

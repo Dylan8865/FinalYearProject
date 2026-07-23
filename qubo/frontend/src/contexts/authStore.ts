@@ -28,7 +28,7 @@ const getApiErrorMessage = (error: any, fallback: string) => {
   }
 
   if (!error.response) {
-    return 'Cannot connect to backend. Please start the FastAPI server on http://127.0.0.1:8002';
+    return 'Cannot connect to backend. Please start the FastAPI server on http://127.0.0.1:8003';
   }
 
   const detail = error.response.data?.detail;

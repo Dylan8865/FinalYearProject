@@ -69,6 +69,7 @@ export interface ReviewSchedule {
   last_reviewed_date: string | null;
   last_score: number | null;
   is_due: boolean;
+  quiz_id: string | null;
 }
 
 export interface AnalyticsFilters {

@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from typing import Optional, List
-from datetime import date, datetime
+from datetime import date, datetime, time
 from enum import Enum
 import re
 
@@ -123,6 +123,23 @@ class LearningStyleAssessmentRequest(BaseModel):
     kinesthetic_score: int = Field(..., ge=0, le=100)
 
 
+class StudyReminderPreferences(BaseModel):
+    """Saved study reminder controls for the signed-in student."""
+    daily_flashcards_enabled: bool = True
+    daily_flashcards_time: time = time(20, 0)
+    nightly_review_enabled: bool = True
+    nightly_review_time: time = time(22, 30)
+    reminder_timezone: str = "Asia/Kuala_Lumpur"
+
+
+class StudyReminderPreferencesUpdate(BaseModel):
+    """Editable reminder fields. The app currently uses Malaysia time."""
+    daily_flashcards_enabled: bool
+    daily_flashcards_time: time
+    nightly_review_enabled: bool
+    nightly_review_time: time
+
+
 class PasswordChangeRequest(BaseModel):
     """Password change request"""
     old_password: str
@@ -148,6 +165,11 @@ class PasswordChangeRequest(BaseModel):
 class PasswordResetRequest(BaseModel):
     """Password reset email request"""
     email: EmailStr
+
+
+class AccountActionRequest(BaseModel):
+    """Password confirmation for destructive account actions."""
+    password: str = Field(..., min_length=1)
 
 
 class PasswordRecoveryRequest(BaseModel):
@@ -206,14 +228,19 @@ class UserResponse(BaseModel):
     role: UserRole
     profile_picture_url: Optional[str] = None
     learning_style: Optional[LearningStyle] = None
+    visual_score: Optional[int] = None
+    auditory_score: Optional[int] = None
+    kinesthetic_score: Optional[int] = None
+    learning_style_assessed_at: Optional[datetime] = None
     form_level: Optional[str] = None
     school: Optional[str] = None
     target_grade: Optional[str] = None
     target_exam_date: Optional[date] = None
     created_at: datetime
+    email_verified: Optional[bool] = None
+    last_sign_in_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AuthResponse(BaseModel):
@@ -237,5 +264,4 @@ class ProfileResponse(BaseModel):
     target_exam_date: Optional[date] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

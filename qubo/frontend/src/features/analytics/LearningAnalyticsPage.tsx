@@ -6,6 +6,7 @@ import {
   FiBookOpen,
   FiCheckCircle,
   FiClock,
+  FiPlay,
   FiRefreshCw,
   FiSave,
   FiTrendingUp,
@@ -14,6 +15,7 @@ import {
 import AppSidebar from '@/components/layout/AppSidebar';
 import { useAuthStore } from '@/contexts/authStore';
 import { useLanguageStore } from '@/contexts/languageStore';
+import { useQuizStore } from '@/contexts/quizStore';
 import { authService } from '@/lib/authService';
 import { ReviewSchedule, StudySession, SubjectAnalytics } from '@/types/analytics';
 
@@ -35,6 +37,8 @@ export default function LearningAnalyticsPage() {
   const language = useLanguageStore((state) => state.language);
   const locale = language === 'ms' ? 'ms-MY' : 'en-MY';
   const navigate = useNavigate();
+  const setGeneratedQuiz = useQuizStore((state) => state.setGeneratedQuiz);
+  const setSavedQuizId = useQuizStore((state) => state.setSavedQuizId);
   const [subjects, setSubjects] = useState<SubjectAnalytics[]>([]);
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [reviewSchedule, setReviewSchedule] = useState<ReviewSchedule[]>([]);
@@ -43,6 +47,7 @@ export default function LearningAnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingThreshold, setIsSavingThreshold] = useState(false);
+  const [startingReviewId, setStartingReviewId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [form, setForm] = useState({
@@ -58,26 +63,45 @@ export default function LearningAnalyticsPage() {
     setIsLoading(true);
     setError('');
     try {
-      const [subjectData, sessionData, predictionThreshold, reviewData] = await Promise.all([
+      const [subjectResult, sessionResult, thresholdResult, reviewResult] = await Promise.allSettled([
         authService.getSubjectAnalytics(),
         authService.getStudySessions(),
         authService.getPredictionThreshold(),
         authService.getReviewSchedule(),
       ]);
-      setSubjects(subjectData);
-      setSessions(sessionData);
-      setThreshold(predictionThreshold);
-      setSavedThreshold(predictionThreshold);
-      setReviewSchedule(reviewData);
-      setForm((current) => ({
-        ...current,
-        subject_id: subjectData.some((subject) => subject.id === current.subject_id)
-          ? current.subject_id
-          : subjectData[0]?.id || '',
-      }));
-    } catch (requestError: any) {
-      const detail = requestError.response?.data?.detail;
-      setError(typeof detail === 'string' ? detail : 'Learning analytics could not be loaded.');
+
+      const failedSections: string[] = [];
+      if (subjectResult.status === 'fulfilled') {
+        const subjectData = subjectResult.value;
+        setSubjects(subjectData);
+        setForm((current) => ({
+          ...current,
+          subject_id: subjectData.some((subject) => subject.id === current.subject_id)
+            ? current.subject_id
+            : subjectData[0]?.id || '',
+        }));
+      } else {
+        failedSections.push('subject progress');
+      }
+
+      if (sessionResult.status === 'fulfilled') setSessions(sessionResult.value);
+      else failedSections.push('study sessions');
+
+      if (thresholdResult.status === 'fulfilled') {
+        setThreshold(thresholdResult.value);
+        setSavedThreshold(thresholdResult.value);
+      } else {
+        failedSections.push('warning setting');
+      }
+
+      if (reviewResult.status === 'fulfilled') setReviewSchedule(reviewResult.value);
+      else failedSections.push('review schedule');
+
+      if (failedSections.length) {
+        setError(`Could not load ${failedSections.join(', ')}. Other analytics remain available.`);
+      }
+    } catch {
+      setError('Learning analytics could not be loaded.');
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +113,7 @@ export default function LearningAnalyticsPage() {
       return;
     }
     void loadData();
-  }, [user?.role]);
+  }, [navigate, user?.role]);
 
   const selectedSubject = subjects.find((subject) => subject.id === form.subject_id) || null;
   const predictions = subjects
@@ -141,6 +165,24 @@ export default function LearningAnalyticsPage() {
       setError(typeof detail === 'string' ? detail : 'Warning threshold could not be updated.');
     } finally {
       setIsSavingThreshold(false);
+    }
+  };
+
+  const startReview = async (item: ReviewSchedule) => {
+    if (!item.quiz_id) return;
+    setMessage('');
+    setError('');
+    setStartingReviewId(item.id);
+    try {
+      const quiz = await authService.getSavedQuiz(item.quiz_id);
+      setGeneratedQuiz(quiz);
+      setSavedQuizId(item.quiz_id);
+      navigate('/quiz/session');
+    } catch (requestError: any) {
+      const detail = requestError.response?.data?.detail;
+      setError(typeof detail === 'string' ? detail : 'The review quiz could not be opened.');
+    } finally {
+      setStartingReviewId(null);
     }
   };
 
@@ -276,6 +318,18 @@ export default function LearningAnalyticsPage() {
                         <span className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase ${item.is_due ? 'bg-amber-200 text-amber-800' : 'bg-white text-slate-500'}`}>{item.is_due ? 'Due now' : `${item.interval_days} day interval`}</span>
                       </div>
                       <p className="mt-3 text-xs font-semibold text-slate-500">Next review: {new Date(`${item.next_review_date}T00:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      {item.quiz_id ? (
+                        <button
+                          type="button"
+                          onClick={() => void startReview(item)}
+                          disabled={startingReviewId === item.id}
+                          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-extrabold text-white hover:bg-blue-700 disabled:opacity-50"
+                        >
+                          <FiPlay /> {startingReviewId === item.id ? 'Opening review…' : item.is_due ? 'Start review quiz' : 'Practice early'}
+                        </button>
+                      ) : (
+                        <p className="mt-3 text-xs font-semibold text-slate-400">No saved quiz is available for this topic.</p>
+                      )}
                     </div>
                   )) : <p className="rounded-2xl border-2 border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">Complete a quiz to create your first review date.</p>}
                 </div>
