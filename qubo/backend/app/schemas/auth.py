@@ -11,6 +11,7 @@ VALID_SPM_GRADES = {"A+", "A", "A-", "B+", "B", "C+", "C", "D", "E"}
 class UserRole(str, Enum):
     STUDENT = "student"
     EDUCATOR = "educator"
+    ADMIN = "admin"
 
 
 class LearningStyle(str, Enum):

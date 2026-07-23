@@ -31,6 +31,11 @@ async def get_current_user(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found",
             )
+        if user.get("is_blacklisted"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This account has been blacklisted.",
+            )
         return user
     except Exception as e:
         raise HTTPException(
@@ -55,5 +60,15 @@ async def get_current_educator(current_user = Depends(get_current_user)):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied. Educator role required.",
+        )
+    return current_user
+
+
+async def get_current_admin(current_user = Depends(get_current_user)):
+    """Verify access to the separate Qubo administrative portal."""
+    if current_user.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Administrator role required.",
         )
     return current_user

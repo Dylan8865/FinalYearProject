@@ -29,6 +29,11 @@ class AuthService:
     @staticmethod
     def register(user_data: UserRegisterRequest) -> AuthResponse:
         """Register a new user"""
+        if user_data.role.value == "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Administrator accounts can only be created manually.",
+            )
         supabase = get_supabase()
 
         # Check if email already exists
@@ -156,6 +161,12 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No account found with this email. Please register first.",
+            )
+
+        if profile.get("is_blacklisted"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This account has been blacklisted. Contact Qubo support.",
             )
 
         account_role = profile.get("role")

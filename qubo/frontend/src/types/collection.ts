@@ -1,4 +1,10 @@
-export type CollectionStatus = 'draft' | 'shared' | 'archived';
+export type CollectionStatus = "draft" | "shared" | "archived";
+export type CollectionPreviewItem = {
+  item_type: CollectionItemType;
+  title: string;
+  youtube_url?: string | null;
+  preview_model_url?: string | null;
+};
 
 export interface EducatorCollection {
   collection_id: string;
@@ -10,6 +16,7 @@ export interface EducatorCollection {
   version: number;
   created_at: string;
   updated_at: string;
+  preview_items?: CollectionPreviewItem[];
 }
 
 export interface LinkedStudent {
@@ -19,7 +26,7 @@ export interface LinkedStudent {
   email?: string | null;
 }
 
-export type CollectionItemType = 'model' | 'video' | 'quiz';
+export type CollectionItemType = "model" | "video" | "quiz";
 
 export interface CollectionItem {
   collection_item_id: string;
