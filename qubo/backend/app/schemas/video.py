@@ -11,6 +11,7 @@ class VideoResponse(BaseModel):
     youtube_url: str
     title: str
     subject_tag: Optional[str] = None
+    uploaded_by: Optional[str] = None
 
 
 class ContentShareCreate(BaseModel):

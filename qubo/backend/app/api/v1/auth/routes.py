@@ -6,6 +6,7 @@ from typing import List
 from app.schemas.auth import (
     UserRegisterRequest,
     UserLoginRequest,
+    RefreshTokenRequest,
     ProfileUpdateRequest,
     LearningStyleAssessmentRequest,
     PasswordChangeRequest,
@@ -14,6 +15,7 @@ from app.schemas.auth import (
     SubjectResponse,
     StudentSubjectsUpdateRequest,
     AuthResponse,
+    TokenResponse,
     UserResponse,
 )
 from app.services.auth import AuthService
@@ -44,6 +46,12 @@ async def register(user_data: UserRegisterRequest):
 async def login(credentials: UserLoginRequest):
     """Login user"""
     return AuthService.login(credentials)
+
+
+@router.post("/refresh", response_model=TokenResponse)
+async def refresh_access_token(refresh_data: RefreshTokenRequest):
+    """Renew an expired short-lived access token without interrupting the user."""
+    return AuthService.refresh_access_token(refresh_data.refresh_token)
 
 
 @router.get("/profile", response_model=UserResponse)

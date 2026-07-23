@@ -16,6 +16,7 @@ import {
   FiSearch,
   FiShare2,
   FiStar,
+  FiTrash2,
   FiVideo,
   FiX,
 } from 'react-icons/fi';
@@ -42,6 +43,7 @@ export default function TutorialVideoPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [videos, setVideos] = useState<TutorialVideo[]>([]);
   const [selectedSubject, setSelectedSubject] = useState('All');
+  const [visibilityScope, setVisibilityScope] = useState<'public' | 'private'>('public');
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -77,7 +79,7 @@ export default function TutorialVideoPage() {
     setIsLoading(true);
     setError('');
     try {
-      setVideos(await authService.getTutorialVideos());
+      setVideos(await authService.getTutorialVideos(undefined, undefined, visibilityScope));
     } catch {
       setError('We could not load learning videos right now. Please check the backend connection and try again.');
     } finally {
@@ -88,7 +90,7 @@ export default function TutorialVideoPage() {
   useEffect(() => {
     loadVideos();
     authService.getFavourites().then((items: FavouriteItem[]) => setFavouriteIds(new Set(items.filter((item) => item.target_type === 'video').map((item) => item.target_id)))).catch(() => undefined);
-  }, []);
+  }, [visibilityScope]);
 
   useEffect(() => {
     if (user?.role !== 'educator') return;
@@ -129,6 +131,11 @@ export default function TutorialVideoPage() {
     const isSaved = favouriteIds.has(videoId);
     setFavouriteIds((current) => { const next = new Set(current); isSaved ? next.delete(videoId) : next.add(videoId); return next; });
     try { if (isSaved) await authService.removeFavourite('video', videoId); else await authService.saveFavourite('video', videoId); } catch { setFavouriteIds((current) => { const next = new Set(current); isSaved ? next.add(videoId) : next.delete(videoId); return next; }); }
+  };
+  const deleteVideo = async (video: TutorialVideo) => {
+    if (!window.confirm(`Delete “${video.title}”? This removes it from your collections and shared links.`)) return;
+    try { await authService.deleteTutorialVideo(video.video_id); setVideos((current) => current.filter((item) => item.video_id !== video.video_id)); }
+    catch (requestError: any) { setError(requestError.response?.data?.detail || 'This video could not be deleted.'); }
   };
 
   const submitShare = async () => {
@@ -195,6 +202,7 @@ export default function TutorialVideoPage() {
         </section>
 
         <section className="mt-6 flex flex-wrap gap-2" aria-label="Filter videos by subject">
+          {user?.role === 'educator' && <div className="mr-2 flex rounded-full bg-slate-200 p-1" aria-label="Filter videos by ownership"><button onClick={() => setVisibilityScope('public')} className={`rounded-full px-3 py-1.5 text-sm font-bold ${visibilityScope === 'public' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>Public library</button><button onClick={() => setVisibilityScope('private')} className={`rounded-full px-3 py-1.5 text-sm font-bold ${visibilityScope === 'private' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>Only mine</button></div>}
           {subjects.map((subject) => (
             <button key={subject} onClick={() => setSelectedSubject(subject)} className={`rounded-full px-4 py-2 text-sm font-bold transition ${selectedSubject === subject ? 'bg-primary text-white shadow-lg shadow-blue-600/20' : 'bg-white text-slate-600 shadow-sm hover:bg-blue-50 hover:text-primary'}`}>
               {subject}
@@ -252,6 +260,7 @@ export default function TutorialVideoPage() {
                       <button onClick={() => toggleFavourite(video.video_id)} aria-label={`Save ${video.title}`} className={`flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 ${favouriteIds.has(video.video_id) ? 'border-rose-100 bg-rose-50 text-rose-500' : 'text-slate-600 hover:bg-slate-50 hover:text-rose-500'}`}><FiHeart className={favouriteIds.has(video.video_id) ? 'fill-current' : ''} /></button>
                       <button onClick={() => { setShareVideo(video); setShareStatus(''); }} aria-label={`Share ${video.title}`} className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-primary"><FiShare2 /></button>
                       {user?.role === 'educator' && <button onClick={() => void toggleEducatorPick(video)} aria-label={`Recommend ${video.title} to students`} title={myEducatorPicks[video.video_id] ? 'Remove educator recommendation' : 'Recommend to students'} className={`flex h-11 w-11 items-center justify-center rounded-xl border ${myEducatorPicks[video.video_id] ? 'border-amber-200 bg-amber-50 text-amber-600' : 'border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-600'}`}><FiStar className={myEducatorPicks[video.video_id] ? 'fill-current' : ''} /></button>}
+                      {user?.role === 'educator' && video.uploaded_by === user.id && <button onClick={() => void deleteVideo(video)} aria-label={`Delete ${video.title}`} title="Delete your video" className="flex h-11 w-11 items-center justify-center rounded-xl border border-red-100 bg-red-50 text-red-500 hover:bg-red-100"><FiTrash2 /></button>}
                       <a href={video.youtube_url} target="_blank" rel="noreferrer" aria-label={`Open ${video.title} on YouTube`} className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"><FiExternalLink /></a>
                     </div>
                   </div>

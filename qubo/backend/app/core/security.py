@@ -47,11 +47,16 @@ def create_refresh_token(data: dict) -> str:
 
 
 def verify_token(token: str) -> dict:
-    """Verify and decode JWT token"""
+    """Verify and decode an access JWT token."""
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
+        if payload.get("type") == "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token cannot access this resource",
+            )
         user_id: str = payload.get("sub")
         if user_id is None:
             raise HTTPException(
@@ -63,4 +68,23 @@ def verify_token(token: str) -> dict:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
+        )
+
+
+def verify_refresh_token(token: str) -> dict:
+    """Verify and decode a refresh JWT token."""
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        if payload.get("type") != "refresh" or not payload.get("sub"):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+        return payload
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
         )

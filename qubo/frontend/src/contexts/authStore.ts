@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { User, AuthTokens } from '@/types/auth';
+import { User, AuthTokens, UserRole } from '@/types/auth';
 import { authService } from '@/lib/authService';
 
 interface AuthState {
@@ -16,7 +16,7 @@ interface AuthState {
   setAuthInitialized: (isAuthInitialized: boolean) => void;
   setError: (error: string | null) => void;
   
-  login: (email: string, password: string, role: 'student' | 'educator') => Promise<void>;
+  login: (email: string, password: string, role: UserRole) => Promise<void>;
   register: (email: string, password: string, username: string, full_name: string, role: 'student' | 'educator') => Promise<void>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;

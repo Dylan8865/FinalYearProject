@@ -19,14 +19,25 @@ async def create_video(payload: EducatorVideoCreate, current_user=Depends(get_cu
     return VideoService.create_video(current_user['id'], payload.title, payload.youtube_url, payload.subject_tag)
 
 
+@router.delete('/{video_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_video(video_id: str, current_user=Depends(get_current_educator)):
+    VideoService.delete_video(video_id, current_user['id'])
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.get("", response_model=List[VideoResponse])
 async def list_videos(
     search: Optional[str] = Query(default=None, max_length=100),
     subject: Optional[str] = Query(default=None, max_length=100),
-    _current_user=Depends(get_current_user),
+    scope: str = Query(default='public'),
+    current_user=Depends(get_current_user),
 ):
     """List tutorial videos alphabetically without exposing uploader identity."""
-    return VideoService.list_videos(search=search, subject=subject)
+    if scope not in {'public', 'private'}:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail='Scope must be public or private.')
+    if scope == 'private' and current_user['role'] != 'educator':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Only educators can view their uploaded videos.')
+    return VideoService.list_videos(search=search, subject=subject, uploader_id=current_user['id'] if scope == 'private' else None)
 
 
 @router.post("/{video_id}/view", status_code=status.HTTP_204_NO_CONTENT)

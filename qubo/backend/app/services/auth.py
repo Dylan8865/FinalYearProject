@@ -6,6 +6,7 @@ from app.core.security import (
     verify_password,
     create_access_token,
     create_refresh_token,
+    verify_refresh_token,
 )
 from app.db.supabase import create_supabase_auth_client, get_supabase
 from app.schemas.auth import (
@@ -28,6 +29,11 @@ class AuthService:
     @staticmethod
     def register(user_data: UserRegisterRequest) -> AuthResponse:
         """Register a new user"""
+        if user_data.role.value == "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Administrator accounts can only be created manually.",
+            )
         supabase = get_supabase()
 
         # Check if email already exists
@@ -157,6 +163,12 @@ class AuthService:
                 detail="No account found with this email. Please register first.",
             )
 
+        if profile.get("is_blacklisted"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This account has been blacklisted. Contact Qubo support.",
+            )
+
         account_role = profile.get("role")
         if account_role != credentials.role.value:
             raise HTTPException(
@@ -269,6 +281,39 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Incorrect password. {remaining_attempts} login attempts remaining.",
             )
+
+    @staticmethod
+    def refresh_access_token(refresh_token: str) -> TokenResponse:
+        """Issue a new access token for a still-valid refresh token."""
+        payload = verify_refresh_token(refresh_token)
+        user_id = payload["sub"]
+
+        try:
+            profile_response = (
+                get_supabase()
+                .table("profiles")
+                .select("id")
+                .eq("id", user_id)
+                .limit(1)
+                .execute()
+            )
+            if not profile_response.data:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Account no longer exists",
+                )
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Unable to validate the current session",
+            ) from exc
+
+        return TokenResponse(
+            access_token=create_access_token(data={"sub": user_id}),
+            refresh_token=refresh_token,
+        )
 
     @staticmethod
     def get_profile(user_id: str) -> UserResponse:

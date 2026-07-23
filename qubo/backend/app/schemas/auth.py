@@ -11,6 +11,7 @@ VALID_SPM_GRADES = {"A+", "A", "A-", "B+", "B", "C+", "C", "D", "E"}
 class UserRole(str, Enum):
     STUDENT = "student"
     EDUCATOR = "educator"
+    ADMIN = "admin"
 
 
 class LearningStyle(str, Enum):
@@ -71,6 +72,11 @@ class UserLoginRequest(BaseModel):
     @classmethod
     def normalize_login_email(cls, v: EmailStr) -> str:
         return str(v).strip().lower()
+
+
+class RefreshTokenRequest(BaseModel):
+    """Request a new short-lived access token using a valid refresh token."""
+    refresh_token: str = Field(..., min_length=1)
 
 
 class ProfileUpdateRequest(BaseModel):

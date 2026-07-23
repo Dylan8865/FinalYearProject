@@ -17,7 +17,6 @@ import {
   FiMoon,
   FiPlayCircle,
   FiSun,
-  FiTarget,
   FiUser,
   FiVideo,
 } from 'react-icons/fi';
@@ -103,13 +102,6 @@ export default function AppSidebar() {
             >
               {theme === 'dark' ? <FiSun /> : <FiMoon />}
             </button>
-            <span className="hidden items-center gap-1.5 sm:flex">
-              <span aria-hidden="true">🔥</span>
-              <span className="text-blue-600">7 Day Streak</span>
-            </span>
-            <span className="hidden items-center gap-1.5 sm:flex">
-              <FiTarget className="text-slate-500" /> Level 12
-            </span>
           </div>
           <button
             type="button"
