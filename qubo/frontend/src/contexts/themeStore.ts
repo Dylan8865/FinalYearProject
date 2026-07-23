@@ -4,7 +4,7 @@ export type ThemeMode = 'light' | 'dark';
 
 const THEME_STORAGE_KEY = 'qubo-theme';
 
-const applyTheme = (theme: ThemeMode) => {
+export const applyTheme = (theme: ThemeMode) => {
   if (typeof document === 'undefined') return;
 
   document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -22,6 +22,11 @@ const getInitialTheme = (): ThemeMode => {
   }
 
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
+export const applyThemeForPath = (theme: ThemeMode, pathname: string) => {
+  const isPublicAuthPage = pathname === '/login' || pathname === '/register';
+  applyTheme(isPublicAuthPage ? 'light' : theme);
 };
 
 const saveTheme = (theme: ThemeMode) => {
@@ -42,7 +47,7 @@ interface ThemeState {
 }
 
 export const initializeTheme = () => {
-  applyTheme(initialTheme);
+  applyThemeForPath(initialTheme, window.location.pathname);
 };
 
 export const useThemeStore = create<ThemeState>((set, get) => ({

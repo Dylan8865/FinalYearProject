@@ -9,9 +9,12 @@ from app.schemas.auth import (
     RefreshTokenRequest,
     ProfileUpdateRequest,
     LearningStyleAssessmentRequest,
+    StudyReminderPreferences,
+    StudyReminderPreferencesUpdate,
     PasswordChangeRequest,
     PasswordResetRequest,
     PasswordRecoveryRequest,
+    AccountActionRequest,
     SubjectResponse,
     StudentSubjectsUpdateRequest,
     AuthResponse,
@@ -57,7 +60,7 @@ async def refresh_access_token(refresh_data: RefreshTokenRequest):
 @router.get("/profile", response_model=UserResponse)
 async def get_profile(current_user = Depends(get_current_user)):
     """Get current user profile"""
-    return current_user
+    return await run_in_threadpool(AuthService.get_profile, current_user["id"])
 
 
 @router.put("/profile", response_model=UserResponse)
@@ -184,3 +187,76 @@ async def update_student_subjects(
 async def logout(current_user = Depends(get_current_user)):
     """Logout user (client-side token deletion)"""
     return {"message": "Logged out successfully"}
+
+
+@router.post("/account/deactivate")
+async def deactivate_account(
+    request: AccountActionRequest,
+    current_user=Depends(get_current_user),
+):
+    """Deactivate the current account after password confirmation."""
+    return await run_in_threadpool(
+        AuthService.deactivate_account,
+        current_user["id"],
+        current_user["email"],
+        request.password,
+    )
+
+
+@router.get("/profile/reminders", response_model=StudyReminderPreferences)
+async def get_study_reminders(current_user=Depends(get_current_user)):
+    """Get the signed-in student's saved reminder preferences."""
+    return await run_in_threadpool(AuthService.get_study_reminders, current_user["id"])
+
+
+@router.put("/profile/reminders", response_model=StudyReminderPreferences)
+async def update_study_reminders(
+    preferences: StudyReminderPreferencesUpdate,
+    current_user=Depends(get_current_user),
+):
+    """Update reminder times and enabled states."""
+    return await run_in_threadpool(
+        AuthService.update_study_reminders,
+        current_user["id"],
+        preferences,
+    )
+
+
+@router.delete("/account")
+async def delete_account(
+    request: AccountActionRequest,
+    current_user=Depends(get_current_user),
+):
+    """Permanently delete the current Auth user and cascading profile data."""
+    return await run_in_threadpool(
+        AuthService.delete_account,
+        current_user["id"],
+        current_user["email"],
+        request.password,
+    )
+
+
+@router.get("/account/data")
+async def get_account_data(current_user=Depends(get_current_user)):
+    """Downloadable account and learning data for the signed-in user."""
+    return await run_in_threadpool(AuthService.get_account_data, current_user["id"])
+
+
+@router.get("/account/data-summary")
+async def get_account_data_summary(current_user=Depends(get_current_user)):
+    """Small live summary used by the Privacy & Data panel."""
+    return await run_in_threadpool(AuthService.get_account_data_summary, current_user["id"])
+
+
+@router.delete("/account/learning-history")
+async def clear_learning_history(
+    request: AccountActionRequest,
+    current_user=Depends(get_current_user),
+):
+    """Clear learning activity after password confirmation."""
+    return await run_in_threadpool(
+        AuthService.clear_learning_history,
+        current_user["id"],
+        current_user["email"],
+        request.password,
+    )

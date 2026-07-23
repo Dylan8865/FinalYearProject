@@ -1,4 +1,5 @@
 from uuid import UUID
+from typing import List
 
 from fastapi import APIRouter, Depends, Query
 
@@ -55,7 +56,7 @@ async def complete_match(
     )
 
 
-@router.get("/history", response_model=list[MatchHistoryResponse])
+@router.get("/history", response_model=List[MatchHistoryResponse])
 async def get_match_history(
     limit: int = Query(default=5, ge=1, le=50),
     current_user=Depends(get_current_user),
@@ -64,7 +65,7 @@ async def get_match_history(
     return GameService.get_user_match_history(current_user["id"], limit)
 
 
-@router.get("/leaderboard/level-1", response_model=list[LeaderboardEntryResponse])
+@router.get("/leaderboard/level-1", response_model=List[LeaderboardEntryResponse])
 async def get_level_one_leaderboard(limit: int = Query(default=5, ge=1, le=50)):
     """Best winning turn count per student, ranked from lowest to highest."""
     return GameService.get_level_one_leaderboard(limit)

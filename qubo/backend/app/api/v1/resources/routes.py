@@ -35,7 +35,7 @@ ALLOWED_GLB_TYPES = {'model/gltf-binary', 'application/octet-stream'}
 async def upload_3d_model(
     title: str = Form(...),
     subject_name: str = Form(...),
-    topic_name: str | None = Form(default=None),
+    topic_name: Optional[str] = Form(default=None),
     visibility: str = Form(default='public'),
     model: UploadFile = File(...),
     current_user=Depends(get_current_educator),

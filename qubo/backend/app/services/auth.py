@@ -16,6 +16,7 @@ from app.schemas.auth import (
     UserResponse,
     TokenResponse,
     AuthResponse,
+    StudyReminderPreferencesUpdate,
 )
 
 
@@ -118,6 +119,8 @@ class AuthService:
                 full_name=user_data.full_name,
                 role=user_data.role,
                 created_at=datetime.now(timezone.utc),
+                email_verified=bool(auth_response.user.email_confirmed_at),
+                last_sign_in_at=auth_response.user.last_sign_in_at,
             )
 
             return AuthResponse(
@@ -167,6 +170,12 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="This account has been blacklisted. Contact Qubo support.",
+            )
+
+        if profile.get("is_active") is False:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This account has been deactivated. Contact support to reactivate it.",
             )
 
         account_role = profile.get("role")
@@ -226,11 +235,17 @@ class AuthService:
                 role=profile["role"],
                 profile_picture_url=profile.get("profile_picture_url"),
                 learning_style=profile.get("learning_style"),
+                visual_score=profile.get("visual_score"),
+                auditory_score=profile.get("auditory_score"),
+                kinesthetic_score=profile.get("kinesthetic_score"),
+                learning_style_assessed_at=profile.get("learning_style_assessed_at"),
                 form_level=profile.get("form_level"),
                 school=profile.get("school"),
                 target_grade=profile.get("target_grade"),
                 target_exam_date=profile.get("target_exam_date"),
                 created_at=profile.get("created_at"),
+                email_verified=bool(auth_response.user.email_confirmed_at),
+                last_sign_in_at=auth_response.user.last_sign_in_at,
             )
 
             return AuthResponse(
@@ -325,6 +340,15 @@ class AuthService:
                 supabase.table("profiles").select("*").eq("id", user_id).single().execute()
             )
             profile = profile_response.data
+            email_verified = None
+            last_sign_in_at = None
+            try:
+                auth_user = supabase.auth.admin.get_user_by_id(user_id).user
+                email_verified = bool(auth_user.email_confirmed_at)
+                last_sign_in_at = auth_user.last_sign_in_at
+            except Exception:
+                # Profile data remains available if Auth metadata is briefly unavailable.
+                pass
 
             return UserResponse(
                 id=profile["id"],
@@ -334,11 +358,17 @@ class AuthService:
                 role=profile["role"],
                 profile_picture_url=profile.get("profile_picture_url"),
                 learning_style=profile.get("learning_style"),
+                visual_score=profile.get("visual_score"),
+                auditory_score=profile.get("auditory_score"),
+                kinesthetic_score=profile.get("kinesthetic_score"),
+                learning_style_assessed_at=profile.get("learning_style_assessed_at"),
                 form_level=profile.get("form_level"),
                 school=profile.get("school"),
                 target_grade=profile.get("target_grade"),
                 target_exam_date=profile.get("target_exam_date"),
                 created_at=profile.get("created_at"),
+                email_verified=email_verified,
+                last_sign_in_at=last_sign_in_at,
             )
 
         except Exception as e:
@@ -439,19 +469,32 @@ class AuthService:
     @staticmethod
     def set_learning_style(user_id: str, visual: int, auditory: int, kinesthetic: int) -> dict:
         """Set user learning style based on assessment scores"""
-        # Determine dominant learning style
-        scores = {
-            "visual": visual,
-            "auditory": auditory,
-            "kinesthetic": kinesthetic,
-        }
+        raw_scores = {"visual": visual, "auditory": auditory, "kinesthetic": kinesthetic}
+        total = sum(raw_scores.values())
+        if total <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Learning-style scores must include at least one response",
+            )
+
+        # Store a real percentage distribution even if an older client submits
+        # three independent 0-100 scores that do not add up to 100.
+        exact = {key: value * 100 / total for key, value in raw_scores.items()}
+        scores = {key: int(value) for key, value in exact.items()}
+        remainder = 100 - sum(scores.values())
+        for key in sorted(exact, key=lambda item: exact[item] - scores[item], reverse=True)[:remainder]:
+            scores[key] += 1
         dominant_style = max(scores, key=scores.get)
 
         supabase = get_supabase()
         try:
-            supabase.table("profiles").update(
-                {"learning_style": dominant_style}
-            ).eq("id", user_id).execute()
+            supabase.table("profiles").update({
+                "learning_style": dominant_style,
+                "visual_score": scores["visual"],
+                "auditory_score": scores["auditory"],
+                "kinesthetic_score": scores["kinesthetic"],
+                "learning_style_assessed_at": datetime.now(timezone.utc).isoformat(),
+            }).eq("id", user_id).execute()
 
             return {
                 "learning_style": dominant_style,
@@ -505,6 +548,193 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(e),
             )
+
+    @staticmethod
+    def get_study_reminders(user_id: str) -> dict:
+        """Return the student's persisted reminder preferences."""
+        try:
+            return (
+                get_supabase().table("profiles")
+                .select(
+                    "daily_flashcards_enabled,daily_flashcards_time,"
+                    "nightly_review_enabled,nightly_review_time,reminder_timezone"
+                )
+                .eq("id", user_id)
+                .single()
+                .execute().data
+            )
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to load study reminders",
+            ) from exc
+
+    @staticmethod
+    def update_study_reminders(
+        user_id: str,
+        preferences: StudyReminderPreferencesUpdate,
+    ) -> dict:
+        """Persist the two reminder controls for the signed-in student."""
+        update = preferences.model_dump()
+        update["daily_flashcards_time"] = preferences.daily_flashcards_time.isoformat(timespec="minutes")
+        update["nightly_review_time"] = preferences.nightly_review_time.isoformat(timespec="minutes")
+        try:
+            get_supabase().table("profiles").update(update).eq("id", user_id).execute()
+            return AuthService.get_study_reminders(user_id)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to save study reminders",
+            ) from exc
+
+    @staticmethod
+    def _verify_account_password(email: str, password: str) -> None:
+        try:
+            auth_client = create_supabase_auth_client()
+            auth_client.auth.sign_in_with_password({"email": email, "password": password})
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect password",
+            ) from exc
+
+    @staticmethod
+    def deactivate_account(user_id: str, email: str, password: str) -> dict:
+        """Block future application access while preserving learning data."""
+        AuthService._verify_account_password(email, password)
+        try:
+            get_supabase().table("profiles").update({
+                "is_active": False,
+                "deactivated_at": datetime.now(timezone.utc).isoformat(),
+            }).eq("id", user_id).execute()
+            return {"message": "Account deactivated successfully"}
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to deactivate account",
+            ) from exc
+
+    @staticmethod
+    def delete_account(user_id: str, email: str, password: str) -> dict:
+        """Permanently delete a user and data linked through cascade constraints."""
+        AuthService._verify_account_password(email, password)
+        supabase = get_supabase()
+
+        try:
+            avatar_files = supabase.storage.from_(AuthService.PROFILE_PICTURE_BUCKET).list(user_id)
+            paths = [f"{user_id}/{item['name']}" for item in (avatar_files or []) if item.get("name")]
+            if paths:
+                supabase.storage.from_(AuthService.PROFILE_PICTURE_BUCKET).remove(paths)
+        except Exception:
+            # Missing legacy avatars must not prevent the account from being deleted.
+            pass
+
+        try:
+            # This removes auth.users; profiles and owned learning rows cascade from it.
+            supabase.auth.admin.delete_user(user_id)
+            return {"message": "Account and learning data deleted permanently"}
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to delete account data",
+            ) from exc
+
+    @staticmethod
+    def get_account_data(user_id: str) -> dict:
+        """Return a portable copy of the signed-in user's Qubo data."""
+        supabase = get_supabase()
+
+        def rows(table: str, user_column: str, columns: str = "*") -> list:
+            return (
+                supabase.table(table)
+                .select(columns)
+                .eq(user_column, user_id)
+                .execute().data
+                or []
+            )
+
+        profile_rows = (
+            supabase.table("profiles")
+            .select(
+                "id,email,username,full_name,role,profile_picture_url,learning_style,"
+                "visual_score,auditory_score,kinesthetic_score,learning_style_assessed_at,"
+                "daily_flashcards_enabled,daily_flashcards_time,nightly_review_enabled,"
+                "nightly_review_time,reminder_timezone,form_level,school,target_grade,"
+                "target_exam_date,created_at"
+            )
+            .eq("id", user_id)
+            .limit(1)
+            .execute().data
+            or []
+        )
+        selected_subjects = rows(
+            "student_subjects",
+            "student_id",
+            "subject_id,subjects(subject_name,category)",
+        )
+
+        return {
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "profile": profile_rows[0] if profile_rows else {},
+            "selected_subjects": selected_subjects,
+            "saved_quizzes": rows(
+                "quizzes",
+                "owner_id",
+                "id,title,subject_id,topic_id,source_type,created_at",
+            ),
+            "quiz_attempts": rows("quiz_attempts", "student_id"),
+            "study_sessions": rows("study_sessions", "student_id"),
+            "topic_performance": rows("performance_records", "student_id"),
+            "review_schedule": rows("spaced_repetition_schedule", "student_id"),
+            "exam_predictions": rows("exam_predictions", "student_id"),
+            "learning_events": rows("learning_events", "user_id"),
+            "resource_activity": rows("user_resources", "user_id"),
+            "favourites": rows("user_favourites", "user_id"),
+            "game_matches": rows("matches", "user_id"),
+        }
+
+    @staticmethod
+    def get_account_data_summary(user_id: str) -> dict:
+        data = AuthService.get_account_data(user_id)
+        return {
+            "selected_subjects": len(data["selected_subjects"]),
+            "saved_quizzes": len(data["saved_quizzes"]),
+            "quiz_attempts": len(data["quiz_attempts"]),
+            "study_sessions": len(data["study_sessions"]),
+            "review_schedules": len(data["review_schedule"]),
+            "learning_events": len(data["learning_events"]),
+            "game_matches": len(data["game_matches"]),
+        }
+
+    @staticmethod
+    def clear_learning_history(user_id: str, email: str, password: str) -> dict:
+        """Remove derived activity and progress while preserving profile and saved content."""
+        AuthService._verify_account_password(email, password)
+        supabase = get_supabase()
+        cleared = {}
+        history_tables = (
+            ("exam_predictions", "student_id"),
+            ("quiz_attempts", "student_id"),
+            ("study_sessions", "student_id"),
+            ("performance_records", "student_id"),
+            ("spaced_repetition_schedule", "student_id"),
+            ("learning_events", "user_id"),
+            ("user_resources", "user_id"),
+            ("matches", "user_id"),
+        )
+        try:
+            for table, user_column in history_tables:
+                response = supabase.table(table).delete().eq(user_column, user_id).execute()
+                cleared[table] = len(response.data or [])
+            return {
+                "message": "Learning history cleared successfully",
+                "cleared": cleared,
+            }
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to clear all learning history",
+            ) from exc
 
     @staticmethod
     def send_password_reset(email: str) -> dict:
@@ -602,6 +832,10 @@ class AuthService:
                     {"subject_name": "Chemistry", "category": "Elective (Science)"},
                     {"subject_name": "Biology", "category": "Elective (Science)"},
                     {"subject_name": "Add Mathematics", "category": "Elective (Science)"},
+                    {"subject_name": "Computer Science", "category": "Elective (Science)"},
+                    {"subject_name": "Geography", "category": "Elective (Art)"},
+                    {"subject_name": "Economic", "category": "Elective (Art)"},
+                    {"subject_name": "Chinese", "category": "Elective (Art)"},
                 ]
                 supabase.table("subjects").insert(seed_subjects).execute()
                 res = supabase.table("subjects").select("*").execute()

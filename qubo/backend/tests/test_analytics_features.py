@@ -1,5 +1,5 @@
 import unittest
-from datetime import date
+from datetime import date, timezone
 
 from app.services.analytics import AnalyticsService
 from app.services.quiz import QuizLibraryService
@@ -7,6 +7,25 @@ from app.services.report import ProgressReportService
 
 
 class AnalyticsFeatureTests(unittest.TestCase):
+    def test_new_spm_subject_aliases_match_database_names(self):
+        subjects = [
+            {"id": "geography", "subject_name": "Geography"},
+            {"id": "computer-science", "subject_name": "Computer Science"},
+            {"id": "economic", "subject_name": "Economic"},
+            {"id": "chinese", "subject_name": "Chinese"},
+            {"id": "science", "subject_name": "Science"},
+        ]
+
+        self.assertEqual(QuizLibraryService._match_subject(subjects, "Geografi")["id"], "geography")
+        self.assertEqual(QuizLibraryService._match_subject(subjects, "SPM Sains Komputer")["id"], "computer-science")
+        self.assertEqual(QuizLibraryService._match_subject(subjects, "Economics")["id"], "economic")
+        self.assertEqual(QuizLibraryService._match_subject(subjects, "Bahasa Cina")["id"], "chinese")
+
+    def test_supabase_timestamp_with_variable_precision_is_parsed(self):
+        parsed = AnalyticsService._parse_datetime("2026-07-21T17:35:04.89745+00:00")
+        self.assertEqual(parsed.microsecond, 897450)
+        self.assertEqual(parsed.tzinfo, timezone.utc)
+
     def test_prediction_is_bounded_and_uses_recent_activity(self):
         without_study = AnalyticsService._calculate_prediction([40, 50, 60], 0)
         with_study = AnalyticsService._calculate_prediction([40, 50, 60], 150)

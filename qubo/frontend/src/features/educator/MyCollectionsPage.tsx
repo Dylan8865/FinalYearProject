@@ -139,7 +139,8 @@ export default function MyCollectionsPage() {
   };
   useEffect(() => {
     if (user?.role === "educator") void loadCollections();
-  }, [status, user?.role]);
+  }, [status, user?.role]); // eslint-disable-line react-hooks/exhaustive-deps -- status is the request input
+
   useEffect(() => {
     if (!isShareOpen || studentEmail.trim().length < 2) {
       setStudentMatches([]);
