@@ -17,6 +17,12 @@ public class GameSessionReporter : MonoBehaviour
         public int effect_value;
         public string winner;
         public int turns_played;
+        public int score;
+        public int waves_cleared;
+        public bool is_victory;
+        public int enemies_defeated;
+        public int compounds_discovered;
+        public int highest_combo;
     }
 
     public static GameSessionReporter Instance { get; private set; }
@@ -75,7 +81,15 @@ public class GameSessionReporter : MonoBehaviour
         Post(new BridgeMessage { type = "qubo:match-started" });
     }
 
-    public void ReportMatchCompleted(string winner, int turnsPlayed)
+    public void ReportMatchCompleted(
+        string winner,
+        int turnsPlayed,
+        int score,
+        int wavesCleared,
+        bool isVictory,
+        int enemiesDefeated,
+        int compoundsDiscovered,
+        int highestCombo)
     {
         if (!matchStarted || matchCompleted) return;
 
@@ -84,7 +98,13 @@ public class GameSessionReporter : MonoBehaviour
         {
             type = "qubo:match-completed",
             winner = winner,
-            turns_played = Mathf.Max(turnsPlayed, currentTurn - 1)
+            turns_played = Mathf.Max(turnsPlayed, currentTurn - 1),
+            score = Mathf.Max(0, score),
+            waves_cleared = Mathf.Max(0, wavesCleared),
+            is_victory = isVictory,
+            enemies_defeated = Mathf.Max(0, enemiesDefeated),
+            compounds_discovered = Mathf.Max(0, compoundsDiscovered),
+            highest_combo = Mathf.Max(0, highestCombo)
         });
     }
 

@@ -160,7 +160,15 @@ public class RunProgressionSystem : MonoBehaviour
         PlayerPrefs.SetInt(HighScoreKey, highScore);
         PlayerPrefs.Save();
 
-        GameSessionReporter.Instance?.ReportMatchCompleted("player", TurnsUsed);
+        GameSessionReporter.Instance?.ReportMatchCompleted(
+            "player",
+            TurnsUsed,
+            Score,
+            WavesCleared,
+            true,
+            EnemiesDefeated,
+            CompoundsDiscovered,
+            HighestCombo);
 
         inGameUI?.ShowFinalReport(
             Score,

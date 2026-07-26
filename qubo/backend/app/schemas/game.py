@@ -13,6 +13,11 @@ class MatchResponse(BaseModel):
     game_level: int = 1
     waves_cleared: int = 0
     is_victory: bool = False
+    score: Optional[int] = None
+    enemies_defeated: Optional[int] = None
+    compounds_discovered: Optional[int] = None
+    highest_combo: Optional[int] = None
+    leaderboard_points: Optional[int] = None
     completed_at: Optional[str] = None
 
 
@@ -22,8 +27,16 @@ class MatchHistoryResponse(MatchResponse):
 
 class LeaderboardEntryResponse(BaseModel):
     rank: int
+    match_id: UUID
     username: str
     profile_picture_url: Optional[str] = None
+    score: int
+    leaderboard_points: int
+    waves_cleared: int
+    enemies_defeated: int
+    compounds_discovered: int
+    highest_combo: int
+    grade: str
     turns_played: int
     completed_at: Optional[str] = None
     played_at: str
@@ -49,3 +62,7 @@ class MatchCompleteRequest(BaseModel):
     turns_played: int = Field(ge=0, le=10_000)
     waves_cleared: int = Field(default=0, ge=0, le=100)
     is_victory: bool = False
+    score: Optional[int] = Field(default=None, ge=0, le=10_000_000)
+    enemies_defeated: Optional[int] = Field(default=None, ge=0, le=100_000)
+    compounds_discovered: Optional[int] = Field(default=None, ge=0, le=100_000)
+    highest_combo: Optional[int] = Field(default=None, ge=0, le=100_000)

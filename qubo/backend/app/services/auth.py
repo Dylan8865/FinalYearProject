@@ -26,6 +26,10 @@ class AuthService:
     MAX_FAILED_LOGIN_ATTEMPTS = 5
     LOCKOUT_MINUTES = 15
     PROFILE_PICTURE_BUCKET = "avatars"
+    # Use one public failure response for every login rejection. In particular,
+    # do not reveal whether an email exists, which role owns it, or whether a
+    # supplied password was otherwise valid for a different portal.
+    LOGIN_FAILURE_MESSAGE = "Unable to sign in with these credentials. Please try again."
 
     @staticmethod
     def register(user_data: UserRegisterRequest) -> AuthResponse:
@@ -142,7 +146,8 @@ class AuthService:
         """Login user"""
         supabase = get_supabase()
 
-        # Fetch profile first so the API can give useful login feedback.
+        # Fetch the profile only to enforce account controls. Every rejection
+        # below deliberately returns the same public message.
         try:
             profile_response = (
                 supabase.table("profiles")
@@ -156,36 +161,33 @@ class AuthService:
             raise
         except Exception as e:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unable to check account: {e}",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=AuthService.LOGIN_FAILURE_MESSAGE,
             )
 
         if not profile:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No account found with this email. Please register first.",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=AuthService.LOGIN_FAILURE_MESSAGE,
             )
 
         if profile.get("is_blacklisted"):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="This account has been blacklisted. Contact Qubo support.",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=AuthService.LOGIN_FAILURE_MESSAGE,
             )
 
         if profile.get("is_active") is False:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="This account has been deactivated. Contact support to reactivate it.",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=AuthService.LOGIN_FAILURE_MESSAGE,
             )
 
         account_role = profile.get("role")
         if account_role != credentials.role.value:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    f"This account is registered as an {account_role}. "
-                    f"Select {account_role.capitalize()} before logging in."
-                ),
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=AuthService.LOGIN_FAILURE_MESSAGE,
             )
 
         if profile.get("locked_until"):
@@ -193,10 +195,9 @@ class AuthService:
             clean_str = locked_until_str.replace("Z", "+00:00")
             locked_until = datetime.fromisoformat(clean_str)
             if locked_until > datetime.now(timezone.utc):
-                diff_mins = int((locked_until - datetime.now(timezone.utc)).total_seconds() / 60) + 1
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Account is temporarily locked. Try again in {diff_mins} minutes.",
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=AuthService.LOGIN_FAILURE_MESSAGE,
                 )
 
         try:
@@ -260,18 +261,17 @@ class AuthService:
             error_message = str(e).lower()
             if "email not confirmed" in error_message or "confirm" in error_message:
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Please confirm your email before logging in.",
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=AuthService.LOGIN_FAILURE_MESSAGE,
                 )
             if "email link" in error_message or "verification" in error_message:
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Please verify your email before logging in.",
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=AuthService.LOGIN_FAILURE_MESSAGE,
                 )
 
             # Handle failed attempt
             attempts = profile.get("failed_login_attempts", 0) + 1
-            remaining_attempts = max(AuthService.MAX_FAILED_LOGIN_ATTEMPTS - attempts, 0)
             lock_until = None
             if attempts >= AuthService.MAX_FAILED_LOGIN_ATTEMPTS:
                 lock_until = (
@@ -288,13 +288,13 @@ class AuthService:
 
             if lock_until:
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Incorrect password. Account locked for {AuthService.LOCKOUT_MINUTES} minutes.",
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=AuthService.LOGIN_FAILURE_MESSAGE,
                 )
 
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Incorrect password. {remaining_attempts} login attempts remaining.",
+                detail=AuthService.LOGIN_FAILURE_MESSAGE,
             )
 
     @staticmethod

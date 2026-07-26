@@ -50,3 +50,33 @@ async def restore_recent_learning(target_type: str, target_id: str, current_user
 @router.get("/analytics", response_model=EducatorAnalyticsResponse)
 async def get_educator_analytics(_current_user=Depends(get_current_educator)):
     return LearningService.educator_analytics()
+
+
+# ---------------------------------------------------------------------------
+# Shared collections inbox (student-facing)
+# ---------------------------------------------------------------------------
+from app.services.collection_inbox import CollectionInboxService  # noqa: E402
+
+
+@router.get("/shared-collections")
+async def list_shared_collections(current_user=Depends(get_current_user)):
+    """Collections that educators have shared with the current student."""
+    return CollectionInboxService.list_received(current_user["id"])
+
+
+@router.get("/shared-collections/{collection_id}")
+async def get_shared_collection_detail(collection_id: str, current_user=Depends(get_current_user)):
+    """Full item listing for a shared collection."""
+    return CollectionInboxService.get_detail(current_user["id"], collection_id)
+
+
+@router.post("/shared-collections/{collection_share_id}/open", status_code=status.HTTP_204_NO_CONTENT)
+async def open_shared_collection(collection_share_id: str, current_user=Depends(get_current_user)):
+    CollectionInboxService.mark_opened(current_user["id"], collection_share_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/shared-collections/{collection_id}/save-quiz/{quiz_id}", status_code=status.HTTP_201_CREATED)
+async def save_shared_quiz(collection_id: str, quiz_id: str, current_user=Depends(get_current_user)):
+    """Copy a quiz from a shared collection into the student's personal library."""
+    return CollectionInboxService.save_quiz_to_library(current_user["id"], quiz_id, collection_id)
