@@ -52,7 +52,7 @@ export default function ModelLibraryPage() {
   useEffect(() => {
     void loadModels();
     authService.getFavourites().then((items: FavouriteItem[]) => setFavouriteIds(new Set(items.filter((item) => item.target_type === 'model').map((item) => item.target_id)))).catch(() => undefined);
-  }, [visibilityScope]);
+  }, [visibilityScope]); // eslint-disable-line react-hooks/exhaustive-deps -- reload only when the selected visibility changes
 
   const toggleFavourite = async (resourceId: string) => {
     const isSaved = favouriteIds.has(resourceId);

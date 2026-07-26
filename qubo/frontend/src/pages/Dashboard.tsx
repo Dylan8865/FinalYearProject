@@ -108,22 +108,24 @@ export default function Dashboard() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/profile')}
-              className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 md:flex"
-            >
-              <FiSettings className="h-4 w-4" />
-              Settings
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/10 transition hover:bg-slate-800"
-            >
-              <FiLogOut className="h-4 w-4" />
-              Logout
-            </button>
-          </div>
+          {!isStudent && (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/profile')}
+                className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 md:flex"
+              >
+                <FiSettings className="h-4 w-4" />
+                Settings
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/10 transition hover:bg-slate-800"
+              >
+                <FiLogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </div>
+          )}
         </header>
 
         <main className="space-y-6 px-5 py-6 md:px-8 md:py-8">

@@ -46,7 +46,7 @@ export default function CollectionEditorModal({ collection, onClose, onChanged }
     }
   };
 
-  useEffect(() => { void load(); }, [collection.collection_id]);
+  useEffect(() => { void load(); }, [collection.collection_id]); // eslint-disable-line react-hooks/exhaustive-deps -- reload when the selected collection changes
 
   const included = useMemo(() => new Set(items.map((item) => `${item.item_type}:${item.target_id}`)), [items]);
   const shownOptions = useMemo(

@@ -88,6 +88,7 @@ class ReviewScheduleItem(BaseModel):
     last_reviewed_date: Optional[str] = None
     last_score: Optional[float] = None
     is_due: bool
+    quiz_id: Optional[str] = None
 
 
 class PredictionSettings(BaseModel):

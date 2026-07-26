@@ -36,7 +36,15 @@ async def get_current_user(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="This account has been blacklisted.",
             )
+
+        if user.get("is_active") is False:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This account has been deactivated.",
+            )
         return user
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

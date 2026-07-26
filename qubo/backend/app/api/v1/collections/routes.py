@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.db.deps import get_current_educator
@@ -7,7 +9,7 @@ from app.services.collection import CollectionService
 router = APIRouter(prefix='/collections', tags=['collections'])
 
 @router.get('/mine')
-async def list_collections(status_filter: str | None = None, current_user=Depends(get_current_educator)):
+async def list_collections(status_filter: Optional[str] = None, current_user=Depends(get_current_educator)):
     return CollectionService.list_mine(current_user['id'], status_filter)
 
 @router.get('/linked-students')

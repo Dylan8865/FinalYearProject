@@ -75,7 +75,7 @@ export default function TutorialVideoPage() {
     });
   }, [search, selectedSubject, videos]);
 
-  const loadVideos = async () => {
+  const loadVideos = useCallback(async () => {
     setIsLoading(true);
     setError('');
     try {
@@ -85,12 +85,12 @@ export default function TutorialVideoPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [visibilityScope]);
 
   useEffect(() => {
-    loadVideos();
+    void loadVideos();
     authService.getFavourites().then((items: FavouriteItem[]) => setFavouriteIds(new Set(items.filter((item) => item.target_type === 'video').map((item) => item.target_id)))).catch(() => undefined);
-  }, [visibilityScope]);
+  }, [loadVideos]);
 
   useEffect(() => {
     if (user?.role !== 'educator') return;

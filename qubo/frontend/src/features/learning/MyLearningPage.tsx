@@ -62,7 +62,7 @@ export default function MyLearningPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toast]);
+  }, [toast]); // eslint-disable-line react-hooks/exhaustive-deps -- undo always reads the same toast captured by this effect
 
   useEffect(() => () => { if (toastTimeout.current) window.clearTimeout(toastTimeout.current); }, []);
 
