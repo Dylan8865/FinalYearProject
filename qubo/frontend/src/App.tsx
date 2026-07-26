@@ -23,6 +23,7 @@ import ExploreResourcesPage from '@/features/resources/ExploreResourcesPage';
 import GameRoomPage from '@/features/game/GameRoomPage';
 import TutorialVideoPage from '@/features/videos/TutorialVideoPage';
 import MyLearningPage from '@/features/learning/MyLearningPage';
+import SharedCollectionPage from '@/features/learning/SharedCollectionPage';
 import EducatorUploadContentPage from '@/features/educator/EducatorUploadContentPage';
 import MyCollectionsPage from '@/features/educator/MyCollectionsPage';
 import EducatorQuizEditorPage from '@/features/educator/EducatorQuizEditorPage';
@@ -221,6 +222,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <MyLearningPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shared-collection/:collectionId"
+          element={
+            <ProtectedRoute>
+              <SharedCollectionPage />
             </ProtectedRoute>
           }
         />

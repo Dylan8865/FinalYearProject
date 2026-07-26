@@ -55,6 +55,8 @@ import {
   CollectionItemType,
   EducatorCollection,
   LinkedStudent,
+  SharedCollection,
+  SharedCollectionDetail,
 } from "@/types/collection";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
@@ -967,6 +969,42 @@ class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.getAccessToken();
+  }
+
+  // -----------------------------------------------------------------------
+  // Shared collections inbox (student-facing)
+  // -----------------------------------------------------------------------
+
+  async getSharedCollections(): Promise<SharedCollection[]> {
+    const response = await this.api.get<SharedCollection[]>(
+      "/learning/shared-collections",
+    );
+    return response.data;
+  }
+
+  async getSharedCollectionDetail(
+    collectionId: string,
+  ): Promise<SharedCollectionDetail> {
+    const response = await this.api.get<SharedCollectionDetail>(
+      `/learning/shared-collections/${collectionId}`,
+    );
+    return response.data;
+  }
+
+  async openSharedCollection(collectionShareId: string): Promise<void> {
+    await this.api.post(
+      `/learning/shared-collections/${collectionShareId}/open`,
+    );
+  }
+
+  async saveSharedQuizToLibrary(
+    collectionId: string,
+    quizId: string,
+  ): Promise<{ id: string; message: string }> {
+    const response = await this.api.post<{ id: string; message: string }>(
+      `/learning/shared-collections/${collectionId}/save-quiz/${quizId}`,
+    );
+    return response.data;
   }
 }
 
