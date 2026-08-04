@@ -1,3 +1,4 @@
+import json
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
@@ -59,11 +60,36 @@ class Settings(BaseSettings):
     GOOGLE_OAUTH_CLIENT_SECRET: str = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
     
     # CORS
-    ALLOWED_ORIGINS: list = [
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "http://localhost:5173",
-    ]
+    # Render provides this as one comma-separated string, for example:
+    # ALLOWED_ORIGINS=https://qubo.vercel.app,http://localhost:3000
+    ALLOWED_ORIGINS: str = os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:3000,http://localhost:8000,http://localhost:5173",
+    )
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Return normalized origins for FastAPI's CORS middleware.
+
+        Comma-separated values are preferred. The legacy JSON-array value in
+        existing local .env files remains supported during the transition.
+        """
+        raw_origins = self.ALLOWED_ORIGINS.strip()
+        candidates: list[Any]
+        if raw_origins.startswith("["):
+            try:
+                parsed = json.loads(raw_origins)
+                candidates = parsed if isinstance(parsed, list) else []
+            except json.JSONDecodeError:
+                candidates = []
+        else:
+            candidates = raw_origins.split(",")
+
+        return [
+            str(origin).strip().rstrip("/")
+            for origin in candidates
+            if str(origin).strip()
+        ]
     
     # Email (optional)
     SMTP_SERVER: Optional[str] = os.getenv("SMTP_SERVER")
@@ -71,7 +97,14 @@ class Settings(BaseSettings):
     SMTP_USER: Optional[str] = os.getenv("SMTP_USER")
     SMTP_PASSWORD: Optional[str] = os.getenv("SMTP_PASSWORD")
     
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+    # A shared deployment environment may contain frontend-only variables such
+    # as VITE_API_URL. They are not backend settings and should not stop the
+    # API from booting.
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore",
+    )
 
 
 settings = Settings()
