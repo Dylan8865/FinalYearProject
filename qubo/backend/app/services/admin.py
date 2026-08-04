@@ -1,5 +1,5 @@
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -121,7 +121,7 @@ class AdminService:
     def list_users(cls, search: str | None = None) -> list[dict]:
         try:
             query = get_supabase().table("profiles").select(
-                "id,username,full_name,email,role,failed_login_attempts,locked_until,is_blacklisted,blacklisted_at,blacklist_reason,created_at"
+                "id,username,full_name,email,role,is_active,deactivated_at,failed_login_attempts,locked_until,created_at"
             ).order("created_at", desc=True)
             if search:
                 query = query.or_(f"username.ilike.%{search.strip()}%,email.ilike.%{search.strip()}%,full_name.ilike.%{search.strip()}%")
@@ -130,41 +130,25 @@ class AdminService:
             raise HTTPException(status_code=502, detail="Users could not be loaded.") from exc
 
     @classmethod
-    def set_lock(cls, admin_id: str, user_id: str, locked: bool, reason: str | None) -> None:
+    def set_active_status(cls, admin_id: str, user_id: str, is_active: bool, reason: str | None) -> None:
         if admin_id == user_id:
-            raise HTTPException(status_code=400, detail="Administrators cannot lock their own account.")
-        locked_until = (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat() if locked else None
-        updated = get_supabase().table("profiles").update({"locked_until": locked_until, "failed_login_attempts": 5 if locked else 0}).eq("id", user_id).execute().data or []
+            raise HTTPException(status_code=400, detail="Administrators cannot change their own active status.")
+        profiles = get_supabase().table("profiles").select("session_version").eq("id", user_id).limit(1).execute().data or []
+        if not profiles:
+            raise HTTPException(status_code=404, detail="User not found.")
+        updated = get_supabase().table("profiles").update({
+            "is_active": is_active,
+            "deactivated_at": None if is_active else datetime.now(timezone.utc).isoformat(),
+            # Clear any temporary sign-in cooldown when the administrator
+            # changes an account's lifecycle state.
+            "locked_until": None,
+            "failed_login_attempts": 0,
+            # A reactivated account must not make its old browser tokens valid again.
+            "session_version": int(profiles[0].get("session_version") or 0) + (0 if is_active else 1),
+        }).eq("id", user_id).execute().data or []
         if not updated:
             raise HTTPException(status_code=404, detail="User not found.")
-        cls._audit(admin_id, "account_locked" if locked else "account_unlocked", "user", user_id, user_id, reason)
-
-    @classmethod
-    def set_blacklist(cls, admin_id: str, user_id: str, blacklisted: bool, reason: str | None) -> None:
-        if admin_id == user_id:
-            raise HTTPException(status_code=400, detail="Administrators cannot blacklist themselves.")
-        changes = {
-            "is_blacklisted": blacklisted,
-            "blacklisted_at": datetime.now(timezone.utc).isoformat() if blacklisted else None,
-            "blacklisted_by": admin_id if blacklisted else None,
-            "blacklist_reason": reason if blacklisted else None,
-        }
-        updated = get_supabase().table("profiles").update(changes).eq("id", user_id).execute().data or []
-        if not updated:
-            raise HTTPException(status_code=404, detail="User not found.")
-        cls._audit(admin_id, "user_blacklisted" if blacklisted else "user_unblacklisted", "user", user_id, user_id, reason)
-
-    @classmethod
-    def set_temporary_password(cls, admin_id: str, user_id: str, password: str) -> None:
-        if admin_id == user_id:
-            raise HTTPException(status_code=400, detail="Use your own password settings instead.")
-        get_supabase().auth.admin.update_user_by_id(user_id, {"password": password})
-        cls._audit(admin_id, "temporary_password_set", "user", user_id, user_id)
-
-    @classmethod
-    def send_password_reset(cls, admin_id: str, email: str) -> None:
-        get_supabase().auth.reset_password_email(email.strip().lower())
-        cls._audit(admin_id, "password_reset_email_sent", "user", metadata={"email": email.strip().lower()})
+        cls._audit(admin_id, "account_activated" if is_active else "account_deactivated", "user", user_id, user_id, reason)
 
     @classmethod
     def delete_user(cls, admin_id: str, user_id: str) -> None:
@@ -221,7 +205,7 @@ class AdminService:
     def analytics(cls) -> dict:
         supabase = get_supabase()
         try:
-            profiles = supabase.table("profiles").select("role,locked_until,is_blacklisted").execute().data or []
+            profiles = supabase.table("profiles").select("role,is_active").execute().data or []
             videos = supabase.table("videos").select("video_id,subject_tag").execute().data or []
             models = supabase.table("resources").select("resource_id,topics(subjects(subject_name))").in_("resource_type", ResourceService.MODEL_TYPES).execute().data or []
             recommendations = supabase.table("educator_recommendations").select("video_id,resource_id").execute().data or []
@@ -235,8 +219,7 @@ class AdminService:
             return {
                 "total_internal_views": sum(1 for row in events if row.get("event_type") in view_events),
                 "accounts": dict(Counter(row.get("role") for row in profiles)),
-                "locked_accounts": sum(1 for row in profiles if row.get("locked_until")),
-                "blacklisted_accounts": sum(1 for row in profiles if row.get("is_blacklisted")),
+                "inactive_accounts": sum(1 for row in profiles if row.get("is_active") is False),
                 "total_videos": len(videos), "total_models": len(models),
                 "subject_distribution": [{"subject": name, "count": count} for name, count in subject_counts.most_common()],
                 "most_recommended": [{"content_id": content_id, "label": names.get(content_id, "Resource"), "count": count} for content_id, count in rec_counts.most_common(8)],

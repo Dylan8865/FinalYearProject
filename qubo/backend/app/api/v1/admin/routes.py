@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.db.deps import get_current_admin
-from app.schemas.admin import AdminBlacklistUpdate, AdminContentUpdate, AdminEmailResetRequest, AdminLockUpdate, AdminTemporaryPassword
+from app.schemas.admin import AdminAccountActiveUpdate, AdminContentUpdate
 from app.services.admin import AdminService
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -39,27 +39,9 @@ async def list_users(search: str | None = Query(default=None, max_length=100), _
     return AdminService.list_users(search)
 
 
-@router.patch("/users/{user_id}/lock", status_code=status.HTTP_204_NO_CONTENT)
-async def update_lock(user_id: str, payload: AdminLockUpdate, admin=Depends(get_current_admin)):
-    AdminService.set_lock(admin["id"], user_id, payload.locked, payload.reason)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@router.patch("/users/{user_id}/blacklist", status_code=status.HTTP_204_NO_CONTENT)
-async def update_blacklist(user_id: str, payload: AdminBlacklistUpdate, admin=Depends(get_current_admin)):
-    AdminService.set_blacklist(admin["id"], user_id, payload.blacklisted, payload.reason)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@router.patch("/users/{user_id}/temporary-password", status_code=status.HTTP_204_NO_CONTENT)
-async def set_temporary_password(user_id: str, payload: AdminTemporaryPassword, admin=Depends(get_current_admin)):
-    AdminService.set_temporary_password(admin["id"], user_id, payload.new_password)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@router.post("/users/password-reset-email", status_code=status.HTTP_204_NO_CONTENT)
-async def send_password_reset_email(payload: AdminEmailResetRequest, admin=Depends(get_current_admin)):
-    AdminService.send_password_reset(admin["id"], payload.email)
+@router.patch("/users/{user_id}/active", status_code=status.HTTP_204_NO_CONTENT)
+async def update_active_status(user_id: str, payload: AdminAccountActiveUpdate, admin=Depends(get_current_admin)):
+    AdminService.set_active_status(admin["id"], user_id, payload.is_active, payload.reason)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

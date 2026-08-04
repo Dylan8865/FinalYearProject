@@ -9,19 +9,6 @@ class AdminContentUpdate(BaseModel):
     visibility: Optional[Literal["public", "private"]] = None
 
 
-class AdminLockUpdate(BaseModel):
-    locked: bool
+class AdminAccountActiveUpdate(BaseModel):
+    is_active: bool
     reason: Optional[str] = Field(default=None, max_length=300)
-
-
-class AdminBlacklistUpdate(BaseModel):
-    blacklisted: bool
-    reason: Optional[str] = Field(default=None, max_length=300)
-
-
-class AdminTemporaryPassword(BaseModel):
-    new_password: str = Field(min_length=8, max_length=128)
-
-
-class AdminEmailResetRequest(BaseModel):
-    email: str = Field(min_length=3, max_length=320)

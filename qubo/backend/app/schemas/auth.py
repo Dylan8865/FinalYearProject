@@ -172,16 +172,10 @@ class AccountActionRequest(BaseModel):
     password: str = Field(..., min_length=1)
 
 
-class PasswordRecoveryRequest(BaseModel):
-    """Direct password recovery request for the local prototype"""
-    email: EmailStr
+class PasswordResetCompleteRequest(BaseModel):
+    """New password plus the short-lived Supabase recovery access token."""
+    recovery_access_token: str = Field(..., min_length=1)
     new_password: str = Field(..., min_length=8)
-    confirm_password: str
-
-    @field_validator("email")
-    @classmethod
-    def normalize_recovery_email(cls, v: EmailStr) -> str:
-        return str(v).strip().lower()
 
     @field_validator("new_password")
     @classmethod

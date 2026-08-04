@@ -1,44 +1,55 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { lazy, Suspense, useEffect, useLayoutEffect } from 'react';
-import { useAuthStore } from '@/contexts/authStore';
-import { authService } from '@/lib/authService';
-import { LanguageDomBridge } from '@/contexts/languageStore';
-import { applyThemeForPath, useThemeStore } from '@/contexts/themeStore';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import { lazy, Suspense, useEffect, useLayoutEffect } from "react";
+import { useAuthStore } from "@/contexts/authStore";
+import { authService } from "@/lib/authService";
+import { LanguageDomBridge } from "@/contexts/languageStore";
+import { applyThemeForPath, useThemeStore } from "@/contexts/themeStore";
 
 // Pages
-import LoginPage from '@/features/auth/LoginPage';
-import RegisterPage from '@/features/auth/RegisterPage';
-import LearningStyleAssessment from '@/features/auth/LearningStyleAssessment';
-import Dashboard from '@/pages/Dashboard';
-import ProfilePage from '@/features/profile/ProfilePage';
-import ProfileSettings from '@/features/profile/ProfileSettings';
-import QuizCreatorPage from '@/features/quiz/QuizCreatorPage';
-import QuizExperiencePage from '@/features/quiz/QuizExperiencePage';
-import LibraryPage from '@/features/library/LibraryPage';
-import SubjectsPage from '@/features/analytics/SubjectsPage';
-import LearningAnalyticsPage from '@/features/analytics/LearningAnalyticsPage';
-import EducatorAnalyticsPage from '@/features/analytics/EducatorAnalyticsPage';
-import ResourceHubPage from '@/features/resources/ResourceHubPage';
-import ExploreResourcesPage from '@/features/resources/ExploreResourcesPage';
-import GameRoomPage from '@/features/game/GameRoomPage';
-import TutorialVideoPage from '@/features/videos/TutorialVideoPage';
-import MyLearningPage from '@/features/learning/MyLearningPage';
-import SharedCollectionPage from '@/features/learning/SharedCollectionPage';
-import EducatorUploadContentPage from '@/features/educator/EducatorUploadContentPage';
-import MyCollectionsPage from '@/features/educator/MyCollectionsPage';
-import EducatorQuizEditorPage from '@/features/educator/EducatorQuizEditorPage';
-import AdminLoginPage from '@/features/admin/AdminLoginPage';
-import AdminPortalPage from '@/features/admin/AdminPortalPage';
+import LoginPage from "@/features/auth/LoginPage";
+import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
+import RegisterPage from "@/features/auth/RegisterPage";
+import LearningStyleAssessment from "@/features/auth/LearningStyleAssessment";
+import Dashboard from "@/pages/Dashboard";
+import ProfilePage from "@/features/profile/ProfilePage";
+import ProfileSettings from "@/features/profile/ProfileSettings";
+import QuizCreatorPage from "@/features/quiz/QuizCreatorPage";
+import QuizExperiencePage from "@/features/quiz/QuizExperiencePage";
+import LibraryPage from "@/features/library/LibraryPage";
+import SubjectsPage from "@/features/analytics/SubjectsPage";
+import LearningAnalyticsPage from "@/features/analytics/LearningAnalyticsPage";
+import EducatorAnalyticsPage from "@/features/analytics/EducatorAnalyticsPage";
+import ResourceHubPage from "@/features/resources/ResourceHubPage";
+import ExploreResourcesPage from "@/features/resources/ExploreResourcesPage";
+import GameRoomPage from "@/features/game/GameRoomPage";
+import TutorialVideoPage from "@/features/videos/TutorialVideoPage";
+import MyLearningPage from "@/features/learning/MyLearningPage";
+import SharedCollectionPage from "@/features/learning/SharedCollectionPage";
+import EducatorUploadContentPage from "@/features/educator/EducatorUploadContentPage";
+import MyCollectionsPage from "@/features/educator/MyCollectionsPage";
+import EducatorQuizEditorPage from "@/features/educator/EducatorQuizEditorPage";
+import AdminLoginPage from "@/features/admin/AdminLoginPage";
+import AdminPortalPage from "@/features/admin/AdminPortalPage";
 
 // Components
-import ProtectedRoute from '@/components/common/ProtectedRoute';
-import AdminProtectedRoute from '@/components/common/AdminProtectedRoute';
-import StudyReminderNotifier from '@/components/common/StudyReminderNotifier';
+import ProtectedRoute from "@/components/common/ProtectedRoute";
+import AdminProtectedRoute from "@/components/common/AdminProtectedRoute";
+import StudyReminderNotifier from "@/components/common/StudyReminderNotifier";
 
-import '@/styles/global.css';
+import "@/styles/global.css";
 
-const ModelLibraryPage = lazy(() => import('@/features/resources/ModelLibraryPage'));
-const ModelDetailPage = lazy(() => import('@/features/resources/ModelDetailPage'));
+const ModelLibraryPage = lazy(
+  () => import("@/features/resources/ModelLibraryPage"),
+);
+const ModelDetailPage = lazy(
+  () => import("@/features/resources/ModelDetailPage"),
+);
 
 function ThemeRouteBridge() {
   const { pathname } = useLocation();
@@ -52,7 +63,8 @@ function ThemeRouteBridge() {
 }
 
 export default function App() {
-  const { setUser, setAuthInitialized, user, isAuthInitialized } = useAuthStore();
+  const { setUser, setAuthInitialized, user, isAuthInitialized } =
+    useAuthStore();
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -63,7 +75,7 @@ export default function App() {
           setUser(userProfile);
         }
       } catch (error) {
-        console.error('Failed to fetch user profile:', error);
+        console.error("Failed to fetch user profile:", error);
       } finally {
         setAuthInitialized(true);
       }
@@ -80,9 +92,17 @@ export default function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin/:section" element={<AdminProtectedRoute><AdminPortalPage /></AdminProtectedRoute>} />
+        <Route
+          path="/admin/:section"
+          element={
+            <AdminProtectedRoute>
+              <AdminPortalPage />
+            </AdminProtectedRoute>
+          }
+        />
 
         {/* Protected Routes */}
         <Route
@@ -120,7 +140,7 @@ export default function App() {
         <Route
           path="/educator/upload"
           element={
-            <ProtectedRoute allowedRoles={['educator']}>
+            <ProtectedRoute allowedRoles={["educator"]}>
               <EducatorUploadContentPage />
             </ProtectedRoute>
           }
@@ -128,7 +148,7 @@ export default function App() {
         <Route
           path="/educator/collections"
           element={
-            <ProtectedRoute allowedRoles={['educator']}>
+            <ProtectedRoute allowedRoles={["educator"]}>
               <MyCollectionsPage />
             </ProtectedRoute>
           }
@@ -143,7 +163,11 @@ export default function App() {
         />
         <Route
           path="/educator/quizzes/edit"
-          element={<ProtectedRoute allowedRoles={['educator']}><EducatorQuizEditorPage /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedRoles={["educator"]}>
+              <EducatorQuizEditorPage />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/quiz/session"
@@ -188,7 +212,7 @@ export default function App() {
         <Route
           path="/analytics"
           element={
-            <ProtectedRoute allowedRoles={['student']}>
+            <ProtectedRoute allowedRoles={["student"]}>
               <LearningAnalyticsPage />
             </ProtectedRoute>
           }
@@ -196,7 +220,7 @@ export default function App() {
         <Route
           path="/educator/analytics"
           element={
-            <ProtectedRoute allowedRoles={['educator']}>
+            <ProtectedRoute allowedRoles={["educator"]}>
               <EducatorAnalyticsPage />
             </ProtectedRoute>
           }
@@ -259,7 +283,13 @@ export default function App() {
           path="/"
           element={
             isAuthInitialized ? (
-              user ? <Navigate to={user.role === 'admin' ? '/admin/content' : '/dashboard'} /> : <Navigate to="/login" />
+              user ? (
+                <Navigate
+                  to={user.role === "admin" ? "/admin/content" : "/dashboard"}
+                />
+              ) : (
+                <Navigate to="/login" />
+              )
             ) : (
               <div className="min-h-screen bg-slate-50" />
             )
