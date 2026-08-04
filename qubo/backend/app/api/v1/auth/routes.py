@@ -13,7 +13,7 @@ from app.schemas.auth import (
     StudyReminderPreferencesUpdate,
     PasswordChangeRequest,
     PasswordResetRequest,
-    PasswordRecoveryRequest,
+    PasswordResetCompleteRequest,
     AccountActionRequest,
     SubjectResponse,
     StudentSubjectsUpdateRequest,
@@ -146,17 +146,12 @@ async def forgot_password(reset_data: PasswordResetRequest):
     return AuthService.send_password_reset(reset_data.email)
 
 
-@router.post("/recover-password")
-async def recover_password(recovery_data: PasswordRecoveryRequest):
-    """Reset password directly for the local prototype"""
-    if recovery_data.new_password != recovery_data.confirm_password:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Passwords do not match",
-        )
-    return AuthService.recover_password(
-        recovery_data.email,
-        recovery_data.new_password,
+@router.post("/password-reset/complete")
+async def complete_password_reset(reset_data: PasswordResetCompleteRequest):
+    """Complete a reset after Supabase has verified the one-time recovery link."""
+    return AuthService.complete_password_recovery(
+        reset_data.recovery_access_token,
+        reset_data.new_password,
     )
 
 

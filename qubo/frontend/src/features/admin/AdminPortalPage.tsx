@@ -86,34 +86,24 @@ export default function AdminPortalPage() {
     }
   };
 
-  const userAction = async (
-    target: any,
-    action: "lock" | "blacklist" | "password" | "email" | "delete",
-  ) => {
+  const userAction = async (target: any, action: "active" | "delete") => {
     try {
-      if (action === "lock")
-        await authService.setAdminUserLock(
+      if (action === "active") {
+        const nextActiveState = !target.is_active;
+        if (
+          !window.confirm(
+            nextActiveState
+              ? `Activate ${target.email}? They can sign in again.`
+              : `Deactivate ${target.email}? Their current Qubo session will be ended.`,
+          )
+        )
+          return;
+        await authService.setAdminUserActiveStatus(
           target.id,
-          !target.locked_until,
-          "Admin security action",
+          nextActiveState,
+          "Administrator account status action",
         );
-      if (action === "blacklist")
-        await authService.setAdminUserBlacklist(
-          target.id,
-          !target.is_blacklisted,
-          target.is_blacklisted
-            ? undefined
-            : window.prompt("Blacklist reason") || undefined,
-        );
-      if (action === "password") {
-        const password = window.prompt(
-          "Temporary password (minimum 8 characters)",
-        );
-        if (!password) return;
-        await authService.setAdminTemporaryPassword(target.id, password);
       }
-      if (action === "email")
-        await authService.sendAdminPasswordResetEmail(target.email);
       if (action === "delete") {
         if (
           !window.confirm(
@@ -295,8 +285,7 @@ export default function AdminPortalPage() {
                     ["Internal views", analytics?.total_internal_views],
                     ["Students", counts.student || 0],
                     ["Educators", counts.educator || 0],
-                    ["Locked", analytics?.locked_accounts],
-                    ["Blacklisted", analytics?.blacklisted_accounts],
+                    ["Inactive", analytics?.inactive_accounts],
                   ].map(([name, value]) => (
                     <article
                       key={String(name)}
@@ -391,13 +380,9 @@ export default function AdminPortalPage() {
                       <td className="capitalize">{item.role}</td>
                       <td>
                         <span
-                          className={`rounded-full px-2 py-1 text-xs font-bold ${item.is_blacklisted ? "bg-rose-100 text-rose-700" : item.locked_until ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}
+                          className={`rounded-full px-2 py-1 text-xs font-bold ${item.is_active === false ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}
                         >
-                          {item.is_blacklisted
-                            ? "Blacklisted"
-                            : item.locked_until
-                              ? "Locked"
-                              : "Active"}
+                          {item.is_active === false ? "Inactive" : "Active"}
                         </span>
                       </td>
                       <td className="p-4">
@@ -405,34 +390,12 @@ export default function AdminPortalPage() {
                           {item.role !== "admin" && (
                             <>
                               <button
-                                onClick={() => void userAction(item, "lock")}
-                                className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold"
+                                onClick={() => void userAction(item, "active")}
+                                className={`rounded-lg px-2 py-1 text-xs font-bold ${item.is_active === false ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}
                               >
-                                {item.locked_until ? "Unlock" : "Lock"}
-                              </button>
-                              <button
-                                onClick={() =>
-                                  void userAction(item, "blacklist")
-                                }
-                                className="rounded-lg bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700"
-                              >
-                                {item.is_blacklisted
-                                  ? "Unblacklist"
-                                  : "Blacklist"}
-                              </button>
-                              <button
-                                onClick={() => void userAction(item, "email")}
-                                className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-bold text-primary"
-                              >
-                                Email reset
-                              </button>
-                              <button
-                                onClick={() =>
-                                  void userAction(item, "password")
-                                }
-                                className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-bold text-primary"
-                              >
-                                Temp password
+                                {item.is_active === false
+                                  ? "Activate"
+                                  : "Deactivate"}
                               </button>
                               <button
                                 onClick={() => void userAction(item, "delete")}

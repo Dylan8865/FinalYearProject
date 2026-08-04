@@ -93,7 +93,9 @@ class AuthService {
         const isAuthRequest =
           requestUrl.includes("/auth/login") ||
           requestUrl.includes("/auth/register") ||
-          requestUrl.includes("/auth/refresh");
+          requestUrl.includes("/auth/refresh") ||
+          requestUrl.includes("/auth/forgot-password") ||
+          requestUrl.includes("/auth/password-reset/complete");
 
         if (
           error.response?.status === 401 &&
@@ -183,36 +185,15 @@ class AuthService {
     return response.data;
   }
 
-  async setAdminUserLock(
+  async setAdminUserActiveStatus(
     userId: string,
-    locked: boolean,
+    isActive: boolean,
     reason?: string,
   ): Promise<void> {
-    await this.api.patch(`/admin/users/${userId}/lock`, { locked, reason });
-  }
-
-  async setAdminUserBlacklist(
-    userId: string,
-    blacklisted: boolean,
-    reason?: string,
-  ): Promise<void> {
-    await this.api.patch(`/admin/users/${userId}/blacklist`, {
-      blacklisted,
+    await this.api.patch(`/admin/users/${userId}/active`, {
+      is_active: isActive,
       reason,
     });
-  }
-
-  async setAdminTemporaryPassword(
-    userId: string,
-    newPassword: string,
-  ): Promise<void> {
-    await this.api.patch(`/admin/users/${userId}/temporary-password`, {
-      new_password: newPassword,
-    });
-  }
-
-  async sendAdminPasswordResetEmail(email: string): Promise<void> {
-    await this.api.post("/admin/users/password-reset-email", { email });
   }
 
   async deleteAdminUser(userId: string): Promise<void> {
@@ -435,26 +416,35 @@ class AuthService {
     this.clearTokens();
   }
 
+  clearSession(): void {
+    this.clearTokens();
+  }
+
   async deactivateAccount(password: string): Promise<void> {
-    await this.api.post('/auth/account/deactivate', { password });
+    await this.api.post("/auth/account/deactivate", { password });
     this.clearTokens();
   }
 
   async deleteAccount(password: string): Promise<void> {
-    await this.api.delete('/auth/account', { data: { password } });
+    await this.api.delete("/auth/account", { data: { password } });
     this.clearTokens();
   }
 
   async getAccountDataSummary(): Promise<AccountDataSummary> {
-    const response = await this.api.get<AccountDataSummary>('/auth/account/data-summary');
+    const response = await this.api.get<AccountDataSummary>(
+      "/auth/account/data-summary",
+    );
     return response.data;
   }
 
   async downloadAccountData(): Promise<void> {
-    const response = await this.api.get<Record<string, unknown>>('/auth/account/data');
-    const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+    const response =
+      await this.api.get<Record<string, unknown>>("/auth/account/data");
+    const blob = new Blob([JSON.stringify(response.data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
+    const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = `qubo-account-data-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(anchor);
@@ -463,8 +453,13 @@ class AuthService {
     URL.revokeObjectURL(url);
   }
 
-  async clearLearningHistory(password: string): Promise<{ message: string; cleared: Record<string, number> }> {
-    const response = await this.api.delete<{ message: string; cleared: Record<string, number> }>('/auth/account/learning-history', { data: { password } });
+  async clearLearningHistory(
+    password: string,
+  ): Promise<{ message: string; cleared: Record<string, number> }> {
+    const response = await this.api.delete<{
+      message: string;
+      cleared: Record<string, number>;
+    }>("/auth/account/learning-history", { data: { password } });
     return response.data;
   }
 
@@ -481,17 +476,15 @@ class AuthService {
     return response.data;
   }
 
-  async recoverPassword(
-    email: string,
+  async completePasswordReset(
+    recoveryAccessToken: string,
     newPassword: string,
-    confirmPassword: string,
   ): Promise<{ message: string }> {
     const response = await this.api.post<{ message: string }>(
-      "/auth/recover-password",
+      "/auth/password-reset/complete",
       {
-        email,
+        recovery_access_token: recoveryAccessToken,
         new_password: newPassword,
-        confirm_password: confirmPassword,
       },
     );
     return response.data;

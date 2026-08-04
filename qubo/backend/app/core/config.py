@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
     SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
     SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "")
+    PASSWORD_RESET_REDIRECT_URL: str = os.getenv(
+        "PASSWORD_RESET_REDIRECT_URL",
+        "http://localhost:3000/reset-password",
+    )
     
     # Security
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")

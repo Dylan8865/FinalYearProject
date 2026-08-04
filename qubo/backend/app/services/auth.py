@@ -1,6 +1,7 @@
 from typing import Optional, List
 from datetime import datetime, timezone, timedelta
 from fastapi import HTTPException, status
+from app.core.config import settings
 from app.core.security import (
     get_password_hash,
     verify_password,
@@ -24,7 +25,7 @@ class AuthService:
     """Authentication business logic"""
 
     MAX_FAILED_LOGIN_ATTEMPTS = 5
-    LOCKOUT_MINUTES = 15
+    LOCKOUT_MINUTES = 1
     PROFILE_PICTURE_BUCKET = "avatars"
     # Use one public failure response for every login rejection. In particular,
     # do not reveal whether an email exists, which role owns it, or whether a
@@ -113,8 +114,8 @@ class AuthService:
             supabase.table("profiles").update(profile_data).eq("id", user_id).execute()
 
             # Generate tokens
-            access_token = create_access_token(data={"sub": user_id})
-            refresh_token = create_refresh_token(data={"sub": user_id})
+            access_token = create_access_token(data={"sub": user_id, "sv": 0})
+            refresh_token = create_refresh_token(data={"sub": user_id, "sv": 0})
 
             user_response = UserResponse(
                 id=user_id,
@@ -171,12 +172,6 @@ class AuthService:
                 detail=AuthService.LOGIN_FAILURE_MESSAGE,
             )
 
-        if profile.get("is_blacklisted"):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=AuthService.LOGIN_FAILURE_MESSAGE,
-            )
-
         if profile.get("is_active") is False:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -197,8 +192,13 @@ class AuthService:
             if locked_until > datetime.now(timezone.utc):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=AuthService.LOGIN_FAILURE_MESSAGE,
+                    detail="Too many sign-in attempts. Please wait one minute and try again.",
                 )
+            supabase.table("profiles").update({
+                "failed_login_attempts": 0,
+                "locked_until": None,
+            }).eq("id", profile["id"]).execute()
+            profile["failed_login_attempts"] = 0
 
         try:
             # Authenticate with Supabase Auth
@@ -225,8 +225,9 @@ class AuthService:
                 }).eq("id", user_id).execute()
 
             # Generate tokens
-            access_token = create_access_token(data={"sub": user_id})
-            refresh_token = create_refresh_token(data={"sub": user_id})
+            session_version = int(profile.get("session_version") or 0)
+            access_token = create_access_token(data={"sub": user_id, "sv": session_version})
+            refresh_token = create_refresh_token(data={"sub": user_id, "sv": session_version})
 
             user_response = UserResponse(
                 id=profile["id"],
@@ -289,7 +290,7 @@ class AuthService:
             if lock_until:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=AuthService.LOGIN_FAILURE_MESSAGE,
+                    detail="Too many sign-in attempts. Please wait one minute and try again.",
                 )
 
             raise HTTPException(
@@ -307,15 +308,20 @@ class AuthService:
             profile_response = (
                 get_supabase()
                 .table("profiles")
-                .select("id")
+                .select("id,is_active,session_version")
                 .eq("id", user_id)
                 .limit(1)
                 .execute()
             )
-            if not profile_response.data:
+            if not profile_response.data or profile_response.data[0].get("is_active") is False:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Account no longer exists",
+                    detail="Session is no longer active. Please sign in again.",
+                )
+            if int(payload.get("sv", 0)) != int(profile_response.data[0].get("session_version") or 0):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Session is no longer active. Please sign in again.",
                 )
         except HTTPException:
             raise
@@ -326,7 +332,7 @@ class AuthService:
             ) from exc
 
         return TokenResponse(
-            access_token=create_access_token(data={"sub": user_id}),
+            access_token=create_access_token(data={"sub": user_id, "sv": int(profile_response.data[0].get("session_version") or 0)}),
             refresh_token=refresh_token,
         )
 
@@ -514,7 +520,7 @@ class AuthService:
             # Get user email
             profile = (
                 supabase.table("profiles")
-                .select("email")
+                .select("email,session_version")
                 .eq("id", user_id)
                 .single()
                 .execute()
@@ -542,6 +548,9 @@ class AuthService:
         try:
             # Update password
             supabase.auth.admin.update_user_by_id(user_id, {"password": new_password})
+            supabase.table("profiles").update({
+                "session_version": int(profile.get("session_version") or 0) + 1,
+            }).eq("id", user_id).execute()
             return {"message": "Password changed successfully"}
         except Exception as e:
             raise HTTPException(
@@ -738,80 +747,52 @@ class AuthService:
 
     @staticmethod
     def send_password_reset(email: str) -> dict:
-        """Send a Supabase password reset email if the account exists"""
-        supabase = get_supabase()
+        """Request a recovery email without revealing whether the account exists."""
+        public_message = "If an account exists for this email, a reset link has been sent."
         try:
-            profile_response = (
-                supabase.table("profiles")
-                .select("id")
-                .eq("email", email)
-                .limit(1)
-                .execute()
+            create_supabase_auth_client().auth.reset_password_email(
+                email.strip().lower(),
+                {"redirect_to": settings.PASSWORD_RESET_REDIRECT_URL},
             )
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unable to check account: {e}",
-            )
-
-        if not profile_response.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No account found with this email. Please register first.",
-            )
-
-        try:
-            supabase.auth.reset_password_email(email)
-            return {"message": "Password reset email sent. Please check your inbox."}
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unable to send reset email: {e}",
-            )
+        except Exception:
+            # Keep this response deliberately indistinguishable from an unknown
+            # email address. Supabase still enforces its own recovery-email rate limit.
+            pass
+        return {"message": public_message}
 
     @staticmethod
-    def recover_password(email: str, new_password: str) -> dict:
-        """Reset a user's password directly for the local prototype"""
-        supabase = get_supabase()
+    def complete_password_recovery(recovery_access_token: str, new_password: str) -> dict:
+        """Update a password only after Supabase validates its recovery session."""
         try:
-            profile_response = (
+            recovery_user = create_supabase_auth_client().auth.get_user(recovery_access_token).user
+            if not recovery_user:
+                raise ValueError("Missing recovery user")
+            user_id = recovery_user.id
+            supabase = get_supabase()
+            profile_rows = (
                 supabase.table("profiles")
-                .select("id")
-                .eq("email", email)
+                .select("id,session_version")
+                .eq("id", user_id)
                 .limit(1)
                 .execute()
+                .data
+                or []
             )
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unable to check account: {e}",
-            )
+            if not profile_rows:
+                raise ValueError("Missing profile")
 
-        if not profile_response.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No account found with this email. Please register first.",
-            )
-
-        user_id = profile_response.data[0]["id"]
-        try:
-            supabase.auth.admin.update_user_by_id(
-                user_id,
-                {
-                    "password": new_password,
-                    "email_confirm": True,
-                },
-            )
+            supabase.auth.admin.update_user_by_id(user_id, {"password": new_password})
             supabase.table("profiles").update({
                 "failed_login_attempts": 0,
                 "locked_until": None,
+                "session_version": int(profile_rows[0].get("session_version") or 0) + 1,
             }).eq("id", user_id).execute()
-            return {"message": "Password updated successfully. You can log in with your new password."}
-        except Exception as e:
+            return {"message": "Password reset successfully. Please sign in with your new password."}
+        except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unable to reset password: {e}",
-            )
+                detail="This reset link has expired or is invalid. Request a new link.",
+            ) from exc
 
     @staticmethod
     def get_subjects() -> list:

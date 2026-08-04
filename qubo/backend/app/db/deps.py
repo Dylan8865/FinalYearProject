@@ -31,16 +31,15 @@ async def get_current_user(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found",
             )
-        if user.get("is_blacklisted"):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="This account has been blacklisted.",
-            )
-
         if user.get("is_active") is False:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="This account has been deactivated.",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session is no longer active. Please sign in again.",
+            )
+        if int(payload.get("sv", 0)) != int(user.get("session_version") or 0):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session is no longer active. Please sign in again.",
             )
         return user
     except HTTPException:

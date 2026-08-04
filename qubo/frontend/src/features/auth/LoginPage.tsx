@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/contexts/authStore';
-import { authService } from '@/lib/authService';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/contexts/authStore";
+import { authService } from "@/lib/authService";
 import {
   FiAlertCircle,
   FiArrowLeft,
@@ -11,19 +11,17 @@ import {
   FiLock,
   FiMail,
   FiShield,
-} from 'react-icons/fi';
+} from "react-icons/fi";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'student' | 'educator'>('student');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"student" | "educator">("student");
   const [showPassword, setShowPassword] = useState(false);
-  const [resetMessage, setResetMessage] = useState('');
+  const [resetMessage, setResetMessage] = useState("");
   const [isResetting, setIsResetting] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
   const navigate = useNavigate();
   const { login, isLoading, error, setError } = useAuthStore();
 
@@ -33,7 +31,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password, role);
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err) {
       // Error is already set in the store
     }
@@ -41,46 +39,44 @@ export default function LoginPage() {
 
   const openRecovery = () => {
     setError(null);
-    setResetMessage('');
+    setResetMessage("");
     setShowRecovery(true);
   };
 
   const closeRecovery = () => {
     setShowRecovery(false);
-    setNewPassword('');
-    setConfirmPassword('');
     setError(null);
   };
 
-  const handleRecoverPassword = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const timer = window.setInterval(() => {
+      setResendSeconds((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendSeconds]);
+
+  const handlePasswordResetRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setResetMessage('');
+    setResetMessage("");
 
     if (!email) {
-      setError('Enter your email first.');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Enter your email first.");
       return;
     }
 
     setIsResetting(true);
     try {
-      const response = await authService.recoverPassword(email, newPassword, confirmPassword);
+      const response = await authService.forgotPassword(email);
       setResetMessage(response.message);
-      setPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setShowRecovery(false);
+      setResendSeconds(60);
     } catch (err: any) {
       const detail = err.response?.data?.detail;
       if (Array.isArray(detail)) {
-        setError(detail.map((item: any) => item.msg).join(', '));
+        setError(detail.map((item: any) => item.msg).join(", "));
       } else {
-        setError(detail || 'Unable to reset password.');
+        setError(detail || "Unable to reset password.");
       }
     } finally {
       setIsResetting(false);
@@ -105,7 +101,8 @@ export default function LoginPage() {
             Enter your academic sanctuary.
           </h1>
           <p className="mt-6 max-w-sm text-base leading-7 text-white/80">
-            A premium digital-first space where your focus thrives and complex knowledge becomes intuitive.
+            A premium digital-first space where your focus thrives and complex
+            knowledge becomes intuitive.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -134,20 +131,21 @@ export default function LoginPage() {
               <span className="text-2xl font-bold text-slate-950">Qubo</span>
             </div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">
-              {showRecovery ? 'Account recovery' : 'Welcome back'}
+              {showRecovery ? "Account recovery" : "Welcome back"}
             </p>
           </div>
 
           <div className="mb-8 hidden lg:block">
             <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-primary">
-              {showRecovery ? 'Account recovery' : 'Welcome back'}
+              {showRecovery ? "Account recovery" : "Welcome back"}
             </p>
             <h2 className="mt-3 text-4xl font-extrabold tracking-normal text-slate-950">
-              {showRecovery ? 'Reset password' : 'Log in to Qubo'}
+              {showRecovery ? "Reset password" : "Log in to Qubo"}
             </h2>
             {showRecovery && (
               <p className="mt-3 text-sm font-medium leading-6 text-slate-500">
-                Use your registered email address and choose a new password.
+                Enter your registered email address. We will send a secure
+                one-time link.
               </p>
             )}
           </div>
@@ -155,15 +153,15 @@ export default function LoginPage() {
           {!showRecovery && (
             <div className="mb-8 rounded-full bg-slate-100 p-1.5 shadow-inner shadow-slate-200/70">
               <div className="grid grid-cols-2 gap-1">
-                {(['student', 'educator'] as const).map((item) => (
+                {(["student", "educator"] as const).map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => setRole(item)}
                     className={`h-11 rounded-full text-sm font-bold capitalize transition ${
                       role === item
-                        ? 'bg-white text-primary shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? "bg-white text-primary shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
                     {item}
@@ -224,7 +222,7 @@ export default function LoginPage() {
                   <div className="relative">
                     <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Password"
@@ -247,13 +245,13 @@ export default function LoginPage() {
                   disabled={isLoading}
                   className="mt-2 h-14 w-full rounded-full bg-blue-600 font-bold text-white shadow-xl shadow-blue-600/25 transition hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {isLoading ? 'Logging in...' : 'Log In'}
+                  {isLoading ? "Logging in..." : "Log In"}
                 </button>
               </form>
 
               <button
                 type="button"
-                onClick={() => navigate('/admin/login')}
+                onClick={() => navigate("/admin/login")}
                 className="mx-auto mt-8 flex items-center gap-2 text-sm font-bold text-slate-600 transition hover:text-slate-900"
               >
                 <FiShield className="h-4 w-4" />
@@ -261,9 +259,9 @@ export default function LoginPage() {
               </button>
 
               <p className="mt-8 text-center text-sm font-semibold text-slate-500">
-                Don&apos;t have an account?{' '}
+                Don&apos;t have an account?{" "}
                 <button
-                  onClick={() => navigate('/register')}
+                  onClick={() => navigate("/register")}
                   className="font-extrabold text-primary hover:text-blue-700"
                 >
                   Sign up
@@ -271,7 +269,7 @@ export default function LoginPage() {
               </p>
             </>
           ) : (
-            <form onSubmit={handleRecoverPassword} className="space-y-5">
+            <form onSubmit={handlePasswordResetRequest} className="space-y-5">
               <div>
                 <label className="mb-2 block text-sm font-bold text-slate-600">
                   Email Address
@@ -283,49 +281,6 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@university.edu"
-                    className="h-14 w-full rounded-none border-0 bg-slate-200/75 pl-12 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-primary"
-                    required
-                    disabled={isResetting}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-600">
-                  New Password
-                </label>
-                <div className="relative">
-                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type={showNewPassword ? 'text' : 'password'}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="New password"
-                    className="h-14 w-full rounded-none border-0 bg-slate-200/75 pl-12 pr-12 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-primary"
-                    required
-                    disabled={isResetting}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
-                  >
-                    {showNewPassword ? <FiEyeOff /> : <FiEye />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-600">
-                  Confirm New Password
-                </label>
-                <div className="relative">
-                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type={showNewPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm password"
                     className="h-14 w-full rounded-none border-0 bg-slate-200/75 pl-12 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-primary"
                     required
                     disabled={isResetting}
@@ -345,10 +300,16 @@ export default function LoginPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isResetting}
+                  disabled={isResetting || resendSeconds > 0}
                   className="h-14 w-full rounded-full bg-blue-600 font-bold text-white shadow-xl shadow-blue-600/25 transition hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {isResetting ? 'Resetting...' : 'Reset'}
+                  {isResetting
+                    ? "Sending..."
+                    : resendSeconds > 0
+                      ? `Resend in ${resendSeconds}s`
+                      : resetMessage
+                        ? "Resend link"
+                        : "Send reset link"}
                 </button>
               </div>
             </form>
