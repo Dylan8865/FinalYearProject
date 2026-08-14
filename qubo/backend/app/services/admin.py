@@ -1,6 +1,6 @@
 from collections import Counter
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException, status
 
@@ -13,9 +13,9 @@ class AdminService:
     """Privileged operations for the isolated Qubo Admin portal."""
 
     @staticmethod
-    def _audit(admin_id: str, action: str, target_type: str, target_id: str | None = None,
-               target_user_id: str | None = None, reason: str | None = None,
-               metadata: dict[str, Any] | None = None) -> None:
+    def _audit(admin_id: str, action: str, target_type: str, target_id: Optional[str] = None,
+               target_user_id: Optional[str] = None, reason: Optional[str] = None,
+               metadata: Optional[Dict[str, Any]] = None) -> None:
         get_supabase().table("admin_audit_logs").insert({
             "admin_id": admin_id,
             "action": action,
@@ -27,7 +27,7 @@ class AdminService:
         }).execute()
 
     @classmethod
-    def list_content(cls, content_type: str) -> list[dict]:
+    def list_content(cls, content_type: str) -> List[dict]:
         supabase = get_supabase()
         try:
             profiles = supabase.table("profiles").select("id,full_name,username").execute().data or []
@@ -73,7 +73,7 @@ class AdminService:
             existing = supabase.table("resources").select("resource_id,topic_id").eq("resource_id", content_id).limit(1).execute().data or []
             if not existing:
                 raise HTTPException(status_code=404, detail="3D model not found.")
-            changes: dict[str, Any] = {"title": title}
+            changes: Dict[str, Any] = {"title": title}
             if payload.get("visibility"):
                 changes["visibility"] = payload["visibility"]
             subject_name = (payload.get("subject_name") or "").strip()
@@ -118,7 +118,7 @@ class AdminService:
             raise HTTPException(status_code=502, detail="Content could not be deleted.") from exc
 
     @classmethod
-    def list_users(cls, search: str | None = None) -> list[dict]:
+    def list_users(cls, search: Optional[str] = None) -> List[dict]:
         try:
             query = get_supabase().table("profiles").select(
                 "id,username,full_name,email,role,is_active,deactivated_at,failed_login_attempts,locked_until,created_at"
@@ -130,7 +130,7 @@ class AdminService:
             raise HTTPException(status_code=502, detail="Users could not be loaded.") from exc
 
     @classmethod
-    def set_active_status(cls, admin_id: str, user_id: str, is_active: bool, reason: str | None) -> None:
+    def set_active_status(cls, admin_id: str, user_id: str, is_active: bool, reason: Optional[str]) -> None:
         if admin_id == user_id:
             raise HTTPException(status_code=400, detail="Administrators cannot change their own active status.")
         profiles = get_supabase().table("profiles").select("session_version").eq("id", user_id).limit(1).execute().data or []
@@ -228,7 +228,7 @@ class AdminService:
             raise HTTPException(status_code=502, detail="Admin analytics could not be loaded.") from exc
 
     @classmethod
-    def audit_logs(cls) -> list[dict]:
+    def audit_logs(cls) -> List[dict]:
         try:
             return get_supabase().table("admin_audit_logs").select("*").order("created_at", desc=True).limit(100).execute().data or []
         except Exception as exc:

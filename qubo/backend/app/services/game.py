@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Optional
 
 from fastapi import HTTPException, status
 
@@ -89,10 +89,10 @@ class GameService:
         turns_played: int,
         waves_cleared: int,
         is_victory: bool,
-        score: int | None = None,
-        enemies_defeated: int | None = None,
-        compounds_discovered: int | None = None,
-        highest_combo: int | None = None,
+        score: Optional[int] = None,
+        enemies_defeated: Optional[int] = None,
+        compounds_discovered: Optional[int] = None,
+        highest_combo: Optional[int] = None,
     ) -> dict:
         cls._ensure_owned_match(match_id, user_id)
         try:
@@ -134,7 +134,7 @@ class GameService:
         )
 
     @classmethod
-    def get_user_match_history(cls, user_id: str, limit: int) -> list[dict]:
+    def get_user_match_history(cls, user_id: str, limit: int) -> List[dict]:
         try:
             response = (
                 get_supabase()
@@ -161,7 +161,7 @@ class GameService:
         return rows
 
     @classmethod
-    def get_level_one_leaderboard(cls, limit: int) -> list[dict]:
+    def get_level_one_leaderboard(cls, limit: int) -> List[dict]:
         try:
             response = (
                 get_supabase()
@@ -188,7 +188,7 @@ class GameService:
         # Every completed winning run receives its own rank. This lets the
         # same student appear with distinct scores while keeping email and
         # other private match history details out of the public leaderboard.
-        entries: list[dict] = []
+        entries: List[dict] = []
         for row in response.data or []:
             profile = row.get("profiles") or {}
             if isinstance(profile, list):

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FiAlertTriangle,
+  FiArrowRight,
   FiCheck,
   FiClock,
   FiChevronRight,
@@ -401,9 +402,14 @@ export default function ProfilePage() {
                     <h2 className="text-lg font-black text-slate-950">Learning Style</h2>
                     <p className="mt-1 text-xs font-medium text-slate-400">Questionnaire-based learning preference</p>
                   </div>
-                  <button type="button" onClick={() => navigate('/learning-style-assessment', { state: { returnTo: '/profile' } })} className="rounded-lg bg-purple-50 px-3 py-2 text-[11px] font-extrabold text-purple-700 hover:bg-purple-100">
-                    {hasSavedScores ? 'Retake' : 'Take assessment'}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => navigate('/resources')} className="rounded-lg bg-blue-50 px-3 py-2 text-[11px] font-extrabold text-blue-700 hover:bg-blue-100">
+                      Find resources
+                    </button>
+                    <button type="button" onClick={() => navigate('/learning-style-assessment', { state: { returnTo: '/profile' } })} className="rounded-lg bg-purple-50 px-3 py-2 text-[11px] font-extrabold text-purple-700 hover:bg-purple-100">
+                      {hasSavedScores ? 'Retake' : 'Complete assessment'}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -420,7 +426,9 @@ export default function ProfilePage() {
                           <style.icon className="h-4 w-4" />
                         </span>
                         <h3 className="mt-3 text-sm font-black text-slate-800">{style.label}</h3>
-                        <p className={`mt-1 text-2xl font-black ${palette.score}`}>{score === null ? '—' : `${score}%`}</p>
+                        <p className={`mt-1 ${score === null ? 'text-xs' : 'text-2xl'} font-black ${palette.score}`}>
+                          {score === null ? (isSelected ? 'Saved preference' : 'Not assessed') : `${score}%`}
+                        </p>
                         <p className="mt-1 text-[10px] font-semibold leading-4 text-slate-400">{style.description}</p>
                       </article>
                     );
@@ -433,16 +441,24 @@ export default function ProfilePage() {
                       <FiKey className="h-3.5 w-3.5" />
                     </span>
                     <div>
-                      <p className="text-xs font-black text-blue-700">Study recommendation</p>
+                      <p className="text-xs font-black text-blue-700">Your next study step</p>
                       <p className="mt-1 text-[11px] font-medium leading-5 text-slate-500">
                         {hasSavedScores
                           ? language === 'ms'
-                            ? `${learningAdvice[selectedStyle].ms} semasa mengulang kaji ${subjects.length ? subjects.slice(0, 2).map((subject) => subject.subject_name).join(' dan ') : 'subjek pilihan anda'}.`
-                            : `${learningAdvice[selectedStyle].en} when revising ${subjects.length ? subjects.slice(0, 2).map((subject) => subject.subject_name).join(' and ') : 'your selected subjects'}.`
+                            ? `${learningAdvice[selectedStyle].ms} semasa mengulang kaji ${subjects.length ? subjects.slice(0, 2).map((subject) => subject.subject_name).join(' dan ') : 'subjek pilihan anda'}. Qubo akan mengutamakan sumber yang sepadan, dan topik kuiz di bawah 60%.`
+                            : `${learningAdvice[selectedStyle].en} when revising ${subjects.length ? subjects.slice(0, 2).map((subject) => subject.subject_name).join(' and ') : 'your selected subjects'}. Qubo will prioritise matching resources, especially for quiz topics below 60%.`
                           : language === 'ms'
-                            ? `Keutamaan dominan anda disimpan sebagai ${selectedStyle}, tetapi pecahan skor penuh tidak disimpan sebelum ini. Ambil semula penilaian untuk menjana cadangan yang tepat.`
-                            : `Your dominant preference is saved as ${selectedStyle}, but the full score breakdown was not stored previously. Retake the assessment to generate an accurate recommendation.`}
+                            ? `Keutamaan semasa anda ialah ${selectedStyle}. Lengkapkan lima soalan penilaian untuk melihat pecahan skor anda; sementara itu, Qubo akan menggunakan keutamaan yang disimpan ini untuk memilih sumber.`
+                            : `Your current saved preference is ${selectedStyle}. Complete the five-question assessment to see your score breakdown; until then, Qubo will use this preference when selecting resources.`}
                       </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {!hasSavedScores && <button type="button" onClick={() => navigate('/learning-style-assessment', { state: { returnTo: '/profile' } })} className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-[11px] font-extrabold text-white hover:bg-blue-700">
+                          Start assessment <FiArrowRight className="h-3.5 w-3.5" />
+                        </button>}
+                        <button type="button" onClick={() => navigate('/resources')} className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-white px-3 py-2 text-[11px] font-extrabold text-blue-700 hover:bg-blue-50">
+                          View tailored resources <FiArrowRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
