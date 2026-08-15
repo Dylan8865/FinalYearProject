@@ -56,7 +56,7 @@ class VideoService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tutorial video not found.")
 
     @staticmethod
-    def create_video(educator_id: str, title: str, youtube_url: str, subject_tag: str | None) -> dict:
+    def create_video(educator_id: str, title: str, youtube_url: str, subject_tag: Optional[str]) -> dict:
         try:
             # A missing row is the normal case for a new upload.  Do not use
             # maybe_single() here: PostgREST can turn a zero-row result into a

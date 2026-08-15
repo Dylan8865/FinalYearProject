@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.db.deps import get_current_admin
@@ -35,7 +37,7 @@ async def analytics(_admin=Depends(get_current_admin)):
 
 
 @router.get("/users")
-async def list_users(search: str | None = Query(default=None, max_length=100), _admin=Depends(get_current_admin)):
+async def list_users(search: Optional[str] = Query(default=None, max_length=100), _admin=Depends(get_current_admin)):
     return AdminService.list_users(search)
 
 

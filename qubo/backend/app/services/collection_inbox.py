@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from fastapi import HTTPException, status
 
@@ -68,7 +68,7 @@ class CollectionInboxService:
                 .data
                 or []
             )
-            item_summary: dict[str, dict] = {}
+            item_summary: Dict[str, dict] = {}
             for item in items:
                 cid = item["collection_id"]
                 summary = item_summary.setdefault(cid, {"total": 0, "types": set()})

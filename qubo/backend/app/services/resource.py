@@ -21,7 +21,7 @@ class ResourceService:
     ANNOTATION_SELECT = "annotation_id,resource_id,title,description,position_x,position_y,position_z,created_by,created_at,updated_at"
 
     @classmethod
-    def create_3d_model(cls, educator_id: str, title: str, subject_name: str, topic_name: str | None, visibility: str, content: bytes, content_type: str) -> dict:
+    def create_3d_model(cls, educator_id: str, title: str, subject_name: str, topic_name: Optional[str], visibility: str, content: bytes, content_type: str) -> dict:
         """Store a GLB privately, then create its resource record."""
         from uuid import uuid4
 
@@ -97,7 +97,7 @@ class ResourceService:
             raise HTTPException(status_code=502, detail='3D model could not be deleted.') from exc
 
     @classmethod
-    def _serialize_model(cls, resource: dict, preview_model_url: str | None = None) -> dict:
+    def _serialize_model(cls, resource: dict, preview_model_url: Optional[str] = None) -> dict:
         topic = resource.get("topics") or {}
         subject = topic.get("subjects") or {}
         return {
@@ -120,7 +120,7 @@ class ResourceService:
         )
 
     @classmethod
-    def list_3d_models(cls, viewer_id: str | None = None, scope: str = 'public') -> list[dict]:
+    def list_3d_models(cls, viewer_id: Optional[str] = None, scope: str = 'public') -> List[dict]:
         try:
             query = (
                 get_supabase()
@@ -146,7 +146,7 @@ class ResourceService:
             ) from exc
 
     @classmethod
-    def list_popular_3d_models(cls, viewer_id: str | None = None, limit: int = 3) -> list[dict]:
+    def list_popular_3d_models(cls, viewer_id: Optional[str] = None, limit: int = 3) -> List[dict]:
         models = cls.list_3d_models(viewer_id, 'public')
         try:
             since = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
@@ -175,16 +175,32 @@ class ResourceService:
                 return [{**model, "popularity_count": 0} for model in models[:limit]]
 
     @classmethod
-    def recommend_3d_model(cls, user_id: str) -> dict | None:
+    def recommend_3d_model(cls, user_id: str) -> Optional[dict]:
         models = cls.list_3d_models(user_id, 'public')
         videos = VideoService.list_videos()
         if not models and not videos:
             return None
+        learning_style = "visual"
         try:
-            viewed = get_supabase().table("user_resources").select("resource_id,video_id").eq("user_id", user_id).execute().data or []
+            supabase = get_supabase()
+            profile_rows = (
+                supabase.table("profiles")
+                .select("learning_style")
+                .eq("id", user_id)
+                .limit(1)
+                .execute()
+                .data
+                or []
+            )
+            saved_style = (profile_rows[0].get("learning_style") if profile_rows else "") or "visual"
+            learning_style = str(saved_style).lower()
+            if learning_style not in {"visual", "auditory", "kinesthetic"}:
+                learning_style = "visual"
+
+            viewed = supabase.table("user_resources").select("resource_id,video_id").eq("user_id", user_id).execute().data or []
             viewed_model_ids = {row["resource_id"] for row in viewed if row.get("resource_id")}
             viewed_video_ids = {row["video_id"] for row in viewed if row.get("video_id")}
-            events = get_supabase().table("learning_events").select("event_type,metadata").eq("user_id", user_id).order("occurred_at", desc=True).limit(120).execute().data or []
+            events = supabase.table("learning_events").select("event_type,metadata").eq("user_id", user_id).order("occurred_at", desc=True).limit(120).execute().data or []
             weights = {
                 "saved": 4, "completed": 3, "quiz_completed": 3,
                 "model_explored": 2, "model_viewed": 2, "video_progress": 2,
@@ -207,39 +223,119 @@ class ResourceService:
                 if event["event_type"] == "quiz_completed" and float(metadata.get("score_percent", 100)) < 60:
                     weak_quizzes[str(subject)] = min(weak_quizzes.get(str(subject), 100), float(metadata.get("score_percent", 100)))
 
-            if weak_quizzes and videos:
-                subject, score = min(weak_quizzes.items(), key=lambda item: item[1])
-                candidates = [video for video in videos if video["video_id"] not in viewed_video_ids and video.get("subject_tag") == subject]
-                candidates = candidates or [video for video in videos if video.get("subject_tag") == subject] or videos
-                recommended = sorted(candidates, key=lambda video: video["title"].lower())[0]
-                reason = f"Your latest {subject} quiz score was {score:.0f}%. Start with a focused explanation before practising again."
+            def pick_model(subject_name: Optional[str] = None) -> Optional[dict]:
+                candidates = models
+                style_tagged = [
+                    model for model in candidates
+                    if str(model.get("learning_style_tag") or "").lower() == learning_style
+                ]
+                if style_tagged:
+                    candidates = style_tagged
+                if subject_name:
+                    matching_subject = [model for model in candidates if model.get("subject_name") == subject_name]
+                    if matching_subject:
+                        candidates = matching_subject
+                unviewed = [model for model in candidates if model["resource_id"] not in viewed_model_ids]
+                candidates = unviewed or candidates
+                return max(
+                    candidates,
+                    key=lambda model: (subject_scores.get(model.get("subject_name") or "", 0), model["title"].lower()),
+                ) if candidates else None
+
+            def pick_video(subject_name: Optional[str] = None) -> Optional[dict]:
+                candidates = videos
+                if subject_name:
+                    matching_subject = [video for video in candidates if video.get("subject_tag") == subject_name]
+                    if matching_subject:
+                        candidates = matching_subject
+                unviewed = [video for video in candidates if video["video_id"] not in viewed_video_ids]
+                candidates = unviewed or candidates
+                return max(
+                    candidates,
+                    key=lambda video: (subject_scores.get(video.get("subject_tag") or "", 0), video["title"].lower()),
+                ) if candidates else None
+
+            def model_response(recommended: dict, reason: str) -> dict:
+                subject_name = recommended.get("subject_name") or recommended.get("topic_name") or "this topic"
+                if learning_style == "kinesthetic":
+                    goal = f"Manipulate {recommended.get('topic_name') or subject_name}, then test yourself with practice questions."
+                else:
+                    goal = f"Explore {recommended.get('topic_name') or subject_name} visually and connect it to revision."
                 return {
-                    "target_type": "video", "target_id": recommended["video_id"], "title": recommended["title"],
-                    "subject_name": recommended.get("subject_tag"), "reason": RecommendationExplanationService.explain(recommended["title"], subject, reason),
-                    "learning_goal": f"Strengthen {subject} foundations before your next quiz.", "estimated_minutes": 6,
-                    "youtube_url": recommended["youtube_url"],
+                    "target_type": "model", "target_id": recommended["resource_id"], "title": recommended["title"],
+                    "subject_name": recommended.get("subject_name"), "topic_name": recommended.get("topic_name"),
+                    "reason": RecommendationExplanationService.explain(recommended["title"], subject_name, reason),
+                    "learning_goal": goal, "estimated_minutes": 8, "preview_model_url": recommended["preview_model_url"],
                 }
 
-            candidates = [model for model in models if model["resource_id"] not in viewed_model_ids] or models
-            recommended = max(candidates, key=lambda model: (subject_scores.get(model.get("subject_name") or "", 0), model["title"].lower()))
-            subject = recommended.get("subject_name") or recommended.get("topic_name") or "this topic"
-            if subject_scores.get(subject, 0) > 0:
-                reason = f"Your recent learning activity shows interest in {subject}; this visual model is a useful next step."
-            elif viewed:
-                reason = "This is a new interactive model to broaden your current learning progress."
-            else:
-                reason = "This is a popular starting point for your learning library."
-            return {
-                "target_type": "model", "target_id": recommended["resource_id"], "title": recommended["title"],
-                "subject_name": recommended.get("subject_name"), "topic_name": recommended.get("topic_name"),
-                "reason": RecommendationExplanationService.explain(recommended["title"], subject, reason),
-                "learning_goal": f"Explore {recommended.get('topic_name') or subject} visually and connect it to revision.",
-                "estimated_minutes": 8, "preview_model_url": recommended["preview_model_url"],
-            }
+            def video_response(recommended: dict, reason: str) -> dict:
+                subject_name = recommended.get("subject_tag") or "this topic"
+                return {
+                    "target_type": "video", "target_id": recommended["video_id"], "title": recommended["title"],
+                    "subject_name": recommended.get("subject_tag"),
+                    "reason": RecommendationExplanationService.explain(recommended["title"], subject_name, reason),
+                    "learning_goal": f"Watch the explanation for {subject_name}, then explain the key idea aloud in your own words.",
+                    "estimated_minutes": 6, "youtube_url": recommended["youtube_url"],
+                }
+
+            if weak_quizzes:
+                subject, score = min(weak_quizzes.items(), key=lambda item: item[1])
+                if learning_style == "auditory":
+                    recommended_video = pick_video(subject)
+                    if recommended_video:
+                        return video_response(
+                            recommended_video,
+                            f"Your latest {subject} quiz score was {score:.0f}%. Your auditory preference is matched with a focused explanation before you practise again.",
+                        )
+                else:
+                    recommended_model = pick_model(subject)
+                    if recommended_model:
+                        action = "map the key relationships" if learning_style == "visual" else "explore it hands-on before practising"
+                        return model_response(
+                            recommended_model,
+                            f"Your latest {subject} quiz score was {score:.0f}%. Use this interactive resource to {action} before your next attempt.",
+                        )
+
+                recommended_video = pick_video(subject)
+                if recommended_video:
+                    return video_response(
+                        recommended_video,
+                        f"Your latest {subject} quiz score was {score:.0f}%. Start with a focused explanation before practising again.",
+                    )
+
+            if learning_style == "auditory":
+                recommended_video = pick_video()
+                if recommended_video:
+                    subject = recommended_video.get("subject_tag") or "this topic"
+                    if subject_scores.get(subject, 0) > 0:
+                        reason = f"Your recent learning activity shows interest in {subject}; this explanation matches your auditory preference."
+                    else:
+                        reason = "This focused explanation matches your auditory learning preference."
+                    return video_response(recommended_video, reason)
+
+            recommended_model = pick_model()
+            if recommended_model:
+                subject = recommended_model.get("subject_name") or recommended_model.get("topic_name") or "this topic"
+                if subject_scores.get(subject, 0) > 0:
+                    reason = f"Your recent learning activity shows interest in {subject}; this interactive resource matches your {learning_style} preference."
+                elif viewed:
+                    reason = f"This is a new interactive resource matched to your {learning_style} preference."
+                else:
+                    reason = f"This is a useful starting resource matched to your {learning_style} preference."
+                return model_response(recommended_model, reason)
+
+            recommended_video = pick_video()
+            if recommended_video:
+                return video_response(recommended_video, "Start with this focused video lesson before choosing your next practice activity.")
+            return None
         except Exception:
+            if learning_style == "auditory" and videos:
+                video = videos[0]
+                return {"target_type": "video", "target_id": video["video_id"], "title": video["title"], "subject_name": video.get("subject_tag"), "reason": "Start with this focused video lesson matched to your auditory preference.", "learning_goal": "Build a strong foundation by listening, then explaining the main idea aloud.", "estimated_minutes": 6, "youtube_url": video["youtube_url"]}
             if models:
                 model = models[0]
-                return {"target_type": "model", "target_id": model["resource_id"], "title": model["title"], "subject_name": model.get("subject_name"), "topic_name": model.get("topic_name"), "reason": "This is a popular interactive model to explore next.", "learning_goal": "Build confidence with a visual revision activity.", "estimated_minutes": 8, "preview_model_url": model["preview_model_url"]}
+                goal = "Use the model hands-on, then test yourself with practice questions." if learning_style == "kinesthetic" else "Build confidence with a visual revision activity."
+                return {"target_type": "model", "target_id": model["resource_id"], "title": model["title"], "subject_name": model.get("subject_name"), "topic_name": model.get("topic_name"), "reason": f"This interactive model is a useful next step for your {learning_style} preference.", "learning_goal": goal, "estimated_minutes": 8, "preview_model_url": model["preview_model_url"]}
             video = videos[0]
             return {"target_type": "video", "target_id": video["video_id"], "title": video["title"], "subject_name": video.get("subject_tag"), "reason": "Start with this focused video lesson.", "learning_goal": "Build a strong foundation for revision.", "estimated_minutes": 6, "youtube_url": video["youtube_url"]}
 

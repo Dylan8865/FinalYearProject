@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from typing import Dict, List, Optional
 
 from fastapi import HTTPException, status
 
@@ -82,7 +83,7 @@ class CollectionService:
         return collection
 
     @staticmethod
-    def _serialize(row: dict, preview_items: list[dict] | None = None) -> dict:
+    def _serialize(row: dict, preview_items: Optional[List[dict]] = None) -> dict:
         subject = row.get('subjects') or {}
         return {
             **row,
@@ -91,7 +92,7 @@ class CollectionService:
         }
 
     @classmethod
-    def _preview_items(cls, collection_ids: list[str]) -> dict[str, list[dict]]:
+    def _preview_items(cls, collection_ids: List[str]) -> Dict[str, List[dict]]:
         if not collection_ids:
             return {}
         supabase = get_supabase()
@@ -123,7 +124,7 @@ class CollectionService:
             .in_('id', quiz_ids or [placeholder_id]).execute().data
             or []
         }
-        result: dict[str, list[dict]] = {collection_id: [] for collection_id in collection_ids}
+        result: Dict[str, List[dict]] = {collection_id: [] for collection_id in collection_ids}
         for item in rows:
             collection_items = result.setdefault(item['collection_id'], [])
             if len(collection_items) >= 3:
@@ -142,7 +143,7 @@ class CollectionService:
         return result
 
     @classmethod
-    def list_mine(cls, educator_id: str, status_filter: str | None = None) -> list[dict]:
+    def list_mine(cls, educator_id: str, status_filter: Optional[str] = None) -> List[dict]:
         query = get_supabase().table('collections').select('*,subjects(subject_name)').eq('educator_id', educator_id).order('updated_at', desc=True)
         if status_filter:
             query = query.eq('status', status_filter)
@@ -199,7 +200,7 @@ class CollectionService:
         return {'collection': cls._serialize(collection), 'items': items}
 
     @staticmethod
-    def content_options(educator_id: str) -> list[dict]:
+    def content_options(educator_id: str) -> List[dict]:
         supabase = get_supabase()
         models = supabase.table('resources').select('resource_id,title,topics(topic_name,subjects(subject_name))').in_('resource_type', ['3d_model', '3D Model']).eq('created_by', educator_id).order('title').execute().data or []
         videos = supabase.table('videos').select('video_id,title,subject_tag').eq('uploaded_by', educator_id).order('title').execute().data or []
@@ -292,12 +293,12 @@ class CollectionService:
         return cls._serialize(clone)
 
     @staticmethod
-    def linked_students(educator_id: str) -> list[dict]:
+    def linked_students(educator_id: str) -> List[dict]:
         rows = get_supabase().table('educator_students').select('student_id,profiles!educator_students_student_id_fkey(id,full_name,username,email)').eq('educator_id', educator_id).execute().data or []
         return [row['profiles'] for row in rows if row.get('profiles')]
 
     @staticmethod
-    def search_students_by_email(email_query: str) -> list[dict]:
+    def search_students_by_email(email_query: str) -> List[dict]:
         """Find registered student accounts by email for collection sharing."""
         query = email_query.strip().lower()
         if len(query) < 2:
