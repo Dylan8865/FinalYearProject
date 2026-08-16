@@ -71,7 +71,7 @@ export default function AppSidebar() {
       setIsExplorerOpen(true);
     }
   }, [location.pathname]);
-  const displayName = user?.full_name || user?.username || 'Qubo user';
+  const displayName = user?.username || user?.full_name || 'Qubo user';
   const initials = displayName
     .split(' ')
     .filter(Boolean)
@@ -166,17 +166,17 @@ export default function AppSidebar() {
             {user.profile_picture_url && !profileImageFailed ? (
               <img
                 src={user.profile_picture_url}
-                alt={`${user.full_name} profile`}
+                alt={`${displayName} profile`}
                 onError={() => setProfileImageFailed(true)}
                 className="h-11 w-11 rounded-full border border-slate-200 object-cover"
               />
             ) : (
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                {user.full_name?.slice(0, 2).toUpperCase() || 'QB'}
+                {initials}
               </div>
             )}
             <div className="min-w-0">
-              <p className="truncate font-semibold text-slate-900">{user.full_name}</p>
+              <p className="truncate font-semibold text-slate-900">{displayName}</p>
               <p className="text-sm capitalize text-slate-500">{user.role}</p>
             </div>
           </div>

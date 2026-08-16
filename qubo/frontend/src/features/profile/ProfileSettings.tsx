@@ -47,10 +47,12 @@ export default function ProfileSettings() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [profileImageFailed, setProfileImageFailed] = useState(false);
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageUploadError, setImageUploadError] = useState('');
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
@@ -138,7 +140,40 @@ export default function ProfileSettings() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (name === 'profile_picture_url') {
+      if (selectedImageFile) {
+        URL.revokeObjectURL(formData.profile_picture_url);
+        setSelectedImageFile(null);
+      }
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCancel = () => {
+    if (user) {
+      setFormData({
+        username: user.username || '',
+        full_name: user.full_name || '',
+        profile_picture_url: user.profile_picture_url || '',
+        school: user.school || '',
+        form_level: user.form_level || '',
+        target_grade: normalizeSpmTargetGrade(user.target_grade),
+        target_exam_date: user.target_exam_date ? user.target_exam_date.slice(0, 10) : '',
+      });
+      
+      if (user.role === 'student') {
+        authService.getStudentSubjects().then((subjects) => {
+          setSelectedSubjectIds(subjects.map((s) => s.id));
+        }).catch(console.error);
+      }
+    }
+    if (selectedImageFile) {
+      URL.revokeObjectURL(formData.profile_picture_url);
+      setSelectedImageFile(null);
+    }
+    setIsEditing(false);
+    setError('');
+    setSaveSuccess(false);
   };
 
   const handleSubjectToggle = (subjectId: string) => {
@@ -164,19 +199,16 @@ export default function ProfileSettings() {
       return;
     }
 
-    setIsUploadingImage(true);
-    try {
-      const updatedUser = await authService.uploadProfilePicture(file);
-      setUser(updatedUser);
-      setFormData((previous) => ({
-        ...previous,
-        profile_picture_url: updatedUser.profile_picture_url || '',
-      }));
-    } catch (uploadError: any) {
-      setImageUploadError(getApiErrorMessage(uploadError, 'Unable to upload profile picture.'));
-    } finally {
-      setIsUploadingImage(false);
+    if (selectedImageFile) {
+      URL.revokeObjectURL(formData.profile_picture_url);
     }
+
+    setSelectedImageFile(file);
+    const localUrl = URL.createObjectURL(file);
+    setFormData((previous) => ({
+      ...previous,
+      profile_picture_url: localUrl,
+    }));
   };
 
   const handleSave = async () => {
@@ -197,12 +229,25 @@ export default function ProfileSettings() {
 
     setIsLoading(true);
     setError('');
+    setSaveSuccess(false);
 
     try {
+      let finalProfilePictureUrl = formData.profile_picture_url;
+      
+      if (selectedImageFile) {
+        setIsUploadingImage(true);
+        const uploadedUser = await authService.uploadProfilePicture(selectedImageFile);
+        finalProfilePictureUrl = uploadedUser.profile_picture_url || '';
+        setIsUploadingImage(false);
+        // Clean up the local blob URL
+        URL.revokeObjectURL(formData.profile_picture_url);
+        setSelectedImageFile(null);
+      }
+
       const updateData: ProfileUpdateRequest = {
         username: formData.username,
         full_name: formData.full_name,
-        profile_picture_url: formData.profile_picture_url,
+        profile_picture_url: finalProfilePictureUrl,
         school: formData.school,
         form_level: formData.form_level,
         target_grade: normalizedGrade,
@@ -216,9 +261,15 @@ export default function ProfileSettings() {
       }
 
       setUser(updatedUser);
+      setFormData((prev) => ({
+        ...prev,
+        profile_picture_url: finalProfilePictureUrl,
+      }));
       setIsEditing(false);
+      setSaveSuccess(true);
     } catch (saveError: any) {
       setError(getApiErrorMessage(saveError, 'Failed to update profile'));
+      setIsUploadingImage(false);
     } finally {
       setIsLoading(false);
     }
@@ -274,18 +325,44 @@ export default function ProfileSettings() {
                 </p>
               </div>
 
-              <button
-                onClick={() => setIsEditing((value) => !value)}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500"
-              >
-                {isEditing ? <FiX className="h-4 w-4" /> : <FiEdit2 className="h-4 w-4" />}
-                {isEditing ? 'Cancel' : 'Edit profile'}
-              </button>
+              <div className="flex items-center gap-3">
+                {isEditing && (
+                  <button
+                    onClick={handleSave}
+                    disabled={isLoading || isUploadingImage}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <FiSave className="h-4 w-4" />
+                    {isLoading ? 'Saving...' : 'Save changes'}
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    if (isEditing) {
+                      handleCancel();
+                    } else {
+                      setIsEditing(true);
+                      setSaveSuccess(false);
+                    }
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+                >
+                  {isEditing ? <FiX className="h-4 w-4" /> : <FiEdit2 className="h-4 w-4" />}
+                  {isEditing ? 'Cancel' : 'Edit profile'}
+                </button>
+              </div>
             </div>
 
             {error && (
               <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
                 {error}
+              </div>
+            )}
+            
+            {saveSuccess && (
+              <div className="mt-6 rounded-2xl border border-green-100 bg-green-50 p-4 flex items-center gap-3 text-sm text-green-700">
+                <FiCheckCircle className="h-5 w-5" />
+                <span>Profile updated successfully</span>
               </div>
             )}
 
@@ -455,26 +532,12 @@ export default function ProfileSettings() {
                   />
                 </div>
               </div>
-            </div>
-
-            <div className="mt-6 grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
-              <div className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Learning style</p>
-                <p className="mt-2 text-sm font-semibold capitalize text-slate-700">
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-600">Learning style</label>
+                <div className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold capitalize text-slate-700">
                   {user.learning_style || 'Not set'}
-                </p>
+                </div>
               </div>
-
-              {isEditing && (
-                <button
-                  onClick={handleSave}
-                  disabled={isLoading || isUploadingImage}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <FiSave className="h-4 w-4" />
-                  {isLoading ? 'Saving...' : 'Save changes'}
-                </button>
-              )}
             </div>
 
             {user.role === 'student' && (

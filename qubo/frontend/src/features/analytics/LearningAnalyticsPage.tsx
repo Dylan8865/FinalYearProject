@@ -16,8 +16,9 @@ import AppSidebar from '@/components/layout/AppSidebar';
 import { useAuthStore } from '@/contexts/authStore';
 import { useLanguageStore } from '@/contexts/languageStore';
 import { useQuizStore } from '@/contexts/quizStore';
+import StudyPlanCard from '@/features/analytics/components/StudyPlanCard';
 import { authService } from '@/lib/authService';
-import { ReviewSchedule, StudySession, SubjectAnalytics } from '@/types/analytics';
+import { ReviewSchedule, StudySession, SubjectAnalytics, StudyPlanRecommendation } from '@/types/analytics';
 
 const localDateTimeValue = () => {
   const now = new Date();
@@ -42,6 +43,7 @@ export default function LearningAnalyticsPage() {
   const [subjects, setSubjects] = useState<SubjectAnalytics[]>([]);
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [reviewSchedule, setReviewSchedule] = useState<ReviewSchedule[]>([]);
+  const [recommendations, setRecommendations] = useState<StudyPlanRecommendation[]>([]);
   const [threshold, setThreshold] = useState(50);
   const [savedThreshold, setSavedThreshold] = useState(50);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,11 +65,12 @@ export default function LearningAnalyticsPage() {
     setIsLoading(true);
     setError('');
     try {
-      const [subjectResult, sessionResult, thresholdResult, reviewResult] = await Promise.allSettled([
+      const [subjectResult, sessionResult, thresholdResult, reviewResult, recommendationResult] = await Promise.allSettled([
         authService.getSubjectAnalytics(),
         authService.getStudySessions(),
         authService.getPredictionThreshold(),
         authService.getReviewSchedule(),
+        authService.getStudyPlanRecommendations(),
       ]);
 
       const failedSections: string[] = [];
@@ -96,6 +99,9 @@ export default function LearningAnalyticsPage() {
 
       if (reviewResult.status === 'fulfilled') setReviewSchedule(reviewResult.value);
       else failedSections.push('review schedule');
+
+      if (recommendationResult.status === 'fulfilled') setRecommendations(recommendationResult.value);
+      else failedSections.push('study plan');
 
       if (failedSections.length) {
         setError(`Could not load ${failedSections.join(', ')}. Other analytics remain available.`);
@@ -310,7 +316,7 @@ export default function LearningAnalyticsPage() {
                   <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700">{reviewSchedule.filter((item) => item.is_due).length} due</span>
                 </div>
                 <p className="mt-2 text-sm text-slate-500">Review dates adapt automatically after each quiz attempt.</p>
-                <div className="mt-4 space-y-3">
+                <div className="mt-4 space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                   {reviewSchedule.length ? reviewSchedule.slice(0, 6).map((item) => (
                     <div key={item.id} className={`rounded-2xl border p-4 ${item.is_due ? 'border-amber-200 bg-amber-50' : 'border-slate-100 bg-slate-50'}`}>
                       <div className="flex items-start justify-between gap-3">
@@ -335,6 +341,10 @@ export default function LearningAnalyticsPage() {
                 </div>
               </section>
             </div>
+          </section>
+
+          <section className="mt-6">
+            <StudyPlanCard recommendations={recommendations} onRefresh={() => void loadData()} />
           </section>
 
           <section className="mt-6 rounded-[30px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] md:p-7">

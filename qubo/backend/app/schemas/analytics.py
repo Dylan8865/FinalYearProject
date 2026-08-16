@@ -91,6 +91,32 @@ class ReviewScheduleItem(BaseModel):
     quiz_id: Optional[str] = None
 
 
+class LearningRecommendationItem(BaseModel):
+    id: str
+    student_id: str
+    recommendation_type: str
+    subject_id: Optional[str] = None
+    subject_name: Optional[str] = None
+    topic_id: Optional[str] = None
+    topic_name: Optional[str] = None
+    recommendation_text: str
+    priority_level: int
+    resource_link: Optional[str] = None
+    is_accepted: bool
+    created_at: datetime
+
+
+class LearningRecommendationAcceptResponse(BaseModel):
+    id: str
+    is_accepted: bool
+    message: str
+
+
+class StudyPlanResponse(BaseModel):
+    message: str
+    recommendations: List[LearningRecommendationItem]
+
+
 class PredictionSettings(BaseModel):
     threshold: float = Field(..., ge=0, le=100)
 

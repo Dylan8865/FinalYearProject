@@ -137,7 +137,9 @@ class AnalyticsService:
             or []
         )
         study_minutes = sum(row.get("duration_minutes") or 0 for row in recent_sessions)
-        predicted_score = AnalyticsService._calculate_prediction(scores, study_minutes)
+        
+        from app.services.ml_prediction import MLPredictionService
+        predicted_score = MLPredictionService.train_and_predict(study_minutes, scores)
         threshold = AnalyticsService.get_prediction_settings(student_id)["threshold"]
         risk_level = "high" if predicted_score < threshold else "medium" if predicted_score < threshold + 10 else "low"
 
@@ -152,7 +154,7 @@ class AnalyticsService:
                 "alert_threshold": threshold,
                 "is_warning": predicted_score < threshold,
                 "basis_attempt_count": len(scores),
-                "model_version": "weighted-trend-v1",
+                "model_version": "random-forest-v1",
             })
             .execute()
         )
@@ -697,4 +699,133 @@ class AnalyticsService:
                 "completed_quizzes": sum(student["quizzes_completed"] for student in students),
             },
             "students": students,
+        }
+
+    @staticmethod
+    def get_learning_recommendations(student_id: str):
+        supabase = get_supabase()
+        recommendations = (
+            supabase.table("learning_recommendations")
+            .select("*")
+            .eq("student_id", student_id)
+            .order("priority_level", desc=True)
+            .order("created_at", desc=True)
+            .limit(10)
+            .execute().data or []
+        )
+        if not recommendations:
+            return []
+
+        subject_ids = list({row["subject_id"] for row in recommendations if row.get("subject_id")})
+        topic_ids = list({row["topic_id"] for row in recommendations if row.get("topic_id")})
+
+        subject_names = {}
+        if subject_ids:
+            subjects = supabase.table("subjects").select("id,subject_name").in_("id", subject_ids).execute().data or []
+            subject_names = {row["id"]: row["subject_name"] for row in subjects}
+
+        topic_names = {}
+        if topic_ids:
+            topics = supabase.table("topics").select("id,topic_name").in_("id", topic_ids).execute().data or []
+            topic_names = {row["id"]: row["topic_name"] for row in topics}
+
+        return [
+            {
+                **rec,
+                "subject_name": subject_names.get(rec.get("subject_id")),
+                "topic_name": topic_names.get(rec.get("topic_id")),
+            }
+            for rec in recommendations
+        ]
+
+    @staticmethod
+    def accept_learning_recommendation(student_id: str, recommendation_id: str):
+        supabase = get_supabase()
+        response = (
+            supabase.table("learning_recommendations")
+            .update({"is_accepted": True})
+            .eq("id", recommendation_id)
+            .eq("student_id", student_id)
+            .execute()
+        )
+        if not response.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recommendation not found")
+        return {"id": recommendation_id, "is_accepted": True, "message": "Recommendation accepted"}
+
+    @staticmethod
+    def generate_study_plan(student_id: str):
+        # 1. Fetch current subject analytics to find weakest topics
+        subjects = AnalyticsService.get_subject_analytics(student_id)
+        if not subjects:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="Not enough activity data to generate a study plan. Complete some quizzes or study sessions first."
+            )
+
+        weak_topics = []
+        for subject in subjects:
+            for topic in subject.get("topic_performance", []):
+                score = topic.get("score_percentage")
+                # Ensure score is a number before comparing
+                if score is not None and isinstance(score, (int, float)) and score < 60:
+                    weak_topics.append({
+                        "subject_id": subject["id"],
+                        "topic_id": topic["topic_id"],
+                        "topic_name": topic["topic_name"],
+                        "score": score
+                    })
+
+        # Sort by score ascending (weakest first)
+        weak_topics.sort(key=lambda x: x["score"])
+
+        supabase = get_supabase()
+        
+        # 2. Fetch existing recommendations
+        existing_recs = supabase.table("learning_recommendations").select("*").eq("student_id", student_id).execute().data or []
+        accepted_topic_ids = {rec["topic_id"] for rec in existing_recs if rec["is_accepted"] and rec.get("topic_id")}
+        has_general_strategy = any(rec["recommendation_type"] == "study_strategy" and rec["is_accepted"] for rec in existing_recs)
+
+        # 3. Filter out weak topics that already have an accepted recommendation
+        weak_topics = [wt for wt in weak_topics if wt["topic_id"] not in accepted_topic_ids]
+
+        # Delete old unaccepted recommendations to keep it clean
+        supabase.table("learning_recommendations").delete().eq("student_id", student_id).eq("is_accepted", False).execute()
+
+        new_recommendations = []
+
+        if not weak_topics:
+            if has_general_strategy or len(accepted_topic_ids) > 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="You already have an active study plan! Complete your accepted recommendations or take more quizzes to refresh your progress."
+                )
+            
+            # If doing well and no prior strategy, give a general study strategy
+            general_rec = {
+                "student_id": student_id,
+                "recommendation_type": "study_strategy",
+                "recommendation_text": "You are doing excellent across all subjects! Keep up the spaced repetition to maintain your mastery.",
+                "priority_level": 5
+            }
+            res = supabase.table("learning_recommendations").insert(general_rec).execute()
+            if res.data:
+                new_recommendations.append(res.data[0])
+        else:
+            # Generate recommendations for top 3 weakest topics
+            for idx, weak_topic in enumerate(weak_topics[:3]):
+                rec = {
+                    "student_id": student_id,
+                    "recommendation_type": "topic_focus",
+                    "subject_id": weak_topic["subject_id"],
+                    "topic_id": weak_topic["topic_id"],
+                    "recommendation_text": f"Your score in '{weak_topic['topic_name']}' is {weak_topic['score']}%. We recommend dedicating your next 2 study sessions exclusively to this topic.",
+                    "priority_level": 10 - idx
+                }
+                res = supabase.table("learning_recommendations").insert(rec).execute()
+                if res.data:
+                    new_recommendations.append(res.data[0])
+
+        return {
+            "message": "Your personalised weekly study plan has been generated based on your latest performance.",
+            "recommendations": AnalyticsService.get_learning_recommendations(student_id)
         }

@@ -10,6 +10,7 @@ import {
   FiDownload,
   FiEdit3,
   FiEye,
+  FiEyeOff,
   FiHeadphones,
   FiKey,
   FiLock,
@@ -117,6 +118,7 @@ export default function ProfilePage() {
   const [accountAction, setAccountAction] = useState<'clear-history' | 'deactivate' | 'delete' | null>(null);
   const [accountPassword, setAccountPassword] = useState('');
   const [accountError, setAccountError] = useState('');
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
   const [isUpdatingAccount, setIsUpdatingAccount] = useState(false);
   const language = useLanguageStore((state) => state.language);
   const theme = useThemeStore((state) => state.theme);
@@ -148,6 +150,8 @@ export default function ProfilePage() {
         await authService.deactivateAccount(accountPassword);
       } else {
         await authService.deleteAccount(accountPassword);
+        window.location.assign('/login?message=Account+deleted+successfully.');
+        return;
       }
       window.location.assign('/login');
     } catch (requestError: any) {
@@ -245,7 +249,7 @@ export default function ProfilePage() {
     kinesthetic: user.kinesthetic_score ?? null,
   };
   const hasSavedScores = Object.values(styleScores).every((score) => score !== null);
-  const displayName = user.full_name || user.username;
+  const displayName = user.username || user.full_name;
   const targetGrade = normalizeSpmTargetGrade(user.target_grade);
   const coreTargets = [
     targetGrade ? `SPM: ${targetGrade}` : 'SPM: Set target',
@@ -367,6 +371,9 @@ export default function ProfilePage() {
                       <h2 className="text-2xl font-black tracking-tight text-slate-950">{displayName}</h2>
                       <FiCheck className="h-5 w-5 rounded-full bg-blue-600 p-1 text-white" />
                     </div>
+                    {user.full_name && user.full_name !== user.username && (
+                      <p className="mt-1 text-sm font-bold text-slate-400">{user.full_name}</p>
+                    )}
                     <p className="mt-1 text-sm font-semibold text-slate-500">
                       {user.school || 'SPM Student'} • {user.form_level || 'Form level not set'}
                     </p>
@@ -682,7 +689,12 @@ export default function ProfilePage() {
                   : 'Your Qubo account, progress, quiz attempts and saved learning data will be permanently removed. This cannot be undone.'}
             </p>
             <label className="mt-5 block text-sm font-bold text-slate-700">Confirm your password
-              <input type="password" value={accountPassword} onChange={(event) => setAccountPassword(event.target.value)} autoComplete="current-password" required autoFocus className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100" />
+              <div className="relative mt-2">
+                <input type={showDeletePassword ? "text" : "password"} value={accountPassword} onChange={(event) => setAccountPassword(event.target.value)} autoComplete="current-password" required autoFocus className="w-full rounded-xl border border-slate-200 pl-3 pr-10 py-2.5 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100" />
+                <button type="button" onClick={() => setShowDeletePassword(!showDeletePassword)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600" aria-label={showDeletePassword ? "Hide password" : "Show password"}>
+                  {showDeletePassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                </button>
+              </div>
             </label>
             {accountError && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{accountError}</p>}
             <div className="mt-6 flex gap-3">

@@ -15,6 +15,9 @@ from app.schemas.analytics import (
     StudySessionCreate,
     StudySessionItem,
     SubjectAnalyticsItem,
+    LearningRecommendationItem,
+    StudyPlanResponse,
+    LearningRecommendationAcceptResponse,
 )
 from app.services.analytics import AnalyticsService
 
@@ -61,6 +64,21 @@ async def get_prediction_settings(current_user=Depends(get_current_student)):
 @router.put("/prediction-settings", response_model=PredictionSettingsResponse)
 async def update_prediction_settings(payload: PredictionSettings, current_user=Depends(get_current_student)):
     return await run_in_threadpool(AnalyticsService.update_prediction_settings, current_user["id"], payload.threshold)
+
+
+@router.get("/recommendations", response_model=List[LearningRecommendationItem])
+async def get_learning_recommendations(current_user=Depends(get_current_student)):
+    return await run_in_threadpool(AnalyticsService.get_learning_recommendations, current_user["id"])
+
+
+@router.post("/recommendations/generate-plan", response_model=StudyPlanResponse)
+async def generate_study_plan(current_user=Depends(get_current_student)):
+    return await run_in_threadpool(AnalyticsService.generate_study_plan, current_user["id"])
+
+
+@router.post("/recommendations/{recommendation_id}/accept", response_model=LearningRecommendationAcceptResponse)
+async def accept_learning_recommendation(recommendation_id: str, current_user=Depends(get_current_student)):
+    return await run_in_threadpool(AnalyticsService.accept_learning_recommendation, current_user["id"], recommendation_id)
 
 
 @router.get("/review-schedule", response_model=List[ReviewScheduleItem])

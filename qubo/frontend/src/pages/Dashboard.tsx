@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { Subject } from '@/types/auth';
-import { useNavigate } from 'react-router-dom';
-import { FiLogOut, FiSettings, FiTarget } from 'react-icons/fi';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FiLogOut, FiSettings, FiTarget, FiCheck } from 'react-icons/fi';
 import AppSidebar from '@/components/layout/AppSidebar';
 import { EducatorAnalytics } from '@/types/learning';
 import { normalizeSpmTargetGrade } from '@/lib/spmGrades';
@@ -11,10 +11,19 @@ import { normalizeSpmTargetGrade } from '@/lib/spmGrades';
 export default function Dashboard() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const [studentSubjects, setStudentSubjects] = useState<Subject[]>([]);
   const [subjectsError, setSubjectsError] = useState('');
   const [analytics, setAnalytics] = useState<EducatorAnalytics | null>(null);
   const [analyticsError, setAnalyticsError] = useState('');
+  const [showLoginSuccess, setShowLoginSuccess] = useState(location.state?.loginSuccess || false);
+
+  useEffect(() => {
+    if (showLoginSuccess) {
+      const timer = setTimeout(() => setShowLoginSuccess(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [showLoginSuccess]);
 
   useEffect(() => {
     const loadStudentSubjects = async () => {
@@ -129,6 +138,20 @@ export default function Dashboard() {
         </header>
 
         <main className="space-y-6 px-5 py-6 md:px-8 md:py-8">
+          {showLoginSuccess && (
+            <div className="flex animate-in fade-in slide-in-from-top-4 duration-500 items-center justify-between rounded-2xl bg-emerald-50 px-6 py-4 border border-emerald-200 text-emerald-800 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                  <FiCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-bold text-emerald-900">Login successful</p>
+                  <p className="text-sm font-medium text-emerald-700 opacity-90">Welcome back to your dashboard.</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <section className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
             <div className="rounded-[32px] bg-gradient-to-br from-[#155dfc] via-[#2b7cff] to-[#1446d1] p-6 text-white shadow-[0_20px_60px_rgba(29,78,216,0.28)] md:p-8">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white/90">

@@ -30,6 +30,8 @@ import {
   StudySession,
   StudySessionCreate,
   SubjectAnalytics,
+  StudyPlanRecommendation,
+  StudyPlanResponse,
 } from "@/types/analytics";
 import { SharedLearningItem, TutorialVideo } from "@/types/video";
 import {
@@ -497,6 +499,31 @@ class AuthService {
 
   async getStudentSubjects(): Promise<Subject[]> {
     const response = await this.api.get<Subject[]>("/auth/profile/subjects");
+    return response.data;
+  }
+
+  async getStudyPlanRecommendations(): Promise<StudyPlanRecommendation[]> {
+    const response = await this.api.get<StudyPlanRecommendation[]>(
+      "/analytics/recommendations",
+    );
+    return response.data;
+  }
+
+  async generateStudyPlan(): Promise<StudyPlanResponse> {
+    const response = await this.api.post<StudyPlanResponse>(
+      "/analytics/recommendations/generate-plan",
+    );
+    return response.data;
+  }
+
+  async acceptStudyPlanRecommendation(
+    recommendationId: string,
+  ): Promise<{ id: string; is_accepted: boolean; message: string }> {
+    const response = await this.api.post<{
+      id: string;
+      is_accepted: boolean;
+      message: string;
+    }>(`/analytics/recommendations/${recommendationId}/accept`);
     return response.data;
   }
 
