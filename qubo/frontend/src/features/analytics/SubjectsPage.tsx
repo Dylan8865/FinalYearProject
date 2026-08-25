@@ -160,7 +160,7 @@ export default function SubjectsPage() {
         <div className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
           <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Module 2</p>
+              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Analytics</p>
               <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-950">Subject Performance</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
                 Review mastery, learning activity, and knowledge gaps calculated from your saved study records.

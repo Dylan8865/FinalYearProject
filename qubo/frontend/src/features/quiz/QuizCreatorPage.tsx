@@ -19,8 +19,8 @@ import {
 import { GeneratedQuestion, QuizDifficulty, QuizQuestionType } from '@/types/quiz';
 import { useAuthStore } from '@/contexts/authStore';
 
-const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
-const MAX_TOTAL_SIZE_BYTES = 16 * 1024 * 1024;
+const MAX_FILE_SIZE_BYTES = 32 * 1024 * 1024;
+const MAX_TOTAL_SIZE_BYTES = 32 * 1024 * 1024;
 
 const formatMegabytes = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
@@ -79,9 +79,9 @@ export default function QuizCreatorPage() {
       if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
         rejectedFiles.push(`${file.name}: unsupported file type`);
       } else if (file.size > MAX_FILE_SIZE_BYTES) {
-        rejectedFiles.push(`${file.name}: larger than 8 MB`);
+        rejectedFiles.push(`${file.name}: larger than 32 MB`);
       } else if (nextTotalSize + file.size > MAX_TOTAL_SIZE_BYTES) {
-        rejectedFiles.push(`${file.name}: would exceed the 16 MB total`);
+        rejectedFiles.push(`${file.name}: would exceed the 32 MB total`);
       } else {
         acceptedFiles.push(file);
         nextTotalSize += file.size;
@@ -223,7 +223,7 @@ export default function QuizCreatorPage() {
       <div className="min-w-0">
         <main className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
           <div className="mb-7">
-            <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Module 3</p>
+            <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">AI-Powered Generation</p>
             <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-950">Quiz Creator</h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
               Transform study materials into interactive mastery challenges. Upload textbook pages or notes and configure the quiz experience.
@@ -249,7 +249,7 @@ export default function QuizCreatorPage() {
                   </div>
                   <h2 className="mt-5 text-lg font-extrabold text-slate-900">Drag and drop textbook pages</h2>
                   <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                    Upload JPEG/PNG images or PDFs. Maximum 8 MB per file and 16 MB in total.
+                    Upload JPEG/PNG images or PDFs. Maximum 32 MB per file and 32 MB in total.
                   </p>
                   <button
                     onClick={() => fileInputRef.current?.click()}
@@ -273,8 +273,8 @@ export default function QuizCreatorPage() {
 
                 <div className="mt-7 flex items-center justify-between">
                   <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">Selected uploads</h3>
-                  <span className="text-xs font-bold text-slate-400" aria-label={`${uploadedFiles.length} files selected, ${formatMegabytes(totalUploadSize)} of 16 MB used`}>
-                    {uploadedFiles.length} selected · {formatMegabytes(totalUploadSize)} / 16 MB
+                  <span className="text-xs font-bold text-slate-400" aria-label={`${uploadedFiles.length} files selected, ${formatMegabytes(totalUploadSize)} of 32 MB used`}>
+                    {uploadedFiles.length} selected · {formatMegabytes(totalUploadSize)} / 32 MB
                   </span>
                 </div>
 

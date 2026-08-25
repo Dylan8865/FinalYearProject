@@ -402,3 +402,23 @@ drop policy if exists "student views own educators" on educator_students;
 create policy "student views own educators" on educator_students
   for select using (auth.uid() = student_id);
 
+
+-- ------------------------------------------------------------
+-- 3.0 QUIZ PROGRESS PERSISTENCE
+-- ------------------------------------------------------------
+create table if not exists quiz_progress (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid not null references profiles(id) on delete cascade,
+  quiz_id uuid not null references quizzes(id) on delete cascade,
+  current_index int not null default 0,
+  elapsed_seconds int not null default 0,
+  answers jsonb not null default '{}'::jsonb,
+  answer_times jsonb not null default '{}'::jsonb,
+  last_updated timestamptz not null default now(),
+  unique (student_id, quiz_id)
+);
+
+alter table quiz_progress enable row level security;
+drop policy if exists "own quiz progress" on quiz_progress;
+create policy "own quiz progress" on quiz_progress
+  for all using (auth.uid() = student_id);

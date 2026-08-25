@@ -278,6 +278,24 @@ class AuthService {
     return response.data;
   }
 
+  async getQuizProgress(quizId: string) {
+    const response = await this.api.get(`/quiz/${quizId}/progress`);
+    return response.data;
+  }
+
+  async saveQuizProgress(quizId: string, progress: {
+    current_index: number;
+    elapsed_seconds: number;
+    answers: Record<string, string>;
+    answer_times: Record<string, number>;
+  }) {
+    await this.api.put(`/quiz/${quizId}/progress`, progress);
+  }
+
+  async deleteQuizProgress(quizId: string) {
+    await this.api.delete(`/quiz/${quizId}/progress`);
+  }
+
   async getSubjectAnalytics(
     filters: AnalyticsFilters = {},
   ): Promise<SubjectAnalytics[]> {

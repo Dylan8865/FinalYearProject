@@ -6,6 +6,7 @@ import {
   FiBookOpen,
   FiCheck,
   FiChevronDown,
+  FiClock,
   FiEye,
   FiFileText,
   FiPlus,
@@ -57,6 +58,7 @@ export default function LibraryPage() {
   const [previewingQuizId, setPreviewingQuizId] = useState<string | null>(null);
   const [previewQuiz, setPreviewQuiz] = useState<{ id: string; quiz: GeneratedQuiz } | null>(null);
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
+  const [resumePromptQuizId, setResumePromptQuizId] = useState<string | null>(null);
 
   const loadLibrary = useCallback(async () => {
     setIsLoading(true);
@@ -107,6 +109,15 @@ export default function LibraryPage() {
   };
 
   const startSavedQuiz = async (quizId: string) => {
+    const quiz = quizzes.find((q) => q.id === quizId);
+    if (quiz?.has_in_progress_attempt) {
+      setResumePromptQuizId(quizId);
+      return;
+    }
+    await proceedWithQuiz(quizId);
+  };
+
+  const proceedWithQuiz = async (quizId: string) => {
     setActionError('');
     setStartingQuizId(quizId);
     try {
@@ -121,6 +132,25 @@ export default function LibraryPage() {
       setActionError(typeof detail === 'string' ? detail : 'Unable to start this quiz.');
     } finally {
       setStartingQuizId(null);
+    }
+  };
+
+  const handleContinueQuiz = () => {
+    if (resumePromptQuizId) {
+      void proceedWithQuiz(resumePromptQuizId);
+      setResumePromptQuizId(null);
+    }
+  };
+
+  const handleRestartQuiz = async () => {
+    if (resumePromptQuizId) {
+      try {
+        await authService.deleteQuizProgress(resumePromptQuizId);
+      } catch (e) {
+        // optionally log or ignore
+      }
+      void proceedWithQuiz(resumePromptQuizId);
+      setResumePromptQuizId(null);
     }
   };
 
@@ -327,8 +357,12 @@ export default function LibraryPage() {
                       disabled={Boolean(startingQuizId) || Boolean(deletingQuizId)}
                       className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white hover:bg-blue-700 disabled:opacity-45"
                     >
-                      <FiPlay className="h-4 w-4" />
-                      {startingQuizId === quiz.id ? 'Loading…' : 'Start quiz'}
+                      {quiz.has_in_progress_attempt ? <FiClock className="h-4 w-4" /> : <FiPlay className="h-4 w-4" />}
+                      {startingQuizId === quiz.id
+                        ? 'Loading…'
+                        : quiz.has_in_progress_attempt
+                          ? 'Resume quiz'
+                          : 'Start quiz'}
                     </button>
                     <button
                       type="button"
@@ -389,6 +423,41 @@ export default function LibraryPage() {
           )}
         </div>
       </main>
+
+      {resumePromptQuizId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[30px] bg-white p-7 text-center shadow-2xl">
+            <FiClock className="mx-auto h-12 w-12 text-blue-500" />
+            <h3 className="mt-5 text-xl font-extrabold text-slate-900">Resume Quiz?</h3>
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              You have an unfinished attempt for this quiz. Do you want to continue where you left off, or start over?
+            </p>
+            <div className="mt-7 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={handleContinueQuiz}
+                className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
+              >
+                Continue attempt
+              </button>
+              <button
+                type="button"
+                onClick={handleRestartQuiz}
+                className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Start over
+              </button>
+              <button
+                type="button"
+                onClick={() => setResumePromptQuizId(null)}
+                className="mt-2 text-sm font-bold text-slate-400 hover:text-slate-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {previewQuiz && (
         <div

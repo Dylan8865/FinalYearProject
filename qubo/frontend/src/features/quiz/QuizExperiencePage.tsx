@@ -113,9 +113,62 @@ export default function QuizExperiencePage() {
   );
 
   useEffect(() => {
+    if (!savedQuizId || isEducatorPreview) return;
+    authService.getQuizProgress(savedQuizId).then((data) => {
+      if (data) {
+        if (data.current_index !== undefined) setCurrentIndex(data.current_index);
+        if (data.answers) setAnswers(data.answers);
+        if (data.elapsed_seconds) setElapsedSeconds(data.elapsed_seconds);
+        if (data.answer_times) setAnswerTimes(data.answer_times);
+      }
+    }).catch(() => undefined);
+  }, [savedQuizId, isEducatorPreview]);
+
+  const currentIndexRef = useRef(currentIndex);
+  const answersRef = useRef(answers);
+  const elapsedSecondsRef = useRef(elapsedSeconds);
+  const answerTimesRef = useRef(answerTimes);
+
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+    answersRef.current = answers;
+    elapsedSecondsRef.current = elapsedSeconds;
+    answerTimesRef.current = answerTimes;
+  }, [currentIndex, answers, elapsedSeconds, answerTimes]);
+
+  useEffect(() => {
+    if (!savedQuizId || isEducatorPreview || isComplete) return;
+    const interval = setInterval(() => {
+      authService.saveQuizProgress(savedQuizId, {
+        current_index: currentIndexRef.current,
+        elapsed_seconds: elapsedSecondsRef.current,
+        answers: answersRef.current,
+        answer_times: answerTimesRef.current,
+      }).catch(() => undefined);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [savedQuizId, isEducatorPreview, isComplete]);
+
+  useEffect(() => {
     setWrittenAnswer(answers[currentIndex] ?? '');
     questionStartedAt.current = Date.now();
   }, [answers, currentIndex]);
+
+  const saveAndExit = async () => {
+    if (savedQuizId && !isEducatorPreview) {
+      try {
+        await authService.saveQuizProgress(savedQuizId, {
+          current_index: currentIndex,
+          elapsed_seconds: elapsedSeconds,
+          answers,
+          answer_times: answerTimes,
+        });
+      } catch (e) {
+        // ignore
+      }
+    }
+    navigate('/library');
+  };
 
   const score = questions.length ? Math.round((correctCount / questions.length) * 100) : 0;
 
@@ -148,6 +201,9 @@ export default function QuizExperiencePage() {
         })),
       });
       setPrediction(attemptResponse.prediction || null);
+      if (quizId && !isEducatorPreview) {
+        authService.deleteQuizProgress(quizId).catch(() => undefined);
+      }
       setReviewSchedule(attemptResponse.review_schedule || null);
       setAttemptSaved(true);
     } catch (requestError: any) {
@@ -348,7 +404,12 @@ export default function QuizExperiencePage() {
             <h1 className="mt-1 text-3xl font-extrabold text-slate-950">Question {currentIndex + 1} of {questions.length}</h1>
           </div>
           <div className="flex items-center gap-2">
-            {isEducatorPreview && <button type="button" onClick={() => navigate('/educator/quizzes/edit')} className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-primary hover:bg-blue-100"><FiEdit3 />Back to edit quiz</button>}
+            {!isComplete && (
+              <button type="button" onClick={saveAndExit} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
+                <FiArrowLeft /> Save & exit
+              </button>
+            )}
+            {isEducatorPreview && <button type="button" onClick={() => navigate('/educator/quizzes/edit')} className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-primary hover:bg-blue-100 shadow-sm"><FiEdit3 />Back to edit quiz</button>}
             <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm">
               <FiClock className="text-slate-400" />
               Time taken: {formatTime(elapsedSeconds)}

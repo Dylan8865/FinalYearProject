@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal, Optional
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -70,4 +70,16 @@ class LibraryQuizItem(BaseModel):
     subject: Optional[str] = None
     source_type: str
     created_at: datetime
+    has_in_progress_attempt: bool = False
+
+
+class QuizProgressRequest(BaseModel):
+    current_index: int = Field(default=0, ge=0, le=100)
+    elapsed_seconds: int = Field(default=0, ge=0)
+    answers: Dict[str, str] = Field(default_factory=dict)
+    answer_times: Dict[str, int] = Field(default_factory=dict)
+
+
+class QuizProgressResponse(QuizProgressRequest):
+    pass
 

@@ -9,6 +9,8 @@ from app.schemas.quiz import (
     LibraryQuizItem,
     QuizAttemptRequest,
     QuizAttemptResponse,
+    QuizProgressRequest,
+    QuizProgressResponse,
     SavedQuizResponse,
     SaveQuizRequest,
 )
@@ -17,8 +19,8 @@ from app.services.quiz import GeminiQuizService, QuizLibraryService
 
 router = APIRouter(prefix="/quiz", tags=["quiz"])
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "application/pdf"}
-MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024
-MAX_TOTAL_SIZE_BYTES = 16 * 1024 * 1024
+MAX_FILE_SIZE_BYTES = 32 * 1024 * 1024
+MAX_TOTAL_SIZE_BYTES = 32 * 1024 * 1024
 
 
 @router.get("/library", response_model=List[LibraryQuizItem])
@@ -95,7 +97,7 @@ async def generate_quiz(
             raise HTTPException(status_code=413, detail=f"File is too large: {upload.filename}")
         total_size += len(content)
         if total_size > MAX_TOTAL_SIZE_BYTES:
-            raise HTTPException(status_code=413, detail="Combined uploads must be 16 MB or less")
+            raise HTTPException(status_code=413, detail="Combined uploads must be 32 MB or less")
         prepared_files.append((upload.filename or "study-material", upload.content_type, content))
 
     return await run_in_threadpool(
@@ -121,5 +123,46 @@ async def record_quiz_attempt(
         attempt.total_questions,
         attempt.time_taken_seconds,
         attempt.answers,
+    )
+
+
+@router.get("/{quiz_id}/progress", response_model=QuizProgressResponse, status_code=status.HTTP_200_OK)
+async def get_quiz_progress(
+    quiz_id: str,
+    current_user=Depends(get_current_student),
+):
+    progress = await run_in_threadpool(
+        QuizLibraryService.get_quiz_progress,
+        current_user["id"],
+        quiz_id,
+    )
+    if not progress:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No progress found")
+    return progress
+
+
+@router.put("/{quiz_id}/progress", status_code=status.HTTP_204_NO_CONTENT)
+async def save_quiz_progress(
+    quiz_id: str,
+    progress: QuizProgressRequest,
+    current_user=Depends(get_current_student),
+):
+    await run_in_threadpool(
+        QuizLibraryService.save_quiz_progress,
+        current_user["id"],
+        quiz_id,
+        progress.model_dump(),
+    )
+
+
+@router.delete("/{quiz_id}/progress", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_quiz_progress(
+    quiz_id: str,
+    current_user=Depends(get_current_student),
+):
+    await run_in_threadpool(
+        QuizLibraryService.delete_quiz_progress,
+        current_user["id"],
+        quiz_id,
     )
 
