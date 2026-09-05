@@ -5,6 +5,8 @@ export interface TopicPerformance {
   score_percentage: number | null;
   sessions_count: number;
   last_updated: string | null;
+  weakness_detail?: string | null;
+  focus_tags?: string[] | null;
 }
 
 export interface QuizScorePoint {

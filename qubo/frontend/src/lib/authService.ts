@@ -50,7 +50,7 @@ import {
   GameMatchHistory,
   LevelOneLeaderboardEntry,
 } from "@/types/game";
-import { EducatorAnalytics, LearningEventInput } from "@/types/learning";
+import { StudentActivityAnalytics, EducatorAnalytics, LearningEventInput } from "@/types/learning";
 import {
   CollectionContentOption,
   CollectionEditorData,
@@ -143,6 +143,16 @@ class AuthService {
   async getProfile(): Promise<User> {
     const response = await this.api.get<User>("/auth/profile");
     return response.data;
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.api.post("/auth/logout");
+    } catch (error) {
+      // Ignore network errors during logout
+    } finally {
+      this.clearTokens();
+    }
   }
 
   async getAdminContent(contentType: "video" | "model") {
@@ -374,6 +384,16 @@ class AuthService {
     return response.data;
   }
 
+  async searchStudentForLinking(
+    username: string,
+  ): Promise<{ id: string; username: string; full_name: string; profile_picture_url: string | null }> {
+    const response = await this.api.get<{ id: string; username: string; full_name: string; profile_picture_url: string | null }>(
+      "/analytics/educator/students/search",
+      { params: { username } }
+    );
+    return response.data;
+  }
+
   async linkStudent(
     username: string,
   ): Promise<{ id: string; message: string }> {
@@ -429,11 +449,6 @@ class AuthService {
       preferences,
     );
     return response.data;
-  }
-
-  async logout(): Promise<void> {
-    await this.api.post("/auth/logout");
-    this.clearTokens();
   }
 
   clearSession(): void {
@@ -614,9 +629,31 @@ class AuthService {
     return response.data.is_completed;
   }
 
+  async getStudentActivityAnalytics(): Promise<StudentActivityAnalytics> {
+    const response = await this.api.get<StudentActivityAnalytics>(
+      "/learning/analytics/student",
+    );
+    return response.data;
+  }
+
   async getEducatorAnalytics(): Promise<EducatorAnalytics> {
     const response = await this.api.get<EducatorAnalytics>(
       "/learning/analytics",
+    );
+    return response.data;
+  }
+
+  async searchStudent(query: string): Promise<any[]> {
+    const response = await this.api.get<any[]>(
+      `/auth/search-student?query=${encodeURIComponent(query)}`
+    );
+    return response.data;
+  }
+
+  async assignQuiz(quizId: string, studentId: string): Promise<{ id: string; message: string }> {
+    const response = await this.api.post<{ id: string; message: string }>(
+      `/quiz/library/${quizId}/assign`,
+      { student_id: studentId }
     );
     return response.data;
   }

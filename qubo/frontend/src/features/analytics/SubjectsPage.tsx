@@ -154,7 +154,7 @@ export default function SubjectsPage() {
   }), [language, selectedSubject]);
 
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
       <AppSidebar />
       <main className="min-w-0">
         <div className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">

@@ -511,6 +511,55 @@ class QuizLibraryService:
         return {"id": quiz_id, "message": "Quiz deleted"}
 
     @staticmethod
+    def assign_quiz(educator_id: str, quiz_id: str, student_id: str):
+        supabase = get_supabase()
+        
+        # Verify educator owns the quiz
+        quiz_response = (
+            supabase.table("quizzes")
+            .select("id")
+            .eq("id", quiz_id)
+            .eq("owner_id", educator_id)
+            .limit(1)
+            .execute()
+        )
+        if not quiz_response.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found or not owned by you.")
+
+        # Verify student exists and has student role
+        student_response = (
+            supabase.table("profiles")
+            .select("id")
+            .eq("id", student_id)
+            .eq("role", "student")
+            .limit(1)
+            .execute()
+        )
+        if not student_response.data:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid student.")
+
+        # Check if already assigned
+        assignment_check = (
+            supabase.table("quiz_assignments")
+            .select("id")
+            .eq("quiz_id", quiz_id)
+            .eq("assigned_to", student_id)
+            .limit(1)
+            .execute()
+        )
+        if assignment_check.data:
+            return {"id": quiz_id, "message": "Quiz already assigned to this student."}
+
+        # Insert assignment
+        supabase.table("quiz_assignments").insert({
+            "quiz_id": quiz_id,
+            "assigned_to": student_id,
+            "assigned_by": educator_id,
+        }).execute()
+        
+        return {"id": quiz_id, "message": "Quiz successfully assigned."}
+
+    @staticmethod
     def get_quiz_progress(user_id: str, quiz_id: str):
         supabase = get_supabase()
         response = (

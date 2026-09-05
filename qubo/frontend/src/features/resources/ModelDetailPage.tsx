@@ -227,7 +227,7 @@ export default function ModelDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-[#f7f9fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
       <AppSidebar />
       <main className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
         <button onClick={() => navigate('/models')} className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900"><FiArrowLeft /> Back to 3D models</button>

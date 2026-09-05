@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Response, status
 
-from app.db.deps import get_current_educator, get_current_user
-from app.schemas.learning import CompletionRequest, CompletionStatusResponse, EducatorAnalyticsResponse, LearningEventCreate
+from app.db.deps import get_current_educator, get_current_user, get_current_student
+from app.schemas.learning import CompletionRequest, CompletionStatusResponse, StudentActivityAnalyticsResponse, EducatorAnalyticsResponse, LearningEventCreate
 from app.services.learning import LearningService
 from app.services.activity import ActivityService
 
@@ -50,6 +50,11 @@ async def restore_recent_learning(target_type: str, target_id: str, current_user
 @router.get("/analytics", response_model=EducatorAnalyticsResponse)
 async def get_educator_analytics(_current_user=Depends(get_current_educator)):
     return LearningService.educator_analytics()
+
+
+@router.get("/analytics/student", response_model=StudentActivityAnalyticsResponse)
+async def get_student_analytics(current_user=Depends(get_current_student)):
+    return LearningService.student_analytics(current_user["id"])
 
 
 # ---------------------------------------------------------------------------

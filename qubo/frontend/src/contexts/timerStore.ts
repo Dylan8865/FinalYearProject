@@ -30,7 +30,7 @@ interface TimerState {
 
 export const useTimerStore = create<TimerState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       isActive: false,
       timeLeft: 25 * 60,
       mode: 'work',

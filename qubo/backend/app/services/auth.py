@@ -921,3 +921,41 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(e),
             )
+
+    @staticmethod
+    def search_student(query: str) -> List[dict]:
+        """Search for a student by exact username or email"""
+        if not query or len(query.strip()) < 3:
+            return []
+            
+        supabase = get_supabase()
+        query = query.strip().lower()
+        
+        try:
+            # First try email case-insensitive match
+            res = (
+                supabase.table("profiles")
+                .select("id, username, email, full_name, profile_picture_url")
+                .eq("role", "student")
+                .ilike("email", query)
+                .limit(1)
+                .execute()
+            )
+            
+            # If not found by email, try username case-insensitive match
+            if not res.data:
+                res = (
+                    supabase.table("profiles")
+                    .select("id, username, email, full_name, profile_picture_url")
+                    .eq("role", "student")
+                    .ilike("username", query)
+                    .limit(1)
+                    .execute()
+                )
+                
+            return res.data or []
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e),
+            )

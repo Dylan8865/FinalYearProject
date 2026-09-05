@@ -83,3 +83,6 @@ class QuizProgressRequest(BaseModel):
 class QuizProgressResponse(QuizProgressRequest):
     pass
 
+
+class AssignQuizRequest(BaseModel):
+    student_id: str = Field(..., min_length=1)

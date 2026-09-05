@@ -589,6 +589,8 @@ class AnalyticsService:
                     "score_percentage": score,
                     "sessions_count": topic_session_counts[topic["id"]],
                     "last_updated": performance.get("last_updated") if performance else None,
+                    "weakness_detail": f"You are consistently struggling with {topic['topic_name']}. Review foundational principles to improve accuracy." if score and score < 70 else None,
+                    "focus_tags": [word + " Fundamentals" for word in topic["topic_name"].replace("&", "").split() if len(word) > 3][:2] if score and score < 70 else None
                 })
 
             subject_attempts = attempts_by_subject[subject["id"]]
@@ -612,17 +614,49 @@ class AnalyticsService:
         return result
 
     @staticmethod
+    def search_student_for_linking(educator_id: str, query: str):
+        supabase = get_supabase()
+        students = (
+            supabase.table("profiles")
+            .select("id,username,full_name,profile_picture_url,role")
+            .or_(f"username.ilike.{query},email.ilike.{query}")
+            .limit(1)
+            .execute().data or []
+        )
+        if not students or students[0].get("role") != "student":
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student username or email not found")
+        student = students[0]
+
+        existing = (
+            supabase.table("educator_students")
+            .select("id")
+            .eq("educator_id", educator_id)
+            .eq("student_id", student["id"])
+            .limit(1)
+            .execute().data or []
+        )
+        if existing:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Student is already in your class")
+
+        return {
+            "id": student["id"],
+            "username": student["username"],
+            "full_name": student["full_name"],
+            "profile_picture_url": student.get("profile_picture_url"),
+        }
+
+    @staticmethod
     def link_student(educator_id: str, username: str):
         supabase = get_supabase()
         students = (
             supabase.table("profiles")
             .select("id,username,role")
-            .ilike("username", username)
+            .or_(f"username.ilike.{username},email.ilike.{username}")
             .limit(1)
             .execute().data or []
         )
         if not students or students[0].get("role") != "student":
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student username not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student username or email not found")
         student_id = students[0]["id"]
         existing = (
             supabase.table("educator_students")

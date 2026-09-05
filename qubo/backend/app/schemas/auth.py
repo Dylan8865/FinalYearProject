@@ -193,6 +193,14 @@ class PasswordResetCompleteRequest(BaseModel):
         return v
 
 
+class StudentSearchResponse(BaseModel):
+    id: str
+    username: str
+    email: str
+    full_name: str
+    profile_picture_url: Optional[str] = None
+
+
 class SubjectResponse(BaseModel):
     """Subject response"""
     id: str

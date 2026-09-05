@@ -11,6 +11,8 @@ class TopicPerformanceItem(BaseModel):
     score_percentage: Optional[float] = None
     sessions_count: int = 0
     last_updated: Optional[datetime] = None
+    weakness_detail: Optional[str] = None
+    focus_tags: Optional[List[str]] = None
 
 
 class QuizScorePoint(BaseModel):
@@ -167,3 +169,11 @@ class EducatorDashboardResponse(BaseModel):
 class StudentLinkResponse(BaseModel):
     id: str
     message: str
+
+
+class StudentSearchResponse(BaseModel):
+    id: str
+    username: str
+    full_name: str
+    profile_picture_url: Optional[str] = None
+

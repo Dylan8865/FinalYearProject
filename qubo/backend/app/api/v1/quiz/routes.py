@@ -13,6 +13,7 @@ from app.schemas.quiz import (
     QuizProgressResponse,
     SavedQuizResponse,
     SaveQuizRequest,
+    AssignQuizRequest,
 )
 from app.services.quiz import GeminiQuizService, QuizLibraryService
 
@@ -52,6 +53,25 @@ async def get_saved_quiz(
         QuizLibraryService.get_quiz,
         current_user["id"],
         quiz_id,
+    )
+
+
+@router.post("/library/{quiz_id}/assign", response_model=SavedQuizResponse)
+async def assign_quiz_to_student(
+    quiz_id: str,
+    request: AssignQuizRequest,
+    current_user=Depends(get_current_user),
+):
+    if current_user.get("role") != "educator":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only educators can assign quizzes",
+        )
+    return await run_in_threadpool(
+        QuizLibraryService.assign_quiz,
+        current_user["id"],
+        quiz_id,
+        request.student_id,
     )
 
 

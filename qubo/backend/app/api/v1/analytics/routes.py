@@ -12,6 +12,7 @@ from app.schemas.analytics import (
     ReviewScheduleItem,
     StudentLinkRequest,
     StudentLinkResponse,
+    StudentSearchResponse,
     StudySessionCreate,
     StudySessionItem,
     SubjectAnalyticsItem,
@@ -117,6 +118,11 @@ async def export_progress_pdf(
 @router.get("/educator/dashboard", response_model=EducatorDashboardResponse)
 async def get_educator_dashboard(current_user=Depends(get_current_educator)):
     return await run_in_threadpool(AnalyticsService.get_educator_dashboard, current_user["id"])
+
+
+@router.get("/educator/students/search", response_model=StudentSearchResponse)
+async def search_student_for_linking(username: str, current_user=Depends(get_current_educator)):
+    return await run_in_threadpool(AnalyticsService.search_student_for_linking, current_user["id"], username)
 
 
 @router.post("/educator/students", response_model=StudentLinkResponse, status_code=status.HTTP_201_CREATED)

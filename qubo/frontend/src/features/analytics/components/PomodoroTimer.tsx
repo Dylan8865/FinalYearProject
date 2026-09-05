@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { FiPause, FiPlay, FiX, FiCheck } from 'react-icons/fi';
 import { useTimerStore } from '@/contexts/timerStore';
 

@@ -30,6 +30,17 @@ class CompletionStatusResponse(BaseModel):
     is_completed: bool
 
 
+class StudentActivityAnalyticsResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+    active_learners: int
+    total_learning_events: int
+    completions: int
+    model_explorations: int
+    video_learning_actions: int
+    top_subjects: List[Dict[str, Union[int, str]]]
+    daily_activity: List[Dict[str, Union[int, str]]]
+
+
 class EducatorAnalyticsResponse(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
     active_learners: int

@@ -20,6 +20,7 @@ export interface GeneratedQuiz {
   difficulty: QuizDifficulty;
   source_files: string[];
   questions: GeneratedQuestion[];
+  is_manual?: boolean;
 }
 
 export interface LibraryQuiz {
@@ -28,6 +29,7 @@ export interface LibraryQuiz {
   subject: string | null;
   source_type: string;
   created_at: string;
+  has_in_progress_attempt?: boolean;
 }
 
 export interface SavedQuizResponse {

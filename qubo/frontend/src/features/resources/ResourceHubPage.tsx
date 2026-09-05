@@ -56,7 +56,7 @@ export default function ResourceHubPage() {
     setShowRecommendation(false);
   };
 
-  return <div className="min-h-screen bg-[#f7f9fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+  return <div className="min-h-screen bg-[#f7f9fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
     <AppSidebar />
     <div className="min-w-0">
       <header className="sticky top-16 z-20 border-b border-slate-200/80 bg-white/90 px-5 py-4 backdrop-blur md:px-8">

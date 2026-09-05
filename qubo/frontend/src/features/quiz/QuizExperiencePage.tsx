@@ -284,7 +284,7 @@ export default function QuizExperiencePage() {
 
   if (!quiz || questions.length === 0) {
     return (
-      <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+      <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
         <AppSidebar />
         <main className="flex min-h-screen items-center justify-center px-5 py-10">
           <div className="w-full max-w-lg rounded-[34px] border border-slate-200 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
@@ -305,7 +305,7 @@ export default function QuizExperiencePage() {
 
   if (isComplete) {
     return (
-      <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+      <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
         <AppSidebar />
         <main className="flex min-h-screen items-center justify-center px-5 py-10">
           <div className="w-full max-w-xl rounded-[36px] border border-slate-200 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:p-10">
@@ -395,7 +395,7 @@ export default function QuizExperiencePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
       <AppSidebar />
       <main className="mx-auto w-full max-w-6xl px-5 py-8 md:px-8 lg:py-10">
         <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 md:flex-row md:items-end md:justify-between">
