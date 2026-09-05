@@ -332,7 +332,15 @@ export default function SubjectsPage() {
                   {weakestTopic ? (
                     <>
                       <h3 className="mt-3 text-2xl font-extrabold">{weakestTopic.topic_name}</h3>
-                      <p className="mt-3 text-sm leading-6 text-slate-300">This is currently your lowest measured topic at {Math.round(weakestTopic.score_percentage ?? 0)}%.</p>
+                      <p className="mt-3 text-sm leading-6 text-slate-300">
+                        This is your weakest measured topic at {Math.round(weakestTopic.score_percentage ?? 0)}%.
+                        Focus here first to improve your overall {selectedSubject.subject_name} mastery.
+                      </p>
+                      <div className="mt-5 space-y-2 rounded-2xl bg-white/10 p-4 text-xs font-semibold leading-5 text-slate-200">
+                        <p><span className="mr-2 text-blue-300">1.</span>Review the key notes and examples for this topic.</p>
+                        <p><span className="mr-2 text-blue-300">2.</span>Practise a short set of questions without checking answers.</p>
+                        <p><span className="mr-2 text-blue-300">3.</span>Retry until you can explain the mistakes clearly.</p>
+                      </div>
                     </>
                   ) : (
                     <>
@@ -340,8 +348,8 @@ export default function SubjectsPage() {
                       <p className="mt-3 text-sm leading-6 text-slate-300">Complete subject activities to identify the topic that needs the most attention.</p>
                     </>
                   )}
-                  <button onClick={() => navigate('/quiz/create')} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-extrabold hover:bg-blue-500">
-                    Create a practice quiz <FiArrowRight />
+                  <button onClick={() => navigate(`/quiz/create?subject=${encodeURIComponent(selectedSubject.subject_name)}&topic=${encodeURIComponent(weakestTopic?.topic_name || '')}`)} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-extrabold hover:bg-blue-500">
+                    {weakestTopic ? `Practise ${weakestTopic.topic_name}` : 'Start a practice quiz'} <FiArrowRight />
                   </button>
                 </div>
               </section>

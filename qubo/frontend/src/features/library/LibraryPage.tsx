@@ -379,11 +379,14 @@ export default function LibraryPage() {
                     <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${quiz.source_type === 'educator_shared' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
                       {quiz.source_type === 'ai_generated' ? <FiArchive className="h-5 w-5" /> : quiz.source_type === 'educator_shared' ? <FiCheck className="h-5 w-5" /> : <FiFileText className="h-5 w-5" />}
                     </div>
-                    <span className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide ${quiz.source_type === 'educator_shared' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide ${quiz.source_type === 'educator_assigned' || quiz.source_type === 'educator_shared' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
                       {formatSourceType(quiz.source_type)}
                     </span>
                   </div>
                   <h3 className="mt-6 line-clamp-2 text-lg font-extrabold leading-6 text-slate-900">{quiz.title}</h3>
+                  {quiz.source_type === 'educator_assigned' && quiz.assigned_by_name && (
+                    <p className="mt-2 text-xs font-bold text-amber-700">Assigned by {quiz.assigned_by_name}</p>
+                  )}
                   <div className="mt-auto flex items-center justify-between gap-3 pt-6 text-xs font-semibold text-slate-500">
                     <span className="inline-flex min-w-0 items-center gap-2 truncate">
                       <FiBookOpen className="h-4 w-4 flex-none" />

@@ -96,6 +96,7 @@ class GeminiQuizService:
         question_type: str,
         difficulty: str,
         question_count: int,
+        focus_topic: str = "",
     ) -> GeneratedQuizResponse:
         if not settings.GEMINI_API_KEY:
             raise HTTPException(
@@ -124,6 +125,8 @@ class GeminiQuizService:
             "Keep wording clear for secondary-school students. Give a short teaching explanation for every answer. "
             "Do not invent facts that are absent from the uploaded material."
         )
+        if focus_topic:
+            prompt += f" Focus the questions specifically on the topic '{focus_topic}', using other material only when needed for context."
 
         parts = [{"text": prompt}]
         for _, mime_type, content in files:
@@ -335,12 +338,31 @@ class QuizLibraryService:
 
         assigned_response = (
             supabase.table("quiz_assignments")
-            .select("quiz_id")
+            .select("quiz_id,assigned_by")
             .eq("assigned_to", user_id)
             .execute()
         )
+        assignments = assigned_response.data or []
         assigned_quiz_ids = {
-            row["quiz_id"] for row in (assigned_response.data or []) if row.get("quiz_id")
+            row["quiz_id"] for row in assignments if row.get("quiz_id")
+        }
+        assigned_by_ids = list({row["assigned_by"] for row in assignments if row.get("assigned_by")})
+        educator_names = {}
+        if assigned_by_ids:
+            educator_response = (
+                supabase.table("profiles")
+                .select("id,full_name,username")
+                .in_("id", assigned_by_ids)
+                .execute()
+            )
+            educator_names = {
+                row["id"]: row.get("full_name") or row.get("username") or "Educator"
+                for row in (educator_response.data or [])
+            }
+        assigned_by_for_quiz = {
+            row["quiz_id"]: educator_names.get(row.get("assigned_by"))
+            for row in assignments
+            if row.get("quiz_id")
         }
         owned_quiz_ids = {quiz["id"] for quiz in quizzes}
         additional_quiz_ids = assigned_quiz_ids - owned_quiz_ids
@@ -387,6 +409,7 @@ class QuizLibraryService:
                 "source_type": "educator_assigned" if quiz["id"] in assigned_quiz_ids else quiz["source_type"],
                 "created_at": quiz["created_at"],
                 "has_in_progress_attempt": quiz["id"] in in_progress_quizzes,
+                "assigned_by_name": assigned_by_for_quiz.get(quiz["id"]),
             }
             for quiz in quizzes
         ]

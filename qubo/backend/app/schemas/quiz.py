@@ -71,6 +71,7 @@ class LibraryQuizItem(BaseModel):
     source_type: str
     created_at: datetime
     has_in_progress_attempt: bool = False
+    assigned_by_name: Optional[str] = None
 
 
 class QuizProgressRequest(BaseModel):

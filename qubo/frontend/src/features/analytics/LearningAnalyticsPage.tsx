@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fi';
 
 import AppSidebar from '@/components/layout/AppSidebar';
+import Tooltip from '@/components/common/Tooltip';
 import { useAuthStore } from '@/contexts/authStore';
 import { useLanguageStore } from '@/contexts/languageStore';
 import { useQuizStore } from '@/contexts/quizStore';
@@ -34,6 +35,38 @@ const formatMinutes = (minutes: number) => {
   if (!hours) return `${minutes} min`;
   return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
 };
+
+const forecastGrade = (score: number) => {
+  if (score >= 90) return 'A+';
+  if (score >= 80) return 'A';
+  if (score >= 70) return 'A-';
+  if (score >= 65) return 'B+';
+  if (score >= 60) return 'B';
+  if (score >= 55) return 'C+';
+  if (score >= 50) return 'C';
+  if (score >= 45) return 'D';
+  if (score >= 40) return 'E';
+  return 'G';
+};
+
+const forecastGradeGuide = (
+  <div className="w-72">
+    <p className="mb-2 font-extrabold">Malaysian grading scale</p>
+    <div className="grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-1 text-xs">
+      {[
+        ['A+', '90–100', '0'], ['A', '80–89', '1'], ['A-', '70–79', '2'],
+        ['B+', '65–69', '3'], ['B', '60–64', '4'], ['C+', '55–59', '5'],
+        ['C', '50–54', '6'], ['D', '45–49', '7'], ['E', '40–44', '8'], ['G', '0–39', '9'],
+      ].map(([grade, range, points]) => (
+        <div key={grade} className="contents">
+          <span className="font-extrabold text-white">{grade}</span>
+          <span className="text-slate-300">{range} marks</span>
+          <span className="text-right text-slate-300">GP {points}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 export default function LearningAnalyticsPage() {
   const user = useAuthStore((state) => state.user);
@@ -440,7 +473,7 @@ export default function LearningAnalyticsPage() {
           </section>
 
           <section className="mt-6 rounded-[30px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] md:p-7">
-            <div className="flex items-center gap-3"><FiTrendingUp className="text-blue-600" /><h2 className="text-xl font-extrabold">Exam score forecasts</h2></div>
+            <div className="flex items-center gap-3"><FiTrendingUp className="text-blue-600" /><h2 className="text-xl font-extrabold">Exam score forecasts</h2><Tooltip content={forecastGradeGuide} position="top" /></div>
             <p className="mt-2 text-sm text-slate-500">Forecasts are updated automatically after a saved quiz attempt.</p>
             <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {subjects.map((subject) => {
@@ -451,7 +484,10 @@ export default function LearningAnalyticsPage() {
                       <div><p className="font-extrabold">{subject.subject_name}</p><p className="mt-1 text-xs font-semibold text-slate-400">{prediction ? `Based on ${prediction.basis_attempt_count} attempt${prediction.basis_attempt_count === 1 ? '' : 's'}` : 'Complete a quiz to start forecasting'}</p></div>
                       {prediction?.is_warning && <FiAlertTriangle className="text-red-600" />}
                     </div>
-                    <p className={`mt-5 text-3xl font-extrabold ${prediction?.is_warning ? 'text-red-600' : 'text-blue-600'}`}>{prediction ? `${Math.round(prediction.predicted_score)}%` : '—'}</p>
+                    <div className="mt-5 flex items-end gap-3">
+                      <p className={`text-3xl font-extrabold ${prediction?.is_warning ? 'text-red-600' : 'text-blue-600'}`}>{prediction ? `${Math.round(prediction.predicted_score)}%` : '—'}</p>
+                      {prediction && <span className={`mb-1 rounded-lg px-2.5 py-1 text-sm font-extrabold ${prediction.is_warning ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>Grade {forecastGrade(prediction.predicted_score)}</span>}
+                    </div>
                     <div className="mt-4 flex items-center justify-between text-xs font-bold text-slate-500">
                       <span>Velocity</span>
                       <span>{subject.learning_velocity === null ? 'Not enough data' : `${subject.learning_velocity > 0 ? '+' : ''}${subject.learning_velocity} pts/week`}</span>

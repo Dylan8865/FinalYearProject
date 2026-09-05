@@ -241,12 +241,14 @@ class AuthService {
     questionType: QuizQuestionType,
     difficulty: QuizDifficulty,
     questionCount = 5,
+    focusTopic = '',
   ): Promise<GeneratedQuiz> {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
     formData.append("question_type", questionType);
     formData.append("difficulty", difficulty);
     formData.append("question_count", String(questionCount));
+    if (focusTopic) formData.append("focus_topic", focusTopic);
 
     const response = await this.api.post<GeneratedQuiz>(
       "/quiz/generate",

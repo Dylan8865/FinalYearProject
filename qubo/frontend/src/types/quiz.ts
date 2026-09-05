@@ -30,6 +30,7 @@ export interface LibraryQuiz {
   source_type: string;
   created_at: string;
   has_in_progress_attempt?: boolean;
+  assigned_by_name?: string | null;
 }
 
 export interface SavedQuizResponse {

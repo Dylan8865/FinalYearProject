@@ -93,6 +93,7 @@ async def generate_quiz(
     question_type: str = Form("mcq"),
     difficulty: str = Form("Intermediate"),
     question_count: int = Form(5),
+    focus_topic: str = Form(""),
     current_user=Depends(get_current_user),
 ):
     if question_type not in {"mcq", "fill", "short"}:
@@ -126,6 +127,7 @@ async def generate_quiz(
         question_type,
         difficulty,
         question_count,
+        focus_topic.strip(),
     )
 
 
