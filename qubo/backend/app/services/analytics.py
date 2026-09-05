@@ -616,14 +616,19 @@ class AnalyticsService:
     @staticmethod
     def search_student_for_linking(educator_id: str, query: str):
         supabase = get_supabase()
+        query = query.strip().replace("%", "").replace(",", "")
+        if len(query) < 3:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Enter at least 3 characters")
+        pattern = f"%{query}%"
         students = (
             supabase.table("profiles")
             .select("id,username,full_name,profile_picture_url,role")
-            .or_(f"username.ilike.{query},email.ilike.{query}")
+            .or_(f"username.ilike.{pattern},email.ilike.{pattern},full_name.ilike.{pattern}")
+            .eq("role", "student")
             .limit(1)
             .execute().data or []
         )
-        if not students or students[0].get("role") != "student":
+        if not students:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student username or email not found")
         student = students[0]
 
@@ -648,14 +653,19 @@ class AnalyticsService:
     @staticmethod
     def link_student(educator_id: str, username: str):
         supabase = get_supabase()
+        username = username.strip().replace("%", "").replace(",", "")
+        if len(username) < 3:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Enter at least 3 characters")
+        pattern = f"%{username}%"
         students = (
             supabase.table("profiles")
             .select("id,username,role")
-            .or_(f"username.ilike.{username},email.ilike.{username}")
+            .or_(f"username.ilike.{pattern},email.ilike.{pattern},full_name.ilike.{pattern}")
+            .eq("role", "student")
             .limit(1)
             .execute().data or []
         )
-        if not students or students[0].get("role") != "student":
+        if not students:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student username or email not found")
         student_id = students[0]["id"]
         existing = (

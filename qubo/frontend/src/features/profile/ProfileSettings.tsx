@@ -3,6 +3,7 @@ import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { normalizeSpmTargetGrade, VALID_SPM_TARGET_GRADES } from '@/lib/spmGrades';
 import { ProfileUpdateRequest, Subject } from '@/types/auth';
+import Tooltip from '@/components/common/Tooltip';
 import {
   FiArrowLeft,
   FiCalendar,
@@ -111,7 +112,7 @@ export default function ProfileSettings() {
 
   useEffect(() => {
     const loadSubjects = async () => {
-      if (!user || user.role !== 'student') {
+      if (!user || !['student', 'educator'].includes(user.role)) {
         return;
       }
 
@@ -161,7 +162,7 @@ export default function ProfileSettings() {
         target_exam_date: user.target_exam_date ? user.target_exam_date.slice(0, 10) : '',
       });
       
-      if (user.role === 'student') {
+      if (user.role === 'student' || user.role === 'educator') {
         authService.getStudentSubjects().then((subjects) => {
           setSelectedSubjectIds(subjects.map((s) => s.id));
         }).catch(console.error);
@@ -256,7 +257,7 @@ export default function ProfileSettings() {
 
       const updatedUser = await authService.updateProfile(updateData);
 
-      if (user.role === 'student') {
+      if (user.role === 'student' || user.role === 'educator') {
         await authService.updateStudentSubjects(selectedSubjectIds);
       }
 
@@ -473,79 +474,40 @@ export default function ProfileSettings() {
                 )}
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-600">School</label>
-                <input
-                  type="text"
-                  name="school"
-                  value={formData.school}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-600">Form level</label>
-                <select
-                  name="form_level"
-                  value={formData.form_level}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
-                >
-                  <option value="">Select form level</option>
-                  <option value="Form 4">Form 4</option>
-                  <option value="Form 5">Form 5</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-600">Target grade</label>
-                <select
-                  name="target_grade"
-                  value={normalizeSpmTargetGrade(formData.target_grade)}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
-                >
-                  <option value="">Select target grade</option>
-                  {VALID_SPM_TARGET_GRADES.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
-                </select>
-                {formData.target_grade && !normalizeSpmTargetGrade(formData.target_grade) && (
-                  <p className="mt-2 text-xs font-semibold text-red-600">The saved grade is invalid. Choose a valid SPM grade.</p>
-                )}
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-600">Target exam date</label>
-                <div className="relative">
-                  <FiCalendar className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="date"
-                    name="target_exam_date"
-                    value={formData.target_exam_date}
-                    onChange={handleChange}
-                    min={getTodayDateString()}
-                    disabled={!isEditing}
-                    className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
-                  />
+              {user.role === 'student' && <>
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-slate-600">School</label>
+                  <input type="text" name="school" value={formData.school} onChange={handleChange} disabled={!isEditing} className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100" />
                 </div>
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-600">Learning style</label>
-                <div className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold capitalize text-slate-700">
-                  {user.learning_style || 'Not set'}
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-slate-600">Form level</label>
+                  <select name="form_level" value={formData.form_level} onChange={handleChange} disabled={!isEditing} className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100">
+                    <option value="">Select form level</option><option value="Form 4">Form 4</option><option value="Form 5">Form 5</option>
+                  </select>
                 </div>
-              </div>
+                <div>
+                  <label className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-600">Target grade <Tooltip content="The SPM grading system ranges from A+ (highest) to G (fail)." position="top" /></label>
+                  <select name="target_grade" value={normalizeSpmTargetGrade(formData.target_grade)} onChange={handleChange} disabled={!isEditing} className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100">
+                    <option value="">Select target grade</option>{VALID_SPM_TARGET_GRADES.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-slate-600">Target exam date</label>
+                  <div className="relative"><FiCalendar className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input type="date" name="target_exam_date" value={formData.target_exam_date} onChange={handleChange} min={getTodayDateString()} disabled={!isEditing} className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-primary focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100" /></div>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-slate-600">Learning style</label>
+                  <div className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold capitalize text-slate-700">{user.learning_style || 'Not set'}</div>
+                </div>
+              </>}
             </div>
 
-            {user.role === 'student' && (
+            {(user.role === 'student' || user.role === 'educator') && (
               <div className="mt-8 rounded-[28px] border border-slate-100 bg-slate-50 p-5">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Target subjects</p>
-                    <h2 className="mt-2 text-xl font-extrabold text-slate-950">Subjects stored in the database</h2>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">{user.role === 'educator' ? 'Teaching subjects' : 'Target subjects'}</p>
+                    <h2 className="mt-2 text-xl font-extrabold text-slate-950">{user.role === 'educator' ? 'Subjects you teach' : 'Subjects stored in the database'}</h2>
                   </div>
                   <p className="text-sm text-slate-500">
                     {selectedSubjectLabels.length} selected

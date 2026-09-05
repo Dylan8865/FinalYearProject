@@ -333,6 +333,26 @@ class QuizLibraryService:
         )
         quizzes = quiz_response.data or []
 
+        assigned_response = (
+            supabase.table("quiz_assignments")
+            .select("quiz_id")
+            .eq("assigned_to", user_id)
+            .execute()
+        )
+        assigned_quiz_ids = {
+            row["quiz_id"] for row in (assigned_response.data or []) if row.get("quiz_id")
+        }
+        owned_quiz_ids = {quiz["id"] for quiz in quizzes}
+        additional_quiz_ids = assigned_quiz_ids - owned_quiz_ids
+        if additional_quiz_ids:
+            assigned_quiz_response = (
+                supabase.table("quizzes")
+                .select("id,title,subject_id,source_type,created_at")
+                .in_("id", list(additional_quiz_ids))
+                .execute()
+            )
+            quizzes.extend(assigned_quiz_response.data or [])
+
         subject_ids = list({quiz["subject_id"] for quiz in quizzes if quiz.get("subject_id")})
         subject_names = {}
         if subject_ids:
@@ -364,7 +384,7 @@ class QuizLibraryService:
                 "id": quiz["id"],
                 "title": quiz["title"],
                 "subject": subject_names.get(quiz.get("subject_id")),
-                "source_type": quiz["source_type"],
+                "source_type": "educator_assigned" if quiz["id"] in assigned_quiz_ids else quiz["source_type"],
                 "created_at": quiz["created_at"],
                 "has_in_progress_attempt": quiz["id"] in in_progress_quizzes,
             }
@@ -376,15 +396,26 @@ class QuizLibraryService:
         supabase = get_supabase()
         quiz_response = (
             supabase.table("quizzes")
-            .select("id,title,subject_id,topic_id")
+            .select("id,title,subject_id,topic_id,owner_id")
             .eq("id", quiz_id)
-            .eq("owner_id", user_id)
             .limit(1)
             .execute()
         )
         if not quiz_response.data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
         quiz_row = quiz_response.data[0]
+
+        if quiz_row["owner_id"] != user_id:
+            assignment_response = (
+                supabase.table("quiz_assignments")
+                .select("id")
+                .eq("quiz_id", quiz_id)
+                .eq("assigned_to", user_id)
+                .limit(1)
+                .execute()
+            )
+            if not assignment_response.data:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Quiz access denied")
 
         subject = None
         if quiz_row.get("subject_id"):

@@ -1,6 +1,7 @@
 import { DragEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppSidebar from '@/components/layout/AppSidebar';
+import Tooltip from '@/components/common/Tooltip';
 import { useQuizStore } from '@/contexts/quizStore';
 import { authService } from '@/lib/authService';
 import {
@@ -366,7 +367,10 @@ export default function QuizCreatorPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Difficulty level</p>
+                    <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                      Difficulty level
+                      <Tooltip content="Difficulty dictates the depth and complexity of the questions generated. 'Advanced' will challenge you with harder cognitive questions based on the SPM syllabus." position="top" />
+                    </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {(['Beginner', 'Intermediate', 'Advanced'] as QuizDifficulty[]).map((level) => (
                         <button
@@ -388,7 +392,10 @@ export default function QuizCreatorPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Number of questions</p>
+                    <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                      Number of questions
+                      <Tooltip content="The length of the quiz. 5 questions are ideal for a quick review, while 20 questions are better for comprehensive exam preparation." position="top" />
+                    </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {[5, 10, 15, 20].map((count) => (
                         <button
@@ -411,12 +418,6 @@ export default function QuizCreatorPage() {
                     <p className="mt-3 text-xs leading-5 text-slate-400">More questions use more generation time and AI tokens.</p>
                   </div>
                 </div>
-                {isEducator && generatedQuiz && (
-                  <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 md:grid-cols-2">
-                    <label className="text-sm font-bold text-slate-700">Quiz title<input value={generatedQuiz.title} onChange={(event) => setGeneratedQuiz({ ...generatedQuiz, title: event.target.value })} className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-primary" /></label>
-                    <label className="text-sm font-bold text-slate-700">Subject<input value={generatedQuiz.subject} onChange={(event) => setGeneratedQuiz({ ...generatedQuiz, subject: event.target.value })} className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-primary" /></label>
-                  </div>
-                )}
                 {isEducator && creationMethod === 'ai' && (
                   <button
                     type="button"

@@ -10,6 +10,7 @@ import {
   FiTrendingUp,
   FiUserPlus,
   FiUsers,
+  FiX,
 } from 'react-icons/fi';
 
 import AppSidebar from '@/components/layout/AppSidebar';
@@ -38,6 +39,8 @@ export default function EducatorAnalyticsPage() {
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isLinking, setIsLinking] = useState(false);
+  const [isSearchingStudent, setIsSearchingStudent] = useState(false);
+  const [studentToAdd, setStudentToAdd] = useState<{ id: string; username: string; full_name: string; profile_picture_url: string | null } | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -74,12 +77,29 @@ export default function EducatorAnalyticsPage() {
   const addStudent = async (event: FormEvent) => {
     event.preventDefault();
     if (username.trim().length < 3) return;
+    setIsSearchingStudent(true);
+    setMessage('');
+    setError('');
+    try {
+      const student = await authService.searchStudentForLinking(username.trim());
+      setStudentToAdd(student);
+    } catch (requestError: any) {
+      const detail = requestError.response?.data?.detail;
+      setError(typeof detail === 'string' ? detail : 'Student could not be added.');
+    } finally {
+      setIsSearchingStudent(false);
+    }
+  };
+
+  const confirmAddStudent = async () => {
+    if (!studentToAdd) return;
     setIsLinking(true);
     setMessage('');
     setError('');
     try {
-      const response = await authService.linkStudent(username.trim());
+      const response = await authService.linkStudent(studentToAdd.username);
       setMessage(response.message);
+      setStudentToAdd(null);
       setUsername('');
       await loadDashboard();
     } catch (requestError: any) {
@@ -116,9 +136,9 @@ export default function EducatorAnalyticsPage() {
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">Review class-wide progress, early warnings, and individual subject summaries for linked students.</p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <form onSubmit={addStudent} className="flex gap-2">
-                <input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Student username" className="h-11 w-48 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500" />
-                <button disabled={isLinking || username.trim().length < 3} className="inline-flex h-11 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white disabled:opacity-50"><FiUserPlus />{isLinking ? 'Adding…' : 'Add'}</button>
+              <form onSubmit={addStudent} className="flex w-full gap-2 sm:w-auto">
+                <input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Name, username or email" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 sm:w-72 lg:w-80" />
+                <button disabled={isSearchingStudent || isLinking || username.trim().length < 3} className="inline-flex h-11 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white disabled:opacity-50"><FiUserPlus />{isSearchingStudent ? 'Searching…' : 'Add'}</button>
               </form>
               <button onClick={() => void loadDashboard()} disabled={isLoading} className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 disabled:opacity-50"><FiRefreshCw className={isLoading ? 'animate-spin' : ''} />Refresh</button>
             </div>
@@ -198,6 +218,28 @@ export default function EducatorAnalyticsPage() {
           </section>
         </div>
       </main>
+      {studentToAdd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="add-student-title">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-600">Confirm student</p>
+                <h2 id="add-student-title" className="mt-2 text-2xl font-extrabold text-slate-950">Add student to your class?</h2>
+              </div>
+              <button type="button" onClick={() => setStudentToAdd(null)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200" aria-label="Close confirmation"><FiX /></button>
+            </div>
+            <div className="mt-6 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+              {studentToAdd.profile_picture_url ? <img src={studentToAdd.profile_picture_url} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-sm font-extrabold text-blue-700">{studentToAdd.full_name.slice(0, 2).toUpperCase()}</div>}
+              <div className="min-w-0"><p className="truncate text-sm font-extrabold text-blue-950">{studentToAdd.full_name}</p><p className="mt-1 truncate text-xs font-semibold text-blue-700">@{studentToAdd.username}</p></div>
+            </div>
+            <p className="mt-5 text-sm leading-6 text-slate-500">This student will be added to your class performance dashboard.</p>
+            <div className="mt-7 flex gap-3">
+              <button type="button" onClick={() => setStudentToAdd(null)} disabled={isLinking} className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Cancel</button>
+              <button type="button" onClick={() => void confirmAddStudent()} disabled={isLinking} className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-extrabold text-white hover:bg-blue-700 disabled:opacity-50">{isLinking ? 'Adding…' : 'Add student'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

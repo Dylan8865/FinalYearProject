@@ -924,35 +924,26 @@ class AuthService:
 
     @staticmethod
     def search_student(query: str) -> List[dict]:
-        """Search for a student by exact username or email"""
+        """Search for students by username, email, or display name."""
         if not query or len(query.strip()) < 3:
             return []
-            
+
         supabase = get_supabase()
-        query = query.strip().lower()
+        query = query.strip().replace("%", "").replace(",", "")
+        if len(query) < 3:
+            return []
+        pattern = f"%{query}%"
         
         try:
-            # First try email case-insensitive match
             res = (
                 supabase.table("profiles")
                 .select("id, username, email, full_name, profile_picture_url")
                 .eq("role", "student")
-                .ilike("email", query)
-                .limit(1)
+                .or_(f"username.ilike.{pattern},email.ilike.{pattern},full_name.ilike.{pattern}")
+                .order("username")
+                .limit(10)
                 .execute()
             )
-            
-            # If not found by email, try username case-insensitive match
-            if not res.data:
-                res = (
-                    supabase.table("profiles")
-                    .select("id, username, email, full_name, profile_picture_url")
-                    .eq("role", "student")
-                    .ilike("username", query)
-                    .limit(1)
-                    .execute()
-                )
-                
             return res.data or []
         except Exception as e:
             raise HTTPException(

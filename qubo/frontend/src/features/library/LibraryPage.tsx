@@ -642,7 +642,7 @@ export default function LibraryPage() {
                 </div>
               )}
 
-              <label className="block text-sm font-bold text-slate-700">Search Student (Username or Email)</label>
+              <label className="block text-sm font-bold text-slate-700">Search Student (Name, Username or Email)</label>
               <div className="mt-2 flex gap-3">
                 <input
                   type="text"
@@ -651,7 +651,7 @@ export default function LibraryPage() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') void handleSearchStudent();
                   }}
-                  placeholder="e.g. johndoe or john@example.com"
+                  placeholder="e.g. Hello, johndoe or john@example.com"
                   className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 focus:border-blue-400 focus:bg-white focus:outline-none"
                 />
                 <button
