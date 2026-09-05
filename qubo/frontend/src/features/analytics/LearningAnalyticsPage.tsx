@@ -19,6 +19,7 @@ import { useQuizStore } from '@/contexts/quizStore';
 import PomodoroTimer from '@/features/analytics/components/PomodoroTimer';
 import StudyPlanCard from '@/features/analytics/components/StudyPlanCard';
 import { authService } from '@/lib/authService';
+import { useTimerStore } from '@/contexts/timerStore';
 import { ReviewSchedule, StudySession, SubjectAnalytics, StudyPlanRecommendation } from '@/types/analytics';
 
 const localDateTimeValue = () => {
@@ -53,7 +54,9 @@ export default function LearningAnalyticsPage() {
   const [startingReviewId, setStartingReviewId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const session = useTimerStore((state) => state.session);
+  const startSession = useTimerStore((state) => state.startSession);
+  const cancelSession = useTimerStore((state) => state.cancelSession);
   const [isManualMode, setIsManualMode] = useState(false);
   const [form, setForm] = useState({
     subject_id: '',
@@ -135,15 +138,15 @@ export default function LearningAnalyticsPage() {
     if (event) event.preventDefault();
     setMessage('');
     setError('');
-    if (!form.subject_id || form.topic_name.trim().length < 2) {
-      setError('Choose a subject and enter the topic you studied.');
+    if (!form.subject_id) {
+      setError('Choose a subject to record a study session.');
       return;
     }
     setIsSaving(true);
     try {
       await authService.createStudySession({
         subject_id: form.subject_id,
-        topic_name: form.topic_name.trim(),
+        topic_name: form.topic_name.trim() || 'General',
         duration_minutes: form.duration_minutes,
         pomodoro_cycles: form.pomodoro_cycles,
         session_date: new Date(form.session_date).toISOString(),
@@ -161,24 +164,29 @@ export default function LearningAnalyticsPage() {
   };
 
   const handleTimerFinish = (elapsedMinutes: number, cycles: number) => {
+    const activeSession = useTimerStore.getState().session;
+    cancelSession();
+    
+    if (!activeSession) return;
+
     setForm((prev) => ({
       ...prev,
       duration_minutes: elapsedMinutes,
       pomodoro_cycles: cycles,
     }));
-    setIsTimerRunning(false);
+
     
     // We can't await state update easily, so we just pass the values directly to API
     setMessage('');
     setError('');
     setIsSaving(true);
     authService.createStudySession({
-      subject_id: form.subject_id,
-      topic_name: form.topic_name.trim(),
+      subject_id: activeSession.subject_id,
+      topic_name: activeSession.topic_name,
       duration_minutes: elapsedMinutes,
       pomodoro_cycles: cycles,
       session_date: new Date().toISOString(),
-      notes: form.notes.trim() || undefined,
+      notes: activeSession.notes || undefined,
     }).then(() => {
       setMessage('Study session recorded successfully.');
       setForm((current) => ({ ...current, topic_name: '', notes: '', session_date: localDateTimeValue() }));
@@ -277,14 +285,14 @@ export default function LearningAnalyticsPage() {
                 </div>
               </div>
 
-              {isTimerRunning ? (
+              {session ? (
                 <div className="mt-6 flex flex-col items-center">
                   <h3 className="mb-6 text-xl font-extrabold text-slate-800">
-                    Studying: {form.topic_name || 'General'}
+                    Studying: {session.topic_name}
                   </h3>
                   <PomodoroTimer 
                     onFinish={handleTimerFinish} 
-                    onCancel={() => setIsTimerRunning(false)} 
+                    onCancel={() => cancelSession()} 
                   />
                 </div>
               ) : subjects.length === 0 && !isLoading ? (
@@ -301,8 +309,8 @@ export default function LearningAnalyticsPage() {
                     </select>
                   </label>
                   <label className="text-sm font-bold text-slate-700">
-                    Topic
-                    <input list="subject-topics" value={form.topic_name} onChange={(event) => setForm((current) => ({ ...current, topic_name: event.target.value }))} placeholder="e.g. Quadratic equations" className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 outline-none focus:border-blue-500" required />
+                    Topic <span className="font-medium text-slate-400">(optional)</span>
+                    <input list="subject-topics" value={form.topic_name} onChange={(event) => setForm((current) => ({ ...current, topic_name: event.target.value }))} placeholder="e.g. Quadratic equations" className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 outline-none focus:border-blue-500" />
                     <datalist id="subject-topics">{selectedSubject?.topic_performance.map((topic) => <option key={topic.topic_id} value={topic.topic_name} />)}</datalist>
                   </label>
                   
@@ -342,12 +350,16 @@ export default function LearningAnalyticsPage() {
                       <button 
                         type="button" 
                         onClick={() => {
-                          if (!form.subject_id || form.topic_name.trim().length < 2) {
-                            setError('Choose a subject and enter the topic you want to study.');
+                          if (!form.subject_id) {
+                            setError('Choose a subject you want to study.');
                             return;
                           }
                           setError('');
-                          setIsTimerRunning(true);
+                          startSession({
+                            subject_id: form.subject_id,
+                            topic_name: form.topic_name.trim() || 'General',
+                            notes: form.notes.trim(),
+                          });
                         }} 
                         className="inline-flex w-full sm:w-auto h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-8 text-sm font-extrabold text-white hover:bg-slate-800 transition shadow-lg shadow-slate-900/20"
                       >

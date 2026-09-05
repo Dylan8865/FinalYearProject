@@ -119,6 +119,7 @@ class GeminiQuizService:
             "Use every attached file for at least one question. After covering every file, allocate the remaining "
             "questions according to how much clear, useful study content each file contains. "
             f"Set subject to exactly one matching name from this current SPM subject list: {available_subjects}. "
+            "If the subject is one that lacks an MCQ section in the actual SPM exam (e.g., Chinese, Bahasa Cina, Mandarin, Add Mathematics, Computer Science, Sains Komputer) and the user requests multiple-choice questions (mcq), focus on core vocabulary, definitions, idioms, and foundational concepts that can be tested in an MCQ format. "
             "Set topic to one concise syllabus topic that best describes the attached material. "
             "Keep wording clear for secondary-school students. Give a short teaching explanation for every answer. "
             "Do not invent facts that are absent from the uploaded material."

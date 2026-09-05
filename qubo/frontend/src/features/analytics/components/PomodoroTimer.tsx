@@ -1,67 +1,44 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { FiPause, FiPlay, FiX, FiCheck } from 'react-icons/fi';
+import { useTimerStore } from '@/contexts/timerStore';
 
 interface PomodoroTimerProps {
-  initialMinutes?: number;
-  breakMinutes?: number;
   onFinish: (durationMinutes: number, completedCycles: number) => void;
   onCancel: () => void;
 }
 
-type TimerMode = 'work' | 'break';
-
 export default function PomodoroTimer({
-  initialMinutes = 25,
-  breakMinutes = 5,
   onFinish,
   onCancel,
 }: PomodoroTimerProps) {
-  const [timeLeft, setTimeLeft] = useState(initialMinutes * 60);
-  const [isActive, setIsActive] = useState(true);
-  const [mode, setMode] = useState<TimerMode>('work');
-  const [cyclesCompleted, setCyclesCompleted] = useState(0);
-  const [totalWorkSeconds, setTotalWorkSeconds] = useState(0);
-
-  const intervalRef = useRef<number | null>(null);
+  const {
+    isActive,
+    timeLeft,
+    mode,
+    cyclesCompleted,
+    totalWorkSeconds,
+    initialMinutes,
+    breakMinutes,
+    toggleTimer,
+    tick,
+  } = useTimerStore();
 
   const totalTime = mode === 'work' ? initialMinutes * 60 : breakMinutes * 60;
 
-  const handleTimerComplete = useCallback(() => {
-    setIsActive(false);
-
-    if (mode === 'work') {
-      setCyclesCompleted((prev) => prev + 1);
-      setMode('break');
-      setTimeLeft(breakMinutes * 60);
-    } else {
-      setMode('work');
-      setTimeLeft(initialMinutes * 60);
-    }
-  }, [mode, initialMinutes, breakMinutes]);
-
   useEffect(() => {
-    if (isActive && timeLeft > 0) {
-      intervalRef.current = window.setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-        if (mode === 'work') {
-          setTotalWorkSeconds((prev) => prev + 1);
-        }
-      }, 1000);
-    } else if (isActive && timeLeft <= 0) {
-      handleTimerComplete();
-    }
+    // Tick immediately to catch up time in case we navigated away
+    tick();
+
+    const intervalId = window.setInterval(() => {
+      tick();
+    }, 1000);
 
     return () => {
-      if (intervalRef.current !== null) {
-        window.clearInterval(intervalRef.current);
-      }
+      window.clearInterval(intervalId);
     };
-  }, [isActive, timeLeft, handleTimerComplete, mode]);
-
-  const toggleTimer = () => setIsActive(!isActive);
+  }, [tick]);
 
   const handleFinishEarly = () => {
-    setIsActive(false);
     const elapsedMinutes = Math.max(1, Math.floor(totalWorkSeconds / 60));
     onFinish(elapsedMinutes, cyclesCompleted);
   };
@@ -77,7 +54,7 @@ export default function PomodoroTimer({
   const strokeDashoffset = strokeDasharray - (strokeDasharray * progressPercentage) / 100;
 
   return (
-    <div className="flex flex-col items-center justify-center rounded-[30px] bg-slate-950 p-8 text-white shadow-2xl">
+    <div className="flex flex-col items-center justify-center rounded-[30px] bg-slate-950 p-8 text-white shadow-2xl w-full max-w-sm">
       <div className="mb-6 flex w-full items-center justify-between">
         <div className="flex items-center gap-3">
           <span className={`rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wider ${mode === 'work' ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>

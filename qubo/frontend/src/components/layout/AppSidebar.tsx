@@ -23,6 +23,8 @@ import {
 } from 'react-icons/fi';
 import { useLanguageStore } from '@/contexts/languageStore';
 import { useThemeStore } from '@/contexts/themeStore';
+import { useTimerStore } from '@/contexts/timerStore';
+import { FiClock } from 'react-icons/fi';
 
 const studentNavigationItems = [
   { icon: FiGrid, label: 'Dashboard', path: '/dashboard' },
@@ -61,6 +63,21 @@ export default function AppSidebar() {
   const toggleLanguage = useLanguageStore((state) => state.toggleLanguage);
   const theme = useThemeStore((state) => state.theme);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
+  const { session, timeLeft, mode, tick } = useTimerStore();
+
+  useEffect(() => {
+    if (session) {
+      tick();
+      const interval = setInterval(() => tick(), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [session, tick]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   useEffect(() => {
     setProfileImageFailed(false);
@@ -158,6 +175,27 @@ export default function AppSidebar() {
           </div>;
         })}
       </nav>
+
+      {session && (
+        <div 
+          className="mt-6 mx-4 rounded-[24px] border border-blue-200 bg-blue-50 p-4 shadow-sm hover:border-blue-300 transition-colors cursor-pointer" 
+          onClick={() => navigate('/analytics')}
+          title="Return to active study session"
+        >
+          <div className="flex items-center gap-3">
+            <div className={`flex h-10 w-10 flex-none items-center justify-center rounded-full ${mode === 'work' ? 'bg-blue-600' : 'bg-emerald-500'} text-white shadow-md`}>
+              <FiClock className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-bold text-blue-900">{session.topic_name || 'General'}</p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className={`font-mono text-sm font-extrabold ${mode === 'work' ? 'text-blue-700' : 'text-emerald-600'}`}>{formatTime(timeLeft)}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-500">{mode === 'work' ? 'Focus' : 'Break'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {user && (
         <div className="mt-auto rounded-[28px] border border-slate-200 bg-slate-50 p-4">

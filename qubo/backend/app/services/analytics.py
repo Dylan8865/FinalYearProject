@@ -173,8 +173,8 @@ class AnalyticsService:
         return AnalyticsService._format_prediction(row, (subject_row or {}).get("subject_name", "Subject"))
 
     @staticmethod
-    def _format_prediction(row: dict, subject_name: str):
-        threshold = float(row.get("alert_threshold") or AnalyticsService.DEFAULT_ALERT_THRESHOLD)
+    def _format_prediction(row: dict, subject_name: str, current_threshold: float = None):
+        threshold = current_threshold if current_threshold is not None else float(row.get("alert_threshold") or AnalyticsService.DEFAULT_ALERT_THRESHOLD)
         predicted_score = float(row["predicted_score"])
         return {
             "id": row["id"],
@@ -183,7 +183,7 @@ class AnalyticsService:
             "predicted_score": predicted_score,
             "risk_level": row["risk_level"],
             "threshold": threshold,
-            "is_warning": bool(row.get("is_warning", predicted_score < threshold)),
+            "is_warning": predicted_score < threshold,
             "basis_attempt_count": int(row.get("basis_attempt_count") or 1),
             "generated_at": row["generated_at"],
         }
@@ -569,6 +569,9 @@ class AnalyticsService:
             if subject_id and attempt.get("score") is not None:
                 attempts_by_subject[subject_id].append(attempt)
 
+        user_settings = AnalyticsService.get_prediction_settings(student_id)
+        current_threshold = user_settings["threshold"]
+
         result = []
         for subject in subject_rows:
             subject_topics = topics_by_subject[subject["id"]]
@@ -604,7 +607,7 @@ class AnalyticsService:
                 "learning_velocity": AnalyticsService._calculate_learning_velocity(subject_attempts),
                 "topic_performance": topic_performance,
                 "recent_quiz_scores": [{"score": float(attempt["score"]), "attempted_at": attempt["attempted_at"]} for attempt in subject_attempts[-12:]],
-                "latest_prediction": AnalyticsService._format_prediction(latest_prediction, subject_names[subject["id"]]) if latest_prediction else None,
+                "latest_prediction": AnalyticsService._format_prediction(latest_prediction, subject_names[subject["id"]], current_threshold) if latest_prediction else None,
             })
         return result
 

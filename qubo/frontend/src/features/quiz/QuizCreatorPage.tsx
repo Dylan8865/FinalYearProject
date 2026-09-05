@@ -45,6 +45,9 @@ export default function QuizCreatorPage() {
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [creationMethod, setCreationMethod] = useState<'ai' | 'manual'>('ai');
+  const noMcqSubjects = ['chinese', 'cina', 'mandarin', 'add math', 'matematik tambahan', 'computer science', 'sains komputer', 'informatik'];
+  const isNoMcqSubject = (subject: string) => noMcqSubjects.some(s => subject.toLowerCase().includes(s));
+  
   const totalUploadSize = useMemo(
     () => uploadedFiles.reduce((total, file) => total + file.size, 0),
     [uploadedFiles]
@@ -444,6 +447,16 @@ export default function QuizCreatorPage() {
 
                 {generatedQuiz ? (
                   <div className="mt-5 max-h-[58vh] space-y-4 overflow-y-scroll overscroll-contain pr-2 touch-pan-y" tabIndex={0}>
+                    {generatedQuiz.question_type === 'mcq' && isNoMcqSubject(generatedQuiz.subject || '') && (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800 shadow-sm">
+                        <div className="flex items-start gap-2">
+                          <FiInfo className="mt-0.5 h-4 w-4 flex-none" />
+                          <p>
+                            <strong>Note:</strong> SPM {generatedQuiz.subject} does not have an MCQ section. These questions are designed for quick foundational practice.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     {generatedQuiz.questions.map((item, index) => (
                       <div key={index} className="rounded-2xl bg-white p-4 shadow-sm">
                         <span className="rounded-md bg-emerald-100 px-2 py-1 text-[10px] font-extrabold uppercase text-emerald-700">
