@@ -296,6 +296,8 @@ export default function App() {
                 <Navigate
                   to={user.role === "admin" ? "/admin/content" : "/dashboard"}
                 />
+              ) : window.location.hash.includes("type=recovery") ? (
+                <Navigate to={{ pathname: "/reset-password", hash: window.location.hash }} />
               ) : (
                 <Navigate to="/login" />
               )
