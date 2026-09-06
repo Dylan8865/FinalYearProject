@@ -271,8 +271,8 @@ export default function SharedCollectionPage() {
                                   <button
                                     type="button"
                                     onClick={() => void startQuiz(item)}
-                                    disabled={!!startingQuizId}
-                                    className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-blue-600 text-sm font-extrabold text-white hover:bg-blue-700 disabled:opacity-45"
+                                    disabled={!!startingQuizId || item.title === 'Unavailable item'}
+                                    className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-blue-600 text-sm font-extrabold text-white hover:bg-blue-700 disabled:opacity-45 disabled:cursor-not-allowed"
                                   >
                                     <FiPlay className="h-3.5 w-3.5" />
                                     {startingQuizId === item.target_id ? 'Loading…' : 'Start'}
@@ -280,8 +280,8 @@ export default function SharedCollectionPage() {
                                   <button
                                     type="button"
                                     onClick={() => void saveQuiz(item)}
-                                    disabled={!!savingQuizId || savedQuizIds.has(item.target_id)}
-                                    className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-45"
+                                    disabled={!!savingQuizId || savedQuizIds.has(item.target_id) || item.title === 'Unavailable item'}
+                                    className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-45 disabled:cursor-not-allowed"
                                   >
                                     {savedQuizIds.has(item.target_id) ? (
                                       <>
@@ -302,7 +302,8 @@ export default function SharedCollectionPage() {
                                 <button
                                   type="button"
                                   onClick={() => openItem(item)}
-                                  className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 text-sm font-extrabold text-white hover:bg-blue-700"
+                                  disabled={item.title === 'Unavailable item'}
+                                  className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 text-sm font-extrabold text-white hover:bg-blue-700 disabled:opacity-45 disabled:cursor-not-allowed"
                                 >
                                   {item.item_type === 'model' ? (
                                     <>

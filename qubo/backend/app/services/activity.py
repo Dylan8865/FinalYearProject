@@ -96,6 +96,8 @@ class ActivityService:
                     .table("resources")
                     .select("resource_id,title,topics(topic_name,subjects(subject_name))")
                     .in_("resource_id", resource_ids)
+                    .eq("is_locked", False)
+                    .eq("is_deleted", False)
                     .execute()
                     .data
                     or []
@@ -108,6 +110,8 @@ class ActivityService:
                     .table("videos")
                     .select("video_id,title,subject_tag")
                     .in_("video_id", video_ids)
+                    .eq("is_locked", False)
+                    .eq("is_deleted", False)
                     .execute()
                     .data
                     or []

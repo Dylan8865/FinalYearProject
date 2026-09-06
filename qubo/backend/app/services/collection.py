@@ -109,13 +109,13 @@ class CollectionService:
         models = {
             item['resource_id']: item
             for item in supabase.table('resources').select('resource_id,title,url')
-            .in_('resource_id', model_ids or [placeholder_id]).execute().data
+            .in_('resource_id', model_ids or [placeholder_id]).eq('is_locked', False).eq('is_deleted', False).execute().data
             or []
         }
         videos = {
             item['video_id']: item
             for item in supabase.table('videos').select('video_id,title,youtube_url')
-            .in_('video_id', video_ids or [placeholder_id]).execute().data
+            .in_('video_id', video_ids or [placeholder_id]).eq('is_locked', False).eq('is_deleted', False).execute().data
             or []
         }
         quizzes = {
@@ -187,8 +187,8 @@ class CollectionService:
             .eq('collection_id', collection_id).order('sort_order').execute().data
             or []
         )
-        models = {row['resource_id']: row for row in get_supabase().table('resources').select('resource_id,title,topics(topic_name,subjects(subject_name))').in_('resource_id', [item['resource_id'] for item in rows if item.get('resource_id')] or ['00000000-0000-0000-0000-000000000000']).execute().data or []}
-        videos = {row['video_id']: row for row in get_supabase().table('videos').select('video_id,title,subject_tag').in_('video_id', [item['video_id'] for item in rows if item.get('video_id')] or ['00000000-0000-0000-0000-000000000000']).execute().data or []}
+        models = {row['resource_id']: row for row in get_supabase().table('resources').select('resource_id,title,topics(topic_name,subjects(subject_name))').in_('resource_id', [item['resource_id'] for item in rows if item.get('resource_id')] or ['00000000-0000-0000-0000-000000000000']).eq('is_locked', False).eq('is_deleted', False).execute().data or []}
+        videos = {row['video_id']: row for row in get_supabase().table('videos').select('video_id,title,subject_tag').in_('video_id', [item['video_id'] for item in rows if item.get('video_id')] or ['00000000-0000-0000-0000-000000000000']).eq('is_locked', False).eq('is_deleted', False).execute().data or []}
         quizzes = {row['id']: row for row in get_supabase().table('quizzes').select('id,title,subjects(subject_name)').in_('id', [item['quiz_id'] for item in rows if item.get('quiz_id')] or ['00000000-0000-0000-0000-000000000000']).execute().data or []}
         items = []
         for item in rows:
@@ -202,8 +202,8 @@ class CollectionService:
     @staticmethod
     def content_options(educator_id: str) -> List[dict]:
         supabase = get_supabase()
-        models = supabase.table('resources').select('resource_id,title,topics(topic_name,subjects(subject_name))').in_('resource_type', ['3d_model', '3D Model']).eq('created_by', educator_id).order('title').execute().data or []
-        videos = supabase.table('videos').select('video_id,title,subject_tag').eq('uploaded_by', educator_id).order('title').execute().data or []
+        models = supabase.table('resources').select('resource_id,title,topics(topic_name,subjects(subject_name))').in_('resource_type', ['3d_model', '3D Model']).eq('created_by', educator_id).eq('is_locked', False).eq('is_deleted', False).order('title').execute().data or []
+        videos = supabase.table('videos').select('video_id,title,subject_tag').eq('uploaded_by', educator_id).eq('is_locked', False).eq('is_deleted', False).order('title').execute().data or []
         quizzes = supabase.table('quizzes').select('id,title,subjects(subject_name)').eq('owner_id', educator_id).order('created_at', desc=True).execute().data or []
         result = []
         for model in models:

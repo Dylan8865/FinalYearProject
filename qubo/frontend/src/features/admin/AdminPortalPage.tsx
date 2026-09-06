@@ -109,6 +109,7 @@ export default function AdminPortalPage() {
   const [moderationTarget, setModerationTarget] = useState<any | null>(null);
   const [moderationAction, setModerationAction] = useState<"lock" | "unlock" | "soft-delete" | null>(null);
   const [moderationReason, setModerationReason] = useState("");
+  const [moderationError, setModerationError] = useState("");
   const [isModerating, setIsModerating] = useState(false);
 
   // Preview state
@@ -118,6 +119,7 @@ export default function AdminPortalPage() {
     setModerationTarget(item);
     setModerationAction(action);
     setModerationReason("");
+    setModerationError("");
   };
 
   const submitModeration = async () => {
@@ -139,7 +141,8 @@ export default function AdminPortalPage() {
       setModerationAction(null);
       await load();
     } catch (error: any) {
-      setMessage(error.response?.data?.detail || "Moderation action failed.");
+      const detail = error.response?.data?.detail;
+      setModerationError(Array.isArray(detail) ? detail.map((d: any) => d.msg).join(", ") : detail || "Moderation action failed.");
     } finally {
       setIsModerating(false);
     }
@@ -168,9 +171,8 @@ export default function AdminPortalPage() {
       if (section === "audit-logs")
         setLogs(await authService.getAdminAuditLogs());
     } catch (error: any) {
-      setMessage(
-        error.response?.data?.detail || "Admin data could not be loaded.",
-      );
+      const detail = error.response?.data?.detail;
+      setMessage(Array.isArray(detail) ? detail.map((d: any) => d.msg).join(", ") : detail || "Admin data could not be loaded.");
     } finally {
       setIsLoading(false);
     }
@@ -202,7 +204,8 @@ export default function AdminPortalPage() {
       setMessage("Security action completed.");
       await load();
     } catch (error: any) {
-      setMessage(error.response?.data?.detail || "Security action failed.");
+      const detail = error.response?.data?.detail;
+      setMessage(Array.isArray(detail) ? detail.map((d: any) => d.msg).join(", ") : detail || "Security action failed.");
     }
   };
 
@@ -396,6 +399,11 @@ export default function AdminPortalPage() {
                     <p className="mt-2 text-sm text-slate-600">
                       <span className="font-bold">"{moderationTarget.title}"</span> · {moderationTarget.owner_name}
                     </p>
+                    {moderationError && (
+                      <div className="mt-3 rounded-lg border border-red-100 bg-red-50 p-3 text-xs font-bold text-red-600">
+                        {moderationError}
+                      </div>
+                    )}
                     {moderationAction !== "unlock" && (
                       <div className="mt-4">
                         <label className="text-xs font-bold uppercase tracking-wider text-slate-500">

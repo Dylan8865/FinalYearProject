@@ -57,11 +57,11 @@ class FavouriteService:
             video_ids = [row["video_id"] for row in favourites if row.get("video_id")]
             resources = [] if not resource_ids else (
                 get_supabase().table("resources").select("resource_id,title,topics(topic_name,subjects(subject_name))")
-                .in_("resource_id", resource_ids).execute().data or []
+                .in_("resource_id", resource_ids).eq("is_locked", False).eq("is_deleted", False).execute().data or []
             )
             videos = [] if not video_ids else (
                 get_supabase().table("videos").select("video_id,title,subject_tag")
-                .in_("video_id", video_ids).execute().data or []
+                .in_("video_id", video_ids).eq("is_locked", False).eq("is_deleted", False).execute().data or []
             )
             resource_map = {item["resource_id"]: item for item in resources}
             video_map = {item["video_id"]: item for item in videos}

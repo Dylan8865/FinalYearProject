@@ -76,7 +76,7 @@ class ResourceService:
     def delete_3d_model(cls, resource_id: str, educator_id: str) -> None:
         supabase = get_supabase()
         try:
-            owned = supabase.table('resources').select('resource_id,url').eq('resource_id', resource_id).eq('created_by', educator_id).in_('resource_type', cls.MODEL_TYPES).limit(1).execute().data or []
+            owned = supabase.table('resources').select('resource_id,url').eq('resource_id', resource_id).eq('created_by', educator_id).eq('is_locked', False).eq('is_deleted', False).in_('resource_type', cls.MODEL_TYPES).limit(1).execute().data or []
             if not owned:
                 raise HTTPException(status_code=404, detail='3D model not found or not owned by this educator.')
             storage_path = owned[0]['url']
@@ -109,6 +109,8 @@ class ResourceService:
             "visibility": resource.get("visibility") or "public",
             "created_by": resource.get("created_by"),
             "preview_model_url": preview_model_url,
+            "is_locked": resource.get("is_locked", False),
+            "is_deleted": resource.get("is_deleted", False),
         }
 
     @classmethod
@@ -131,8 +133,8 @@ class ResourceService:
             if scope == 'private':
                 if not viewer_id:
                     return []
-                # Educators see their own content including locked, but not soft-deleted
-                query = query.eq('created_by', viewer_id).eq('is_deleted', False)
+                # Educators see their own content including locked and soft-deleted (corpses)
+                query = query.eq('created_by', viewer_id)
             else:
                 # Students/public: hide both locked AND soft-deleted content
                 query = query.eq('visibility', 'public').eq('is_locked', False).eq('is_deleted', False)
@@ -347,7 +349,7 @@ class ResourceService:
             response = (
                 get_supabase()
                 .table("resources")
-                .select(cls.MODEL_SELECT)
+                .select(cls.MODEL_SELECT + ",is_locked,is_deleted")
                 .eq("resource_id", resource_id)
                 .in_("resource_type", cls.MODEL_TYPES)
                 .maybe_single()
@@ -360,8 +362,16 @@ class ResourceService:
                 detail="3D learning resource could not be loaded from Supabase.",
             ) from exc
 
-        if not resource or (viewer_role != 'admin' and resource.get('visibility') == 'private' and resource.get('created_by') != viewer_id):
+        if not resource:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="3D model not found.")
+
+        if viewer_role != 'admin':
+            if resource.get('is_deleted'):
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="3D model not found.")
+            if resource.get('is_locked') and resource.get('created_by') != viewer_id:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="3D model not found.")
+            if resource.get('visibility') == 'private' and resource.get('created_by') != viewer_id:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="3D model not found.")
 
         try:
             signed_url = cls._create_signed_model_url(resource["url"])
@@ -392,13 +402,13 @@ class ResourceService:
             videos_by_id: Dict[str, dict] = {}
 
             if resource_ids:
-                resources = get_supabase().table("resources").select(cls.MODEL_SELECT).in_("resource_id", resource_ids).execute().data or []
+                resources = get_supabase().table("resources").select(cls.MODEL_SELECT).in_("resource_id", resource_ids).eq("is_locked", False).eq("is_deleted", False).execute().data or []
                 models_by_id = {
                     resource["resource_id"]: cls._serialize_model(resource, cls._create_signed_model_url(resource["url"]))
                     for resource in resources
                 }
             if video_ids:
-                videos = get_supabase().table("videos").select("video_id,title,subject_tag,youtube_url").in_("video_id", video_ids).execute().data or []
+                videos = get_supabase().table("videos").select("video_id,title,subject_tag,youtube_url").in_("video_id", video_ids).eq("is_locked", False).eq("is_deleted", False).execute().data or []
                 videos_by_id = {video["video_id"]: video for video in videos}
 
             result = []
@@ -432,7 +442,7 @@ class ResourceService:
         target_column = "resource_id" if target_type == "model" else "video_id"
         target_table = "resources" if target_type == "model" else "videos"
         try:
-            target = get_supabase().table(target_table).select(target_column).eq(target_column, target_id).maybe_single().execute().data
+            target = get_supabase().table(target_table).select(target_column).eq(target_column, target_id).eq("is_locked", False).eq("is_deleted", False).maybe_single().execute().data
             if not target:
                 raise HTTPException(status_code=404, detail="Learning resource not found.")
             existing = get_supabase().table("educator_recommendations").select("recommendation_id").eq("educator_id", educator_id).eq(target_column, target_id).limit(1).execute().data or []
