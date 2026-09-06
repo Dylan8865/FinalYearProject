@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from typing import Optional
 
-from app.db.deps import get_current_admin
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
+
+from app.db.deps import get_current_admin, get_current_educator
 from app.schemas.admin import AdminAccountActiveUpdate, AdminContentUpdate
 from app.services.admin import AdminService
 
@@ -29,13 +31,52 @@ async def delete_content(content_type: str, content_id: str, admin=Depends(get_c
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+@router.post("/content/{content_type}/{content_id}/lock", status_code=status.HTTP_204_NO_CONTENT)
+async def lock_content(
+    content_type: str,
+    content_id: str,
+    reason: str = Body(..., embed=True, min_length=5, max_length=500),
+    admin=Depends(get_current_admin),
+):
+    AdminService.lock_content(admin["id"], valid_content_type(content_type), content_id, reason)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/content/{content_type}/{content_id}/unlock", status_code=status.HTTP_204_NO_CONTENT)
+async def unlock_content(
+    content_type: str,
+    content_id: str,
+    reason: Optional[str] = Body(default=None, embed=True, max_length=500),
+    admin=Depends(get_current_admin),
+):
+    AdminService.unlock_content(admin["id"], valid_content_type(content_type), content_id, reason)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/content/{content_type}/{content_id}/soft-delete", status_code=status.HTTP_204_NO_CONTENT)
+async def soft_delete_content(
+    content_type: str,
+    content_id: str,
+    reason: str = Body(..., embed=True, min_length=5, max_length=500),
+    admin=Depends(get_current_admin),
+):
+    AdminService.soft_delete_content(admin["id"], valid_content_type(content_type), content_id, reason)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/educator/moderation-logs")
+async def educator_moderation_logs(educator=Depends(get_current_educator)):
+    """Educators call this to see their own moderation alerts from admin."""
+    return AdminService.educator_moderation_logs(educator["id"])
+
+
 @router.get("/analytics")
 async def analytics(_admin=Depends(get_current_admin)):
     return AdminService.analytics()
 
 
 @router.get("/users")
-async def list_users(search: str | None = Query(default=None, max_length=100), _admin=Depends(get_current_admin)):
+async def list_users(search: Optional[str] = Query(default=None, max_length=100), _admin=Depends(get_current_admin)):
     return AdminService.list_users(search)
 
 

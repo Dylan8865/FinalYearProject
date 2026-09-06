@@ -6,8 +6,10 @@ import {
   FiBookOpen,
   FiCheck,
   FiChevronDown,
+  FiClock,
   FiEye,
   FiFileText,
+  FiGlobe,
   FiPlus,
   FiPlay,
   FiRefreshCw,
@@ -15,6 +17,8 @@ import {
   FiTrash2,
   FiUploadCloud,
   FiX,
+  FiUsers,
+  FiSend,
 } from 'react-icons/fi';
 import AppSidebar from '@/components/layout/AppSidebar';
 import { authService } from '@/lib/authService';
@@ -54,9 +58,20 @@ export default function LibraryPage() {
   const [actionError, setActionError] = useState('');
   const [startingQuizId, setStartingQuizId] = useState<string | null>(null);
   const [deletingQuizId, setDeletingQuizId] = useState<string | null>(null);
+  const [publishingQuizId, setPublishingQuizId] = useState<string | null>(null);
   const [previewingQuizId, setPreviewingQuizId] = useState<string | null>(null);
   const [previewQuiz, setPreviewQuiz] = useState<{ id: string; quiz: GeneratedQuiz } | null>(null);
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
+  const [resumePromptQuizId, setResumePromptQuizId] = useState<string | null>(null);
+
+  // Assign Modal State
+  const [assigningQuizId, setAssigningQuizId] = useState<string | null>(null);
+  const [studentSearchQuery, setStudentSearchQuery] = useState('');
+  const [studentSearchResults, setStudentSearchResults] = useState<any[]>([]);
+  const [isSearchingStudent, setIsSearchingStudent] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [assignMessage, setAssignMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const loadLibrary = useCallback(async () => {
     setIsLoading(true);
@@ -107,6 +122,15 @@ export default function LibraryPage() {
   };
 
   const startSavedQuiz = async (quizId: string) => {
+    const quiz = quizzes.find((q) => q.id === quizId);
+    if (quiz?.has_in_progress_attempt) {
+      setResumePromptQuizId(quizId);
+      return;
+    }
+    await proceedWithQuiz(quizId);
+  };
+
+  const proceedWithQuiz = async (quizId: string) => {
     setActionError('');
     setStartingQuizId(quizId);
     try {
@@ -121,6 +145,25 @@ export default function LibraryPage() {
       setActionError(typeof detail === 'string' ? detail : 'Unable to start this quiz.');
     } finally {
       setStartingQuizId(null);
+    }
+  };
+
+  const handleContinueQuiz = () => {
+    if (resumePromptQuizId) {
+      void proceedWithQuiz(resumePromptQuizId);
+      setResumePromptQuizId(null);
+    }
+  };
+
+  const handleRestartQuiz = async () => {
+    if (resumePromptQuizId) {
+      try {
+        await authService.deleteQuizProgress(resumePromptQuizId);
+      } catch (e) {
+        // optionally log or ignore
+      }
+      void proceedWithQuiz(resumePromptQuizId);
+      setResumePromptQuizId(null);
     }
   };
 
@@ -165,8 +208,60 @@ export default function LibraryPage() {
     }
   };
 
+  const togglePublishQuiz = async (quiz: LibraryQuiz) => {
+    setPublishingQuizId(quiz.id);
+    try {
+      const result = await authService.publishQuiz(quiz.id, !quiz.is_public);
+      setQuizzes((current) => current.map((item) => item.id === quiz.id ? { ...item, is_public: result.is_public } : item));
+    } catch (requestError: any) {
+      const detail = requestError.response?.data?.detail;
+      setActionError(typeof detail === 'string' ? detail : 'Unable to update quiz visibility.');
+    } finally {
+      setPublishingQuizId(null);
+    }
+  };
+
+  const handleSearchStudent = async () => {
+    if (!studentSearchQuery || studentSearchQuery.length < 3) return;
+    setIsSearchingStudent(true);
+    setAssignMessage(null);
+    setSelectedStudent(null);
+    try {
+      const results = await authService.searchStudent(studentSearchQuery);
+      setStudentSearchResults(results);
+      if (results.length === 0) {
+        setAssignMessage({ type: 'error', text: 'No student found with that email or username.' });
+      }
+    } catch (e: any) {
+      setAssignMessage({ type: 'error', text: e.response?.data?.detail || 'Failed to search for student.' });
+    } finally {
+      setIsSearchingStudent(false);
+    }
+  };
+
+  const handleAssignQuiz = async () => {
+    if (!assigningQuizId || !selectedStudent) return;
+    setIsAssigning(true);
+    setAssignMessage(null);
+    try {
+      const result = await authService.assignQuiz(assigningQuizId, selectedStudent.id);
+      setAssignMessage({ type: 'success', text: result.message || 'Quiz assigned successfully!' });
+      setTimeout(() => {
+        setAssigningQuizId(null);
+        setAssignMessage(null);
+        setSelectedStudent(null);
+        setStudentSearchQuery('');
+        setStudentSearchResults([]);
+      }, 2000);
+    } catch (e: any) {
+      setAssignMessage({ type: 'error', text: e.response?.data?.detail || 'Failed to assign quiz.' });
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
       <AppSidebar />
 
       <main className="min-w-0">
@@ -299,11 +394,14 @@ export default function LibraryPage() {
                     <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${quiz.source_type === 'educator_shared' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
                       {quiz.source_type === 'ai_generated' ? <FiArchive className="h-5 w-5" /> : quiz.source_type === 'educator_shared' ? <FiCheck className="h-5 w-5" /> : <FiFileText className="h-5 w-5" />}
                     </div>
-                    <span className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide ${quiz.source_type === 'educator_shared' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide ${quiz.source_type === 'educator_assigned' || quiz.source_type === 'educator_shared' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
                       {formatSourceType(quiz.source_type)}
                     </span>
                   </div>
                   <h3 className="mt-6 line-clamp-2 text-lg font-extrabold leading-6 text-slate-900">{quiz.title}</h3>
+                  {quiz.source_type === 'educator_assigned' && quiz.assigned_by_name && (
+                    <p className="mt-2 text-xs font-bold text-amber-700">Assigned by {quiz.assigned_by_name}</p>
+                  )}
                   <div className="mt-auto flex items-center justify-between gap-3 pt-6 text-xs font-semibold text-slate-500">
                     <span className="inline-flex min-w-0 items-center gap-2 truncate">
                       <FiBookOpen className="h-4 w-4 flex-none" />
@@ -311,35 +409,64 @@ export default function LibraryPage() {
                     </span>
                     <span className="flex-none">{formatCreatedDate(quiz.created_at, locale)}</span>
                   </div>
-                  <div className="mt-5 grid grid-cols-[1fr_1fr_auto] gap-2 border-t border-slate-100 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => void openQuizPreview(quiz.id)}
-                      disabled={Boolean(startingQuizId) || Boolean(deletingQuizId) || Boolean(previewingQuizId)}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-extrabold text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-45"
-                    >
-                      <FiEye className="h-4 w-4" />
-                      {previewingQuizId === quiz.id ? 'Loading…' : 'Preview'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void startSavedQuiz(quiz.id)}
-                      disabled={Boolean(startingQuizId) || Boolean(deletingQuizId)}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white hover:bg-blue-700 disabled:opacity-45"
-                    >
-                      <FiPlay className="h-4 w-4" />
-                      {startingQuizId === quiz.id ? 'Loading…' : 'Start quiz'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void deleteSavedQuiz(quiz)}
-                      disabled={Boolean(startingQuizId) || Boolean(deletingQuizId)}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-45"
-                      aria-label={`Delete ${quiz.title}`}
-                      title="Delete quiz"
-                    >
-                      <FiTrash2 className="h-4 w-4" />
-                    </button>
+                  <div className="mt-5 flex flex-col gap-2 border-t border-slate-100 pt-4">
+                    {isEducator && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void togglePublishQuiz(quiz)}
+                          disabled={Boolean(publishingQuizId)}
+                          title={quiz.is_public ? 'Make quiz private' : 'Share to public'}
+                          className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-sm font-extrabold disabled:opacity-45 ${quiz.is_public ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-slate-200 text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600'}`}
+                        >
+                          <FiGlobe className="h-4 w-4" />
+                          {publishingQuizId === quiz.id ? 'Updating…' : quiz.is_public ? 'Public' : 'Publish'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAssigningQuizId(quiz.id)}
+                          disabled={Boolean(startingQuizId) || Boolean(deletingQuizId) || Boolean(previewingQuizId)}
+                          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-50 px-4 text-sm font-extrabold text-indigo-600 hover:bg-indigo-100 disabled:opacity-45"
+                        >
+                          <FiSend className="h-4 w-4" />
+                          Assign
+                        </button>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void openQuizPreview(quiz.id)}
+                        disabled={Boolean(startingQuizId) || Boolean(deletingQuizId) || Boolean(previewingQuizId)}
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-extrabold text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-45"
+                      >
+                        <FiEye className="h-4 w-4" />
+                        {previewingQuizId === quiz.id ? 'Loading…' : 'Preview'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void startSavedQuiz(quiz.id)}
+                        disabled={Boolean(startingQuizId) || Boolean(deletingQuizId)}
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white hover:bg-blue-700 disabled:opacity-45"
+                      >
+                        {quiz.has_in_progress_attempt ? <FiClock className="h-4 w-4" /> : <FiPlay className="h-4 w-4" />}
+                        {startingQuizId === quiz.id
+                          ? 'Loading…'
+                          : quiz.has_in_progress_attempt
+                            ? 'Resume quiz'
+                            : 'Start quiz'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void deleteSavedQuiz(quiz)}
+                        disabled={Boolean(startingQuizId) || Boolean(deletingQuizId)}
+                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-45"
+                        aria-label={`Delete ${quiz.title}`}
+                        title="Delete quiz"
+                      >
+                        <FiTrash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </article>
               ))}
@@ -389,6 +516,41 @@ export default function LibraryPage() {
           )}
         </div>
       </main>
+
+      {resumePromptQuizId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[30px] bg-white p-7 text-center shadow-2xl">
+            <FiClock className="mx-auto h-12 w-12 text-blue-500" />
+            <h3 className="mt-5 text-xl font-extrabold text-slate-900">Resume Quiz?</h3>
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              You have an unfinished attempt for this quiz. Do you want to continue where you left off, or start over?
+            </p>
+            <div className="mt-7 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={handleContinueQuiz}
+                className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
+              >
+                Continue attempt
+              </button>
+              <button
+                type="button"
+                onClick={handleRestartQuiz}
+                className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Start over
+              </button>
+              <button
+                type="button"
+                onClick={() => setResumePromptQuizId(null)}
+                className="mt-2 text-sm font-bold text-slate-400 hover:text-slate-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {previewQuiz && (
         <div
@@ -477,6 +639,133 @@ export default function LibraryPage() {
               >
                 <FiPlay className="h-4 w-4" />
                 {startingQuizId === previewQuiz.id ? 'Starting…' : 'Start this quiz'}
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
+
+      {assigningQuizId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-[30px] bg-white p-7 shadow-2xl">
+            <header className="flex items-center justify-between">
+              <h3 className="text-xl font-extrabold text-slate-900">Assign Quiz to Student</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setAssigningQuizId(null);
+                  setAssignMessage(null);
+                  setSelectedStudent(null);
+                  setStudentSearchQuery('');
+                  setStudentSearchResults([]);
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </header>
+
+            <div className="mt-6">
+              {assignMessage && (
+                <div className={`mb-4 rounded-xl px-4 py-3 text-sm font-semibold ${assignMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                  {assignMessage.text}
+                </div>
+              )}
+
+              <label className="block text-sm font-bold text-slate-700">Search Student (Name, Username or Email)</label>
+              <div className="mt-2 flex gap-3">
+                <input
+                  type="text"
+                  value={studentSearchQuery}
+                  onChange={(e) => setStudentSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') void handleSearchStudent();
+                  }}
+                  placeholder="e.g. Hello, johndoe or john@example.com"
+                  className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 focus:border-blue-400 focus:bg-white focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleSearchStudent()}
+                  disabled={isSearchingStudent || studentSearchQuery.length < 3}
+                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 font-bold text-white shadow-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  <FiSearch className="h-4 w-4" />
+                </button>
+              </div>
+
+              {studentSearchResults.length > 0 && !selectedStudent && (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                  {studentSearchResults.map(student => (
+                    <button
+                      key={student.id}
+                      onClick={() => setSelectedStudent(student)}
+                      className="flex w-full items-center gap-3 border-b border-slate-100 p-4 text-left hover:bg-slate-50 last:border-0"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 overflow-hidden">
+                        {student.profile_picture_url ? (
+                          <img src={student.profile_picture_url} alt={student.username} className="h-full w-full object-cover" />
+                        ) : (
+                          <FiUsers className="h-5 w-5" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">{student.full_name} (@{student.username})</p>
+                        <p className="text-xs font-semibold text-slate-500">{student.email}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {selectedStudent && (
+                <div className="mt-4 flex items-center justify-between rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-indigo-500 overflow-hidden shadow-sm">
+                      {selectedStudent.profile_picture_url ? (
+                        <img src={selectedStudent.profile_picture_url} alt={selectedStudent.username} className="h-full w-full object-cover" />
+                      ) : (
+                        <FiUsers className="h-5 w-5" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-indigo-900">Selected: {selectedStudent.full_name}</p>
+                      <p className="text-xs font-semibold text-indigo-700">@{selectedStudent.username}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStudent(null)}
+                    className="text-xs font-bold text-indigo-600 hover:underline"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <footer className="mt-7 flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setAssigningQuizId(null);
+                  setAssignMessage(null);
+                  setSelectedStudent(null);
+                  setStudentSearchQuery('');
+                  setStudentSearchResults([]);
+                }}
+                className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleAssignQuiz()}
+                disabled={!selectedStudent || isAssigning || assignMessage?.type === 'success'}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 disabled:opacity-50"
+              >
+                <FiSend className="h-4 w-4" />
+                {isAssigning ? 'Assigning...' : 'Assign Quiz'}
               </button>
             </footer>
           </div>

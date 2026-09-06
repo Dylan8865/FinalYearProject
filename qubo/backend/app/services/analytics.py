@@ -137,7 +137,9 @@ class AnalyticsService:
             or []
         )
         study_minutes = sum(row.get("duration_minutes") or 0 for row in recent_sessions)
-        predicted_score = AnalyticsService._calculate_prediction(scores, study_minutes)
+        
+        from app.services.ml_prediction import MLPredictionService
+        predicted_score = MLPredictionService.train_and_predict(study_minutes, scores)
         threshold = AnalyticsService.get_prediction_settings(student_id)["threshold"]
         risk_level = "high" if predicted_score < threshold else "medium" if predicted_score < threshold + 10 else "low"
 
@@ -152,7 +154,7 @@ class AnalyticsService:
                 "alert_threshold": threshold,
                 "is_warning": predicted_score < threshold,
                 "basis_attempt_count": len(scores),
-                "model_version": "weighted-trend-v1",
+                "model_version": "random-forest-v1",
             })
             .execute()
         )
@@ -171,8 +173,8 @@ class AnalyticsService:
         return AnalyticsService._format_prediction(row, (subject_row or {}).get("subject_name", "Subject"))
 
     @staticmethod
-    def _format_prediction(row: dict, subject_name: str):
-        threshold = float(row.get("alert_threshold") or AnalyticsService.DEFAULT_ALERT_THRESHOLD)
+    def _format_prediction(row: dict, subject_name: str, current_threshold: float = None):
+        threshold = current_threshold if current_threshold is not None else float(row.get("alert_threshold") or AnalyticsService.DEFAULT_ALERT_THRESHOLD)
         predicted_score = float(row["predicted_score"])
         return {
             "id": row["id"],
@@ -181,7 +183,7 @@ class AnalyticsService:
             "predicted_score": predicted_score,
             "risk_level": row["risk_level"],
             "threshold": threshold,
-            "is_warning": bool(row.get("is_warning", predicted_score < threshold)),
+            "is_warning": predicted_score < threshold,
             "basis_attempt_count": int(row.get("basis_attempt_count") or 1),
             "generated_at": row["generated_at"],
         }
@@ -567,6 +569,9 @@ class AnalyticsService:
             if subject_id and attempt.get("score") is not None:
                 attempts_by_subject[subject_id].append(attempt)
 
+        user_settings = AnalyticsService.get_prediction_settings(student_id)
+        current_threshold = user_settings["threshold"]
+
         result = []
         for subject in subject_rows:
             subject_topics = topics_by_subject[subject["id"]]
@@ -584,6 +589,8 @@ class AnalyticsService:
                     "score_percentage": score,
                     "sessions_count": topic_session_counts[topic["id"]],
                     "last_updated": performance.get("last_updated") if performance else None,
+                    "weakness_detail": f"You are consistently struggling with {topic['topic_name']}. Review foundational principles to improve accuracy." if score and score < 70 else None,
+                    "focus_tags": [word + " Fundamentals" for word in topic["topic_name"].replace("&", "").split() if len(word) > 3][:2] if score and score < 70 else None
                 })
 
             subject_attempts = attempts_by_subject[subject["id"]]
@@ -602,22 +609,64 @@ class AnalyticsService:
                 "learning_velocity": AnalyticsService._calculate_learning_velocity(subject_attempts),
                 "topic_performance": topic_performance,
                 "recent_quiz_scores": [{"score": float(attempt["score"]), "attempted_at": attempt["attempted_at"]} for attempt in subject_attempts[-12:]],
-                "latest_prediction": AnalyticsService._format_prediction(latest_prediction, subject_names[subject["id"]]) if latest_prediction else None,
+                "latest_prediction": AnalyticsService._format_prediction(latest_prediction, subject_names[subject["id"]], current_threshold) if latest_prediction else None,
             })
         return result
 
     @staticmethod
-    def link_student(educator_id: str, username: str):
+    def search_student_for_linking(educator_id: str, query: str):
         supabase = get_supabase()
+        query = query.strip().replace("%", "").replace(",", "")
+        if len(query) < 3:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Enter at least 3 characters")
+        pattern = f"%{query}%"
         students = (
             supabase.table("profiles")
-            .select("id,username,role")
-            .ilike("username", username)
+            .select("id,username,full_name,profile_picture_url,role")
+            .or_(f"username.ilike.{pattern},email.ilike.{pattern},full_name.ilike.{pattern}")
+            .eq("role", "student")
             .limit(1)
             .execute().data or []
         )
-        if not students or students[0].get("role") != "student":
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student username not found")
+        if not students:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student username or email not found")
+        student = students[0]
+
+        existing = (
+            supabase.table("educator_students")
+            .select("id")
+            .eq("educator_id", educator_id)
+            .eq("student_id", student["id"])
+            .limit(1)
+            .execute().data or []
+        )
+        if existing:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Student is already in your class")
+
+        return {
+            "id": student["id"],
+            "username": student["username"],
+            "full_name": student["full_name"],
+            "profile_picture_url": student.get("profile_picture_url"),
+        }
+
+    @staticmethod
+    def link_student(educator_id: str, username: str):
+        supabase = get_supabase()
+        username = username.strip().replace("%", "").replace(",", "")
+        if len(username) < 3:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Enter at least 3 characters")
+        pattern = f"%{username}%"
+        students = (
+            supabase.table("profiles")
+            .select("id,username,role")
+            .or_(f"username.ilike.{pattern},email.ilike.{pattern},full_name.ilike.{pattern}")
+            .eq("role", "student")
+            .limit(1)
+            .execute().data or []
+        )
+        if not students:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student username or email not found")
         student_id = students[0]["id"]
         existing = (
             supabase.table("educator_students")
@@ -697,4 +746,133 @@ class AnalyticsService:
                 "completed_quizzes": sum(student["quizzes_completed"] for student in students),
             },
             "students": students,
+        }
+
+    @staticmethod
+    def get_learning_recommendations(student_id: str):
+        supabase = get_supabase()
+        recommendations = (
+            supabase.table("learning_recommendations")
+            .select("*")
+            .eq("student_id", student_id)
+            .order("priority_level", desc=True)
+            .order("created_at", desc=True)
+            .limit(10)
+            .execute().data or []
+        )
+        if not recommendations:
+            return []
+
+        subject_ids = list({row["subject_id"] for row in recommendations if row.get("subject_id")})
+        topic_ids = list({row["topic_id"] for row in recommendations if row.get("topic_id")})
+
+        subject_names = {}
+        if subject_ids:
+            subjects = supabase.table("subjects").select("id,subject_name").in_("id", subject_ids).execute().data or []
+            subject_names = {row["id"]: row["subject_name"] for row in subjects}
+
+        topic_names = {}
+        if topic_ids:
+            topics = supabase.table("topics").select("id,topic_name").in_("id", topic_ids).execute().data or []
+            topic_names = {row["id"]: row["topic_name"] for row in topics}
+
+        return [
+            {
+                **rec,
+                "subject_name": subject_names.get(rec.get("subject_id")),
+                "topic_name": topic_names.get(rec.get("topic_id")),
+            }
+            for rec in recommendations
+        ]
+
+    @staticmethod
+    def accept_learning_recommendation(student_id: str, recommendation_id: str):
+        supabase = get_supabase()
+        response = (
+            supabase.table("learning_recommendations")
+            .update({"is_accepted": True})
+            .eq("id", recommendation_id)
+            .eq("student_id", student_id)
+            .execute()
+        )
+        if not response.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recommendation not found")
+        return {"id": recommendation_id, "is_accepted": True, "message": "Recommendation accepted"}
+
+    @staticmethod
+    def generate_study_plan(student_id: str):
+        # 1. Fetch current subject analytics to find weakest topics
+        subjects = AnalyticsService.get_subject_analytics(student_id)
+        if not subjects:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="Not enough activity data to generate a study plan. Complete some quizzes or study sessions first."
+            )
+
+        weak_topics = []
+        for subject in subjects:
+            for topic in subject.get("topic_performance", []):
+                score = topic.get("score_percentage")
+                # Ensure score is a number before comparing
+                if score is not None and isinstance(score, (int, float)) and score < 60:
+                    weak_topics.append({
+                        "subject_id": subject["id"],
+                        "topic_id": topic["topic_id"],
+                        "topic_name": topic["topic_name"],
+                        "score": score
+                    })
+
+        # Sort by score ascending (weakest first)
+        weak_topics.sort(key=lambda x: x["score"])
+
+        supabase = get_supabase()
+        
+        # 2. Fetch existing recommendations
+        existing_recs = supabase.table("learning_recommendations").select("*").eq("student_id", student_id).execute().data or []
+        accepted_topic_ids = {rec["topic_id"] for rec in existing_recs if rec["is_accepted"] and rec.get("topic_id")}
+        has_general_strategy = any(rec["recommendation_type"] == "study_strategy" and rec["is_accepted"] for rec in existing_recs)
+
+        # 3. Filter out weak topics that already have an accepted recommendation
+        weak_topics = [wt for wt in weak_topics if wt["topic_id"] not in accepted_topic_ids]
+
+        # Delete old unaccepted recommendations to keep it clean
+        supabase.table("learning_recommendations").delete().eq("student_id", student_id).eq("is_accepted", False).execute()
+
+        new_recommendations = []
+
+        if not weak_topics:
+            if has_general_strategy or len(accepted_topic_ids) > 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="You already have an active study plan! Complete your accepted recommendations or take more quizzes to refresh your progress."
+                )
+            
+            # If doing well and no prior strategy, give a general study strategy
+            general_rec = {
+                "student_id": student_id,
+                "recommendation_type": "study_strategy",
+                "recommendation_text": "You are doing excellent across all subjects! Keep up the spaced repetition to maintain your mastery.",
+                "priority_level": 5
+            }
+            res = supabase.table("learning_recommendations").insert(general_rec).execute()
+            if res.data:
+                new_recommendations.append(res.data[0])
+        else:
+            # Generate recommendations for top 3 weakest topics
+            for idx, weak_topic in enumerate(weak_topics[:3]):
+                rec = {
+                    "student_id": student_id,
+                    "recommendation_type": "topic_focus",
+                    "subject_id": weak_topic["subject_id"],
+                    "topic_id": weak_topic["topic_id"],
+                    "recommendation_text": f"Your score in '{weak_topic['topic_name']}' is {weak_topic['score']}%. We recommend dedicating your next 2 study sessions exclusively to this topic.",
+                    "priority_level": 10 - idx
+                }
+                res = supabase.table("learning_recommendations").insert(rec).execute()
+                if res.data:
+                    new_recommendations.append(res.data[0])
+
+        return {
+            "message": "Your personalised weekly study plan has been generated based on your latest performance.",
+            "recommendations": AnalyticsService.get_learning_recommendations(student_id)
         }

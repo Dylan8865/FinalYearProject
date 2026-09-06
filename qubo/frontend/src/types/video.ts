@@ -4,6 +4,8 @@ export interface TutorialVideo {
   title: string;
   subject_tag?: string | null;
   uploaded_by?: string | null;
+  is_locked?: boolean;
+  is_deleted?: boolean;
 }
 
 export interface SharedLearningItem {

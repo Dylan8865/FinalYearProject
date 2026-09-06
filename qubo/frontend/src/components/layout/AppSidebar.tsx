@@ -23,13 +23,15 @@ import {
 } from 'react-icons/fi';
 import { useLanguageStore } from '@/contexts/languageStore';
 import { useThemeStore } from '@/contexts/themeStore';
+import { useTimerStore } from '@/contexts/timerStore';
+import { FiClock } from 'react-icons/fi';
 
 const studentNavigationItems = [
   { icon: FiGrid, label: 'Dashboard', path: '/dashboard' },
   { icon: FiBookOpen, label: 'Subjects', path: '/subjects' },
   { icon: FiBarChart2, label: 'Analytics', path: '/analytics' },
   { icon: FiPlayCircle, label: 'Game Room', path: '/game-room' },
-  { icon: FiHelpCircle, label: 'Quizzes', path: '/quiz/create' },
+  { icon: FiHelpCircle, label: 'Quizzes', path: '/quizzes' },
   { icon: FiArchive, label: 'Library', path: '/library' },
   { icon: FiFolder, label: 'Resource', path: '/resources' },
   { icon: FiBookmark, label: 'My Learning', path: '/learning' },
@@ -61,6 +63,21 @@ export default function AppSidebar() {
   const toggleLanguage = useLanguageStore((state) => state.toggleLanguage);
   const theme = useThemeStore((state) => state.theme);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
+  const { session, timeLeft, mode, tick } = useTimerStore();
+
+  useEffect(() => {
+    if (session) {
+      tick();
+      const interval = setInterval(() => tick(), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [session, tick]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   useEffect(() => {
     setProfileImageFailed(false);
@@ -71,7 +88,7 @@ export default function AppSidebar() {
       setIsExplorerOpen(true);
     }
   }, [location.pathname]);
-  const displayName = user?.full_name || user?.username || 'Qubo user';
+  const displayName = user?.username || user?.full_name || 'Qubo user';
   const initials = displayName
     .split(' ')
     .filter(Boolean)
@@ -159,6 +176,27 @@ export default function AppSidebar() {
         })}
       </nav>
 
+      {session && (
+        <div 
+          className="mt-6 mx-4 rounded-[24px] border border-blue-200 bg-blue-50 p-4 shadow-sm hover:border-blue-300 transition-colors cursor-pointer" 
+          onClick={() => navigate('/analytics')}
+          title="Return to active study session"
+        >
+          <div className="flex items-center gap-3">
+            <div className={`flex h-10 w-10 flex-none items-center justify-center rounded-full ${mode === 'work' ? 'bg-blue-600' : 'bg-emerald-500'} text-white shadow-md`}>
+              <FiClock className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-bold text-blue-900">{session.topic_name || 'General'}</p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className={`font-mono text-sm font-extrabold ${mode === 'work' ? 'text-blue-700' : 'text-emerald-600'}`}>{formatTime(timeLeft)}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-500">{mode === 'work' ? 'Focus' : 'Break'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {user && (
         <div className="mt-auto rounded-[28px] border border-slate-200 bg-slate-50 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Signed in as</p>
@@ -166,17 +204,17 @@ export default function AppSidebar() {
             {user.profile_picture_url && !profileImageFailed ? (
               <img
                 src={user.profile_picture_url}
-                alt={`${user.full_name} profile`}
+                alt={`${displayName} profile`}
                 onError={() => setProfileImageFailed(true)}
                 className="h-11 w-11 rounded-full border border-slate-200 object-cover"
               />
             ) : (
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                {user.full_name?.slice(0, 2).toUpperCase() || 'QB'}
+                {initials}
               </div>
             )}
             <div className="min-w-0">
-              <p className="truncate font-semibold text-slate-900">{user.full_name}</p>
+              <p className="truncate font-semibold text-slate-900">{displayName}</p>
               <p className="text-sm capitalize text-slate-500">{user.role}</p>
             </div>
           </div>

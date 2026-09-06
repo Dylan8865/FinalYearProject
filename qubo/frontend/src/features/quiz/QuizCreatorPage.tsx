@@ -1,6 +1,7 @@
 import { DragEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppSidebar from '@/components/layout/AppSidebar';
+import Tooltip from '@/components/common/Tooltip';
 import { useQuizStore } from '@/contexts/quizStore';
 import { authService } from '@/lib/authService';
 import {
@@ -19,13 +20,14 @@ import {
 import { GeneratedQuestion, QuizDifficulty, QuizQuestionType } from '@/types/quiz';
 import { useAuthStore } from '@/contexts/authStore';
 
-const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
-const MAX_TOTAL_SIZE_BYTES = 16 * 1024 * 1024;
+const MAX_FILE_SIZE_BYTES = 32 * 1024 * 1024;
+const MAX_TOTAL_SIZE_BYTES = 32 * 1024 * 1024;
 
 const formatMegabytes = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
 export default function QuizCreatorPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const user = useAuthStore((state) => state.user);
   const isEducator = user?.role === 'educator';
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,6 +47,18 @@ export default function QuizCreatorPage() {
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [creationMethod, setCreationMethod] = useState<'ai' | 'manual'>('ai');
+  const practiceSubject = searchParams.get('subject') || '';
+  const practiceTopic = searchParams.get('topic') || '';
+  const noMcqSubjects = ['chinese', 'cina', 'mandarin', 'add math', 'matematik tambahan', 'computer science', 'sains komputer', 'informatik'];
+  const isNoMcqSubject = (subject: string) => noMcqSubjects.some(s => subject.toLowerCase().includes(s));
+
+  useEffect(() => {
+    if (!isEducator) {
+      setGeneratedQuiz(null);
+      setSavedQuizId(null);
+    }
+  }, [isEducator, setGeneratedQuiz, setSavedQuizId]);
+  
   const totalUploadSize = useMemo(
     () => uploadedFiles.reduce((total, file) => total + file.size, 0),
     [uploadedFiles]
@@ -79,9 +93,9 @@ export default function QuizCreatorPage() {
       if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
         rejectedFiles.push(`${file.name}: unsupported file type`);
       } else if (file.size > MAX_FILE_SIZE_BYTES) {
-        rejectedFiles.push(`${file.name}: larger than 8 MB`);
+        rejectedFiles.push(`${file.name}: larger than 32 MB`);
       } else if (nextTotalSize + file.size > MAX_TOTAL_SIZE_BYTES) {
-        rejectedFiles.push(`${file.name}: would exceed the 16 MB total`);
+        rejectedFiles.push(`${file.name}: would exceed the 32 MB total`);
       } else {
         acceptedFiles.push(file);
         nextTotalSize += file.size;
@@ -120,7 +134,7 @@ export default function QuizCreatorPage() {
     setSaveError('');
     setIsGenerating(true);
     try {
-      const quiz = await authService.generateQuiz(uploadedFiles, questionType, difficulty, questionCount);
+      const quiz = await authService.generateQuiz(uploadedFiles, questionType, difficulty, questionCount, practiceTopic);
       setGeneratedQuiz(quiz);
       if (isEducator) {
         navigate('/educator/quizzes/edit');
@@ -217,13 +231,13 @@ export default function QuizCreatorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-[#f7f9fc] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
       <AppSidebar />
 
       <div className="min-w-0">
         <main className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
           <div className="mb-7">
-            <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Module 3</p>
+            <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">AI-Powered Generation</p>
             <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-950">Quiz Creator</h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
               Transform study materials into interactive mastery challenges. Upload textbook pages or notes and configure the quiz experience.
@@ -247,9 +261,9 @@ export default function QuizCreatorPage() {
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-primary">
                     <FiCamera className="h-7 w-7" />
                   </div>
-                  <h2 className="mt-5 text-lg font-extrabold text-slate-900">Drag and drop textbook pages</h2>
+                  <h2 className="mt-5 flex items-center gap-2 text-lg font-extrabold text-slate-900">Drag and drop textbook pages <Tooltip content="Upload clear textbook pages, notes, or PDFs related to the topic you want to practise. Qubo uses this material to create the questions." position="top" /></h2>
                   <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                    Upload JPEG/PNG images or PDFs. Maximum 8 MB per file and 16 MB in total.
+                    Upload JPEG/PNG images or PDFs. Maximum 32 MB per file and 32 MB in total.
                   </p>
                   <button
                     onClick={() => fileInputRef.current?.click()}
@@ -273,8 +287,8 @@ export default function QuizCreatorPage() {
 
                 <div className="mt-7 flex items-center justify-between">
                   <h3 className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">Selected uploads</h3>
-                  <span className="text-xs font-bold text-slate-400" aria-label={`${uploadedFiles.length} files selected, ${formatMegabytes(totalUploadSize)} of 16 MB used`}>
-                    {uploadedFiles.length} selected · {formatMegabytes(totalUploadSize)} / 16 MB
+                  <span className="text-xs font-bold text-slate-400" aria-label={`${uploadedFiles.length} files selected, ${formatMegabytes(totalUploadSize)} of 32 MB used`}>
+                    {uploadedFiles.length} selected · {formatMegabytes(totalUploadSize)} / 32 MB
                   </span>
                 </div>
 
@@ -325,6 +339,13 @@ export default function QuizCreatorPage() {
 
               <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)] md:p-7">
                 <h2 className="text-xl font-extrabold text-slate-950">Quiz configuration</h2>
+                {practiceTopic && (
+                  <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-600">Practice focus</p>
+                    <p className="mt-1 font-bold">{practiceTopic}</p>
+                    <p className="mt-1 text-xs text-blue-700">Upload notes or textbook pages for {practiceSubject || 'this subject'} and Qubo will generate questions focused on this topic.</p>
+                  </div>
+                )}
                 {isEducator && (
                   <div className="mt-5 flex flex-wrap gap-2">
                     <button type="button" onClick={() => { setCreationMethod('ai'); setGeneratedQuiz(null); setSavedQuizId(null); }} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${creationMethod === 'ai' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600'}`}>Generate with AI</button>
@@ -338,7 +359,7 @@ export default function QuizCreatorPage() {
                 )}
                 <div className="mt-6 grid gap-7 md:grid-cols-3">
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Question type</p>
+                    <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Question type <Tooltip content="MCQ gives four choices, fill-in-the-blank checks missing terms, and short answer requires you to write the answer." position="top" /></p>
                     <div className="mt-3 space-y-3">
                       {[
                         { value: 'mcq', label: 'MCQ (Single choice)' },
@@ -363,7 +384,10 @@ export default function QuizCreatorPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Difficulty level</p>
+                    <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                      Difficulty level
+                      <Tooltip content="Difficulty dictates the depth and complexity of the questions generated. 'Advanced' will challenge you with harder cognitive questions based on the SPM syllabus." position="top" />
+                    </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {(['Beginner', 'Intermediate', 'Advanced'] as QuizDifficulty[]).map((level) => (
                         <button
@@ -385,7 +409,10 @@ export default function QuizCreatorPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Number of questions</p>
+                    <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                      Number of questions
+                      <Tooltip content="The length of the quiz. 5 questions are ideal for a quick review, while 20 questions are better for comprehensive exam preparation." position="top" />
+                    </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {[5, 10, 15, 20].map((count) => (
                         <button
@@ -408,12 +435,6 @@ export default function QuizCreatorPage() {
                     <p className="mt-3 text-xs leading-5 text-slate-400">More questions use more generation time and AI tokens.</p>
                   </div>
                 </div>
-                {isEducator && generatedQuiz && (
-                  <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 md:grid-cols-2">
-                    <label className="text-sm font-bold text-slate-700">Quiz title<input value={generatedQuiz.title} onChange={(event) => setGeneratedQuiz({ ...generatedQuiz, title: event.target.value })} className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-primary" /></label>
-                    <label className="text-sm font-bold text-slate-700">Subject<input value={generatedQuiz.subject} onChange={(event) => setGeneratedQuiz({ ...generatedQuiz, subject: event.target.value })} className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-primary" /></label>
-                  </div>
-                )}
                 {isEducator && creationMethod === 'ai' && (
                   <button
                     type="button"
@@ -444,6 +465,16 @@ export default function QuizCreatorPage() {
 
                 {generatedQuiz ? (
                   <div className="mt-5 max-h-[58vh] space-y-4 overflow-y-scroll overscroll-contain pr-2 touch-pan-y" tabIndex={0}>
+                    {generatedQuiz.question_type === 'mcq' && isNoMcqSubject(generatedQuiz.subject || '') && (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800 shadow-sm">
+                        <div className="flex items-start gap-2">
+                          <FiInfo className="mt-0.5 h-4 w-4 flex-none" />
+                          <p>
+                            <strong>Note:</strong> SPM {generatedQuiz.subject} does not have an MCQ section. These questions are designed for quick foundational practice.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     {generatedQuiz.questions.map((item, index) => (
                       <div key={index} className="rounded-2xl bg-white p-4 shadow-sm">
                         <span className="rounded-md bg-emerald-100 px-2 py-1 text-[10px] font-extrabold uppercase text-emerald-700">

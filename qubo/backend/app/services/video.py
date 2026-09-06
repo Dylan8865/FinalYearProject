@@ -16,7 +16,7 @@ class VideoService:
             query = (
                 get_supabase()
                 .table("videos")
-                .select("video_id,youtube_url,title,subject_tag,uploaded_by")
+                .select("video_id,youtube_url,title,subject_tag,uploaded_by,is_locked,is_deleted")
                 .order("title")
             )
 
@@ -25,7 +25,11 @@ class VideoService:
             if search:
                 query = query.ilike("title", f"%{search.strip()}%")
             if uploader_id:
+                # Educators viewing their own uploads: show locked but not deleted
                 query = query.eq("uploaded_by", uploader_id)
+            else:
+                # Students / public: hide locked AND soft-deleted content
+                query = query.eq("is_locked", False).eq("is_deleted", False)
 
             return query.execute().data or []
         except Exception as exc:
@@ -56,7 +60,9 @@ class VideoService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tutorial video not found.")
 
     @staticmethod
-    def create_video(educator_id: str, title: str, youtube_url: str, subject_tag: str | None) -> dict:
+    def create_video(educator_id: str, title: str, youtube_url: str, subject_tag: Optional[str]) -> dict:
+        from app.services.moderation import AIModerationService
+        scan = AIModerationService.scan_multiple(title, subject_tag)
         try:
             # A missing row is the normal case for a new upload.  Do not use
             # maybe_single() here: PostgREST can turn a zero-row result into a
@@ -72,6 +78,8 @@ class VideoService:
             created = get_supabase().table('videos').insert({
                 'uploaded_by': educator_id, 'title': title.strip(), 'youtube_url': youtube_url.strip(),
                 'subject_tag': subject_tag.strip() if subject_tag else None,
+                'is_locked': not scan['is_safe'],
+                'locked_reason': scan['flag_reason'],
             }).execute().data
             if not created:
                 raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail='Tutorial video could not be created.')

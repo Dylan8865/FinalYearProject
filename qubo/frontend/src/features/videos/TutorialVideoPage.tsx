@@ -6,6 +6,7 @@ import { authService } from '@/lib/authService';
 import { FavouriteItem } from '@/types/resource';
 import { TutorialVideo } from '@/types/video';
 import YouTubeLearningPlayer from './YouTubeLearningPlayer';
+import ModerationAlertsPanel from '@/components/common/ModerationAlertsPanel';
 import {
   FiAlertCircle,
   FiArrowLeft,
@@ -148,7 +149,8 @@ export default function TutorialVideoPage() {
       setRecipientEmail('');
       setShareMessage('');
     } catch (shareError: any) {
-      setShareStatus(shareError.response?.data?.detail || 'The video could not be shared.');
+      const detail = shareError.response?.data?.detail;
+      setShareStatus(typeof detail === 'string' ? detail : 'User not found or sharing not permitted.');
     } finally {
       setIsSharing(false);
     }
@@ -183,11 +185,13 @@ export default function TutorialVideoPage() {
   }, [searchParams, selectedVideo, setSearchParams, videos]);
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-[#f7f9fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
       <AppSidebar />
 
       <main className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:py-10">
         <button onClick={() => navigate('/resources')} className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900"><FiArrowLeft /> Back to resources</button>
+        {/* Moderation Alerts for educators */}
+        {user?.role === 'educator' && <div className="mt-6"><ModerationAlertsPanel /></div>}
         <section className="flex flex-col gap-6 border-b border-slate-200 pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Learning hub</p>
@@ -253,17 +257,22 @@ export default function TutorialVideoPage() {
                     <span className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-primary shadow-lg"><FiPlay className="ml-0.5 h-6 w-6" /></span>
                   </button>
                   <div className="p-5">
-                    {video.subject_tag && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-primary">{video.subject_tag}</span>}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {video.subject_tag && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-primary">{video.subject_tag}</span>}
+                      {video.is_deleted && <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700">❌ Removed by Admin</span>}
+                      {!video.is_deleted && video.is_locked && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">🔒 Locked</span>}
+                    </div>
                     <h3 className="mt-3 line-clamp-2 text-lg font-extrabold leading-6 text-slate-950">{video.title}</h3>
                     <div className="mt-5 flex gap-3">
-                      <button onClick={() => openVideo(video)} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"><FiPlay /> Play</button>
-                      <button onClick={() => toggleFavourite(video.video_id)} aria-label={`Save ${video.title}`} className={`flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 ${favouriteIds.has(video.video_id) ? 'border-rose-100 bg-rose-50 text-rose-500' : 'text-slate-600 hover:bg-slate-50 hover:text-rose-500'}`}><FiHeart className={favouriteIds.has(video.video_id) ? 'fill-current' : ''} /></button>
-                      <button onClick={() => { setShareVideo(video); setShareStatus(''); }} aria-label={`Share ${video.title}`} className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-primary"><FiShare2 /></button>
+                      <button onClick={() => openVideo(video)} disabled={!!(video.is_deleted)} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"><FiPlay /> Play</button>
+                      {user?.role !== 'educator' && <button onClick={() => toggleFavourite(video.video_id)} aria-label={`Save ${video.title}`} className={`flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 ${favouriteIds.has(video.video_id) ? 'border-rose-100 bg-rose-50 text-rose-500' : 'text-slate-600 hover:bg-slate-50 hover:text-rose-500'}`}><FiHeart className={favouriteIds.has(video.video_id) ? 'fill-current' : ''} /></button>}
+                      <button onClick={() => { setShareVideo(video); setShareStatus(''); }} disabled={!!(video.is_deleted)} aria-label={`Share ${video.title}`} className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"><FiShare2 /></button>
                       {user?.role === 'educator' && <button onClick={() => void toggleEducatorPick(video)} aria-label={`Recommend ${video.title} to students`} title={myEducatorPicks[video.video_id] ? 'Remove educator recommendation' : 'Recommend to students'} className={`flex h-11 w-11 items-center justify-center rounded-xl border ${myEducatorPicks[video.video_id] ? 'border-amber-200 bg-amber-50 text-amber-600' : 'border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-600'}`}><FiStar className={myEducatorPicks[video.video_id] ? 'fill-current' : ''} /></button>}
                       {user?.role === 'educator' && video.uploaded_by === user.id && <button onClick={() => void deleteVideo(video)} aria-label={`Delete ${video.title}`} title="Delete your video" className="flex h-11 w-11 items-center justify-center rounded-xl border border-red-100 bg-red-50 text-red-500 hover:bg-red-100"><FiTrash2 /></button>}
                       <a href={video.youtube_url} target="_blank" rel="noreferrer" aria-label={`Open ${video.title} on YouTube`} className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"><FiExternalLink /></a>
                     </div>
                   </div>
+
                 </article>
               ))}
             </div>

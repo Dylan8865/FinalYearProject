@@ -119,6 +119,20 @@ create table spaced_repetition_schedule (
   unique (student_id, topic_id)
 );
 
+-- Learning Recommendations (UC400)
+create table learning_recommendations (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid not null references profiles(id) on delete cascade,
+  recommendation_type text not null, -- 'study_strategy', 'topic_focus', 'resource'
+  subject_id uuid references subjects(id) on delete cascade,
+  topic_id uuid references topics(id) on delete cascade,
+  recommendation_text text not null,
+  priority_level int not null default 5,
+  resource_link text,
+  is_accepted boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 -- ------------------------------------------------------------
 -- 3.0 AI-POWERED QUIZ GENERATION & PRACTICE (FR 3.1–3.10)
 -- ------------------------------------------------------------
@@ -190,6 +204,7 @@ create index idx_quiz_attempts_student on quiz_attempts(student_id);
 create index idx_attempt_answers_attempt on attempt_answers(attempt_id);
 create index idx_exam_predictions_student on exam_predictions(student_id);
 create index idx_educator_students_educator on educator_students(educator_id);
+create index idx_learning_recommendations_student on learning_recommendations(student_id);
 
 -- ------------------------------------------------------------
 -- AUTO-CREATE PROFILE ON SIGNUP (standard Supabase pattern)
@@ -224,6 +239,7 @@ alter table session_topics enable row level security;
 alter table performance_records enable row level security;
 alter table exam_predictions enable row level security;
 alter table spaced_repetition_schedule enable row level security;
+alter table learning_recommendations enable row level security;
 alter table quizzes enable row level security;
 alter table questions enable row level security;
 alter table question_options enable row level security;
@@ -263,6 +279,9 @@ create policy "own exam predictions" on exam_predictions
   );
 
 create policy "own srs schedule" on spaced_repetition_schedule
+  for all using (auth.uid() = student_id);
+
+create policy "own learning recommendations" on learning_recommendations
   for all using (auth.uid() = student_id);
 
 -- Quizzes & quiz library: owner-only, unless assigned to the student

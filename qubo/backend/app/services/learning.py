@@ -129,6 +129,34 @@ class LearningService:
             raise HTTPException(status_code=502, detail="Completion status could not be loaded.") from exc
 
     @classmethod
+    def student_analytics(cls, student_id: str) -> dict:
+        since = (datetime.now(timezone.utc) - timedelta(days=13)).isoformat()
+        try:
+            rows = get_supabase().table("learning_events").select(
+                "user_id,event_type,occurred_at,metadata"
+            ).gte("occurred_at", since).eq("user_id", student_id).execute().data or []
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail="Learning analytics could not be loaded. Apply the learning-events migration first.") from exc
+
+        subject_counts: Counter[str] = Counter()
+        day_counts: Counter[str] = Counter()
+        for row in rows:
+            metadata = row.get("metadata") or {}
+            if metadata.get("subject_name"):
+                subject_counts[str(metadata["subject_name"])] += 1
+            day_counts[str(row["occurred_at"])[:10]] += 1
+        days = [(datetime.now(timezone.utc).date() - timedelta(days=offset)).isoformat() for offset in range(13, -1, -1)]
+        return {
+            "active_learners": len({row["user_id"] for row in rows}),
+            "total_learning_events": len(rows),
+            "completions": sum(row["event_type"] in {"completed", "quiz_completed"} for row in rows),
+            "model_explorations": sum(row["event_type"] == "model_explored" for row in rows),
+            "video_learning_actions": sum(row["event_type"] in {"video_played", "video_progress", "video_paused", "rewound"} for row in rows),
+            "top_subjects": [{"subject_name": name, "event_count": count} for name, count in subject_counts.most_common(5)],
+            "daily_activity": [{"date": day, "event_count": day_counts[day]} for day in days],
+        }
+
+    @classmethod
     def educator_analytics(cls) -> dict:
         since = (datetime.now(timezone.utc) - timedelta(days=13)).isoformat()
         try:

@@ -9,18 +9,22 @@ from app.db.supabase import get_supabase
 class ContentShareService:
     @staticmethod
     def share(
-        target_type: str, target_id: str, sender_id: str, recipient_email: str, message: Optional[str]
+        target_type: str, target_id: str, sender_id: str, sender_role: str, recipient_email: str, message: Optional[str]
     ) -> None:
         if target_type not in {"model", "video"}:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Learning content not found.")
         supabase = get_supabase()
         try:
-            recipient_rows = supabase.table("profiles").select("id").ilike("email", recipient_email.strip()).limit(1).execute().data or []
+            recipient_rows = supabase.table("profiles").select("id, role").ilike("email", recipient_email.strip()).limit(1).execute().data or []
             if not recipient_rows:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Qubo account is registered with that email address.")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found or sharing not permitted.")
             recipient_id = recipient_rows[0]["id"]
+            recipient_role = recipient_rows[0]["role"]
             if recipient_id == sender_id:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You cannot share content with yourself.")
+            
+            if sender_role == "student" and recipient_role != "student":
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found or sharing not permitted.")
             target_column = "resource_id" if target_type == "model" else "video_id"
             target_table = "resources" if target_type == "model" else "videos"
             target_key = "resource_id" if target_type == "model" else "video_id"

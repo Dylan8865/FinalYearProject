@@ -1,24 +1,52 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
-from app.db.deps import get_current_student, get_current_user
+from app.db.deps import get_current_educator, get_current_student, get_current_user
 from app.schemas.quiz import (
     GeneratedQuizResponse,
     LibraryQuizItem,
+    PublicQuizItem,
     QuizAttemptRequest,
     QuizAttemptResponse,
+    QuizProgressRequest,
+    QuizProgressResponse,
     SavedQuizResponse,
     SaveQuizRequest,
+    AssignQuizRequest,
 )
 from app.services.quiz import GeminiQuizService, QuizLibraryService
 
 
 router = APIRouter(prefix="/quiz", tags=["quiz"])
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "application/pdf"}
-MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024
-MAX_TOTAL_SIZE_BYTES = 16 * 1024 * 1024
+MAX_FILE_SIZE_BYTES = 32 * 1024 * 1024
+MAX_TOTAL_SIZE_BYTES = 32 * 1024 * 1024
+
+
+class PublishQuizRequest(BaseModel):
+    is_public: bool
+
+
+@router.get("/public", response_model=List[PublicQuizItem])
+async def get_public_quizzes(current_user=Depends(get_current_user)):
+    return await run_in_threadpool(QuizLibraryService.list_public_quizzes)
+
+
+@router.patch("/{quiz_id}/publish")
+async def publish_quiz(
+    quiz_id: str,
+    body: PublishQuizRequest,
+    current_user=Depends(get_current_educator),
+):
+    return await run_in_threadpool(
+        QuizLibraryService.publish_quiz,
+        current_user["id"],
+        quiz_id,
+        body.is_public,
+    )
 
 
 @router.get("/library", response_model=List[LibraryQuizItem])
@@ -53,6 +81,25 @@ async def get_saved_quiz(
     )
 
 
+@router.post("/library/{quiz_id}/assign", response_model=SavedQuizResponse)
+async def assign_quiz_to_student(
+    quiz_id: str,
+    request: AssignQuizRequest,
+    current_user=Depends(get_current_user),
+):
+    if current_user.get("role") != "educator":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only educators can assign quizzes",
+        )
+    return await run_in_threadpool(
+        QuizLibraryService.assign_quiz,
+        current_user["id"],
+        quiz_id,
+        request.student_id,
+    )
+
+
 @router.delete("/library/{quiz_id}", response_model=SavedQuizResponse)
 async def delete_saved_quiz(
     quiz_id: str,
@@ -71,6 +118,7 @@ async def generate_quiz(
     question_type: str = Form("mcq"),
     difficulty: str = Form("Intermediate"),
     question_count: int = Form(5),
+    focus_topic: str = Form(""),
     current_user=Depends(get_current_user),
 ):
     if question_type not in {"mcq", "fill", "short"}:
@@ -95,7 +143,7 @@ async def generate_quiz(
             raise HTTPException(status_code=413, detail=f"File is too large: {upload.filename}")
         total_size += len(content)
         if total_size > MAX_TOTAL_SIZE_BYTES:
-            raise HTTPException(status_code=413, detail="Combined uploads must be 16 MB or less")
+            raise HTTPException(status_code=413, detail="Combined uploads must be 32 MB or less")
         prepared_files.append((upload.filename or "study-material", upload.content_type, content))
 
     return await run_in_threadpool(
@@ -104,6 +152,7 @@ async def generate_quiz(
         question_type,
         difficulty,
         question_count,
+        focus_topic.strip(),
     )
 
 
@@ -121,5 +170,46 @@ async def record_quiz_attempt(
         attempt.total_questions,
         attempt.time_taken_seconds,
         attempt.answers,
+    )
+
+
+@router.get("/{quiz_id}/progress", response_model=QuizProgressResponse, status_code=status.HTTP_200_OK)
+async def get_quiz_progress(
+    quiz_id: str,
+    current_user=Depends(get_current_student),
+):
+    progress = await run_in_threadpool(
+        QuizLibraryService.get_quiz_progress,
+        current_user["id"],
+        quiz_id,
+    )
+    if not progress:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No progress found")
+    return progress
+
+
+@router.put("/{quiz_id}/progress", status_code=status.HTTP_204_NO_CONTENT)
+async def save_quiz_progress(
+    quiz_id: str,
+    progress: QuizProgressRequest,
+    current_user=Depends(get_current_student),
+):
+    await run_in_threadpool(
+        QuizLibraryService.save_quiz_progress,
+        current_user["id"],
+        quiz_id,
+        progress.model_dump(),
+    )
+
+
+@router.delete("/{quiz_id}/progress", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_quiz_progress(
+    quiz_id: str,
+    current_user=Depends(get_current_student),
+):
+    await run_in_threadpool(
+        QuizLibraryService.delete_quiz_progress,
+        current_user["id"],
+        quiz_id,
     )
 

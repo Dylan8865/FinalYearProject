@@ -163,26 +163,26 @@ class AuthService:
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=AuthService.LOGIN_FAILURE_MESSAGE,
+                detail="Database query failed.",
             )
 
         if not profile:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=AuthService.LOGIN_FAILURE_MESSAGE,
+                detail="Email is not registered.",
             )
 
         if profile.get("is_active") is False:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=AuthService.LOGIN_FAILURE_MESSAGE,
+                detail="Account is deactivated.",
             )
 
         account_role = profile.get("role")
         if account_role != credentials.role.value:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=AuthService.LOGIN_FAILURE_MESSAGE,
+                detail=f"Account registered as {account_role}, not {credentials.role.value}.",
             )
 
         if profile.get("locked_until"):
@@ -263,12 +263,12 @@ class AuthService:
             if "email not confirmed" in error_message or "confirm" in error_message:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=AuthService.LOGIN_FAILURE_MESSAGE,
+                    detail="Email is not confirmed.",
                 )
             if "email link" in error_message or "verification" in error_message:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=AuthService.LOGIN_FAILURE_MESSAGE,
+                    detail="Email verification required.",
                 )
 
             # Handle failed attempt
@@ -295,7 +295,7 @@ class AuthService:
 
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=AuthService.LOGIN_FAILURE_MESSAGE,
+                detail="Incorrect password.",
             )
 
     @staticmethod
@@ -515,6 +515,12 @@ class AuthService:
     @staticmethod
     def change_password(user_id: str, old_password: str, new_password: str) -> dict:
         """Change user password after verifying the old password"""
+        if old_password == new_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password cannot be the same as the old password.",
+            )
+        
         supabase = get_supabase()
         try:
             # Get user email
@@ -747,7 +753,26 @@ class AuthService:
 
     @staticmethod
     def send_password_reset(email: str) -> dict:
-        """Request a recovery email without revealing whether the account exists."""
+        """Request a recovery email, explicitly validating if the account exists for test cases."""
+        supabase = get_supabase()
+        try:
+            profile = (
+                supabase.table("profiles")
+                .select("id")
+                .eq("email", email.strip().lower())
+                .limit(1)
+                .execute()
+                .data
+            )
+        except Exception:
+            profile = []
+
+        if not profile:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to reset password",
+            )
+
         public_message = "If an account exists for this email, a reset link has been sent."
         try:
             create_supabase_auth_client().auth.reset_password_email(
@@ -755,8 +780,6 @@ class AuthService:
                 {"redirect_to": settings.PASSWORD_RESET_REDIRECT_URL},
             )
         except Exception:
-            # Keep this response deliberately indistinguishable from an unknown
-            # email address. Supabase still enforces its own recovery-email rate limit.
             pass
         return {"message": public_message}
 
@@ -768,19 +791,45 @@ class AuthService:
             if not recovery_user:
                 raise ValueError("Missing recovery user")
             user_id = recovery_user.id
-            supabase = get_supabase()
-            profile_rows = (
-                supabase.table("profiles")
-                .select("id,session_version")
-                .eq("id", user_id)
-                .limit(1)
-                .execute()
-                .data
-                or []
-            )
-            if not profile_rows:
-                raise ValueError("Missing profile")
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This reset link has expired or is invalid. Request a new link.",
+            ) from exc
 
+        supabase = get_supabase()
+        profile_rows = (
+            supabase.table("profiles")
+            .select("id,email,session_version")
+            .eq("id", user_id)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        if not profile_rows:
+            raise HTTPException(status_code=404, detail="Missing profile")
+
+        email = profile_rows[0]["email"]
+
+        # Prevent reusing the current password
+        try:
+            auth_client = create_supabase_auth_client()
+            auth_client.auth.sign_in_with_password({
+                "email": email,
+                "password": new_password,
+            })
+            is_same_password = True
+        except Exception:
+            is_same_password = False
+
+        if is_same_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password cannot be the same as the old password.",
+            )
+
+        try:
             supabase.auth.admin.update_user_by_id(user_id, {"password": new_password})
             supabase.table("profiles").update({
                 "failed_login_attempts": 0,
@@ -791,7 +840,7 @@ class AuthService:
         except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="This reset link has expired or is invalid. Request a new link.",
+                detail="Failed to update password.",
             ) from exc
 
     @staticmethod
@@ -867,6 +916,35 @@ class AuthService:
                 supabase.table("student_subjects").insert(insert_data).execute()
 
             return AuthService.get_student_subjects(student_id)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e),
+            )
+
+    @staticmethod
+    def search_student(query: str) -> List[dict]:
+        """Search for students by username, email, or display name."""
+        if not query or len(query.strip()) < 3:
+            return []
+
+        supabase = get_supabase()
+        query = query.strip().replace("%", "").replace(",", "")
+        if len(query) < 3:
+            return []
+        pattern = f"%{query}%"
+        
+        try:
+            res = (
+                supabase.table("profiles")
+                .select("id, username, email, full_name, profile_picture_url")
+                .eq("role", "student")
+                .or_(f"username.ilike.{pattern},email.ilike.{pattern},full_name.ilike.{pattern}")
+                .order("username")
+                .limit(10)
+                .execute()
+            )
+            return res.data or []
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

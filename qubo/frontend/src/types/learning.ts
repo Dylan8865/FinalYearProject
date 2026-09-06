@@ -12,6 +12,16 @@ export interface LearningEventInput {
   metadata?: Record<string, string | number>;
 }
 
+export interface StudentActivityAnalytics {
+  active_learners: number;
+  total_learning_events: number;
+  completions: number;
+  model_explorations: number;
+  video_learning_actions: number;
+  top_subjects: { subject_name: string; event_count: number }[];
+  daily_activity: { date: string; event_count: number }[];
+}
+
 export interface EducatorAnalytics {
   active_learners: number;
   total_learning_events: number;

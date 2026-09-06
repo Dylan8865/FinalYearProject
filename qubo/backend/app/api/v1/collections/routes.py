@@ -35,15 +35,15 @@ async def collection_editor(collection_id: str, current_user=Depends(get_current
 
 @router.post('', status_code=status.HTTP_201_CREATED)
 async def create_collection(payload: CollectionCreate, current_user=Depends(get_current_educator)):
-    return CollectionService.create(current_user['id'], payload.model_dump())
+    return CollectionService.create(current_user['id'], payload.model_dump(mode='json'))
 
 @router.put('/{collection_id}')
 async def update_collection(collection_id: str, payload: CollectionUpdate, current_user=Depends(get_current_educator)):
-    return CollectionService.update(collection_id, current_user['id'], payload.model_dump())
+    return CollectionService.update(collection_id, current_user['id'], payload.model_dump(mode='json'))
 
 @router.post('/{collection_id}/items', status_code=status.HTTP_201_CREATED)
 async def add_item(collection_id: str, payload: CollectionItemCreate, current_user=Depends(get_current_educator)):
-    return CollectionService.add_item(collection_id, current_user['id'], payload.model_dump())
+    return CollectionService.add_item(collection_id, current_user['id'], payload.model_dump(mode='json'))
 
 @router.delete('/{collection_id}/items/{collection_item_id}', status_code=204)
 async def remove_item(collection_id: str, collection_item_id: str, current_user=Depends(get_current_educator)):

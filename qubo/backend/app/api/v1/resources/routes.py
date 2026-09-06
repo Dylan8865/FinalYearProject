@@ -137,14 +137,14 @@ async def remove_favourite(target_type: str, target_id: str, current_user=Depend
 @router.get("/models/{resource_id}", response_model=ThreeDModelDetailResponse)
 async def get_3d_model(resource_id: str, current_user=Depends(get_current_user)):
     """Return a short-lived signed URL for one private GLB resource."""
-    model = ResourceService.get_3d_model(resource_id, current_user['id'])
+    model = ResourceService.get_3d_model(resource_id, current_user['id'], current_user.get('role', 'student'))
     ActivityService.record_resource_view(current_user["id"], resource_id)
     return model
 
 
-@router.post("/models/{resource_id}/share", status_code=status.HTTP_204_NO_CONTENT)
-async def share_3d_model(resource_id: str, payload: ContentShareCreate, current_user=Depends(get_current_user)):
-    ContentShareService.share("model", resource_id, current_user["id"], str(payload.recipient_email), payload.message)
+@router.post("/{resource_id}/share", status_code=status.HTTP_204_NO_CONTENT)
+async def share_resource(resource_id: str, payload: ContentShareCreate, current_user=Depends(get_current_user)):
+    ContentShareService.share("model", resource_id, current_user["id"], current_user["role"], str(payload.recipient_email), payload.message)
     LearningService.record(current_user["id"], {
         "target_type": "model", "target_id": resource_id, "event_type": "shared",
         "metadata": {"source": "in_app_share"},

@@ -2,7 +2,7 @@ import json
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 
 class Settings(BaseSettings):
@@ -68,14 +68,14 @@ class Settings(BaseSettings):
     )
 
     @property
-    def cors_origins(self) -> list[str]:
+    def cors_origins(self) -> List[str]:
         """Return normalized origins for FastAPI's CORS middleware.
 
         Comma-separated values are preferred. The legacy JSON-array value in
         existing local .env files remains supported during the transition.
         """
         raw_origins = self.ALLOWED_ORIGINS.strip()
-        candidates: list[Any]
+        candidates: List[Any]
         if raw_origins.startswith("["):
             try:
                 parsed = json.loads(raw_origins)

@@ -159,6 +159,20 @@ create table if not exists spaced_repetition_schedule (
   unique (student_id, topic_id)
 );
 
+-- Learning Recommendations (UC400)
+create table if not exists learning_recommendations (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid not null references profiles(id) on delete cascade,
+  recommendation_type text not null, -- 'study_strategy', 'topic_focus', 'resource'
+  subject_id uuid references subjects(id) on delete cascade,
+  topic_id uuid references topics(id) on delete cascade,
+  recommendation_text text not null,
+  priority_level int not null default 5,
+  resource_link text,
+  is_accepted boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 -- ------------------------------------------------------------
 -- 3.0 AI-POWERED QUIZ GENERATION & PRACTICE (FR 3.1–3.10)
 -- ------------------------------------------------------------
@@ -171,6 +185,7 @@ create table if not exists quizzes (
   title text not null,
   source_type quiz_source_type not null default 'ai_generated',
   is_assigned boolean not null default false,
+  is_public boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -248,6 +263,7 @@ create index if not exists idx_exam_predictions_student on exam_predictions(stud
 create unique index if not exists idx_exam_predictions_attempt
   on exam_predictions(quiz_attempt_id) where quiz_attempt_id is not null;
 create index if not exists idx_educator_students_educator on educator_students(educator_id);
+create index if not exists idx_learning_recommendations_student on learning_recommendations(student_id);
 
 -- ------------------------------------------------------------
 -- AUTO-CREATE PROFILE ON SIGNUP (standard Supabase pattern)
@@ -294,6 +310,7 @@ alter table session_topics enable row level security;
 alter table performance_records enable row level security;
 alter table exam_predictions enable row level security;
 alter table spaced_repetition_schedule enable row level security;
+alter table learning_recommendations enable row level security;
 alter table quizzes enable row level security;
 alter table questions enable row level security;
 alter table question_options enable row level security;
@@ -341,6 +358,10 @@ drop policy if exists "own srs schedule" on spaced_repetition_schedule;
 create policy "own srs schedule" on spaced_repetition_schedule
   for all using (auth.uid() = student_id);
 
+drop policy if exists "own learning recommendations" on learning_recommendations;
+create policy "own learning recommendations" on learning_recommendations
+  for all using (auth.uid() = student_id);
+
 -- Quizzes & quiz library: owner-only, unless assigned to the student
 drop policy if exists "own or assigned quizzes" on quizzes;
 create policy "own or assigned quizzes" on quizzes
@@ -360,6 +381,10 @@ create policy "update own quizzes" on quizzes
 drop policy if exists "delete own quizzes" on quizzes;
 create policy "delete own quizzes" on quizzes
   for delete using (auth.uid() = owner_id);
+
+drop policy if exists "read public quizzes" on quizzes;
+create policy "read public quizzes" on quizzes
+  for select using (is_public = true);
 
 drop policy if exists "own quiz attempts" on quiz_attempts;
 create policy "own quiz attempts" on quiz_attempts
@@ -382,3 +407,23 @@ drop policy if exists "student views own educators" on educator_students;
 create policy "student views own educators" on educator_students
   for select using (auth.uid() = student_id);
 
+
+-- ------------------------------------------------------------
+-- 3.0 QUIZ PROGRESS PERSISTENCE
+-- ------------------------------------------------------------
+create table if not exists quiz_progress (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid not null references profiles(id) on delete cascade,
+  quiz_id uuid not null references quizzes(id) on delete cascade,
+  current_index int not null default 0,
+  elapsed_seconds int not null default 0,
+  answers jsonb not null default '{}'::jsonb,
+  answer_times jsonb not null default '{}'::jsonb,
+  last_updated timestamptz not null default now(),
+  unique (student_id, quiz_id)
+);
+
+alter table quiz_progress enable row level security;
+drop policy if exists "own quiz progress" on quiz_progress;
+create policy "own quiz progress" on quiz_progress
+  for all using (auth.uid() = student_id);

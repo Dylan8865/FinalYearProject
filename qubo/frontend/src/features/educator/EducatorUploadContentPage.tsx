@@ -71,7 +71,7 @@ export default function EducatorUploadContentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-[#f4f7fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
       <AppSidebar />
       <main className="min-w-0">
         <header className="flex min-h-[64px] items-center justify-between border-b border-slate-200/80 bg-white/90 px-5 py-3 backdrop-blur md:px-8">

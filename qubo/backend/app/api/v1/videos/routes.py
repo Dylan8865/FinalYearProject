@@ -50,7 +50,7 @@ async def record_video_view(video_id: str, current_user=Depends(get_current_user
 
 @router.post("/{video_id}/share", status_code=status.HTTP_204_NO_CONTENT)
 async def share_video(video_id: str, payload: ContentShareCreate, current_user=Depends(get_current_user)):
-    ContentShareService.share("video", video_id, current_user["id"], str(payload.recipient_email), payload.message)
+    ContentShareService.share("video", video_id, current_user["id"], current_user["role"], str(payload.recipient_email), payload.message)
     LearningService.record(current_user["id"], {
         "target_type": "video", "target_id": video_id, "event_type": "shared",
         "metadata": {"source": "in_app_share"},
