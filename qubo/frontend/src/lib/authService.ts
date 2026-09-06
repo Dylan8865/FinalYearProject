@@ -17,6 +17,7 @@ import {
 import {
   GeneratedQuiz,
   LibraryQuiz,
+  PublicQuiz,
   QuizDifficulty,
   QuizAttemptRequest,
   QuizAttemptResponse,
@@ -173,6 +174,23 @@ class AuthService {
     await this.api.delete(`/admin/content/${contentType}/${contentId}`);
   }
 
+  async lockAdminContent(contentType: "video" | "model", contentId: string, reason: string): Promise<void> {
+    await this.api.post(`/admin/content/${contentType}/${contentId}/lock`, { reason });
+  }
+
+  async unlockAdminContent(contentType: "video" | "model", contentId: string, reason?: string): Promise<void> {
+    await this.api.post(`/admin/content/${contentType}/${contentId}/unlock`, { reason });
+  }
+
+  async softDeleteAdminContent(contentType: "video" | "model", contentId: string, reason: string): Promise<void> {
+    await this.api.post(`/admin/content/${contentType}/${contentId}/soft-delete`, { reason });
+  }
+
+  async getEducatorModerationLogs() {
+    const response = await this.api.get("/admin/educator/moderation-logs");
+    return response.data;
+  }
+
   async getAdminAnalytics() {
     const response = await this.api.get("/admin/analytics");
     return response.data;
@@ -266,6 +284,19 @@ class AuthService {
     const response = await this.api.get<GeneratedQuiz>(
       `/quiz/library/${quizId}`,
     );
+    return response.data;
+  }
+
+  async publishQuiz(quizId: string, isPublic: boolean): Promise<{ id: string; is_public: boolean; message: string }> {
+    const response = await this.api.patch<{ id: string; is_public: boolean; message: string }>(
+      `/quiz/${quizId}/publish`,
+      { is_public: isPublic },
+    );
+    return response.data;
+  }
+
+  async getPublicQuizzes(): Promise<PublicQuiz[]> {
+    const response = await this.api.get<PublicQuiz[]>("/quiz/public");
     return response.data;
   }
 

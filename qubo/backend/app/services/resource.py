@@ -125,15 +125,17 @@ class ResourceService:
             query = (
                 get_supabase()
                 .table("resources")
-                .select(cls.MODEL_SELECT)
+                .select(cls.MODEL_SELECT + ",is_locked,is_deleted")
                 .in_("resource_type", cls.MODEL_TYPES)
             )
             if scope == 'private':
                 if not viewer_id:
                     return []
-                query = query.eq('created_by', viewer_id)
+                # Educators see their own content including locked, but not soft-deleted
+                query = query.eq('created_by', viewer_id).eq('is_deleted', False)
             else:
-                query = query.eq('visibility', 'public')
+                # Students/public: hide both locked AND soft-deleted content
+                query = query.eq('visibility', 'public').eq('is_locked', False).eq('is_deleted', False)
             response = query.order("title").execute()
             return [
                 cls._serialize_model(resource, cls._create_signed_model_url(resource["url"]))
@@ -340,7 +342,7 @@ class ResourceService:
             return {"target_type": "video", "target_id": video["video_id"], "title": video["title"], "subject_name": video.get("subject_tag"), "reason": "Start with this focused video lesson.", "learning_goal": "Build a strong foundation for revision.", "estimated_minutes": 6, "youtube_url": video["youtube_url"]}
 
     @classmethod
-    def get_3d_model(cls, resource_id: str, viewer_id: str) -> dict:
+    def get_3d_model(cls, resource_id: str, viewer_id: str, viewer_role: str = 'student') -> dict:
         try:
             response = (
                 get_supabase()
@@ -358,7 +360,7 @@ class ResourceService:
                 detail="3D learning resource could not be loaded from Supabase.",
             ) from exc
 
-        if not resource or (resource.get('visibility') == 'private' and resource.get('created_by') != viewer_id):
+        if not resource or (viewer_role != 'admin' and resource.get('visibility') == 'private' and resource.get('created_by') != viewer_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="3D model not found.")
 
         try:
@@ -496,6 +498,8 @@ class ResourceService:
 
     @classmethod
     def create_annotation(cls, resource_id: str, educator_id: str, annotation: dict) -> dict:
+        from app.services.moderation import AIModerationService
+        scan = AIModerationService.scan_multiple(annotation.get("title"), annotation.get("description"))
         try:
             model = (
                 get_supabase()
@@ -514,6 +518,12 @@ class ResourceService:
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Only the educator who uploaded this 3D model can add annotations.",
                 )
+            # If AI flagged the annotation text, lock the parent model
+            if not scan["is_safe"]:
+                get_supabase().table("resources").update({
+                    "is_locked": True,
+                    "locked_reason": scan["flag_reason"],
+                }).eq("resource_id", resource_id).execute()
             response = (
                 get_supabase()
                 .table("resource_annotations")
@@ -529,7 +539,9 @@ class ResourceService:
                 .execute()
             )
             if response.data:
-                return cls._serialize_annotation(response.data[0])
+                result = cls._serialize_annotation(response.data[0])
+                result["ai_flagged"] = not scan["is_safe"]
+                return result
         except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,

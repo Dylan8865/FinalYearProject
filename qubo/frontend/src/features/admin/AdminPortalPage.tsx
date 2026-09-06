@@ -3,12 +3,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   FiBarChart2,
   FiBookOpen,
+  FiEye,
   FiFileText,
+  FiLock,
   FiLogOut,
   FiSearch,
   FiShield,
   FiTrash2,
+  FiUnlock,
   FiUsers,
+  FiX,
 } from "react-icons/fi";
 import { authService } from "@/lib/authService";
 import { useAuthStore } from "@/contexts/authStore";
@@ -22,6 +26,69 @@ const nav: Array<{ id: Section; label: string; icon: typeof FiBookOpen }> = [
 ];
 
 const label = (value: string) => value.replace(/_/g, " ");
+
+import ModelViewer from "@/features/resources/ModelViewer";
+
+function AdminModelPreview({ resourceId, title }: { resourceId: string; title: string }) {
+  const [modelUrl, setModelUrl] = useState<string | null>(null);
+  const [annotations, setAnnotations] = useState<any[]>([]);
+  const [selectedAnnotation, setSelectedAnnotation] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    authService.getThreeDModel(resourceId)
+      .then((model) => {
+        if (active) setModelUrl(model.signed_model_url || null);
+        return authService.getModelAnnotations(resourceId);
+      })
+      .then((anns) => {
+        if (active) {
+          setAnnotations(anns);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setError(err.response?.data?.detail || "Failed to load model.");
+          setLoading(false);
+        }
+      });
+    return () => { active = false; };
+  }, [resourceId]);
+
+  if (loading) return <div className="p-10 text-center text-slate-500">Loading model...</div>;
+  if (error) return <div className="p-10 text-center text-rose-500">{error}</div>;
+  if (!modelUrl) return <div className="p-10 text-center text-slate-500">Model URL missing.</div>;
+
+  return (
+    <div className="w-full">
+      <div className="h-[400px] w-full overflow-hidden rounded-xl bg-slate-900">
+        <ModelViewer 
+          modelUrl={modelUrl} 
+          title={title} 
+          annotations={annotations} 
+          selectedAnnotationId={selectedAnnotation?.annotation_id}
+          onSelectAnnotation={setSelectedAnnotation}
+        />
+      </div>
+      
+      {selectedAnnotation && (
+        <article className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-5 shadow-sm text-left">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-widest text-primary">Annotation text</p>
+              <h2 className="mt-1 text-lg font-extrabold text-slate-900">{selectedAnnotation.title}</h2>
+            </div>
+            <button type="button" onClick={() => setSelectedAnnotation(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><FiX /></button>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{selectedAnnotation.description}</p>
+        </article>
+      )}
+    </div>
+  );
+}
 
 export default function AdminPortalPage() {
   const location = useLocation();
@@ -37,6 +104,46 @@ export default function AdminPortalPage() {
   const [search, setSearch] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Moderation dialog state
+  const [moderationTarget, setModerationTarget] = useState<any | null>(null);
+  const [moderationAction, setModerationAction] = useState<"lock" | "unlock" | "soft-delete" | null>(null);
+  const [moderationReason, setModerationReason] = useState("");
+  const [isModerating, setIsModerating] = useState(false);
+
+  // Preview state
+  const [previewItem, setPreviewItem] = useState<any | null>(null);
+
+  const openModerationDialog = (item: any, action: "lock" | "unlock" | "soft-delete") => {
+    setModerationTarget(item);
+    setModerationAction(action);
+    setModerationReason("");
+  };
+
+  const submitModeration = async () => {
+    if (!moderationTarget || !moderationAction) return;
+    if (moderationAction !== "unlock" && !moderationReason.trim()) return;
+    setIsModerating(true);
+    try {
+      if (moderationAction === "lock") {
+        await authService.lockAdminContent(moderationTarget.type, moderationTarget.id, moderationReason.trim());
+        setMessage(`"${moderationTarget.title}" has been locked.`);
+      } else if (moderationAction === "unlock") {
+        await authService.unlockAdminContent(moderationTarget.type, moderationTarget.id, moderationReason.trim() || undefined);
+        setMessage(`"${moderationTarget.title}" has been unlocked.`);
+      } else if (moderationAction === "soft-delete") {
+        await authService.softDeleteAdminContent(moderationTarget.type, moderationTarget.id, moderationReason.trim());
+        setMessage(`"${moderationTarget.title}" has been removed.`);
+      }
+      setModerationTarget(null);
+      setModerationAction(null);
+      await load();
+    } catch (error: any) {
+      setMessage(error.response?.data?.detail || "Moderation action failed.");
+    } finally {
+      setIsModerating(false);
+    }
+  };
 
   const load = async () => {
     setIsLoading(true);
@@ -73,18 +180,6 @@ export default function AdminPortalPage() {
     void load();
   }, [section, contentType]); // eslint-disable-line react-hooks/exhaustive-deps -- search is submitted explicitly
 
-  const removeContent = async (item: any) => {
-    if (!window.confirm(`Delete “${item.title}” permanently?`)) return;
-    try {
-      await authService.deleteAdminContent(item.type, item.id);
-      setMessage("Content deleted.");
-      await load();
-    } catch (error: any) {
-      setMessage(
-        error.response?.data?.detail || "Content could not be deleted.",
-      );
-    }
-  };
 
   const userAction = async (target: any, action: "active" | "delete") => {
     try {
@@ -103,15 +198,6 @@ export default function AdminPortalPage() {
           nextActiveState,
           "Administrator account status action",
         );
-      }
-      if (action === "delete") {
-        if (
-          !window.confirm(
-            `Delete ${target.email} and all owned data permanently?`,
-          )
-        )
-          return;
-        await authService.deleteAdminUser(target.id);
       }
       setMessage("Security action completed.");
       await load();
@@ -228,28 +314,163 @@ export default function AdminPortalPage() {
                     {content.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between gap-3 p-5"
+                        className={`flex items-start justify-between gap-3 p-5 ${item.is_deleted ? "bg-rose-50/40" : item.is_locked ? "bg-amber-50/40" : ""}`}
                       >
-                        <div>
-                          <p className="font-bold">{item.title}</p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-bold">{item.title}</p>
+                            {item.is_deleted && (
+                              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700">❌ Deleted</span>
+                            )}
+                            {!item.is_deleted && item.is_locked && (
+                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">🔒 Locked</span>
+                            )}
+                          </div>
                           <p className="mt-1 text-xs text-slate-500">
                             {item.subject_name || "Uncategorised"} ·{" "}
                             {item.owner_name} · {item.recommendation_count}{" "}
                             educator recommendations
                           </p>
+                          {item.locked_reason && (
+                            <p className="mt-1 text-xs italic text-slate-400">Reason: {item.locked_reason}</p>
+                          )}
                         </div>
-                        <button
-                          onClick={() => void removeContent(item)}
-                          className="rounded-lg bg-rose-50 p-2 text-rose-600"
-                          title="Delete resource"
-                        >
-                          <FiTrash2 />
-                        </button>
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          {/* View / Preview */}
+                          <button
+                            onClick={() => setPreviewItem(item)}
+                            className="rounded-lg bg-blue-50 p-2 text-blue-600 hover:bg-blue-100"
+                            title="Preview content"
+                          >
+                            <FiEye />
+                          </button>
+                          {/* Lock / Unlock */}
+                          {item.is_locked && !item.is_deleted ? (
+                            <button
+                              onClick={() => openModerationDialog(item, "unlock")}
+                              className="rounded-lg bg-emerald-50 p-2 text-emerald-600 hover:bg-emerald-100"
+                              title="Unlock content"
+                            >
+                              <FiUnlock />
+                            </button>
+                          ) : !item.is_deleted ? (
+                            <button
+                              onClick={() => openModerationDialog(item, "lock")}
+                              className="rounded-lg bg-amber-50 p-2 text-amber-600 hover:bg-amber-100"
+                              title="Lock content"
+                            >
+                              <FiLock />
+                            </button>
+                          ) : null}
+                          {/* Soft Delete */}
+                          {!item.is_deleted && (
+                            <button
+                              onClick={() => openModerationDialog(item, "soft-delete")}
+                              className="rounded-lg bg-rose-50 p-2 text-rose-600 hover:bg-rose-100"
+                              title="Remove content (soft delete)"
+                            >
+                              <FiTrash2 />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
+
+              {/* Moderation Dialog */}
+              {moderationTarget && moderationAction && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                  <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-extrabold">
+                        {moderationAction === "lock" && "🔒 Lock Content"}
+                        {moderationAction === "unlock" && "🔓 Unlock Content"}
+                        {moderationAction === "soft-delete" && "❌ Remove Content"}
+                      </h3>
+                      <button onClick={() => { setModerationTarget(null); setModerationAction(null); }} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100">
+                        <FiX />
+                      </button>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-600">
+                      <span className="font-bold">"{moderationTarget.title}"</span> · {moderationTarget.owner_name}
+                    </p>
+                    {moderationAction !== "unlock" && (
+                      <div className="mt-4">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                          Admin Comment / Reason <span className="text-rose-500">*</span>
+                        </label>
+                        <textarea
+                          value={moderationReason}
+                          onChange={(e) => setModerationReason(e.target.value)}
+                          rows={3}
+                          placeholder="Explain why this content is being moderated. The educator will see this message."
+                          className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-primary focus:outline-none"
+                        />
+                      </div>
+                    )}
+                    {moderationAction === "unlock" && (
+                      <div className="mt-4">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Note (optional)</label>
+                        <textarea
+                          value={moderationReason}
+                          onChange={(e) => setModerationReason(e.target.value)}
+                          rows={2}
+                          placeholder="Optional: Add an unlock note for the educator."
+                          className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-primary focus:outline-none"
+                        />
+                      </div>
+                    )}
+                    <div className="mt-5 flex gap-3">
+                      <button
+                        onClick={() => { setModerationTarget(null); setModerationAction(null); }}
+                        className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-slate-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => void submitModeration()}
+                        disabled={isModerating || (moderationAction !== "unlock" && !moderationReason.trim())}
+                        className={`flex-1 rounded-xl py-2.5 text-sm font-bold text-white disabled:opacity-50 ${moderationAction === "soft-delete" ? "bg-rose-600" : moderationAction === "lock" ? "bg-amber-600" : "bg-emerald-600"}`}
+                      >
+                        {isModerating ? "Processing…" : "Confirm"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Preview Modal */}
+              {previewItem && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                  <div className="flex w-full max-w-2xl flex-col rounded-3xl bg-white shadow-2xl">
+                    <div className="flex items-center justify-between border-b border-slate-100 p-5">
+                      <div>
+                        <p className="font-extrabold">{previewItem.title}</p>
+                        <p className="text-xs text-slate-500">{previewItem.owner_name} · {previewItem.type === "video" ? "Video" : "3D Model"}</p>
+                      </div>
+                      <button onClick={() => setPreviewItem(null)} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100">
+                        <FiX />
+                      </button>
+                    </div>
+                    <div className="p-5">
+                      {previewItem.type === "video" && previewItem.youtube_url ? (
+                        <iframe
+                          className="aspect-video w-full rounded-2xl"
+                          src={`https://www.youtube.com/embed/${previewItem.youtube_url.split("v=")[1] || previewItem.youtube_url.split("/").pop()}`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : previewItem.type === "model" ? (
+                        <AdminModelPreview resourceId={previewItem.id} title={previewItem.title} />
+                      ) : (
+                        <p className="text-sm text-slate-400">Preview not available.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <aside className="rounded-3xl bg-[#0756d8] p-6 text-white">
               <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-blue-100">

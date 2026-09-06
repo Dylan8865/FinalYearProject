@@ -1,12 +1,14 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
-from app.db.deps import get_current_student, get_current_user
+from app.db.deps import get_current_educator, get_current_student, get_current_user
 from app.schemas.quiz import (
     GeneratedQuizResponse,
     LibraryQuizItem,
+    PublicQuizItem,
     QuizAttemptRequest,
     QuizAttemptResponse,
     SavedQuizResponse,
@@ -19,6 +21,29 @@ router = APIRouter(prefix="/quiz", tags=["quiz"])
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "application/pdf"}
 MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024
 MAX_TOTAL_SIZE_BYTES = 16 * 1024 * 1024
+
+
+class PublishQuizRequest(BaseModel):
+    is_public: bool
+
+
+@router.get("/public", response_model=List[PublicQuizItem])
+async def get_public_quizzes(current_user=Depends(get_current_user)):
+    return await run_in_threadpool(QuizLibraryService.list_public_quizzes)
+
+
+@router.patch("/{quiz_id}/publish")
+async def publish_quiz(
+    quiz_id: str,
+    body: PublishQuizRequest,
+    current_user=Depends(get_current_educator),
+):
+    return await run_in_threadpool(
+        QuizLibraryService.publish_quiz,
+        current_user["id"],
+        quiz_id,
+        body.is_public,
+    )
 
 
 @router.get("/library", response_model=List[LibraryQuizItem])

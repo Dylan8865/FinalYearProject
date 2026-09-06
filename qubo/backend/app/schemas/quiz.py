@@ -69,5 +69,15 @@ class LibraryQuizItem(BaseModel):
     title: str
     subject: Optional[str] = None
     source_type: str
+    is_public: bool = False
+    created_at: datetime
+
+
+class PublicQuizItem(BaseModel):
+    id: str
+    title: str
+    subject: Optional[str] = None
+    owner_name: Optional[str] = None
+    question_count: int = 0
     created_at: datetime
 

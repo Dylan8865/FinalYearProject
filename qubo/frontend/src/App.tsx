@@ -21,6 +21,7 @@ import ProfilePage from "@/features/profile/ProfilePage";
 import ProfileSettings from "@/features/profile/ProfileSettings";
 import QuizCreatorPage from "@/features/quiz/QuizCreatorPage";
 import QuizExperiencePage from "@/features/quiz/QuizExperiencePage";
+import QuizExplorerPage from "@/features/quiz/QuizExplorerPage";
 import LibraryPage from "@/features/library/LibraryPage";
 import SubjectsPage from "@/features/analytics/SubjectsPage";
 import LearningAnalyticsPage from "@/features/analytics/LearningAnalyticsPage";
@@ -150,6 +151,14 @@ export default function App() {
           element={
             <ProtectedRoute allowedRoles={["educator"]}>
               <MyCollectionsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quizzes"
+          element={
+            <ProtectedRoute>
+              <QuizExplorerPage />
             </ProtectedRoute>
           }
         />

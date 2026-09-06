@@ -116,7 +116,8 @@ export default function ModelDetailPage() {
       setRecipientEmail('');
       setShareMessage('');
     } catch (shareError: any) {
-      setShareStatus(shareError.response?.data?.detail || 'The 3D model could not be shared.');
+      const detail = shareError.response?.data?.detail;
+      setShareStatus(typeof detail === 'string' ? detail : 'User not found or sharing not permitted.');
     } finally {
       setIsSharing(false);
     }

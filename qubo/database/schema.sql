@@ -171,6 +171,7 @@ create table if not exists quizzes (
   title text not null,
   source_type quiz_source_type not null default 'ai_generated',
   is_assigned boolean not null default false,
+  is_public boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -360,6 +361,10 @@ create policy "update own quizzes" on quizzes
 drop policy if exists "delete own quizzes" on quizzes;
 create policy "delete own quizzes" on quizzes
   for delete using (auth.uid() = owner_id);
+
+drop policy if exists "read public quizzes" on quizzes;
+create policy "read public quizzes" on quizzes
+  for select using (is_public = true);
 
 drop policy if exists "own quiz attempts" on quiz_attempts;
 create policy "own quiz attempts" on quiz_attempts

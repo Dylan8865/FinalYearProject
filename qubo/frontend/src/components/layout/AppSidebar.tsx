@@ -29,7 +29,7 @@ const studentNavigationItems = [
   { icon: FiBookOpen, label: 'Subjects', path: '/subjects' },
   { icon: FiBarChart2, label: 'Analytics', path: '/analytics' },
   { icon: FiPlayCircle, label: 'Game Room', path: '/game-room' },
-  { icon: FiHelpCircle, label: 'Quizzes', path: '/quiz/create' },
+  { icon: FiHelpCircle, label: 'Quizzes', path: '/quizzes' },
   { icon: FiArchive, label: 'Library', path: '/library' },
   { icon: FiFolder, label: 'Resource', path: '/resources' },
   { icon: FiBookmark, label: 'My Learning', path: '/learning' },

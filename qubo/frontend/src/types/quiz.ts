@@ -27,6 +27,16 @@ export interface LibraryQuiz {
   title: string;
   subject: string | null;
   source_type: string;
+  is_public: boolean;
+  created_at: string;
+}
+
+export interface PublicQuiz {
+  id: string;
+  title: string;
+  subject: string | null;
+  owner_name: string | null;
+  question_count: number;
   created_at: string;
 }
 

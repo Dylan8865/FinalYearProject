@@ -8,6 +8,7 @@ import {
   FiChevronDown,
   FiEye,
   FiFileText,
+  FiGlobe,
   FiPlus,
   FiPlay,
   FiRefreshCw,
@@ -54,6 +55,7 @@ export default function LibraryPage() {
   const [actionError, setActionError] = useState('');
   const [startingQuizId, setStartingQuizId] = useState<string | null>(null);
   const [deletingQuizId, setDeletingQuizId] = useState<string | null>(null);
+  const [publishingQuizId, setPublishingQuizId] = useState<string | null>(null);
   const [previewingQuizId, setPreviewingQuizId] = useState<string | null>(null);
   const [previewQuiz, setPreviewQuiz] = useState<{ id: string; quiz: GeneratedQuiz } | null>(null);
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
@@ -162,6 +164,19 @@ export default function LibraryPage() {
       setActionError(typeof detail === 'string' ? detail : 'Unable to delete this quiz.');
     } finally {
       setDeletingQuizId(null);
+    }
+  };
+
+  const togglePublishQuiz = async (quiz: LibraryQuiz) => {
+    setPublishingQuizId(quiz.id);
+    try {
+      const result = await authService.publishQuiz(quiz.id, !quiz.is_public);
+      setQuizzes((current) => current.map((item) => item.id === quiz.id ? { ...item, is_public: result.is_public } : item));
+    } catch (requestError: any) {
+      const detail = requestError.response?.data?.detail;
+      setActionError(typeof detail === 'string' ? detail : 'Unable to update quiz visibility.');
+    } finally {
+      setPublishingQuizId(null);
     }
   };
 
@@ -311,7 +326,17 @@ export default function LibraryPage() {
                     </span>
                     <span className="flex-none">{formatCreatedDate(quiz.created_at, locale)}</span>
                   </div>
-                  <div className="mt-5 grid grid-cols-[1fr_1fr_auto] gap-2 border-t border-slate-100 pt-4">
+                  <div className="mt-5 grid grid-cols-[1fr_1fr_auto_auto] gap-2 border-t border-slate-100 pt-4">
+                    {isEducator && <button
+                      type="button"
+                      onClick={() => void togglePublishQuiz(quiz)}
+                      disabled={Boolean(publishingQuizId)}
+                      title={quiz.is_public ? 'Make quiz private' : 'Share to public'}
+                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-sm font-extrabold disabled:opacity-45 ${quiz.is_public ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-slate-200 text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600'}`}
+                    >
+                      <FiGlobe className="h-4 w-4" />
+                      {publishingQuizId === quiz.id ? 'Updating…' : quiz.is_public ? 'Public' : 'Publish'}
+                    </button>}
                     <button
                       type="button"
                       onClick={() => void openQuizPreview(quiz.id)}

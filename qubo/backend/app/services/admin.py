@@ -27,6 +27,66 @@ class AdminService:
         }).execute()
 
     @classmethod
+    def lock_content(cls, admin_id: str, content_type: str, content_id: str, reason: str) -> None:
+        """Lock a piece of content so students cannot see it."""
+        supabase = get_supabase()
+        table = "videos" if content_type == "video" else "resources"
+        pk = "video_id" if content_type == "video" else "resource_id"
+        owner_col = "uploaded_by" if content_type == "video" else "created_by"
+        row = supabase.table(table).select(f"{pk},{owner_col}").eq(pk, content_id).limit(1).execute().data or []
+        if not row:
+            raise HTTPException(status_code=404, detail="Content not found.")
+        supabase.table(table).update({"is_locked": True, "locked_reason": reason.strip()}).eq(pk, content_id).execute()
+        cls._audit(admin_id, "content_locked", content_type, content_id,
+                   target_user_id=row[0].get(owner_col), reason=reason.strip())
+
+    @classmethod
+    def unlock_content(cls, admin_id: str, content_type: str, content_id: str, reason: Optional[str] = None) -> None:
+        """Unlock a previously locked piece of content."""
+        supabase = get_supabase()
+        table = "videos" if content_type == "video" else "resources"
+        pk = "video_id" if content_type == "video" else "resource_id"
+        owner_col = "uploaded_by" if content_type == "video" else "created_by"
+        row = supabase.table(table).select(f"{pk},{owner_col}").eq(pk, content_id).limit(1).execute().data or []
+        if not row:
+            raise HTTPException(status_code=404, detail="Content not found.")
+        supabase.table(table).update({"is_locked": False, "locked_reason": None}).eq(pk, content_id).execute()
+        cls._audit(admin_id, "content_unlocked", content_type, content_id,
+                   target_user_id=row[0].get(owner_col), reason=reason)
+
+    @classmethod
+    def soft_delete_content(cls, admin_id: str, content_type: str, content_id: str, reason: str) -> None:
+        """Soft-delete a piece of content so it is hidden but preserved for audit."""
+        supabase = get_supabase()
+        table = "videos" if content_type == "video" else "resources"
+        pk = "video_id" if content_type == "video" else "resource_id"
+        owner_col = "uploaded_by" if content_type == "video" else "created_by"
+        row = supabase.table(table).select(f"{pk},{owner_col}").eq(pk, content_id).limit(1).execute().data or []
+        if not row:
+            raise HTTPException(status_code=404, detail="Content not found.")
+        supabase.table(table).update({"is_deleted": True, "is_locked": True, "locked_reason": reason.strip()}).eq(pk, content_id).execute()
+        cls._audit(admin_id, "content_deleted", content_type, content_id,
+                   target_user_id=row[0].get(owner_col), reason=reason.strip())
+
+    @classmethod
+    def educator_moderation_logs(cls, educator_id: str) -> List[dict]:
+        """Return moderation actions targeted at a specific educator's content."""
+        try:
+            return (
+                get_supabase()
+                .table("admin_audit_logs")
+                .select("*")
+                .eq("target_user_id", educator_id)
+                .in_("action", ["content_locked", "content_unlocked", "content_deleted"])
+                .order("created_at", desc=True)
+                .limit(50)
+                .execute()
+                .data or []
+            )
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail="Moderation alerts could not be loaded.") from exc
+
+    @classmethod
     def list_content(cls, content_type: str) -> List[dict]:
         supabase = get_supabase()
         try:
@@ -37,17 +97,20 @@ class AdminService:
                 row.get("video_id") or row.get("resource_id") for row in recommendations if row.get("video_id") or row.get("resource_id")
             )
             if content_type == "video":
-                rows = supabase.table("videos").select("video_id,title,youtube_url,subject_tag,uploaded_by").order("title").execute().data or []
+                rows = supabase.table("videos").select("video_id,title,youtube_url,subject_tag,uploaded_by,is_locked,is_deleted,locked_reason").order("title").execute().data or []
                 return [{
                     "id": row["video_id"], "type": "video", "title": row["title"],
                     "subject_name": row.get("subject_tag"), "uploaded_by": row.get("uploaded_by"),
                     "owner_name": owners.get(row.get("uploaded_by"), "Unknown educator"),
                     "recommendation_count": recommendation_counts.get(row["video_id"], 0),
                     "youtube_url": row.get("youtube_url"), "visibility": "public",
+                    "is_locked": row.get("is_locked", False),
+                    "is_deleted": row.get("is_deleted", False),
+                    "locked_reason": row.get("locked_reason"),
                 } for row in rows]
 
             rows = supabase.table("resources").select(
-                "resource_id,title,visibility,created_by,topics(topic_name,subjects(subject_name))"
+                "resource_id,title,visibility,created_by,is_locked,is_deleted,locked_reason,topics(topic_name,subjects(subject_name))"
             ).in_("resource_type", ResourceService.MODEL_TYPES).order("title").execute().data or []
             return [{
                 "id": row["resource_id"], "type": "model", "title": row["title"],
@@ -57,6 +120,9 @@ class AdminService:
                 "owner_name": owners.get(row.get("created_by"), "Unknown educator"),
                 "recommendation_count": recommendation_counts.get(row["resource_id"], 0),
                 "visibility": row.get("visibility") or "public",
+                "is_locked": row.get("is_locked", False),
+                "is_deleted": row.get("is_deleted", False),
+                "locked_reason": row.get("locked_reason"),
             } for row in rows]
         except Exception as exc:
             raise HTTPException(status_code=502, detail="Admin content could not be loaded.") from exc

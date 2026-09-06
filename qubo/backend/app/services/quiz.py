@@ -306,7 +306,7 @@ class QuizLibraryService:
         supabase = get_supabase()
         quiz_response = (
             supabase.table("quizzes")
-            .select("id,title,subject_id,source_type,created_at")
+            .select("id,title,subject_id,source_type,is_public,created_at")
             .eq("owner_id", user_id)
             .order("created_at", desc=True)
             .execute()
@@ -333,9 +333,75 @@ class QuizLibraryService:
                 "title": quiz["title"],
                 "subject": subject_names.get(quiz.get("subject_id")),
                 "source_type": quiz["source_type"],
+                "is_public": quiz.get("is_public", False),
                 "created_at": quiz["created_at"],
             }
             for quiz in quizzes
+        ]
+
+    @staticmethod
+    def publish_quiz(user_id: str, quiz_id: str, is_public: bool):
+        """Toggle the is_public flag on a quiz owned by the current user."""
+        supabase = get_supabase()
+        quiz_response = (
+            supabase.table("quizzes")
+            .select("id")
+            .eq("id", quiz_id)
+            .eq("owner_id", user_id)
+            .limit(1)
+            .execute()
+        )
+        if not quiz_response.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
+        supabase.table("quizzes").update({"is_public": is_public}).eq("id", quiz_id).eq("owner_id", user_id).execute()
+        return {"id": quiz_id, "is_public": is_public, "message": "Quiz visibility updated"}
+
+    @staticmethod
+    def list_public_quizzes():
+        """Return all quizzes marked as public, with owner info and question count."""
+        supabase = get_supabase()
+        quiz_rows = (
+            supabase.table("quizzes")
+            .select("id,title,subject_id,owner_id,created_at")
+            .eq("is_public", True)
+            .order("created_at", desc=True)
+            .execute()
+            .data or []
+        )
+        if not quiz_rows:
+            return []
+
+        # Resolve subject names
+        subject_ids = list({q["subject_id"] for q in quiz_rows if q.get("subject_id")})
+        subject_names = {}
+        if subject_ids:
+            subject_response = supabase.table("subjects").select("id,subject_name").in_("id", subject_ids).execute()
+            subject_names = {s["id"]: s["subject_name"] for s in (subject_response.data or [])}
+
+        # Resolve owner names
+        owner_ids = list({q["owner_id"] for q in quiz_rows})
+        owner_names = {}
+        if owner_ids:
+            profile_response = supabase.table("profiles").select("id,full_name,username").in_("id", owner_ids).execute()
+            owner_names = {p["id"]: p.get("full_name") or p.get("username") or "Educator" for p in (profile_response.data or [])}
+
+        # Count questions per quiz
+        quiz_ids = [q["id"] for q in quiz_rows]
+        question_rows = supabase.table("questions").select("quiz_id").in_("quiz_id", quiz_ids).execute().data or []
+        question_counts: dict = {}
+        for qr in question_rows:
+            question_counts[qr["quiz_id"]] = question_counts.get(qr["quiz_id"], 0) + 1
+
+        return [
+            {
+                "id": q["id"],
+                "title": q["title"],
+                "subject": subject_names.get(q.get("subject_id")),
+                "owner_name": owner_names.get(q["owner_id"]),
+                "question_count": question_counts.get(q["id"], 0),
+                "created_at": q["created_at"],
+            }
+            for q in quiz_rows
         ]
 
     @staticmethod
