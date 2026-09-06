@@ -3,15 +3,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/contexts/authStore';
 import { authService } from '@/lib/authService';
 import { LearningStyle } from '@/types/auth';
+import { FiCheck } from 'react-icons/fi';
 
 export default function LearningStyleAssessment() {
   const [questionAnswers, setQuestionAnswers] = useState<Array<LearningStyle | null>>(Array(5).fill(null));
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const fetchProfile = useAuthStore((state) => state.fetchProfile);
+  const setUser = useAuthStore((state) => state.setUser);
 
   const questions = [
     {
@@ -84,9 +86,13 @@ export default function LearningStyleAssessment() {
 
       try {
         await authService.setLearningStyle(finalScores);
-        await fetchProfile();
-        const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
-        navigate(returnTo || '/dashboard', { replace: true });
+        const updatedProfile = await authService.getProfile();
+        setUser(updatedProfile);
+        setIsSuccess(true);
+        setTimeout(() => {
+          const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
+          navigate(returnTo || '/dashboard', { replace: true });
+        }, 2000);
       } catch (error) {
         console.error('Failed to set learning style:', error);
         setError('Your learning preference could not be saved. Please try again.');
@@ -99,6 +105,20 @@ export default function LearningStyleAssessment() {
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const currentAnswer = questionAnswers[currentQuestion];
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg p-12 text-center animate-in fade-in zoom-in duration-300">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+            <FiCheck className="h-10 w-10 text-green-600" />
+          </div>
+          <h1 className="text-3xl font-black text-gray-900 mb-3">Account created successfully!</h1>
+          <p className="text-lg text-gray-500 font-semibold">We've personalized your learning experience. Taking you to your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-4">

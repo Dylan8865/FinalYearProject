@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "@/contexts/authStore";
 import { authService } from "@/lib/authService";
 import {
@@ -23,17 +23,38 @@ export default function LoginPage() {
   const [showRecovery, setShowRecovery] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [successMessage, setSuccessMessage] = useState(searchParams.get("message") || "");
+  const [fieldErrors, setFieldErrors] = useState<{email?: string; password?: string}>({});
   const { login, isLoading, error, setError } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage("");
+    setFieldErrors({});
+
+    const newErrors: { email?: string; password?: string } = {};
+    if (!email) newErrors.email = "Please fill out this field.";
+    if (!password) newErrors.password = "Please fill out this field.";
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      return;
+    }
 
     try {
       await login(email, password, role);
-      navigate("/dashboard");
+      navigate("/dashboard", { state: { loginSuccess: true } });
     } catch (err) {
-      // Error is already set in the store
+      const storeError = useAuthStore.getState().error;
+      if (storeError === "Email is not registered.") {
+        setFieldErrors({ email: storeError });
+        setError(null);
+      } else if (storeError === "Incorrect password.") {
+        setFieldErrors({ password: storeError });
+        setError(null);
+      }
     }
   };
 
@@ -62,7 +83,7 @@ export default function LoginPage() {
     setResetMessage("");
 
     if (!email) {
-      setError("Enter your email first.");
+      setError("Please enter your email address first");
       return;
     }
 
@@ -186,23 +207,40 @@ export default function LoginPage() {
 
           {!showRecovery ? (
             <>
-              <form onSubmit={handleSubmit} className="space-y-5">
+              {successMessage && (
+                <div className="mb-6 flex animate-in fade-in zoom-in items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+                  <FiAlertCircle className="mt-0.5 h-5 w-5 flex-none text-emerald-600" />
+                  <p className="text-sm font-semibold">{successMessage}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} noValidate className="space-y-5">
                 <div>
                   <label className="mb-2 block text-sm font-bold text-slate-600">
                     Email Address
                   </label>
                   <div className="relative">
-                    <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <FiMail className={`absolute left-4 top-1/2 -translate-y-1/2 ${fieldErrors.email ? 'text-red-400' : 'text-slate-400'}`} />
                     <input
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: undefined });
+                      }}
                       placeholder="name@university.edu"
-                      className="h-14 w-full rounded-none border-0 bg-slate-200/75 pl-12 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-primary"
-                      required
+                      className={`h-14 w-full rounded-none border-0 bg-slate-200/75 pl-12 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 ${
+                        fieldErrors.email ? 'ring-2 ring-red-500 focus:ring-red-500' : 'focus:ring-primary'
+                      }`}
                       disabled={isLoading}
                     />
                   </div>
+                  {fieldErrors.email && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-red-500">
+                      <FiAlertCircle className="h-3.5 w-3.5" />
+                      {fieldErrors.email}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -220,14 +258,18 @@ export default function LoginPage() {
                     </button>
                   </div>
                   <div className="relative">
-                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <FiLock className={`absolute left-4 top-1/2 -translate-y-1/2 ${fieldErrors.password ? 'text-red-400' : 'text-slate-400'}`} />
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: undefined });
+                      }}
                       placeholder="Password"
-                      className="h-14 w-full rounded-none border-0 bg-slate-200/75 pl-12 pr-12 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-primary"
-                      required
+                      className={`h-14 w-full rounded-none border-0 bg-slate-200/75 pl-12 pr-12 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 ${
+                        fieldErrors.password ? 'ring-2 ring-red-500 focus:ring-red-500' : 'focus:ring-primary'
+                      }`}
                       disabled={isLoading}
                     />
                     <button
@@ -238,6 +280,12 @@ export default function LoginPage() {
                       {showPassword ? <FiEyeOff /> : <FiEye />}
                     </button>
                   </div>
+                  {fieldErrors.password && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-red-500">
+                      <FiAlertCircle className="h-3.5 w-3.5" />
+                      {fieldErrors.password}
+                    </p>
+                  )}
                 </div>
 
                 <button
@@ -282,7 +330,6 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@university.edu"
                     className="h-14 w-full rounded-none border-0 bg-slate-200/75 pl-12 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-primary"
-                    required
                     disabled={isResetting}
                   />
                 </div>

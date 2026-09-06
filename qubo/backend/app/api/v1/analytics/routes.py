@@ -12,9 +12,13 @@ from app.schemas.analytics import (
     ReviewScheduleItem,
     StudentLinkRequest,
     StudentLinkResponse,
+    StudentSearchResponse,
     StudySessionCreate,
     StudySessionItem,
     SubjectAnalyticsItem,
+    LearningRecommendationItem,
+    StudyPlanResponse,
+    LearningRecommendationAcceptResponse,
 )
 from app.services.analytics import AnalyticsService
 
@@ -63,6 +67,21 @@ async def update_prediction_settings(payload: PredictionSettings, current_user=D
     return await run_in_threadpool(AnalyticsService.update_prediction_settings, current_user["id"], payload.threshold)
 
 
+@router.get("/recommendations", response_model=List[LearningRecommendationItem])
+async def get_learning_recommendations(current_user=Depends(get_current_student)):
+    return await run_in_threadpool(AnalyticsService.get_learning_recommendations, current_user["id"])
+
+
+@router.post("/recommendations/generate-plan", response_model=StudyPlanResponse)
+async def generate_study_plan(current_user=Depends(get_current_student)):
+    return await run_in_threadpool(AnalyticsService.generate_study_plan, current_user["id"])
+
+
+@router.post("/recommendations/{recommendation_id}/accept", response_model=LearningRecommendationAcceptResponse)
+async def accept_learning_recommendation(recommendation_id: str, current_user=Depends(get_current_student)):
+    return await run_in_threadpool(AnalyticsService.accept_learning_recommendation, current_user["id"], recommendation_id)
+
+
 @router.get("/review-schedule", response_model=List[ReviewScheduleItem])
 async def get_review_schedule(
     due_only: bool = False,
@@ -99,6 +118,11 @@ async def export_progress_pdf(
 @router.get("/educator/dashboard", response_model=EducatorDashboardResponse)
 async def get_educator_dashboard(current_user=Depends(get_current_educator)):
     return await run_in_threadpool(AnalyticsService.get_educator_dashboard, current_user["id"])
+
+
+@router.get("/educator/students/search", response_model=StudentSearchResponse)
+async def search_student_for_linking(username: str, current_user=Depends(get_current_educator)):
+    return await run_in_threadpool(AnalyticsService.search_student_for_linking, current_user["id"], username)
 
 
 @router.post("/educator/students", response_model=StudentLinkResponse, status_code=status.HTTP_201_CREATED)

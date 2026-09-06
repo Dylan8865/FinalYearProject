@@ -5,6 +5,8 @@ export interface TopicPerformance {
   score_percentage: number | null;
   sessions_count: number;
   last_updated: string | null;
+  weakness_detail?: string | null;
+  focus_tags?: string[] | null;
 }
 
 export interface QuizScorePoint {
@@ -105,4 +107,24 @@ export interface EducatorDashboard {
     completed_quizzes: number;
   };
   students: EducatorStudentSummary[];
+}
+
+export interface StudyPlanRecommendation {
+  id: string;
+  student_id: string;
+  recommendation_type: string;
+  subject_id: string | null;
+  subject_name: string | null;
+  topic_id: string | null;
+  topic_name: string | null;
+  recommendation_text: string;
+  priority_level: number;
+  resource_link: string | null;
+  is_accepted: boolean;
+  created_at: string;
+}
+
+export interface StudyPlanResponse {
+  message: string;
+  recommendations: StudyPlanRecommendation[];
 }

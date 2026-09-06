@@ -20,6 +20,7 @@ from app.schemas.auth import (
     AuthResponse,
     TokenResponse,
     UserResponse,
+    StudentSearchResponse,
 )
 from app.services.auth import AuthService
 from app.db.deps import get_current_user
@@ -182,6 +183,20 @@ async def update_student_subjects(
 async def logout(current_user = Depends(get_current_user)):
     """Logout user (client-side token deletion)"""
     return {"message": "Logged out successfully"}
+
+
+@router.get("/search-student", response_model=List[StudentSearchResponse])
+async def search_student(
+    query: str,
+    current_user=Depends(get_current_user),
+):
+    """Search for a student by exact username or email"""
+    if current_user.get("role") != "educator":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only educators can search for students",
+        )
+    return await run_in_threadpool(AuthService.search_student, query)
 
 
 @router.post("/account/deactivate")

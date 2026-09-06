@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
       await supabaseRecovery.auth.signOut();
       authService.clearSession();
       setSuccess(response.message);
-      window.setTimeout(() => navigate("/login", { replace: true }), 1800);
+      window.setTimeout(() => navigate(`/login?message=${encodeURIComponent(response.message)}`, { replace: true }), 1800);
     } catch (requestError: any) {
       setError(
         requestError.response?.data?.detail ||

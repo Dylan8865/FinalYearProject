@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { User, AuthTokens, UserRole } from '@/types/auth';
 import { authService } from '@/lib/authService';
+import { useQuizStore } from '@/contexts/quizStore';
+import { useLanguageStore } from '@/contexts/languageStore';
+import { useThemeStore } from '@/contexts/themeStore';
 
 interface AuthState {
   user: User | null;
@@ -94,15 +97,20 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  logout: async () => {
-    set({ isLoading: true });
-    try {
-      await authService.logout();
-      set({ user: null, tokens: null, isLoading: false });
-    } catch (error: any) {
-      set({ isLoading: false });
-    }
-  },
+    logout: async () => {
+      set({ isLoading: true });
+      try {
+        await authService.logout();
+      } catch (error: any) {
+        console.error('Logout error:', error);
+      } finally {
+        set({ user: null, tokens: null, isLoading: false, error: null });
+        useQuizStore.getState().setGeneratedQuiz(null);
+        useQuizStore.getState().setSavedQuizId(null);
+        useLanguageStore.getState().setLanguage('en');
+        useThemeStore.getState().setTheme('light');
+      }
+    },
 
   fetchProfile: async () => {
     set({ isLoading: true });

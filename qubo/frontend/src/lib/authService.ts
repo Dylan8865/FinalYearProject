@@ -31,6 +31,8 @@ import {
   StudySession,
   StudySessionCreate,
   SubjectAnalytics,
+  StudyPlanRecommendation,
+  StudyPlanResponse,
 } from "@/types/analytics";
 import { SharedLearningItem, TutorialVideo } from "@/types/video";
 import {
@@ -49,7 +51,7 @@ import {
   GameMatchHistory,
   LevelOneLeaderboardEntry,
 } from "@/types/game";
-import { EducatorAnalytics, LearningEventInput } from "@/types/learning";
+import { StudentActivityAnalytics, EducatorAnalytics, LearningEventInput } from "@/types/learning";
 import {
   CollectionContentOption,
   CollectionEditorData,
@@ -142,6 +144,16 @@ class AuthService {
   async getProfile(): Promise<User> {
     const response = await this.api.get<User>("/auth/profile");
     return response.data;
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.api.post("/auth/logout");
+    } catch (error) {
+      // Ignore network errors during logout
+    } finally {
+      this.clearTokens();
+    }
   }
 
   async getAdminContent(contentType: "video" | "model") {
@@ -247,12 +259,14 @@ class AuthService {
     questionType: QuizQuestionType,
     difficulty: QuizDifficulty,
     questionCount = 5,
+    focusTopic = '',
   ): Promise<GeneratedQuiz> {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
     formData.append("question_type", questionType);
     formData.append("difficulty", difficulty);
     formData.append("question_count", String(questionCount));
+    if (focusTopic) formData.append("focus_topic", focusTopic);
 
     const response = await this.api.post<GeneratedQuiz>(
       "/quiz/generate",
@@ -305,6 +319,24 @@ class AuthService {
       `/quiz/library/${quizId}`,
     );
     return response.data;
+  }
+
+  async getQuizProgress(quizId: string) {
+    const response = await this.api.get(`/quiz/${quizId}/progress`);
+    return response.data;
+  }
+
+  async saveQuizProgress(quizId: string, progress: {
+    current_index: number;
+    elapsed_seconds: number;
+    answers: Record<string, string>;
+    answer_times: Record<string, number>;
+  }) {
+    await this.api.put(`/quiz/${quizId}/progress`, progress);
+  }
+
+  async deleteQuizProgress(quizId: string) {
+    await this.api.delete(`/quiz/${quizId}/progress`);
   }
 
   async getSubjectAnalytics(
@@ -385,6 +417,16 @@ class AuthService {
     return response.data;
   }
 
+  async searchStudentForLinking(
+    username: string,
+  ): Promise<{ id: string; username: string; full_name: string; profile_picture_url: string | null }> {
+    const response = await this.api.get<{ id: string; username: string; full_name: string; profile_picture_url: string | null }>(
+      "/analytics/educator/students/search",
+      { params: { username } }
+    );
+    return response.data;
+  }
+
   async linkStudent(
     username: string,
   ): Promise<{ id: string; message: string }> {
@@ -440,11 +482,6 @@ class AuthService {
       preferences,
     );
     return response.data;
-  }
-
-  async logout(): Promise<void> {
-    await this.api.post("/auth/logout");
-    this.clearTokens();
   }
 
   clearSession(): void {
@@ -531,6 +568,31 @@ class AuthService {
     return response.data;
   }
 
+  async getStudyPlanRecommendations(): Promise<StudyPlanRecommendation[]> {
+    const response = await this.api.get<StudyPlanRecommendation[]>(
+      "/analytics/recommendations",
+    );
+    return response.data;
+  }
+
+  async generateStudyPlan(): Promise<StudyPlanResponse> {
+    const response = await this.api.post<StudyPlanResponse>(
+      "/analytics/recommendations/generate-plan",
+    );
+    return response.data;
+  }
+
+  async acceptStudyPlanRecommendation(
+    recommendationId: string,
+  ): Promise<{ id: string; is_accepted: boolean; message: string }> {
+    const response = await this.api.post<{
+      id: string;
+      is_accepted: boolean;
+      message: string;
+    }>(`/analytics/recommendations/${recommendationId}/accept`);
+    return response.data;
+  }
+
   async getTutorialVideos(
     search?: string,
     subject?: string,
@@ -600,9 +662,31 @@ class AuthService {
     return response.data.is_completed;
   }
 
+  async getStudentActivityAnalytics(): Promise<StudentActivityAnalytics> {
+    const response = await this.api.get<StudentActivityAnalytics>(
+      "/learning/analytics/student",
+    );
+    return response.data;
+  }
+
   async getEducatorAnalytics(): Promise<EducatorAnalytics> {
     const response = await this.api.get<EducatorAnalytics>(
       "/learning/analytics",
+    );
+    return response.data;
+  }
+
+  async searchStudent(query: string): Promise<any[]> {
+    const response = await this.api.get<any[]>(
+      `/auth/search-student?query=${encodeURIComponent(query)}`
+    );
+    return response.data;
+  }
+
+  async assignQuiz(quizId: string, studentId: string): Promise<{ id: string; message: string }> {
+    const response = await this.api.post<{ id: string; message: string }>(
+      `/quiz/library/${quizId}/assign`,
+      { student_id: studentId }
     );
     return response.data;
   }

@@ -36,6 +36,8 @@ class GeminiQuizService:
     RESPONSE_SCHEMA = {
         "type": "object",
         "properties": {
+            "is_valid_material": {"type": "boolean"},
+            "rejection_reason": {"type": "string"},
             "title": {"type": "string"},
             "subject": {"type": "string"},
             "topic": {"type": "string"},
@@ -66,7 +68,7 @@ class GeminiQuizService:
                 },
             },
         },
-        "required": ["title", "subject", "topic", "questions"],
+        "required": ["is_valid_material", "title", "subject", "topic", "questions"],
     }
 
     @staticmethod
@@ -94,6 +96,7 @@ class GeminiQuizService:
         question_type: str,
         difficulty: str,
         question_count: int,
+        focus_topic: str = "",
     ) -> GeneratedQuizResponse:
         if not settings.GEMINI_API_KEY:
             raise HTTPException(
@@ -108,16 +111,22 @@ class GeminiQuizService:
         }
         available_subjects = ", ".join(GeminiQuizService._available_subject_names())
         prompt = (
-            "You are an expert Malaysian SPM tutor. Generate a quiz using only the attached study material. "
+            "You are an expert Malaysian SPM tutor. First, evaluate the attached material. "
+            "If it is blank, nonsensical, or completely unrelated to educational study material, "
+            "set 'is_valid_material' to false, provide a brief 'rejection_reason', and leave the other fields empty or generic. "
+            "If the material is valid, set 'is_valid_material' to true and generate a quiz using only the attached study material. "
             f"Create exactly {question_count} {difficulty.lower()} questions. "
             f"{type_instructions[question_type]} "
             "Use every attached file for at least one question. After covering every file, allocate the remaining "
             "questions according to how much clear, useful study content each file contains. "
             f"Set subject to exactly one matching name from this current SPM subject list: {available_subjects}. "
+            "If the subject is one that lacks an MCQ section in the actual SPM exam (e.g., Chinese, Bahasa Cina, Mandarin, Add Mathematics, Computer Science, Sains Komputer) and the user requests multiple-choice questions (mcq), focus on core vocabulary, definitions, idioms, and foundational concepts that can be tested in an MCQ format. "
             "Set topic to one concise syllabus topic that best describes the attached material. "
             "Keep wording clear for secondary-school students. Give a short teaching explanation for every answer. "
             "Do not invent facts that are absent from the uploaded material."
         )
+        if focus_topic:
+            prompt += f" Focus the questions specifically on the topic '{focus_topic}', using other material only when needed for context."
 
         parts = [{"text": prompt}]
         for _, mime_type, content in files:
@@ -182,7 +191,14 @@ class GeminiQuizService:
                 part.get("text", "") for part in candidate["content"]["parts"]
             )
             generated_data = json.loads(response_text)
+            
+            if not generated_data.get("is_valid_material", True):
+                reason = generated_data.get("rejection_reason") or "The uploaded material does not contain valid educational content."
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=reason)
+
             questions = [GeneratedQuestion.model_validate(item) for item in generated_data["questions"]]
+        except HTTPException:
+            raise
         except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
@@ -279,11 +295,11 @@ class QuizLibraryService:
         return match
 
     @staticmethod
-    def _resolve_or_create_topic(supabase, subject_id: str, topic_name: str):
+    def _resolve_or_create_topic(supabase, subject_id: str, topic_name: str, difficulty_level: str = None):
         cleaned_name = " ".join(topic_name.split()).strip()
         topic_rows = (
             supabase.table("topics")
-            .select("id,topic_name")
+            .select("id,topic_name,difficulty_level")
             .eq("subject_id", subject_id)
             .execute()
             .data
@@ -292,11 +308,18 @@ class QuizLibraryService:
         normalized = cleaned_name.casefold()
         existing = next((row for row in topic_rows if row["topic_name"].casefold() == normalized), None)
         if existing:
+            if difficulty_level and not existing.get("difficulty_level"):
+                supabase.table("topics").update({"difficulty_level": difficulty_level}).eq("id", existing["id"]).execute()
             return existing
-        response = supabase.table("topics").insert({
+        
+        insert_data = {
             "subject_id": subject_id,
             "topic_name": cleaned_name,
-        }).execute()
+        }
+        if difficulty_level:
+            insert_data["difficulty_level"] = difficulty_level
+            
+        response = supabase.table("topics").insert(insert_data).execute()
         if not response.data:
             raise RuntimeError("Quiz topic was not created")
         return response.data[0]
@@ -313,6 +336,45 @@ class QuizLibraryService:
         )
         quizzes = quiz_response.data or []
 
+        assigned_response = (
+            supabase.table("quiz_assignments")
+            .select("quiz_id,assigned_by")
+            .eq("assigned_to", user_id)
+            .execute()
+        )
+        assignments = assigned_response.data or []
+        assigned_quiz_ids = {
+            row["quiz_id"] for row in assignments if row.get("quiz_id")
+        }
+        assigned_by_ids = list({row["assigned_by"] for row in assignments if row.get("assigned_by")})
+        educator_names = {}
+        if assigned_by_ids:
+            educator_response = (
+                supabase.table("profiles")
+                .select("id,full_name,username")
+                .in_("id", assigned_by_ids)
+                .execute()
+            )
+            educator_names = {
+                row["id"]: row.get("full_name") or row.get("username") or "Educator"
+                for row in (educator_response.data or [])
+            }
+        assigned_by_for_quiz = {
+            row["quiz_id"]: educator_names.get(row.get("assigned_by"))
+            for row in assignments
+            if row.get("quiz_id")
+        }
+        owned_quiz_ids = {quiz["id"] for quiz in quizzes}
+        additional_quiz_ids = assigned_quiz_ids - owned_quiz_ids
+        if additional_quiz_ids:
+            assigned_quiz_response = (
+                supabase.table("quizzes")
+                .select("id,title,subject_id,source_type,created_at")
+                .in_("id", list(additional_quiz_ids))
+                .execute()
+            )
+            quizzes.extend(assigned_quiz_response.data or [])
+
         subject_ids = list({quiz["subject_id"] for quiz in quizzes if quiz.get("subject_id")})
         subject_names = {}
         if subject_ids:
@@ -327,14 +389,28 @@ class QuizLibraryService:
                 for subject in (subject_response.data or [])
             }
 
+        quiz_ids = [quiz["id"] for quiz in quizzes]
+        in_progress_quizzes = set()
+        if quiz_ids:
+            progress_response = (
+                supabase.table("quiz_progress")
+                .select("quiz_id")
+                .in_("quiz_id", quiz_ids)
+                .eq("student_id", user_id)
+                .execute()
+            )
+            in_progress_quizzes = {row["quiz_id"] for row in (progress_response.data or [])}
+
         return [
             {
                 "id": quiz["id"],
                 "title": quiz["title"],
                 "subject": subject_names.get(quiz.get("subject_id")),
-                "source_type": quiz["source_type"],
+                "source_type": "educator_assigned" if quiz["id"] in assigned_quiz_ids else quiz["source_type"],
                 "is_public": quiz.get("is_public", False),
                 "created_at": quiz["created_at"],
+                "has_in_progress_attempt": quiz["id"] in in_progress_quizzes,
+                "assigned_by_name": assigned_by_for_quiz.get(quiz["id"]),
             }
             for quiz in quizzes
         ]
@@ -409,15 +485,26 @@ class QuizLibraryService:
         supabase = get_supabase()
         quiz_response = (
             supabase.table("quizzes")
-            .select("id,title,subject_id,topic_id")
+            .select("id,title,subject_id,topic_id,owner_id")
             .eq("id", quiz_id)
-            .eq("owner_id", user_id)
             .limit(1)
             .execute()
         )
         if not quiz_response.data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
         quiz_row = quiz_response.data[0]
+
+        if quiz_row["owner_id"] != user_id:
+            assignment_response = (
+                supabase.table("quiz_assignments")
+                .select("id")
+                .eq("quiz_id", quiz_id)
+                .eq("assigned_to", user_id)
+                .limit(1)
+                .execute()
+            )
+            if not assignment_response.data:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Quiz access denied")
 
         subject = None
         if quiz_row.get("subject_id"):
@@ -514,7 +601,7 @@ class QuizLibraryService:
         supabase = get_supabase()
         quiz_response = (
             supabase.table("quizzes")
-            .select("id")
+            .select("id, topic_id")
             .eq("id", quiz_id)
             .eq("owner_id", user_id)
             .limit(1)
@@ -523,8 +610,126 @@ class QuizLibraryService:
         if not quiz_response.data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
 
+        topic_id = quiz_response.data[0].get("topic_id")
+
         supabase.table("quizzes").delete().eq("id", quiz_id).eq("owner_id", user_id).execute()
+
+        # Clean up topic analytics if this was the only quiz using it
+        if topic_id:
+            other_quizzes = (
+                supabase.table("quizzes")
+                .select("id")
+                .eq("topic_id", topic_id)
+                .eq("owner_id", user_id)
+                .limit(1)
+                .execute()
+            )
+            if not other_quizzes.data:
+                supabase.table("performance_records").delete().eq("topic_id", topic_id).eq("student_id", user_id).execute()
+                supabase.table("spaced_repetition_schedule").delete().eq("topic_id", topic_id).eq("student_id", user_id).execute()
+
         return {"id": quiz_id, "message": "Quiz deleted"}
+
+    @staticmethod
+    def assign_quiz(educator_id: str, quiz_id: str, student_id: str):
+        supabase = get_supabase()
+        
+        # Verify educator owns the quiz
+        quiz_response = (
+            supabase.table("quizzes")
+            .select("id")
+            .eq("id", quiz_id)
+            .eq("owner_id", educator_id)
+            .limit(1)
+            .execute()
+        )
+        if not quiz_response.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found or not owned by you.")
+
+        # Verify student exists and has student role
+        student_response = (
+            supabase.table("profiles")
+            .select("id")
+            .eq("id", student_id)
+            .eq("role", "student")
+            .limit(1)
+            .execute()
+        )
+        if not student_response.data:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid student.")
+
+        # Check if already assigned
+        assignment_check = (
+            supabase.table("quiz_assignments")
+            .select("id")
+            .eq("quiz_id", quiz_id)
+            .eq("assigned_to", student_id)
+            .limit(1)
+            .execute()
+        )
+        if assignment_check.data:
+            return {"id": quiz_id, "message": "Quiz already assigned to this student."}
+
+        # Insert assignment
+        supabase.table("quiz_assignments").insert({
+            "quiz_id": quiz_id,
+            "assigned_to": student_id,
+            "assigned_by": educator_id,
+        }).execute()
+        
+        return {"id": quiz_id, "message": "Quiz successfully assigned."}
+
+    @staticmethod
+    def get_quiz_progress(user_id: str, quiz_id: str):
+        supabase = get_supabase()
+        response = (
+            supabase.table("quiz_progress")
+            .select("current_index,elapsed_seconds,answers,answer_times")
+            .eq("student_id", user_id)
+            .eq("quiz_id", quiz_id)
+            .limit(1)
+            .execute()
+        )
+        if not response.data:
+            return None
+        return response.data[0]
+
+    @staticmethod
+    def save_quiz_progress(user_id: str, quiz_id: str, progress_data: dict):
+        supabase = get_supabase()
+        # Verify quiz exists
+        quiz_check = supabase.table("quizzes").select("id").eq("id", quiz_id).limit(1).execute()
+        if not quiz_check.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
+
+        payload = {
+            "student_id": user_id,
+            "quiz_id": quiz_id,
+            "current_index": progress_data.get("current_index", 0),
+            "elapsed_seconds": progress_data.get("elapsed_seconds", 0),
+            "answers": progress_data.get("answers", {}),
+            "answer_times": progress_data.get("answer_times", {}),
+        }
+
+        existing = (
+            supabase.table("quiz_progress")
+            .select("id")
+            .eq("student_id", user_id)
+            .eq("quiz_id", quiz_id)
+            .limit(1)
+            .execute()
+        )
+
+        if existing.data:
+            supabase.table("quiz_progress").update(payload).eq("id", existing.data[0]["id"]).execute()
+        else:
+            supabase.table("quiz_progress").insert(payload).execute()
+
+    @staticmethod
+    def delete_quiz_progress(user_id: str, quiz_id: str):
+        supabase = get_supabase()
+        supabase.table("quiz_progress").delete().eq("student_id", user_id).eq("quiz_id", quiz_id).execute()
+        return {"id": quiz_id, "message": "Quiz progress deleted"}
 
     @staticmethod
     def record_attempt(user_id: str, quiz_id: str, score: float, total_questions: int, time_taken_seconds: int, answers):
@@ -760,7 +965,7 @@ class QuizLibraryService:
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail=f"Generated quiz subject '{quiz.subject}' could not be matched to an SPM subject.",
                 )
-            topic = QuizLibraryService._resolve_or_create_topic(supabase, subject_id, quiz.topic)
+            topic = QuizLibraryService._resolve_or_create_topic(supabase, subject_id, quiz.topic, getattr(quiz, 'difficulty', None))
 
             quiz_response = (
                 supabase.table("quizzes")

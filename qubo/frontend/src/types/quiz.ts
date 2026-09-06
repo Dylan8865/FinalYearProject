@@ -20,14 +20,17 @@ export interface GeneratedQuiz {
   difficulty: QuizDifficulty;
   source_files: string[];
   questions: GeneratedQuestion[];
+  is_manual?: boolean;
 }
 
 export interface LibraryQuiz {
   id: string;
   title: string;
-  subject: string | null;
-  source_type: string;
-  is_public: boolean;
+  subject?: string;
+  source_type: 'own' | 'saved' | 'educator_assigned' | 'educator_shared' | 'ai_generated' | string;
+  is_public?: boolean;
+  assigned_by_name?: string | null;
+  has_in_progress_attempt?: boolean;
   created_at: string;
 }
 
@@ -38,6 +41,8 @@ export interface PublicQuiz {
   owner_name: string | null;
   question_count: number;
   created_at: string;
+  has_in_progress_attempt?: boolean;
+  assigned_by_name?: string | null;
 }
 
 export interface SavedQuizResponse {

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   FiAlertTriangle,
   FiArrowRight,
+  FiBarChart2,
+  FiBookOpen,
   FiCheck,
   FiClock,
   FiChevronRight,
@@ -10,6 +12,7 @@ import {
   FiDownload,
   FiEdit3,
   FiEye,
+  FiEyeOff,
   FiHeadphones,
   FiKey,
   FiLock,
@@ -21,6 +24,7 @@ import {
   FiShield,
   FiTarget,
   FiTrash2,
+  FiUploadCloud,
   FiUser,
   FiX,
 } from 'react-icons/fi';
@@ -31,6 +35,7 @@ import { useThemeStore } from '@/contexts/themeStore';
 import { authService } from '@/lib/authService';
 import { normalizeSpmTargetGrade } from '@/lib/spmGrades';
 import { AccountDataSummary, LearningStyle, StudyReminderPreferences, Subject } from '@/types/auth';
+import { EducatorDashboard } from '@/types/analytics';
 
 const styleCards = [
   {
@@ -101,6 +106,7 @@ export default function ProfilePage() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [educatorDashboard, setEducatorDashboard] = useState<EducatorDashboard | null>(null);
   const [reminders, setReminders] = useState<StudyReminderPreferences | null>(null);
   const [isLoadingReminders, setIsLoadingReminders] = useState(true);
   const [isSavingReminders, setIsSavingReminders] = useState(false);
@@ -117,6 +123,7 @@ export default function ProfilePage() {
   const [accountAction, setAccountAction] = useState<'clear-history' | 'deactivate' | 'delete' | null>(null);
   const [accountPassword, setAccountPassword] = useState('');
   const [accountError, setAccountError] = useState('');
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
   const [isUpdatingAccount, setIsUpdatingAccount] = useState(false);
   const language = useLanguageStore((state) => state.language);
   const theme = useThemeStore((state) => state.theme);
@@ -148,6 +155,8 @@ export default function ProfilePage() {
         await authService.deactivateAccount(accountPassword);
       } else {
         await authService.deleteAccount(accountPassword);
+        window.location.assign('/login?message=Account+deleted+successfully.');
+        return;
       }
       window.location.assign('/login');
     } catch (requestError: any) {
@@ -203,7 +212,7 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    if (!user || user.role !== 'student') {
+    if (!user || !['student', 'educator'].includes(user.role)) {
       setIsLoadingReminders(false);
       return;
     }
@@ -221,6 +230,11 @@ export default function ProfilePage() {
     };
 
     void loadSubjects();
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.role !== 'educator') return;
+    authService.getEducatorDashboard().then(setEducatorDashboard).catch(() => setEducatorDashboard(null));
   }, [user]);
 
   useEffect(() => {
@@ -245,7 +259,7 @@ export default function ProfilePage() {
     kinesthetic: user.kinesthetic_score ?? null,
   };
   const hasSavedScores = Object.values(styleScores).every((score) => score !== null);
-  const displayName = user.full_name || user.username;
+  const displayName = user.username || user.full_name;
   const targetGrade = normalizeSpmTargetGrade(user.target_grade);
   const coreTargets = [
     targetGrade ? `SPM: ${targetGrade}` : 'SPM: Set target',
@@ -303,14 +317,14 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f8fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-[#f6f8fb] text-slate-950 lg:grid lg:grid-cols-[260px_1fr] lg:grid-rows-[auto_1fr]">
       <AppSidebar />
 
       <div className="min-w-0">
         <main className="mx-auto w-full max-w-[1120px] px-5 py-8 md:px-8 lg:py-10">
           <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl font-black tracking-tight text-slate-950 md:text-[38px]">Student Identity</h1>
+              <h1 className="text-3xl font-black tracking-tight text-slate-950 md:text-[38px]">{user.role === 'educator' ? 'Educator Identity' : 'Student Identity'}</h1>
               <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
                 Manage your academic profile, learning preferences, and platform security in your scholastic sanctuary.
               </p>
@@ -367,23 +381,30 @@ export default function ProfilePage() {
                       <h2 className="text-2xl font-black tracking-tight text-slate-950">{displayName}</h2>
                       <FiCheck className="h-5 w-5 rounded-full bg-blue-600 p-1 text-white" />
                     </div>
-                    <p className="mt-1 text-sm font-semibold text-slate-500">
-                      {user.school || 'SPM Student'} • {user.form_level || 'Form level not set'}
-                    </p>
-                    <div className="mt-4 grid max-w-sm grid-cols-2 gap-3">
-                      <div className="rounded-xl bg-emerald-50 px-4 py-3">
-                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">SPM Target</p>
-                        <p className="mt-1 text-xl font-black text-emerald-700">{targetGrade || '—'}</p>
-                      </div>
-                      <div className="rounded-xl bg-blue-50 px-4 py-3">
-                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-500">Days to SPM</p>
-                        <p className="mt-1 text-xl font-black text-blue-700">{daysUntilExam} <span className="text-xs">Days</span></p>
-                      </div>
-                    </div>
+                    {user.full_name && user.full_name !== user.username && (
+                      <p className="mt-1 text-sm font-bold text-slate-400">{user.full_name}</p>
+                    )}
+                    {user.role === 'student' && (
+                      <>
+                        <p className="mt-1 text-sm font-semibold text-slate-500">
+                          {user.school || 'SPM Student'} • {user.form_level || 'Form level not set'}
+                        </p>
+                        <div className="mt-4 grid max-w-sm grid-cols-2 gap-3">
+                          <div className="rounded-xl bg-emerald-50 px-4 py-3">
+                            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600">SPM Target</p>
+                            <p className="mt-1 text-xl font-black text-emerald-700">{targetGrade || '—'}</p>
+                          </div>
+                          <div className="rounded-xl bg-blue-50 px-4 py-3">
+                            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-500">Days to SPM</p>
+                            <p className="mt-1 text-xl font-black text-blue-700">{daysUntilExam} <span className="text-xs">Days</span></p>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
-                <div className="mt-6 border-t border-slate-100 pt-5">
+                {user.role === 'student' && <div className="mt-6 border-t border-slate-100 pt-5">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Core academic targets</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {coreTargets.map((target, index) => (
@@ -393,10 +414,10 @@ export default function ProfilePage() {
                       </span>
                     ))}
                   </div>
-                </div>
+                </div>}
               </section>
 
-              <section className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)] md:p-7">
+              {user.role === 'student' && <section className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)] md:p-7">
                 <div className="flex items-start justify-between">
                   <div>
                     <h2 className="text-lg font-black text-slate-950">Learning Style</h2>
@@ -462,7 +483,37 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 </div>
-              </section>
+              </section>}
+
+              {user.role === 'educator' && (
+                <section className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)] md:p-7">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">Teaching Overview</p>
+                      <h2 className="mt-2 text-xl font-black text-slate-950">Your classroom at a glance</h2>
+                    </div>
+                    <FiBarChart2 className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {[
+                      ['Linked students', educatorDashboard?.summary.linked_students ?? '—'],
+                      ['Students at risk', educatorDashboard?.summary.students_at_risk ?? '—'],
+                      ['Completed quizzes', educatorDashboard?.summary.completed_quizzes ?? '—'],
+                      ['Class study time', educatorDashboard ? `${educatorDashboard.summary.total_study_minutes}m` : '—'],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-2xl bg-slate-50 px-3 py-4">
+                        <p className="text-xl font-black text-slate-950">{value}</p>
+                        <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <button type="button" onClick={() => navigate('/educator/analytics')} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-extrabold text-white hover:bg-blue-700"><FiBarChart2 /> View analytics</button>
+                    <button type="button" onClick={() => navigate('/library')} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-extrabold text-slate-700 hover:border-blue-300 hover:text-blue-700"><FiBookOpen /> Quiz library</button>
+                    <button type="button" onClick={() => navigate('/educator/upload')} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-extrabold text-slate-700 hover:border-blue-300 hover:text-blue-700"><FiUploadCloud /> Upload content</button>
+                  </div>
+                </section>
+              )}
             </div>
 
             <aside className="space-y-6">
@@ -580,7 +631,7 @@ export default function ProfilePage() {
                 </div>
               </section>
 
-              <section className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+              {user.role === 'student' && <section className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
                 <h2 className="flex items-center gap-2 text-sm font-black text-slate-900">
                   <FiTarget className="text-purple-600" /> Academic Preferences
                 </h2>
@@ -645,7 +696,16 @@ export default function ProfilePage() {
                     {isLoadingReminders ? 'Loading reminder settings…' : reminderMessage || 'Study reminders are unavailable.'}
                   </div>
                 )}
-              </section>
+              </section>}
+
+              {user.role === 'educator' && <section className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+                <h2 className="flex items-center gap-2 text-sm font-black text-slate-900"><FiBookOpen className="text-blue-600" /> Teaching Subjects</h2>
+                <p className="mt-5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Subjects you teach</p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {subjects.length > 0 ? subjects.map((subject) => <span key={subject.id} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold text-slate-700">{subject.subject_name}</span>) : <span className="col-span-2 rounded-lg bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-400">No teaching subjects selected</span>}
+                  <button type="button" onClick={() => navigate('/profile/settings')} className="col-span-2 flex items-center justify-center gap-1 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-[11px] font-bold text-slate-500 hover:border-blue-400 hover:text-blue-600"><FiPlus /> Choose subjects</button>
+                </div>
+              </section>}
 
             </aside>
           </div>
@@ -682,7 +742,12 @@ export default function ProfilePage() {
                   : 'Your Qubo account, progress, quiz attempts and saved learning data will be permanently removed. This cannot be undone.'}
             </p>
             <label className="mt-5 block text-sm font-bold text-slate-700">Confirm your password
-              <input type="password" value={accountPassword} onChange={(event) => setAccountPassword(event.target.value)} autoComplete="current-password" required autoFocus className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100" />
+              <div className="relative mt-2">
+                <input type={showDeletePassword ? "text" : "password"} value={accountPassword} onChange={(event) => setAccountPassword(event.target.value)} autoComplete="current-password" required autoFocus className="w-full rounded-xl border border-slate-200 pl-3 pr-10 py-2.5 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100" />
+                <button type="button" onClick={() => setShowDeletePassword(!showDeletePassword)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600" aria-label={showDeletePassword ? "Hide password" : "Show password"}>
+                  {showDeletePassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                </button>
+              </div>
             </label>
             {accountError && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{accountError}</p>}
             <div className="mt-6 flex gap-3">
