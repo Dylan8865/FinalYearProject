@@ -25,7 +25,7 @@ class VideoService:
             if search:
                 query = query.ilike("title", f"%{search.strip()}%")
             if uploader_id:
-                # Educators viewing their own uploads: show locked but not deleted
+                # Educators viewing their own uploads: show locked AND soft-deleted (corpses)
                 query = query.eq("uploaded_by", uploader_id)
             else:
                 # Students / public: hide locked AND soft-deleted content
@@ -95,7 +95,7 @@ class VideoService:
     def delete_video(video_id: str, educator_id: str) -> None:
         supabase = get_supabase()
         try:
-            owned = supabase.table('videos').select('video_id').eq('video_id', video_id).eq('uploaded_by', educator_id).limit(1).execute().data or []
+            owned = supabase.table('videos').select('video_id').eq('video_id', video_id).eq('uploaded_by', educator_id).eq('is_locked', False).eq('is_deleted', False).limit(1).execute().data or []
             if not owned:
                 raise HTTPException(status_code=404, detail='Video not found or not owned by this educator.')
             for table in ('content_shares', 'educator_recommendations', 'user_favourites', 'user_resources', 'learning_events'):

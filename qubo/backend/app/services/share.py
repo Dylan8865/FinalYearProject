@@ -28,7 +28,7 @@ class ContentShareService:
             target_column = "resource_id" if target_type == "model" else "video_id"
             target_table = "resources" if target_type == "model" else "videos"
             target_key = "resource_id" if target_type == "model" else "video_id"
-            target_query = supabase.table(target_table).select(target_key).eq(target_key, target_id)
+            target_query = supabase.table(target_table).select(target_key).eq(target_key, target_id).eq("is_locked", False).eq("is_deleted", False)
             if target_type == "model":
                 target_query = target_query.in_("resource_type", ["3d_model", "3D Model"])
             target_rows = target_query.limit(1).execute().data or []
@@ -56,8 +56,8 @@ class ContentShareService:
             video_ids = [share["video_id"] for share in shares if share.get("video_id")]
             resource_ids = [share["resource_id"] for share in shares if share.get("resource_id")]
             sender_ids = [share["sender_id"] for share in shares]
-            videos = supabase.table("videos").select("video_id,title,subject_tag").in_("video_id", video_ids).execute().data or [] if video_ids else []
-            resources = supabase.table("resources").select("resource_id,title,topics(topic_name,subjects(subject_name))").in_("resource_id", resource_ids).execute().data or [] if resource_ids else []
+            videos = supabase.table("videos").select("video_id,title,subject_tag").in_("video_id", video_ids).eq("is_locked", False).eq("is_deleted", False).execute().data or [] if video_ids else []
+            resources = supabase.table("resources").select("resource_id,title,topics(topic_name,subjects(subject_name))").in_("resource_id", resource_ids).eq("is_locked", False).eq("is_deleted", False).execute().data or [] if resource_ids else []
             senders = supabase.table("profiles").select("id,email").in_("id", sender_ids).execute().data or []
             video_map = {video["video_id"]: video for video in videos}
             resource_map = {resource["resource_id"]: resource for resource in resources}

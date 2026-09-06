@@ -14,6 +14,8 @@ class ThreeDModelSummaryResponse(BaseModel):
     popularity_count: int = 0
     visibility: Literal['public', 'private'] = 'public'
     created_by: Optional[str] = None
+    is_locked: bool = False
+    is_deleted: bool = False
 
 
 class ThreeDModelDetailResponse(ThreeDModelSummaryResponse):

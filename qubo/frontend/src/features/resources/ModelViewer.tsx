@@ -79,7 +79,7 @@ function LoadedModel({
     <>
       <primitive object={model} onClick={handleModelClick} />
       {annotations.map((annotation, index) => (
-        <Html key={annotation.annotation_id} position={annotation.position} center distanceFactor={12} zIndexRange={[10, 0]}>
+        <Html key={annotation.annotation_id} position={annotation.position} center zIndexRange={[10, 0]}>
           <button
             type="button"
             onPointerDown={(event) => event.stopPropagation()}
@@ -88,7 +88,7 @@ function LoadedModel({
               onMeaningfulInteraction?.();
               onSelectAnnotation?.(annotation);
             }}
-            className={`flex h-14 w-14 items-center justify-center rounded-full border-[3px] text-xl font-extrabold shadow-xl transition ${selectedAnnotationId === annotation.annotation_id ? 'border-white bg-blue-700 text-white ring-4 ring-blue-300/70 scale-110' : 'border-white bg-primary text-white hover:scale-125 hover:bg-blue-700'}`}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border-[3px] text-base font-extrabold shadow-xl transition ${selectedAnnotationId === annotation.annotation_id ? 'border-white bg-blue-700 text-white ring-4 ring-blue-300/70 scale-110' : 'border-white bg-primary text-white hover:scale-125 hover:bg-blue-700'}`}
             aria-label={`Read annotation ${index + 1}: ${annotation.title}`}
             title={annotation.title}
           >

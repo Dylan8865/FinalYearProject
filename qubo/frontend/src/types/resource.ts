@@ -8,6 +8,8 @@ export interface ThreeDModelSummary {
   popularity_count?: number;
   visibility: 'public' | 'private';
   created_by?: string | null;
+  is_locked?: boolean;
+  is_deleted?: boolean;
 }
 
 export interface ThreeDModelDetail extends ThreeDModelSummary {

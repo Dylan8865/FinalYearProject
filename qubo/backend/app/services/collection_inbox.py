@@ -189,6 +189,7 @@ class CollectionInboxService:
                 for m in supabase.table("resources")
                 .select("resource_id,title,url,topics(topic_name,subjects(subject_name))")
                 .in_("resource_id", model_ids or [placeholder_id])
+                .eq('is_locked', False).eq('is_deleted', False)
                 .execute()
                 .data
                 or []
@@ -198,6 +199,7 @@ class CollectionInboxService:
                 for v in supabase.table("videos")
                 .select("video_id,title,youtube_url,subject_tag")
                 .in_("video_id", video_ids or [placeholder_id])
+                .eq('is_locked', False).eq('is_deleted', False)
                 .execute()
                 .data
                 or []
