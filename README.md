@@ -1,3 +1,0 @@
-# FinalYearProject
-
-# HELLO
