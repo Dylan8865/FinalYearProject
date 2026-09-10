@@ -12,27 +12,8 @@ Qubo is a modern educational platform designed for Malaysian SPM students. It co
 
 ---
 
-## 🔑 2. Login Credentials (For Testing)
 
-To explore the different role-based dashboards, you can use the following test accounts:
-
-**Student Account:**
-*   **Email:** `testing@gmail.com`
-*   **Password:** `Testing@123`
-
-**Educator Account:**
-*   **Email:** `educator@qubo.com` *(Replace with your actual test email)*
-*   **Password:** `Testing@123`
-
-**Administrator Account:**
-*   **Email:** `admin@qubo.com` *(Replace with your actual test email)*
-*   **Password:** `Admin@123`
-
-*(Note: If testing account lockout or password reset features, please use a personal Gmail account during registration to receive the Supabase authentication emails.)*
-
----
-
-## 💻 3. Required Software and Libraries
+## 💻 2. Required Software and Libraries
 
 To run this project locally, ensure you have the following installed on your machine:
 
@@ -50,27 +31,6 @@ To run this project locally, ensure you have the following installed on your mac
 *   **Frontend:** React, TypeScript, Vite, React Three Fiber (for 3D models)
 *   **Backend:** FastAPI, Uvicorn, scikit-learn, google-generativeai (Gemini)
 *   **Database:** Supabase Client
-
----
-
-## ⚙️ 4. Environment Variables (`.env` Files)
-
-You need to set up environment variables for both the frontend and backend to connect to Supabase and the Gemini API.
-
-### Frontend `.env` (Place in `/qubo/frontend/.env`):
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_API_URL=http://localhost:8000/api/v1
-```
-
-### Backend `.env` (Place in `/qubo/backend/.env`):
-```env
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_KEY=your_supabase_service_role_key
-GEMINI_API_KEY=your_google_gemini_api_key
-CORS_ORIGINS=http://localhost:5173,https://final-year-project-murex-rho.vercel.app
-```
 
 ---
 
@@ -120,7 +80,7 @@ cd FinalYearProject/qubo
    ```bash
    npm run dev
    ```
-   *The frontend will now be running at `http://localhost:5173`*
+   *The frontend will now be running at `http://localhost:3000`*
 
 ### Step 4: Access the Platform
-Open your browser and go to `http://localhost:5173`. You can now log in using the test credentials provided above!
+Open your browser and go to `http://localhost:3000`. You can now log in using the test credentials provided above!
