@@ -1,91 +1,126 @@
-# Qubo - SPM Mastery Learning Platform
+# Qubo - Gamified Interactive Educational Learning Platform
 
-An interactive, AI-powered personalized learning platform designed for Malaysian SPM (Sijil Pelajaran Malaysia) students. Qubo offers a comprehensive ecosystem for students, educators, and administrators, featuring interactive 3D models, tutorial videos, quizzes, and a lightweight gamification module.
+Qubo is a modern educational platform designed for Malaysian SPM students. It combines a **Centralised Resource Hub** (3D models, tutorial videos), a **Lightweight Gamification Module** (ChemBattle Card Game via Unity WebGL), and an **AI-powered Smart Analytics Dashboard** to combat revision fatigue and improve learning efficiency.
 
-## Project Structure
+---
 
+## 🔗 1. Deployment URLs
+
+*   **Live Web Application (Frontend):** [https://final-year-project-murex-rho.vercel.app](https://final-year-project-murex-rho.vercel.app)
+*   **Backend API (FastAPI Docs):** *(Please append `/docs` to your live Render backend URL, e.g., `https://your-backend.onrender.com/docs`)*
+*   **Database:** Hosted on [Supabase](https://supabase.com/)
+
+---
+
+## 🔑 2. Login Credentials (For Testing)
+
+To explore the different role-based dashboards, you can use the following test accounts:
+
+**Student Account:**
+*   **Email:** `testing@gmail.com`
+*   **Password:** `Testing@123`
+
+**Educator Account:**
+*   **Email:** `educator@qubo.com` *(Replace with your actual test email)*
+*   **Password:** `Testing@123`
+
+**Administrator Account:**
+*   **Email:** `admin@qubo.com` *(Replace with your actual test email)*
+*   **Password:** `Admin@123`
+
+*(Note: If testing account lockout or password reset features, please use a personal Gmail account during registration to receive the Supabase authentication emails.)*
+
+---
+
+## 💻 3. Required Software and Libraries
+
+To run this project locally, ensure you have the following installed on your machine:
+
+### System Requirements:
+*   **Operating System:** Windows 10/11, macOS, or Linux
+*   **Browser:** Google Chrome (latest) or Microsoft Edge (with WebGL support enabled)
+
+### Development Tools:
+*   **Node.js** (v18 or higher) - For running the React frontend
+*   **Python** (v3.11 or higher) - For running the FastAPI backend
+*   **Git** - For version control
+*   **Unity Hub & Unity Editor** (2022 LTS or newer) - *Only required if modifying the ChemBattle game source code*
+
+### Key Libraries/Dependencies:
+*   **Frontend:** React, TypeScript, Vite, React Three Fiber (for 3D models)
+*   **Backend:** FastAPI, Uvicorn, scikit-learn, google-generativeai (Gemini)
+*   **Database:** Supabase Client
+
+---
+
+## ⚙️ 4. Environment Variables (`.env` Files)
+
+You need to set up environment variables for both the frontend and backend to connect to Supabase and the Gemini API.
+
+### Frontend `.env` (Place in `/qubo/frontend/.env`):
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_API_URL=http://localhost:8000/api/v1
 ```
-qubo/
-├── frontend/              # React, TypeScript, Vite, Tailwind CSS
-├── backend/               # Python, FastAPI, Pydantic
-├── database/              # Supabase PostgreSQL schema & migrations
-├── docs/                  # Project Documentation
-└── README.md              # This file
+
+### Backend `.env` (Place in `/qubo/backend/.env`):
+```env
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_KEY=your_supabase_service_role_key
+GEMINI_API_KEY=your_google_gemini_api_key
+CORS_ORIGINS=http://localhost:5173,https://final-year-project-murex-rho.vercel.app
 ```
 
-## Core Modules & Features
+---
 
-### 1.0 Resource Hub, Content Discovery and Management
-*   **3D Model Explorer**: Interactive 3D science models (Biology, Chemistry, Physics) with rotatable views and educator annotations.
-*   **Video Explorer**: Integrated YouTube tutorial videos playable directly within the platform.
-*   **Quiz Library**: Access to public quizzes created by educators to test SPM knowledge.
-*   **Educator's Picks & Recommendations**: Manually recommended resources by educators, complete with teaching notes.
-*   **My Learning Space**: Personal tracking for recently viewed items and saved/bookmarked resources.
-*   **Teaching Packs (Collections)**: Educators can organize resources into structured teaching packs and share them with specific students.
+## 🚀 5. Local Installation Guide
 
-### 2.0 Lightweight Gamification (ChemBattle)
-*   **Chemistry Card Game**: A Unity WebGL integrated turn-based card game.
-*   **Educational Mechanics**: Combine element cards (e.g., H₂O, NaCl) to attack, defend, or heal.
-*   **Progression System**: Clear waves to earn stat upgrades (Max HP, Attack boosts).
-*   **Leaderboard**: Competitive ranking system based on score, turns, and chemistry mastery.
+Follow these steps to run the Qubo platform on your local machine:
 
-### 3.0 Resource & System Management (Admin Portal)
-*   **Content Moderation**: Administrators can monitor all educator-uploaded content.
-*   **Lock & Delete Rules**: Admins can lock inappropriate content (hiding it from students) or completely remove violating content with an attached mandatory reason.
-*   **User Security Management**: View all registered users (Students, Educators) and manually deactivate/delete accounts.
-*   **Analytics Dashboard**: High-level platform metrics including internal views, user counts, and subject distribution.
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 18+, TypeScript, Tailwind CSS, Vite |
-| **Backend** | Python 3.11, FastAPI, Pydantic, SQLAlchemy |
-| **Database** | PostgreSQL (hosted on Supabase) |
-| **Game Engine**| Unity (WebGL Build) |
-| **Deployment** | Vercel (Frontend), Render (Backend) |
-
-## Quick Start (Local Development)
-
-### Start Frontend + Backend Together
-From the `qubo` folder:
-
-```powershell
-.\start-dev.bat
-```
-
-This opens:
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:8003`
-The public access
-- https://final-year-project-murex-rho.vercel.app
-
-### Manual Setup
-**Frontend:**
+### Step 1: Clone the Repository
 ```bash
-cd frontend
-npm install
-npm run dev
+git clone <your-github-repo-url>
+cd FinalYearProject/qubo
 ```
 
-**Backend:**
-```bash
-cd backend
-python -m venv .venv
-# On Windows: .venv\Scripts\activate
-# On Mac/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --host 127.0.0.1 --port 8003 --reload
-```
+### Step 2: Start the Backend (FastAPI)
+1. Open a terminal and navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Create and activate a virtual environment (optional but recommended):
+   ```bash
+   python -m venv venv
+   # On Windows:
+   .\venv\Scripts\activate
+   # On Mac/Linux:
+   source venv/bin/activate
+   ```
+3. Install the required Python packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Start the backend server:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+   *The backend will now be running at `http://localhost:8000`*
 
-## Environment Variables (.env)
-You will need to set up `.env` files in both `/frontend` and `/backend` directories containing your Supabase URL, Anon Key, and Service Role Key (Backend only).
+### Step 3: Start the Frontend (React)
+1. Open a **new** terminal and navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install the required Node modules:
+   ```bash
+   npm install
+   ```
+3. Start the Vite development server:
+   ```bash
+   npm run dev
+   ```
+   *The frontend will now be running at `http://localhost:5173`*
 
-> **Security Note:** The `SUPABASE_SERVICE_ROLE_KEY` has full administrative access to the database. It must strictly remain in the `backend/.env` file and **never** be exposed to the frontend.
-
-## Project Information
-
-- **Developer**: Yong Chao Juin
-- **Institution**: TUNKU ABDUL RAHMAN UNIVERSITY
-- **Status**: Deployment Phase (Production)
-- **License**: This project is for educational purposes as part of a Final Year Project.
+### Step 4: Access the Platform
+Open your browser and go to `http://localhost:5173`. You can now log in using the test credentials provided above!
