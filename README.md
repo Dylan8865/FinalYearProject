@@ -57,6 +57,8 @@ From the `qubo` folder:
 This opens:
 - Frontend: `http://localhost:3000`
 - Backend: `http://localhost:8003`
+The public access
+- https://final-year-project-murex-rho.vercel.app
 
 ### Manual Setup
 **Frontend:**
